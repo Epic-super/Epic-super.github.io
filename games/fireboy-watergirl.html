@@ -1,0 +1,4340 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>森林冰火人</title>
+  <style>
+    :root {
+      --bg1: #08130c;
+      --bg2: #0f2317;
+      --panel: rgba(11, 24, 16, 0.72);
+      --panel-2: rgba(21, 42, 29, 0.74);
+      --text: #f4f7f4;
+      --muted: #b8c9bc;
+      --accent: #86e39b;
+      --fire: #ff6b4a;
+      --water: #58a9ff;
+      --danger: #ffb84f;
+      --shadow: rgba(0, 0, 0, 0.35);
+    }
+
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 50% 20%, rgba(98, 160, 97, 0.16), transparent 25%),
+        radial-gradient(circle at 15% 80%, rgba(57, 92, 69, 0.26), transparent 22%),
+        linear-gradient(180deg, var(--bg2), var(--bg1));
+      color: var(--text);
+      font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans SC", sans-serif;
+    }
+
+    #app {
+      position: fixed;
+      inset: 0;
+      display: grid;
+      place-items: stretch;
+    }
+
+    canvas {
+      width: 100vw;
+      height: 100vh;
+      display: block;
+      background:
+        radial-gradient(circle at 50% 0%, rgba(130, 184, 112, 0.10), transparent 30%),
+        linear-gradient(180deg, #0c1a12, #08110c 80%);
+    }
+
+    .hud {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .topbar {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      right: 12px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+      pointer-events: none;
+    }
+
+    .chip, .panel {
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      background: linear-gradient(180deg, rgba(29, 54, 36, 0.82), rgba(10, 22, 15, 0.82));
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 14px 30px var(--shadow);
+    }
+
+    .chip {
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-size: 14px;
+      letter-spacing: 0.02em;
+      color: var(--text);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .chip strong {
+      font-size: 14px;
+      color: #fff;
+    }
+
+    .chip .chip-meta {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .legend {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      max-width: 58vw;
+    }
+
+    .legend .item {
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(10, 22, 15, 0.64);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      font-size: 12px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .legend .item b {
+      color: white;
+    }
+
+    .ai-launcher {
+      pointer-events: auto;
+      margin-left: 0;
+      background: linear-gradient(180deg, rgba(94, 177, 255, 0.95), rgba(43, 118, 220, 0.95));
+      color: #f8fbff;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      box-shadow: 0 14px 28px rgba(0, 0, 0, 0.22);
+    }
+
+    .topbar-actions {
+      margin-left: auto;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .ai-launcher.muted {
+      filter: grayscale(0.7) opacity(0.72);
+    }
+
+    .mode-row {
+      margin: 14px 0 18px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .mode-btn {
+      flex: 1 1 160px;
+      justify-content: center;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--text);
+    }
+
+    .mode-btn.active {
+      background: linear-gradient(180deg, #7ef09a, #39b55d);
+      color: #07120b;
+      border-color: transparent;
+    }
+
+    .center-overlay {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: 18px;
+      pointer-events: none;
+    }
+
+    .tutorial-overlay {
+      position: absolute;
+      inset: 0;
+      display: none;
+      place-items: center;
+      padding: 18px;
+      background: rgba(3, 9, 6, 0.80);
+      backdrop-filter: blur(6px);
+      z-index: 60;
+      pointer-events: auto;
+    }
+
+    .tutorial-overlay.visible { display: grid; }
+
+    .tutorial-card {
+      width: min(520px, calc(100vw - 28px));
+      padding: 26px 24px 20px;
+      border-radius: 24px;
+      background:
+        radial-gradient(circle at top right, rgba(134, 227, 155, 0.20), transparent 32%),
+        linear-gradient(180deg, rgba(18, 39, 26, 0.96), rgba(8, 17, 12, 0.96));
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+      text-align: left;
+      animation: tutPop 0.28s ease;
+    }
+
+    @keyframes tutPop {
+      from { opacity: 0; transform: translateY(10px) scale(0.98); }
+      to { opacity: 1; transform: none; }
+    }
+
+    .tutorial-step { display: none; }
+    .tutorial-step.active { display: block; }
+
+    .tut-icon { font-size: 44px; line-height: 1; margin-bottom: 10px; }
+
+    .tut-title { margin: 0 0 8px; font-size: 22px; color: #fff; }
+
+    .tut-desc {
+      margin: 0 0 14px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.65;
+    }
+
+    .tut-grid { display: grid; gap: 10px; margin-bottom: 6px; }
+    .tut-grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+    .tut-item {
+      padding: 12px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .tut-item b { display: block; margin-bottom: 3px; color: #fff; font-size: 13px; }
+    .tut-item b.inline { display: inline; margin: 0; }
+
+    .tut-key {
+      display: inline-block;
+      min-width: 22px;
+      padding: 2px 8px;
+      margin: 2px 3px 2px 0;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.10);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      font-size: 12px;
+      font-weight: 700;
+      color: #fff;
+      text-align: center;
+    }
+
+    .tut-foot {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 18px;
+      gap: 10px;
+    }
+
+    .tut-dots { display: flex; gap: 6px; }
+
+    .tut-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      transition: background 0.2s ease, transform 0.2s ease;
+    }
+
+    .tut-dot.active { background: var(--accent); transform: scale(1.25); }
+
+    .tut-btns { display: flex; gap: 8px; }
+    .tut-btns button { padding: 10px 14px; font-size: 14px; }
+
+    @media (max-width: 560px) {
+      .tut-grid.two { grid-template-columns: 1fr; }
+      .tut-title { font-size: 19px; }
+      .tut-icon { font-size: 38px; }
+    }
+
+    .level-brief {
+      position: absolute;
+      top: 74px;
+      left: 12px;
+      max-width: min(460px, calc(100vw - 24px));
+      padding: 12px 14px;
+      border-radius: 18px;
+      display: grid;
+      gap: 4px;
+      pointer-events: none;
+    }
+
+    .level-brief strong {
+      font-size: 14px;
+      color: #fff;
+    }
+
+    .level-brief span {
+      font-size: 12px;
+      line-height: 1.5;
+      color: var(--muted);
+    }
+
+    .card {
+      pointer-events: auto;
+      width: min(560px, calc(100vw - 28px));
+      padding: 24px 22px 18px;
+      border-radius: 24px;
+      background:
+        radial-gradient(circle at top right, rgba(134, 227, 155, 0.18), transparent 30%),
+        linear-gradient(180deg, rgba(18, 39, 26, 0.94), rgba(8, 17, 12, 0.94));
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+      text-align: left;
+    }
+
+    .title {
+      margin: 0 0 10px;
+      font-size: clamp(28px, 5vw, 44px);
+      line-height: 1.05;
+      letter-spacing: 0.02em;
+    }
+
+    .subtitle {
+      margin: 0 0 14px;
+      color: var(--muted);
+      line-height: 1.6;
+      font-size: 14px;
+    }
+
+    .rules {
+      margin: 14px 0 18px;
+      display: grid;
+      gap: 10px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .rule {
+      padding: 12px 12px 13px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .rule strong {
+      display: block;
+      color: #fff;
+      margin-bottom: 4px;
+      font-size: 13px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      align-items: center;
+    }
+
+    button {
+      appearance: none;
+      border: 0;
+      color: white;
+      border-radius: 14px;
+      padding: 12px 16px;
+      font: inherit;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      transition: transform 0.12s ease, filter 0.12s ease, background 0.12s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.03);
+    }
+
+    button:active {
+      transform: translateY(1px) scale(0.99);
+    }
+
+    button:disabled {
+      opacity: 0.58;
+      cursor: not-allowed;
+      transform: none;
+      filter: none;
+    }
+
+    .primary {
+      background: linear-gradient(180deg, #7ef09a, #39b55d);
+      color: #06110a;
+    }
+
+    .ghost {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .touch {
+      position: absolute;
+      inset: auto 0 0 0;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      padding: 0 12px 12px;
+      pointer-events: none;
+    }
+
+    .ai-panel {
+      position: absolute;
+      right: 12px;
+      bottom: 12px;
+      width: min(420px, calc(100vw - 24px));
+      display: none;
+      pointer-events: auto;
+      border-radius: 20px;
+      background: linear-gradient(180deg, rgba(12, 26, 42, 0.96), rgba(6, 14, 24, 0.96));
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.42);
+      overflow: hidden;
+    }
+
+    .ai-panel.visible {
+      display: block;
+    }
+
+    .ai-panel header {
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .ai-panel header strong {
+      font-size: 14px;
+      letter-spacing: 0.02em;
+    }
+
+    .ai-panel header span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .ai-panel .body {
+      padding: 14px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .ai-config {
+      display: grid;
+      gap: 8px;
+      padding: 12px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .ai-field {
+      display: grid;
+      gap: 6px;
+    }
+
+    .ai-field label {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .ai-field input {
+      width: 100%;
+      box-sizing: border-box;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text);
+      padding: 10px 12px;
+      font: inherit;
+      outline: none;
+    }
+
+    .ai-field input::placeholder {
+      color: rgba(184, 201, 188, 0.58);
+    }
+
+    .ai-note {
+      margin: 0;
+      font-size: 12px;
+      line-height: 1.5;
+      color: var(--muted);
+    }
+
+    .ai-panel textarea {
+      width: 100%;
+      min-height: 92px;
+      resize: vertical;
+      box-sizing: border-box;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text);
+      padding: 12px;
+      font: inherit;
+      outline: none;
+    }
+
+    .ai-panel textarea::placeholder {
+      color: rgba(184, 201, 188, 0.72);
+    }
+
+    .ai-panel .reply {
+      min-height: 84px;
+      max-height: 220px;
+      overflow: auto;
+      padding: 12px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      color: #eaf3ff;
+      white-space: pre-wrap;
+      line-height: 1.6;
+      font-size: 13px;
+    }
+
+    .ai-panel .footer {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+    }
+
+    .ai-panel .footer .ghost {
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .pad {
+      pointer-events: auto;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      align-items: center;
+      padding: 10px;
+      border-radius: 20px;
+      background: rgba(8, 17, 12, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      max-width: 320px;
+    }
+
+    .pad .label {
+      grid-column: 1 / -1;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 2px;
+    }
+
+    .pad button {
+      background: rgba(255, 255, 255, 0.10);
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      min-height: 50px;
+      padding: 0;
+      border-radius: 16px;
+      touch-action: none;
+    }
+
+    .pad button[data-key="jump"] {
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.08));
+      font-size: 12px;
+      color: #fff;
+    }
+
+    .pad button[data-key="left"],
+    .pad button[data-key="right"] {
+      font-size: 20px;
+    }
+
+    .pad.fire .label span:last-child {
+      color: var(--fire);
+    }
+
+    .pad.water .label span:last-child {
+      color: var(--water);
+    }
+
+    @media (max-width: 760px) {
+      .rules {
+        grid-template-columns: 1fr;
+      }
+      .legend {
+        display: none;
+      }
+      .level-brief {
+        top: 72px;
+      }
+      .touch {
+        gap: 8px;
+      }
+      .pad {
+        border-radius: 18px;
+      }
+    }
+
+    @media (pointer: coarse) {
+      .touch {
+        display: grid;
+      }
+    }
+
+    @media (pointer: fine) {
+      .touch {
+        display: none;
+      }
+    }
+
+    /* 关卡选择面板 */
+    .level-select-overlay {
+      position: absolute;
+      inset: 0;
+      display: none;
+      place-items: center;
+      padding: 18px;
+      background: rgba(3, 9, 6, 0.82);
+      backdrop-filter: blur(6px);
+      z-index: 55;
+      pointer-events: auto;
+    }
+    .level-select-overlay.visible { display: grid; }
+    .level-select-card {
+      width: min(580px, calc(100vw - 28px));
+      padding: 24px 22px 18px;
+      border-radius: 24px;
+      background:
+        radial-gradient(circle at top left, rgba(134, 227, 155, 0.15), transparent 28%),
+        linear-gradient(180deg, rgba(18, 39, 26, 0.96), rgba(8, 17, 12, 0.96));
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+    }
+    .level-select-title {
+      margin: 0 0 14px;
+      font-size: 20px;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .level-grid {
+      display: grid;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .level-card {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 14px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      cursor: pointer;
+      transition: transform 0.12s ease, background 0.12s ease, border-color 0.12s ease;
+    }
+    .level-card:hover {
+      transform: translateY(-1px);
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(134, 227, 155, 0.25);
+    }
+    .level-card.current {
+      border-color: var(--accent);
+      background: rgba(134, 227, 155, 0.08);
+    }
+    .level-card.locked {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+    .level-card.locked:hover {
+      transform: none;
+      background: rgba(255, 255, 255, 0.04);
+      border-color: rgba(255, 255, 255, 0.07);
+    }
+    .level-num {
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
+      background: linear-gradient(180deg, var(--accent), #39b55d);
+      color: #06110a;
+      font-size: 16px;
+      font-weight: 800;
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+    }
+    .level-card.locked .level-num {
+      background: rgba(255,255,255,0.08);
+      color: var(--muted);
+    }
+    .level-info { flex: 1; min-width: 0; }
+    .level-info b { display: block; font-size: 14px; color: #fff; }
+    .level-info span { font-size: 12px; color: var(--muted); }
+    .level-badge {
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .badge-done { background: rgba(134, 227, 155, 0.15); color: var(--accent); }
+    .badge-current { background: rgba(255, 184, 79, 0.15); color: var(--danger); }
+    .level-select-foot {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+    .lobby-back{position:fixed;top:14px;left:14px;z-index:9999;display:inline-flex;align-items:center;gap:6px;padding:9px 15px;border-radius:999px;font:600 14px/1 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:#86e39b;text-decoration:none;background:rgba(8,19,12,.72);border:1px solid rgba(134,227,155,.4);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:0 4px 14px rgba(0,0,0,.35);transition:transform .15s ease,background .15s ease}
+    .lobby-back:hover{transform:translateY(-1px);background:rgba(8,19,12,.9)}
+    .lobby-back svg{width:15px;height:15px;display:block}
+    @media (max-width:768px){.lobby-back{top:10px;left:10px;padding:8px 13px;font-size:13px}}
+    @supports(padding:max(0px)){.lobby-back{top:max(14px,env(safe-area-inset-top));left:max(14px,env(safe-area-inset-left))}}
+  </style>
+</head>
+<body>
+  <a class="lobby-back" href="index.html" aria-label="返回游戏大厅">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    游戏大厅
+  </a>
+  <div id="app">
+    <canvas id="game"></canvas>
+    <div class="hud">
+      <div class="topbar">
+        <div class="chip">关卡 <strong id="levelText">1</strong><span class="chip-meta" id="levelNameText">林地起步</span></div>
+        <div class="chip">模式 <strong id="modeText">双人</strong></div>
+        <div class="chip">难度 <strong id="diffText">普通</strong></div>
+        <div class="chip">晶体 <strong id="crystalText">0/0</strong></div>
+        <div class="legend chip">
+          <span class="item" id="legendFire"><b style="color:var(--fire)">火人</b>：A/D/W</span>
+          <span class="item" id="legendWater"><b style="color:var(--water)">水妹</b>：方向键</span>
+          <span class="item"><b>目标</b>：收集晶体并到达出口</span>
+        </div>
+        <div class="topbar-actions">
+          <button class="ai-launcher" id="bgmBtn">🎵 音乐</button>
+          <button class="ai-launcher" id="aiButton">AI 提示</button>
+        </div>
+      </div>
+
+      <div class="level-brief panel">
+        <strong id="hintTitle">林地起步</strong>
+        <span id="hintText">先熟悉跳跃、收集和出口节奏。</span>
+      </div>
+
+      <div class="center-overlay" id="overlay">
+        <div class="card">
+          <h1 class="title">森林冰火人</h1>
+          <p class="subtitle">
+            一个单文件版本的森林冰火人。支持双人协作，也支持单人双手操作模式。
+            先收集所有晶体，再分别把两位角色送到各自出口。
+          </p>
+          <div class="mode-row">
+            <button class="mode-btn active" id="modeCoopBtn">双人模式</button>
+            <button class="mode-btn" id="modeSoloBtn">单人模式</button>
+          </div>
+          <div class="rules">
+            <div class="rule">
+              <strong>火人</strong>
+              只能穿过火焰，碰到水会失败。
+            </div>
+            <div class="rule">
+              <strong>水妹</strong>
+              只能穿过水域，碰到火焰会失败。
+            </div>
+            <div class="rule">
+              <strong>共同危险</strong>
+              尖刺和掉出地图都会让本关重来。
+            </div>
+            <div class="rule">
+              <strong>胜利条件</strong>
+              收齐晶体后，火人进红门，水妹进蓝门。
+            </div>
+          </div>
+          <div class="diff-row" id="menuDiffRow" style="display:flex;gap:8px;justify-content:center;margin:6px 0 10px;">
+            <!-- 难度按钮由 JS 动态生成 -->
+          </div>
+          <div class="actions">
+            <button class="ghost" id="levelSelectBtn">关卡选择</button>
+            <button class="ghost" id="tutorialBtn">新手指引</button>
+            <button class="ghost" id="restartBtn">重开当前关</button>
+            <button class="primary" id="startBtn">开始冒险</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="tutorial-overlay" id="tutorialOverlay" aria-live="polite">
+        <div class="tutorial-card">
+          <div class="tutorial-step active" data-step="0">
+            <div class="tut-icon">🌲</div>
+            <h2 class="tut-title">欢迎来到森林冰火人</h2>
+            <p class="tut-desc">这是一个协作解谜小游戏。你要操控 <b class="inline" style="color:var(--fire)">火人</b> 和 <b class="inline" style="color:var(--water)">水妹</b> 两位角色，收齐关卡里的所有晶体，再把他们分别送进各自的出口。可以两个人一起玩，也可以一个人双手操作。</p>
+          </div>
+
+          <div class="tutorial-step" data-step="1">
+            <div class="tut-icon">🔥💧</div>
+            <h2 class="tut-title">两位主角，各有软肋</h2>
+            <p class="tut-desc">火与水彼此相克，走位时要各走各的路。</p>
+            <div class="tut-grid two">
+              <div class="tut-item"><b style="color:var(--fire)">🔥 火人</b>能安全穿过火焰与岩浆，但 <b class="inline" style="color:var(--fire)">碰到水会失败</b>。</div>
+              <div class="tut-item"><b style="color:var(--water)">💧 水妹</b>能安全穿过水域，但 <b class="inline" style="color:var(--water)">碰到火焰会失败</b>。</div>
+            </div>
+          </div>
+
+          <div class="tutorial-step" data-step="2">
+            <div class="tut-icon">🎮</div>
+            <h2 class="tut-title">操作方式</h2>
+            <p class="tut-desc" id="tutControlsDesc">双人模式：两位玩家各用一套按键。</p>
+            <div class="tut-grid two" id="tutorialControls"></div>
+            <p class="tut-desc" style="margin:12px 0 0;font-size:13px;">📱 手机 / 平板可直接用屏幕下方的虚拟按键。</p>
+          </div>
+
+          <div class="tutorial-step" data-step="3">
+            <div class="tut-icon">💎</div>
+            <h2 class="tut-title">危险与目标</h2>
+            <div class="tut-grid">
+              <div class="tut-item"><b>⚠️ 危险</b>尖刺、以及掉出地图边界，都会让本关重新开始。</div>
+              <div class="tut-item"><b>💎 晶体</b>关卡里的晶体要全部收集，出口才会真正生效。</div>
+              <div class="tut-item"><b>🚪 胜利</b>收齐所有晶体后，火人进红门、水妹进蓝门，即可过关。</div>
+            </div>
+          </div>
+
+          <div class="tutorial-step" data-step="4">
+            <div class="tut-icon">💡</div>
+            <h2 class="tut-title">几个小贴士</h2>
+            <div class="tut-grid">
+              <div class="tut-item"><b>移动平台与机关</b>踩住按钮开门、站上平台搭桥，常需两位角色配合：一人先卡位，另一人趁机通过。</div>
+              <div class="tut-item"><b>随时重来</b>按 <span class="tut-key">R</span> 重开当前关，按 <span class="tut-key">Esc</span> 回到菜单。</div>
+              <div class="tut-item"><b>卡住了？</b>点右上角「AI 提示」，填入你的 API Key 就能问当前关卡的通关思路。</div>
+            </div>
+          </div>
+
+          <div class="tut-foot">
+            <div class="tut-dots" id="tutDots"></div>
+            <div class="tut-btns">
+              <button class="ghost" id="tutSkipBtn">跳过</button>
+              <button class="ghost" id="tutPrevBtn">上一步</button>
+              <button class="primary" id="tutNextBtn">下一步</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="level-select-overlay" id="levelSelectOverlay">
+        <div class="level-select-card">
+          <h2 class="level-select-title"><span>关卡总览</span><span style="font-size:13px;color:var(--muted);font-weight:400">点击任意已解锁关卡直接跳转</span></h2>
+          <div class="level-grid" id="levelGrid"></div>
+          <div class="level-select-foot">
+            <button class="ghost" id="levelSelectCloseBtn">返回</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="touch">
+        <div class="pad fire" aria-label="火人控制">
+          <div class="label"><span>火人</span><span>A / D / W</span></div>
+          <button data-player="fire" data-key="left">◀</button>
+          <button data-player="fire" data-key="jump">跳</button>
+          <button data-player="fire" data-key="right">▶</button>
+        </div>
+        <div class="pad water" aria-label="水妹控制">
+          <div class="label"><span>水妹</span><span>← / → / ↑</span></div>
+          <button data-player="water" data-key="left">◀</button>
+          <button data-player="water" data-key="jump">跳</button>
+          <button data-player="water" data-key="right">▶</button>
+        </div>
+      </div>
+
+      <div class="ai-panel" id="aiPanel" aria-live="polite">
+        <header>
+          <div>
+            <strong>AI 助手</strong>
+            <div><span>支持任意 OpenAI 兼容接口，填入 Key 即可提问</span></div>
+          </div>
+          <button class="ghost" id="aiCloseBtn" type="button">关闭</button>
+        </header>
+        <div class="body">
+          <div class="ai-config">
+            <div class="ai-field">
+              <label for="aiApiKey">API Key</label>
+              <input id="aiApiKey" type="password" autocomplete="off" placeholder="输入你自己的 Key" />
+            </div>
+            <div class="ai-field">
+              <label for="aiBaseUrl">Base URL</label>
+              <input id="aiBaseUrl" type="text" autocomplete="off" placeholder="https://api.openai.com/v1 或任意兼容接口" />
+            </div>
+            <div class="ai-field">
+              <label for="aiModel">模型名称</label>
+              <input id="aiModel" type="text" autocomplete="off" placeholder="gpt-4o-mini / qwen-plus / ..." />
+            </div>
+            <p class="ai-note" id="aiConfigStatus">未配置 API Key，发送前请先保存。配置仅保存在当前浏览器。</p>
+          </div>
+          <textarea id="aiPrompt" placeholder="例如：给我一个通关思路，或者帮我总结当前关卡要点。"></textarea>
+          <div class="reply" id="aiReply">还没有请求。点“发送”后，回复会显示在这里。</div>
+          <div class="footer">
+            <button class="ghost" id="aiSaveBtn" type="button">保存配置</button>
+            <button class="ghost" id="aiResetBtn" type="button">清空配置</button>
+            <button class="ghost" id="aiSampleBtn" type="button">填入示例</button>
+            <button class="primary" id="aiSendBtn" type="button">发送</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const AI_STORAGE_KEY = 'forest-fire-water-ai-config';
+    const DEFAULT_AI_BASE_URL = '';
+    const DEFAULT_AI_MODEL = '';
+
+    function loadAIConfig() {
+      try {
+        const raw = localStorage.getItem(AI_STORAGE_KEY);
+        const parsed = raw ? JSON.parse(raw) : {};
+        return {
+          baseURL: typeof parsed.baseURL === 'string' && parsed.baseURL.trim() ? parsed.baseURL.trim() : DEFAULT_AI_BASE_URL,
+          apiKey: typeof parsed.apiKey === 'string' ? parsed.apiKey.trim() : '',
+          model: typeof parsed.model === 'string' && parsed.model.trim() ? parsed.model.trim() : DEFAULT_AI_MODEL,
+        };
+      } catch {
+        return {
+          baseURL: DEFAULT_AI_BASE_URL,
+          apiKey: '',
+          model: DEFAULT_AI_MODEL,
+        };
+      }
+    }
+
+    let aiConfig = loadAIConfig();
+
+    function saveAIConfig(config) {
+      aiConfig = {
+        baseURL: config.baseURL.trim() || DEFAULT_AI_BASE_URL,
+        apiKey: config.apiKey.trim(),
+        model: config.model.trim() || DEFAULT_AI_MODEL,
+      };
+      try {
+        localStorage.setItem(AI_STORAGE_KEY, JSON.stringify(aiConfig));
+      } catch {}
+    }
+
+    function clearAIConfig() {
+      aiConfig = {
+        baseURL: DEFAULT_AI_BASE_URL,
+        apiKey: '',
+        model: DEFAULT_AI_MODEL,
+      };
+      try {
+        localStorage.removeItem(AI_STORAGE_KEY);
+      } catch {}
+    }
+
+    async function stepfunChat(messages, options = {}) {
+      if (!aiConfig.apiKey) {
+        throw new Error('还没有配置 API Key。请先在面板里保存配置。');
+      }
+
+      const payload = {
+        model: options.model || aiConfig.model || DEFAULT_AI_MODEL,
+        messages,
+        temperature: options.temperature ?? 0.7,
+        stream: options.stream ?? false,
+      };
+
+      if (options.max_tokens !== undefined) payload.max_tokens = options.max_tokens;
+      if (options.top_p !== undefined) payload.top_p = options.top_p;
+      if (options.extra && typeof options.extra === 'object') {
+        Object.assign(payload, options.extra);
+      }
+
+      const response = await fetch(`${aiConfig.baseURL.replace(/\/$/, '')}/chat/completions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${aiConfig.apiKey}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const raw = await response.text();
+      let data;
+      try {
+        data = raw ? JSON.parse(raw) : {};
+      } catch {
+        data = { raw };
+      }
+
+      if (!response.ok) {
+        const message = data?.error?.message || data?.message || raw || `HTTP ${response.status}`;
+        throw new Error(message);
+      }
+
+      return data;
+    }
+
+    window.stepfunChat = stepfunChat;
+    window.stepfunConfig = {
+      baseURL: aiConfig.baseURL,
+      apiKeyConfigured: Boolean(aiConfig.apiKey),
+      model: aiConfig.model,
+    };
+
+    (() => {
+      const canvas = document.getElementById('game');
+      const ctx = canvas.getContext('2d');
+      const levelText = document.getElementById('levelText');
+      const levelNameText = document.getElementById('levelNameText');
+      const modeText = document.getElementById('modeText');
+      const crystalText = document.getElementById('crystalText');
+      const hintTitle = document.getElementById('hintTitle');
+      const hintText = document.getElementById('hintText');
+      const legendFire = document.getElementById('legendFire');
+      const legendWater = document.getElementById('legendWater');
+      const aiButton = document.getElementById('aiButton');
+      const bgmBtn = document.getElementById('bgmBtn');
+      const aiPanel = document.getElementById('aiPanel');
+      const aiApiKey = document.getElementById('aiApiKey');
+      const aiBaseUrl = document.getElementById('aiBaseUrl');
+      const aiModel = document.getElementById('aiModel');
+      const aiConfigStatus = document.getElementById('aiConfigStatus');
+      const aiPrompt = document.getElementById('aiPrompt');
+      const aiReply = document.getElementById('aiReply');
+      const aiSaveBtn = document.getElementById('aiSaveBtn');
+      const aiResetBtn = document.getElementById('aiResetBtn');
+      const aiSendBtn = document.getElementById('aiSendBtn');
+      const aiCloseBtn = document.getElementById('aiCloseBtn');
+      const aiSampleBtn = document.getElementById('aiSampleBtn');
+      const overlay = document.getElementById('overlay');
+      const startBtn = document.getElementById('startBtn');
+      const restartBtn = document.getElementById('restartBtn');
+      const modeCoopBtn = document.getElementById('modeCoopBtn');
+      const modeSoloBtn = document.getElementById('modeSoloBtn');
+      const menuTitle = overlay.querySelector('.title');
+      const menuSubtitle = overlay.querySelector('.subtitle');
+
+      const TILE = 48;
+      const STEP_TOP_INSET = 6;
+      const PLAYER_W = 30;
+      const PLAYER_H = 38;
+      const GRAVITY = 2050;
+      const MOVE_ACCEL = 2800;
+      const MOVE_TOP = 280;
+      const BASE_JUMP_SPEED = Math.sqrt(2 * GRAVITY * PLAYER_H * 4);
+      const RUN_JUMP_BONUS = 45;
+      const SPRING_SPEED = 1000; // 借力平台（弹簧板 *）向上弹射初速，约可高 5 格
+      const COYOTE_TIME = 0.1;
+      const JUMP_BUFFER_TIME = 0.12;
+      const FRICTION = 0.82;
+      const MAX_FALL = 1400;
+      const FAN_FORCE = 3600; // 风扇/气流向上推力（强于重力→上升）
+      const FAN_MAX = 480;    // 气流中上升速度上限
+      const BOX_SIZE = TILE - 12;
+
+      const MODE_KEYS = {
+        coop: {
+          fire: { left: 'KeyA', right: 'KeyD', jump: 'KeyW' },
+          water: { left: 'ArrowLeft', right: 'ArrowRight', jump: 'ArrowUp' },
+        },
+        solo: {
+          fire: { left: 'KeyA', right: 'KeyD', jump: 'KeyW' },
+          water: { left: 'KeyJ', right: 'KeyL', jump: 'KeyI' },
+        },
+      };
+
+      const levelDefs = [
+  {
+    "name": "森林裂谷",
+    "hint": "横移平台是唯一跨过尖刺坑的路！火人必须靠平台过去，水妹直接走右侧。弹簧板够高晶体。",
+    "map": [
+      "########################",
+      "#f...................w.#",
+      "#......................#",
+      "#........o.............#",
+      "#......................#",
+      "#######..........#######",
+      "#...xxxxxxxxxx.........#",
+      "#####...........########",
+      "#......................#",
+      "#......*...............#",
+      "#..o....R....U....o....#",
+      "########################"
+    ],
+    "hardMap": [
+      "########################",
+      "#f...................w.#",
+      "#......................#",
+      "#........o.............#",
+      "#......................#",
+      "######............######",
+      "#..xxxxxxxxxxx.xxxxxxx.#",
+      "####..............######",
+      "#......................#",
+      "#......*...............#",
+      "#..o....R....U....o....#",
+      "########################"
+    ],
+    "platforms": [
+      {
+        "x": 336,
+        "y": 240,
+        "w": 120,
+        "h": 18,
+        "axis": "x",
+        "min": 336,
+        "max": 672,
+        "speed": 60
+      }
+    ],
+    "hardPlatforms": [
+      {
+        "x": 288,
+        "y": 240,
+        "w": 120,
+        "h": 18,
+        "axis": "x",
+        "min": 288,
+        "max": 768,
+        "speed": 70
+      },
+      {
+        "x": 720,
+        "y": 240,
+        "w": 80,
+        "h": 18,
+        "axis": "x",
+        "min": 672,
+        "max": 816,
+        "speed": 65
+      }
+    ]
+  },
+  {
+    "name": "竖井双梯",
+    "hint": "两侧电梯交替下降,底部横移平台把左右串起来。火人避~，水妹避^。",
+    "map": [
+      "########################",
+      "#f...................w.#",
+      "#......................#",
+      "#......o...............#",
+      "#......................#",
+      "#####.....####.....#####",
+      "#..~............^......#",
+      "#####.....####.....#####",
+      "#......................#",
+      "####.....###.....#######",
+      "#......*...............#",
+      "#..o....R....U....o....#",
+      "########################"
+    ],
+    "hardMap": [
+      "########################",
+      "#f...................w.#",
+      "#......................#",
+      "#......o...............#",
+      "#......................#",
+      "#####.....####.....#####",
+      "#..~............^......#",
+      "#####.....####.....#####",
+      "#......................#",
+      "####.....###.....#######",
+      "#..x...*...............#",
+      "#..o....R....U....o....#",
+      "########################"
+    ],
+    "platforms": [
+      {
+        "x": 240,
+        "y": 48,
+        "w": 44,
+        "h": 18,
+        "axis": "y",
+        "min": 48,
+        "max": 480,
+        "speed": 72
+      },
+      {
+        "x": 528,
+        "y": 48,
+        "w": 44,
+        "h": 18,
+        "axis": "y",
+        "min": 48,
+        "max": 480,
+        "speed": 82
+      },
+      {
+        "x": 288,
+        "y": 480,
+        "w": 180,
+        "h": 18,
+        "axis": "x",
+        "min": 192,
+        "max": 624,
+        "speed": 55
+      }
+    ],
+    "hardPlatforms": [
+      {
+        "x": 240,
+        "y": 48,
+        "w": 44,
+        "h": 18,
+        "axis": "y",
+        "min": 48,
+        "max": 480,
+        "speed": 100
+      },
+      {
+        "x": 528,
+        "y": 48,
+        "w": 44,
+        "h": 18,
+        "axis": "y",
+        "min": 48,
+        "max": 480,
+        "speed": 115
+      },
+      {
+        "x": 288,
+        "y": 480,
+        "w": 180,
+        "h": 18,
+        "axis": "x",
+        "min": 192,
+        "max": 624,
+        "speed": 75
+      }
+    ]
+  },
+  {
+    "name": "尖刺迷宫",
+    "hint": "两段尖刺被墙隔开,需在两块横移平台间精确跳转！先踩平台到中间安全岛(柱上),再跳到第二块平台。",
+    "map": [
+      "########################",
+      "#f...................w.#",
+      "#......................#",
+      "#..........o...........#",
+      "#......................#",
+      "#####......##.....######",
+      "#...xxxxxx...xxxxx.....#",
+      "#####.......##....######",
+      "#......................#",
+      "#......*...............#",
+      "#..o....R....U....o....#",
+      "########################"
+    ],
+    "hardMap": [
+      "########################",
+      "#f...................w.#",
+      "#......................#",
+      "#..........o...........#",
+      "#......................#",
+      "#####............#######",
+      "#..xxxxxxxx.xxxxxxx....#",
+      "#####.......##....######",
+      "#......................#",
+      "#......*...............#",
+      "#..o....R....U....o....#",
+      "########################"
+    ],
+    "platforms": [
+      {
+        "x": 240,
+        "y": 240,
+        "w": 120,
+        "h": 18,
+        "axis": "x",
+        "min": 240,
+        "max": 576,
+        "speed": 68
+      },
+      {
+        "x": 624,
+        "y": 240,
+        "w": 120,
+        "h": 18,
+        "axis": "x",
+        "min": 576,
+        "max": 816,
+        "speed": 72
+      }
+    ],
+    "hardPlatforms": [
+      {
+        "x": 240,
+        "y": 240,
+        "w": 100,
+        "h": 18,
+        "axis": "x",
+        "min": 240,
+        "max": 528,
+        "speed": 80
+      },
+      {
+        "x": 576,
+        "y": 240,
+        "w": 100,
+        "h": 18,
+        "axis": "x",
+        "min": 576,
+        "max": 816,
+        "speed": 85
+      }
+    ]
+  },
+  {
+    "name": "协作神殿",
+    "hint": "三厢密室！水妹踩①开A门放火人；火人用弹簧板够②(高处)开B门放水妹。双方在中厢出口会师。",
+    "map": [
+      "########################",
+      "#......#........#......#",
+      "#f.....#........#w.....#",
+      "#......#........#......#",
+      "#..2...#........#......#",
+      "#......#........#......#",
+      "#......#........#......#",
+      "#......#........#..1...#",
+      "#..*...#........#......#",
+      "#......a.oR.Uo..b......#",
+      "########################"
+    ],
+    "hardMap": [
+      "########################",
+      "#......#........#......#",
+      "#f.....#........#w.....#",
+      "#..2...#........#......#",
+      "#......#........#......#",
+      "#......#........#......#",
+      "#..x...#........#......#",
+      "#......#........#..1...#",
+      "#..*...#........#......#",
+      "#......a.oR.Uo..b......#",
+      "########################"
+    ],
+    "platforms": [],
+    "hardPlatforms": []
+  },
+  {
+    "name": "终局圣堂",
+    "hint": "终极挑战！两侧电梯+底部跨平台+中层双尖刺+弹簧板。火人走左避~，水妹走右避^，双方在弹簧板侧出口会师。",
+    "map": [
+      "#########################",
+      "#f....................w.#",
+      "#.......................#",
+      "#..........o............#",
+      "#.......................#",
+      "#####....######....######",
+      "#..~............^.......#",
+      "#####....######....######",
+      "#.......................#",
+      "#####.....######.....####",
+      "#....x..........x.......#",
+      "#####.....######.....####",
+      "#......*................#",
+      "#..o...R....U.....o.....#",
+      "#########################"
+    ],
+    "hardMap": [
+      "#########################",
+      "#f....................w.#",
+      "#.......................#",
+      "#..........o............#",
+      "#.......................#",
+      "#####....######....######",
+      "#..~............^.......#",
+      "#####....######....######",
+      "#.......................#",
+      "#####.....######.....####",
+      "#..x...x.......x........#",
+      "#####.....######.....####",
+      "#......*................#",
+      "#..o...R....U.....o.....#",
+      "#########################"
+    ],
+    "platforms": [
+      {
+        "x": 240,
+        "y": 48,
+        "w": 44,
+        "h": 18,
+        "axis": "y",
+        "min": 48,
+        "max": 576,
+        "speed": 78
+      },
+      {
+        "x": 768,
+        "y": 48,
+        "w": 44,
+        "h": 18,
+        "axis": "y",
+        "min": 48,
+        "max": 576,
+        "speed": 88
+      },
+      {
+        "x": 288,
+        "y": 480,
+        "w": 160,
+        "h": 18,
+        "axis": "x",
+        "min": 192,
+        "max": 768,
+        "speed": 65
+      }
+    ],
+    "hardPlatforms": [
+      {
+        "x": 240,
+        "y": 48,
+        "w": 44,
+        "h": 18,
+        "axis": "y",
+        "min": 48,
+        "max": 576,
+        "speed": 105
+      },
+      {
+        "x": 768,
+        "y": 48,
+        "w": 44,
+        "h": 18,
+        "axis": "y",
+        "min": 48,
+        "max": 576,
+        "speed": 115
+      },
+      {
+        "x": 288,
+        "y": 480,
+        "w": 140,
+        "h": 18,
+        "axis": "x",
+        "min": 240,
+        "max": 720,
+        "speed": 85
+      }
+    ]
+  }
+,
+
+  {
+    "name": "冰霜滑道",
+    "hint": "走进右侧蓝色风柱(站到 v 上)会被气流托上柱顶，够到高处火宝石；地面冰面(_)打滑提前起跳。冰面+风扇气流(v)登场。",
+    "map": [
+      "########################",
+      "#f...................w.#",
+      "#......................#",
+      "#........o.............#",
+      "#........v.............#",
+      "#........v.............#",
+      "#........v.............#",
+      "#........v.............#",
+      "#........v.............#",
+      "#........v.............#",
+      "#R___....v.....o..U....#",
+      "########################"
+    ],
+    "hardMap": [
+      "########################",
+      "#f...................w.#",
+      "#......................#",
+      "#........o.............#",
+      "#........v.............#",
+      "#........v.............#",
+      "#........v.............#",
+      "#........v.............#",
+      "#........v.............#",
+      "#........v.............#",
+      "#R___....v.....o..U....#",
+      "########################"
+    ],
+    "platforms": [],
+    "hardPlatforms": []
+  },
+  {
+    "name": "箱庭谜题",
+    "hint": "把木箱(B)推到压力板(1)上，中间的机关门(a)才会开。火人推箱开路、过门去右上的红门。推箱子(B)+压力板(1)+门(a)。",
+    "map": [
+      "########################",
+      "#f.........#.........w.#",
+      "#..........#...........#",
+      "#..........#...........#",
+      "#..........#...........#",
+      "#..........#...........#",
+      "#..........#...........#",
+      "#.B........#...........#",
+      "#..........#...........#",
+      "#..........#...........#",
+      "#...1..o...a....R..U.o.#",
+      "########################"
+    ],
+    "hardMap": [
+      "########################",
+      "#f.........#.........w.#",
+      "#..........#...........#",
+      "#..........#...........#",
+      "#..........#...........#",
+      "#..........#...........#",
+      "#..........#...........#",
+      "#.B........#...........#",
+      "#..........#...........#",
+      "#..........#...........#",
+      "#...1..o...a....R..U.o.#",
+      "########################"
+    ],
+    "platforms": [],
+    "hardPlatforms": []
+  },
+  {
+    "name": "箱庭枢机",
+    "hint": "中央墙隔开左右，a 门默认关。把木箱(B)推到 1 号压力板，a 门永久开启，火人才能进右侧密室取火晶+火门。推箱子(B)+压力板(1)+机关门(a) 进阶版。",
+    "map": [
+      "########################",
+      "#f.........#..........w#",
+      "#..........#...........#",
+      "#...o......#.....o.....#",
+      "#..........#...........#",
+      "#..........#...........#",
+      "#..........#...........#",
+      "#.B........#...........#",
+      "#..........#...........#",
+      "#..........#...........#",
+      "#...1......a.o....R..U.#",
+      "########################"
+    ],
+    "hardMap": [
+      "########################",
+      "#f.........#..........w#",
+      "#..........#...........#",
+      "#...o......#.....o.....#",
+      "#..........#...........#",
+      "#..........#...........#",
+      "#..........#...........#",
+      "#.B........#...........#",
+      "#..........#...........#",
+      "#..........#...........#",
+      "#...1......a.o....R..U.#",
+      "########################"
+    ],
+    "platforms": [],
+    "hardPlatforms": []
+  },
+  {
+    "name": "霜风回廊",
+    "hint": "地面冰面(_)打滑、提前起跳；走到蓝色风柱(v)上被气流托上柱顶，够到高处火晶。冰面+风扇气流(v) 组合。",
+    "map": [
+      "########################",
+      "#f...................w.#",
+      "#..........o...........#",
+      "#......................#",
+      "#..........v...........#",
+      "#..........v...........#",
+      "#..........v...........#",
+      "#..........v...........#",
+      "#..........v...........#",
+      "#..........v...........#",
+      "#R__.......v.._...U.o..#",
+      "########################"
+    ],
+    "hardMap": [
+      "########################",
+      "#f...................w.#",
+      "#..........o...........#",
+      "#......................#",
+      "#..........v...........#",
+      "#..........v...........#",
+      "#..........v...........#",
+      "#..........v...........#",
+      "#..........v...........#",
+      "#..........v...........#",
+      "#R__.......v.._...U.o..#",
+      "########################"
+    ],
+    "platforms": [],
+    "hardPlatforms": []
+  },
+  {
+    "name": "三重机关",
+    "hint": "左箱庭(推箱压板开 a 门)+右风柱(托升取高处火晶)+冰面打滑，三位一体。火人开 a 门后协作：火取高处火晶，水过门取左侧水晶。",
+    "map": [
+      "########################",
+      "#f.............#......w#",
+      "#..............#.o.....#",
+      "#..............#.......#",
+      "#..............#.v.....#",
+      "#..o...........#.v.....#",
+      "#..............#.v.....#",
+      "#.B............#.v.....#",
+      "#..............#.v.....#",
+      "#..............#.v.....#",
+      "#R._1..........a_vUo...#",
+      "########################"
+    ],
+    "hardMap": [
+      "########################",
+      "#f.............#......w#",
+      "#..............#.o.....#",
+      "#..............#.......#",
+      "#..............#.v.....#",
+      "#..o...........#.v.....#",
+      "#..............#.v.....#",
+      "#.B............#.v.....#",
+      "#..............#.v.....#",
+      "#..............#.v.....#",
+      "#R._1..........a_vUo...#",
+      "########################"
+    ],
+    "platforms": [],
+    "hardPlatforms": []
+  }
+
+];
+
+      const state = {
+        started: false,
+        levelIndex: 0,
+        mode: 'coop',
+        world: null,
+        message: '请选择模式后开始',
+        messageTimer: 0,
+        transitionTimer: 0,
+        keys: Object.create(null),
+        touch: Object.create(null),
+        camera: { x: 0, y: 0, scale: 1 },
+        collected: 0,
+        totalCrystals: 0,
+        playerWon: false,
+      };
+
+      function setAIPanelVisible(visible) {
+        aiPanel.classList.toggle('visible', visible);
+      }
+
+      function buildAIContext() {
+        const level = levelDefs[state.levelIndex];
+        return [
+          `游戏名称：森林冰火人`,
+          `当前关卡：${state.levelIndex + 1} - ${level.name}`,
+          `关卡提示：${level.hint}`,
+          `当前模式：${state.mode === 'coop' ? '双人模式' : '单人模式'}`,
+          `收集进度：${state.collected}/${state.totalCrystals}`,
+          `通关状态：${state.playerWon ? '已通关' : '进行中'}`,
+        ].join('\n');
+      }
+
+      function setAIReply(text) {
+        aiReply.textContent = text;
+      }
+
+      function fillAISample() {
+        aiPrompt.value = '给我一个适合当前关卡的通关建议。';
+        aiPrompt.focus();
+      }
+
+      function updateAIConfigStatus(message = '') {
+        const summary = aiConfig.apiKey
+          ? `已配置 Key，模型为 ${aiConfig.model}。配置仅保存在当前浏览器。`
+          : '未配置 API Key，发送前请先保存。配置仅保存在当前浏览器。';
+        aiConfigStatus.textContent = message ? `${message} ${summary}` : summary;
+        window.stepfunConfig = {
+          baseURL: aiConfig.baseURL,
+          apiKeyConfigured: Boolean(aiConfig.apiKey),
+          model: aiConfig.model,
+        };
+      }
+
+      function syncAIInputs() {
+        aiApiKey.value = aiConfig.apiKey;
+        aiBaseUrl.value = aiConfig.baseURL;
+        aiModel.value = aiConfig.model;
+        updateAIConfigStatus();
+      }
+
+      function handleAIConfigSave() {
+        saveAIConfig({
+          apiKey: aiApiKey.value,
+          baseURL: aiBaseUrl.value,
+          model: aiModel.value,
+        });
+        syncAIInputs();
+        setAIReply('AI 配置已保存，现在可以发送问题了。');
+      }
+
+      function handleAIConfigReset() {
+        clearAIConfig();
+        syncAIInputs();
+        setAIReply('已清空本地 AI 配置。');
+        aiApiKey.focus();
+      }
+
+      async function sendAIRequest() {
+        const userPrompt = aiPrompt.value.trim();
+        if (!userPrompt) {
+          setAIReply('先输入一个问题再发送。');
+          aiPrompt.focus();
+          return;
+        }
+
+        aiSendBtn.disabled = true;
+        aiCloseBtn.disabled = true;
+        aiButton.disabled = true;
+        setAIReply('正在请求 AI ...');
+
+        try {
+          const response = await stepfunChat([
+            {
+              role: 'system',
+              content: '你是一个简洁的游戏助手。请根据用户问题和当前游戏状态，给出直接、实用、中文回答，尽量简短。',
+            },
+            {
+              role: 'user',
+              content: `${buildAIContext()}\n\n用户问题：${userPrompt}`,
+            },
+          ], {
+            temperature: 0.4,
+            max_tokens: 512,
+          });
+
+          const reply = response?.choices?.[0]?.message?.content
+            || response?.choices?.[0]?.text
+            || response?.output_text
+            || '模型没有返回可读内容。';
+          setAIReply(String(reply).trim());
+        } catch (error) {
+          setAIReply(`请求失败：${error?.message || error}`);
+        } finally {
+          aiSendBtn.disabled = false;
+          aiCloseBtn.disabled = false;
+          aiButton.disabled = false;
+        }
+      }
+
+      const fire = makePlayer('fire', '#ff6b4a', '#ffd2b9');
+      const water = makePlayer('water', '#5baaff', '#d4ebff');
+      const players = [fire, water];
+
+      function makePlayer(kind, color, glow) {
+        return {
+          kind,
+          color,
+          glow,
+          x: 0,
+          y: 0,
+          vx: 0,
+          vy: 0,
+          w: PLAYER_W,
+          h: PLAYER_H,
+          face: 1,
+          onGround: false,
+          alive: true,
+          escaped: false,
+          exitHold: 0,
+          riding: -1,
+          standingOn: null,
+          coyoteTimer: 0,
+          jumpBuffer: 0,
+          jumpHeld: false,
+          spawnX: 0,
+          spawnY: 0,
+          prevX: 0,
+          prevY: 0,
+        };
+      }
+
+      function isWalkableBuildTile(ch) {
+        return ch !== '#' && ch !== 'a' && ch !== 'b' && ch !== '~' && ch !== '^' && ch !== 'x';
+      }
+
+      function isSupportTile(ch) {
+        return ch === '#' || ch === 'a' || ch === 'b';
+      }
+
+      function findSafeSlot(tiles, width, height, preferred) {
+        const candidates = preferred.filter(Boolean);
+        const scan = [];
+
+        for (let y = height - 2; y >= 1; y--) {
+          for (let x = 1; x < width - 1; x++) {
+            scan.push({ x, y });
+          }
+        }
+
+        for (const spot of candidates.concat(scan)) {
+          if (!spot || spot.x < 1 || spot.x >= width - 1 || spot.y < 1 || spot.y >= height - 1) continue;
+          const tile = tiles[spot.y][spot.x];
+          const below = tiles[spot.y + 1][spot.x];
+          if (isWalkableBuildTile(tile) && isSupportTile(below)) {
+            return spot;
+          }
+        }
+
+        return { x: 1, y: Math.max(1, height - 2) };
+      }
+
+      function normalizeLevel(lines) {
+        const width = Math.max(...lines.map((line) => line.length));
+        return lines.map((line) => line.padEnd(width, '#'));
+      }
+
+      function clonePlatform(def) {
+        return {
+          x: def.x,
+          y: def.y,
+          w: def.w,
+          h: def.h,
+          axis: def.axis,
+          min: def.min,
+          max: def.max,
+          speed: def.speed,
+          dir: 1,
+          prevX: def.x,
+          prevY: def.y,
+          dx: 0,
+          dy: 0,
+        };
+      }
+
+      function buildLevel(index) {
+        const def = levelDefs[index];
+        const isHard = currentDifficulty === 'hard';
+        const mapData = (isHard && def.hardMap) ? def.hardMap : def.map;
+        const platsData = (isHard && def.hardPlatforms) ? def.hardPlatforms : def.platforms;
+        const raw = normalizeLevel(mapData);
+        const height = raw.length;
+        const width = raw[0].length;
+        const tiles = Array.from({ length: height }, () => Array(width).fill('#'));
+        const crystals = [];
+        const plateRects = { a: [], b: [] };
+        const boxes = [];
+        const platforms = platsData.map(clonePlatform);
+        // 应用难度修正：平台速度 × 难度倍率
+        const diffMult = getDiffMult().speedMult;
+        platforms.forEach(p => { p.speed *= diffMult; });
+        let fireSpawn = null;
+        let waterSpawn = null;
+        let fireExit = null;
+        let waterExit = null;
+
+        for (let y = 0; y < height; y++) {
+          for (let x = 0; x < width; x++) {
+            const ch = raw[y][x];
+            switch (ch) {
+              case 'f':
+                fireSpawn = { x: x * TILE + 9, y: y * TILE + 6 };
+                tiles[y][x] = '.';
+                break;
+              case 'w':
+                waterSpawn = { x: x * TILE + 9, y: y * TILE + 6 };
+                tiles[y][x] = '.';
+                break;
+              case 'o':
+                crystals.push({
+                  x: x * TILE + TILE / 2,
+                  y: y * TILE + TILE / 2,
+                  kind: crystals.length % 2 === 0 ? 'fire' : 'water',
+                  taken: false,
+                  pulse: Math.random() * Math.PI * 2,
+                });
+                tiles[y][x] = '.';
+                break;
+              case 'R':
+                fireExit = { x, y };
+                tiles[y][x] = 'F';
+                break;
+              case 'U':
+                waterExit = { x, y };
+                tiles[y][x] = 'W';
+                break;
+              case '1':
+                plateRects.a.push({ x: x * TILE, y: y * TILE, w: TILE, h: TILE });
+                tiles[y][x] = '.';
+                break;
+              case '2':
+                plateRects.b.push({ x: x * TILE, y: y * TILE, w: TILE, h: TILE });
+                tiles[y][x] = '.';
+                break;
+              case 'B':
+                boxes.push({ x: x * TILE + 6, y: y * TILE + 6, w: BOX_SIZE, h: BOX_SIZE, vx: 0, vy: 0, dx: 0, dy: 0, onGround: false, _px: null, _py: null });
+                tiles[y][x] = '.';
+                break;
+              default:
+                tiles[y][x] = ch;
+                break;
+            }
+          }
+        }
+
+        const fireSpawnSlot = fireSpawn
+          ? { x: Math.floor((fireSpawn.x - 9) / TILE), y: Math.floor((fireSpawn.y - 6) / TILE) }
+          : findSafeSlot(tiles, width, height, [{ x: 1, y: height - 2 }]);
+        const waterSpawnSlot = waterSpawn
+          ? { x: Math.floor((waterSpawn.x - 9) / TILE), y: Math.floor((waterSpawn.y - 6) / TILE) }
+          : findSafeSlot(tiles, width, height, [{ x: 2, y: height - 2 }, fireExit]);
+        const fireExitSlot = fireExit
+          ? fireExit
+          : findSafeSlot(tiles, width, height, [{ x: width - 3, y: 1 }, waterExit, fireSpawnSlot]);
+        const waterExitSlot = waterExit
+          ? waterExit
+          : findSafeSlot(tiles, width, height, [{ x: width - 2, y: 1 }, fireExitSlot, waterSpawnSlot]);
+
+        fireSpawn = { x: fireSpawnSlot.x * TILE + 9, y: fireSpawnSlot.y * TILE + 6 };
+        waterSpawn = { x: waterSpawnSlot.x * TILE + 9, y: waterSpawnSlot.y * TILE + 6 };
+        fireExit = fireExitSlot;
+        waterExit = waterExitSlot;
+        tiles[fireExit.y][fireExit.x] = 'F';
+        tiles[waterExit.y][waterExit.x] = 'W';
+
+        state.world = {
+          width,
+          height,
+          tiles,
+          crystals,
+          plateRects,
+          platforms,
+          boxes,
+          exits: { fire: fireExit, water: waterExit },
+          switches: { a: false, b: false },
+          title: def.name,
+          hint: def.hint,
+        };
+
+        // 把嵌在墙里的平台起点推到墙外（配合运行时墙体碰撞，杜绝穿模）
+        state.world.platforms.forEach(clampPlatformStart);
+        // 各方面自检：可达性 / 出生点 / 平台穿墙 等问题打印到控制台
+        validateLevel();
+
+        state.collected = 0;
+        state.totalCrystals = crystals.length;
+        state.playerWon = false;
+        state.transitionTimer = 0;
+        state.message = `第 ${index + 1} 关：${def.name}`;
+        state.messageTimer = 1.4;
+
+        fire.x = fire.spawnX = fireSpawn.x;
+        fire.y = fire.spawnY = fireSpawn.y;
+        fire.vx = fire.vy = 0;
+        fire.alive = true;
+        fire.escaped = false;
+        fire.exitHold = 0;
+        fire.riding = -1;
+        fire.standingOn = null;
+        fire.coyoteTimer = 0;
+        fire.jumpBuffer = 0;
+        fire.jumpHeld = false;
+
+        water.x = water.spawnX = waterSpawn.x;
+        water.y = water.spawnY = waterSpawn.y;
+        water.vx = water.vy = 0;
+        water.alive = true;
+        water.escaped = false;
+        water.exitHold = 0;
+        water.riding = -1;
+        water.standingOn = null;
+        water.coyoteTimer = 0;
+        water.jumpBuffer = 0;
+        water.jumpHeld = false;
+
+        state.camera.x = (fire.x + water.x) / 2;
+        state.camera.y = (fire.y + water.y) / 2;
+        state.camera.scale = 1.05;
+
+        refreshLevelUI();
+      }
+
+      function setMode(mode) {
+        state.mode = mode;
+        refreshMenuState();
+      }
+
+      function refreshLevelUI() {
+        levelText.textContent = String(state.levelIndex + 1);
+        levelNameText.textContent = state.world?.title || '';
+        hintTitle.textContent = state.world?.title || '';
+        hintText.textContent = state.world?.hint || '';
+        crystalText.textContent = `${state.collected}/${state.totalCrystals}`;
+      }
+
+      function resizeCanvas() {
+        const dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+        canvas.width = Math.floor(window.innerWidth * dpr);
+        canvas.height = Math.floor(window.innerHeight * dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+
+      function clamp(value, min, max) {
+        return Math.max(min, Math.min(max, value));
+      }
+
+      function tileAt(world, tx, ty) {
+        if (ty < 0 || ty >= world.height || tx < 0 || tx >= world.width) return '#';
+        return world.tiles[ty][tx];
+      }
+
+      function isSolidTile(ch, switches) {
+        return ch === '#' || (ch === 'a' && !switches.a) || (ch === 'b' && !switches.b) || ch === '*';
+      }
+
+      function isHazard(ch) {
+        return ch === '~' || ch === '^' || ch === 'x';
+      }
+
+      function rectOverlap(a, b) {
+        return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+      }
+
+      function playerRect(player) {
+        return { x: player.x, y: player.y, w: player.w, h: player.h };
+      }
+
+      function playerControls(kind) {
+        return MODE_KEYS[state.mode][kind];
+      }
+
+      function inputDown(player, action) {
+        const controls = playerControls(player.kind);
+        const keyCode = controls[action];
+        const touchKey = `${player.kind}-${action}`;
+        return Boolean(state.keys[keyCode] || state.touch[touchKey]);
+      }
+
+      function setTouch(playerKind, action, pressed) {
+        state.touch[`${playerKind}-${action}`] = pressed;
+      }
+
+      function tryStartJump(player) {
+        if (player.jumpBuffer <= 0) return false;
+        if (!player.onGround && player.coyoteTimer <= 0) return false;
+        const runRatio = Math.min(1, Math.abs(player.vx) / MOVE_TOP);
+        player.vy = -(BASE_JUMP_SPEED + RUN_JUMP_BONUS * runRatio);
+        player.onGround = false;
+        player.riding = -1;
+        player.standingOn = null;
+        player.coyoteTimer = 0;
+        player.jumpBuffer = 0;
+        return true;
+      }
+
+      function gatherSolids(world, switches) {
+        const solids = [];
+        const margin = TILE * 2;
+        const minTX = Math.floor(-margin / TILE);
+        const maxTX = Math.ceil((world.width * TILE + margin) / TILE);
+        const minTY = Math.floor(-margin / TILE);
+        const maxTY = Math.ceil((world.height * TILE + margin) / TILE);
+
+        for (let ty = minTY; ty <= maxTY; ty++) {
+          for (let tx = minTX; tx <= maxTX; tx++) {
+            const ch = tileAt(world, tx, ty);
+            if (isSolidTile(ch, switches)) {
+              const above = tileAt(world, tx, ty - 1);
+              const topInset = ch === '#' && !isSolidTile(above, switches) ? STEP_TOP_INSET : 0;
+              solids.push({ x: tx * TILE, y: ty * TILE + topInset, w: TILE, h: TILE - topInset, kind: 'tile', tile: ch });
+            }
+          }
+        }
+
+        world.platforms.forEach((platform, index) => {
+          solids.push({ x: platform.x, y: platform.y, w: platform.w, h: platform.h, kind: 'platform', index });
+        });
+
+        (world.boxes || []).forEach((box, index) => {
+          solids.push({ x: box.x, y: box.y, w: box.w, h: box.h, kind: 'box', index });
+        });
+
+        return solids;
+      }
+
+      // 平台是否压到墙体('#')——防止移动平台穿模的核心检测
+      function platformHitsWall(p) {
+        const world = state.world;
+        if (!world) return false;
+        const tx0 = Math.floor(p.x / TILE);
+        const tx1 = Math.floor((p.x + p.w - 1) / TILE);
+        const ty0 = Math.floor(p.y / TILE);
+        const ty1 = Math.floor((p.y + p.h - 1) / TILE);
+        for (let ty = ty0; ty <= ty1; ty++) {
+          for (let tx = tx0; tx <= tx1; tx++) {
+            const ch = (ty < 0 || ty >= world.height || tx < 0 || tx >= world.width) ? '#' : world.tiles[ty][tx];
+            if (ch === '#') return true;
+          }
+        }
+        return false;
+      }
+
+      // 建关时若平台起点已经嵌在墙里，沿运动轴把它推到最近的空位（最小位移）
+      function clampPlatformStart(p) {
+        if (!platformHitsWall(p)) return;
+        if (p.axis === 'x') {
+          let left = p.x, right = p.x;
+          while (left > p.min - 480 && platformHitsWall({ ...p, x: left })) left -= 1;
+          while (right < p.max + 480 && platformHitsWall({ ...p, x: right })) right += 1;
+          const dl = p.x - left, dr = right - p.x;
+          if (dl <= dr) p.x = left; else p.x = right;
+        } else {
+          let up = p.y, down = p.y;
+          while (up > p.min - 480 && platformHitsWall({ ...p, y: up })) up -= 1;
+          while (down < p.max + 480 && platformHitsWall({ ...p, y: down })) down += 1;
+          const du = p.y - up, dd = down - p.y;
+          if (du <= dd) p.y = up; else p.y = down;
+        }
+      }
+
+      // 把角色推出墙体（沿最小穿透轴），用于被平台顶到墙里时的兜底
+      function pushOutOfWalls(player) {
+        const world = state.world;
+        if (!world) return;
+        const tx0 = Math.floor(player.x / TILE);
+        const tx1 = Math.floor((player.x + player.w - 1) / TILE);
+        const ty0 = Math.floor(player.y / TILE);
+        const ty1 = Math.floor((player.y + player.h - 1) / TILE);
+        for (let ty = ty0; ty <= ty1; ty++) {
+          for (let tx = tx0; tx <= tx1; tx++) {
+            const ch = (ty < 0 || ty >= world.height || tx < 0 || tx >= world.width) ? '#' : world.tiles[ty][tx];
+            if (ch !== '#') continue;
+            const sx = tx * TILE, sy = ty * TILE;
+            const ox = Math.min(player.x + player.w, sx + TILE) - Math.max(player.x, sx);
+            const oy = Math.min(player.y + player.h, sy + TILE) - Math.max(player.y, sy);
+            if (ox <= 0 || oy <= 0) continue;
+            if (ox < oy) {
+              if (player.x + player.w / 2 < sx + TILE / 2) player.x -= ox; else player.x += ox;
+            } else {
+              if (player.y + player.h / 2 < sy + TILE / 2) player.y -= oy; else player.y += oy;
+            }
+          }
+        }
+      }
+
+      // 关卡各方面自检：按元素可达性、出生点支撑、平台是否嵌墙
+      function validateLevel() {
+        const world = state.world;
+        if (!world) return;
+        const W = world.width, H = world.height, tiles = world.tiles;
+        const walk = (ch, kind) => {
+          if (ch === '#' || ch === 'x') return false;
+          if (kind === 'fire') return ch !== '~';
+          return ch !== '^';
+        };
+        const bridge = Array.from({ length: H }, () => Array(W).fill(false));
+        for (const p of world.platforms) {
+          const s = p.axis === 'x'
+            ? { x: p.min, y: p.y, w: p.max + p.w - p.min, h: p.h }
+            : { x: p.x, y: p.min, w: p.w, h: p.max + p.h - p.min };
+          const x0 = Math.floor(s.x / TILE), x1 = Math.floor((s.x + s.w - 1) / TILE);
+          const y0 = Math.floor(s.y / TILE), y1 = Math.floor((s.y + s.h - 1) / TILE);
+          for (let ty = y0; ty <= y1; ty++)
+            for (let tx = x0; tx <= x1; tx++)
+              if (ty >= 0 && ty < H && tx >= 0 && tx < W) bridge[ty][tx] = true;
+        }
+        const bfs = (sx, sy, kind) => {
+          const seen = Array.from({ length: H }, () => Array(W).fill(false));
+          if (sx < 0 || sy < 0 || sx >= W || sy >= H) return seen;
+          const q = [{ x: sx, y: sy }];
+          seen[sy][sx] = true;
+          while (q.length) {
+            const c = q.shift();
+            for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+              const nx = c.x + dx, ny = c.y + dy;
+              if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue;
+              if (seen[ny][nx]) continue;
+              const ch = tiles[ny][nx];
+              if (!walk(ch, kind) && !bridge[ny][nx]) continue;
+              seen[ny][nx] = true;
+              q.push({ x: nx, y: ny });
+            }
+          }
+          return seen;
+        };
+        const ftx = Math.floor(fire.spawnX / TILE), fty = Math.floor(fire.spawnY / TILE);
+        const wtx = Math.floor(water.spawnX / TILE), wty = Math.floor(water.spawnY / TILE);
+        const fr = bfs(ftx, fty, 'fire'), wr = bfs(wtx, wty, 'water');
+        const problems = [];
+        // 出生点：向下整列有墙或平台桥即可（游戏有重力，允许落下站稳；仅当整列无落点才是真·悬空）
+        const support = (tx, ty) => {
+          if (bridge[ty][tx]) return true;
+          for (let d = 1; ty + d < H; d++) {
+            if (tiles[ty + d][tx] === '#') return true;
+          }
+          return false;
+        };
+        if (!support(ftx, fty)) problems.push('火人出生点悬空(下方无落点)');
+        if (!support(wtx, wty)) problems.push('水妹出生点悬空(下方无落点)');
+        world.crystals.forEach((c, i) => {
+          const kind = i % 2 === 0 ? 'fire' : 'water';
+          const reach = kind === 'fire' ? fr : wr;
+          const tx = Math.floor(c.x / TILE), ty = Math.floor(c.y / TILE);
+          if (!reach[ty][tx]) problems.push(`晶体#${i}(${kind})不可达`);
+        });
+        if (!fr[world.exits.fire.y][world.exits.fire.x]) problems.push('火人出口不可达');
+        if (!wr[world.exits.water.y][world.exits.water.x]) problems.push('水妹出口不可达');
+        world.platforms.forEach((p, i) => { if (platformHitsWall(p)) problems.push(`平台#${i}起点嵌在墙里`); });
+        if (problems.length) {
+          console.warn(`[关卡自检] ${world.title} 发现 ${problems.length} 项问题:`, problems);
+        } else {
+          console.log(`[关卡自检] ${world.title} 通过：可达性/出生点/平台均正常`);
+        }
+      }
+
+      function updatePlatforms(dt) {
+        for (const platform of state.world.platforms) {
+          platform.prevX = platform.x;
+          platform.prevY = platform.y;
+
+          const targetX = platform.axis === 'x'
+            ? platform.x + platform.speed * platform.dir * dt
+            : platform.x;
+          const targetY = platform.axis === 'y'
+            ? platform.y + platform.speed * platform.dir * dt
+            : platform.y;
+
+          // 关键：平台撞墙就停在该侧并反向，绝不穿过墙体（不允许穿模）
+          const wouldHit = platform.axis === 'x'
+            ? platformHitsWall({ ...platform, x: targetX })
+            : platformHitsWall({ ...platform, y: targetY });
+
+          if (wouldHit) {
+            platform.dir *= -1; // 撞墙反向，保持当前已在墙外的位置
+          } else {
+            platform.x = targetX;
+            platform.y = targetY;
+          }
+
+          // 同时遵守设计行程范围
+          if (platform.axis === 'x') {
+            if (platform.x < platform.min) { platform.x = platform.min; platform.dir = 1; }
+            else if (platform.x > platform.max) { platform.x = platform.max; platform.dir = -1; }
+          } else {
+            if (platform.y < platform.min) { platform.y = platform.min; platform.dir = 1; }
+            else if (platform.y > platform.max) { platform.y = platform.max; platform.dir = -1; }
+          }
+
+          platform.dx = platform.x - platform.prevX;
+          platform.dy = platform.y - platform.prevY;
+        }
+      }
+
+      function carryRiders() {
+        for (let i = 0; i < state.world.platforms.length; i++) {
+          const platform = state.world.platforms[i];
+          if (!platform.dx && !platform.dy) continue;
+          for (const player of players) {
+            if (!player.alive || player.escaped) continue;
+            if (player.riding === i) {
+              player.x += platform.dx;
+              player.y += platform.dy;
+              // 平台把角色顶到墙里时，沿最小穿透轴推回墙外，避免卡模
+              pushOutOfWalls(player);
+            }
+          }
+        }
+      }
+
+      function updateSwitches() {
+        // 闩锁式：任一角色踩过踏板后，对应门永久开启（buildLevel/死亡重来时会重置为关）
+        const switches = state.world.switches || { a: false, b: false };
+        for (const player of players) {
+          if (!player.alive || player.escaped) continue;
+          const rect = playerRect(player);
+          for (const plate of state.world.plateRects.a) {
+            if (rectOverlap(rect, plate)) switches.a = true;
+          }
+          for (const plate of state.world.plateRects.b) {
+            if (rectOverlap(rect, plate)) switches.b = true;
+          }
+        }
+        for (const box of (state.world.boxes || [])) {
+          const rect = { x: box.x, y: box.y, w: box.w, h: box.h };
+          for (const plate of state.world.plateRects.a) {
+            if (rectOverlap(rect, plate)) switches.a = true;
+          }
+          for (const plate of state.world.plateRects.b) {
+            if (rectOverlap(rect, plate)) switches.b = true;
+          }
+        }
+        state.world.switches = switches;
+      }
+
+
+      // ===== 新增机关：推箱子 / 冰面 / 风扇气流 =====
+      function boxHitsWorld(box, nx, ny, ignoreIdx) {
+        const world = state.world;
+        const rect = { x: nx, y: ny, w: box.w, h: box.h };
+        const tx0 = Math.floor(rect.x / TILE), tx1 = Math.floor((rect.x + rect.w - 1) / TILE);
+        const ty0 = Math.floor(rect.y / TILE), ty1 = Math.floor((rect.y + rect.h - 1) / TILE);
+        for (let ty = ty0; ty <= ty1; ty++) {
+          for (let tx = tx0; tx <= tx1; tx++) {
+            if (isSolidTile(tileAt(world, tx, ty), world.switches)) return true;
+          }
+        }
+        for (const p of world.platforms) {
+          if (rectOverlap(rect, { x: p.x, y: p.y, w: p.w, h: p.h })) return true;
+        }
+        for (let j = 0; j < world.boxes.length; j++) {
+          if (j === ignoreIdx) continue;
+          const o = world.boxes[j];
+          if (rectOverlap(rect, { x: o.x, y: o.y, w: o.w, h: o.h })) return true;
+        }
+        return false;
+      }
+
+      function moveBoxAxis(box, idx, dx, dy) {
+        let blocked = false;
+        if (dx !== 0) {
+          const steps = Math.max(1, Math.ceil(Math.abs(dx) / 4));
+          const sgn = Math.sign(dx);
+          for (let s = 0; s < steps; s++) {
+            const step = sgn * Math.min(4, Math.abs(dx) - s * 4);
+            if (boxHitsWorld(box, box.x + step, box.y, idx)) { blocked = true; break; }
+            box.x += step;
+          }
+        }
+        if (dy !== 0) {
+          const steps = Math.max(1, Math.ceil(Math.abs(dy) / 4));
+          const sgn = Math.sign(dy);
+          for (let s = 0; s < steps; s++) {
+            const step = sgn * Math.min(4, Math.abs(dy) - s * 4);
+            if (boxHitsWorld(box, box.x, box.y + step, idx)) { blocked = true; break; }
+            box.y += step;
+          }
+        }
+        return blocked;
+      }
+
+      function updateBoxes(dt) {
+        const world = state.world;
+        if (!world || !world.boxes || !world.boxes.length) return;
+        for (let i = 0; i < world.boxes.length; i++) {
+          const box = world.boxes[i];
+          box.vy = Math.min(box.vy + GRAVITY * getDiffMult().gravityMult * dt, MAX_FALL);
+          const blocked = moveBoxAxis(box, i, 0, box.vy * dt);
+          if (blocked) {
+            if (box.vy > 0) box.onGround = true;
+            box.vy = 0;
+          } else {
+            box.onGround = false;
+          }
+        }
+      }
+
+      function carryBoxRiders() {
+        const world = state.world;
+        if (!world || !world.boxes || !world.boxes.length) return;
+        world.boxes.forEach((box, idx) => {
+          box.dx = box.x - (box._px == null ? box.x : box._px);
+          box.dy = box.y - (box._py == null ? box.y : box._py);
+          box._px = box.x; box._py = box.y;
+          if (!box.dx && !box.dy) return;
+          for (const player of players) {
+            if (!player.alive || player.escaped) continue;
+            if (player.riding === 1000 + idx) {
+              player.x += box.dx;
+              player.y += box.dy;
+              pushOutOfWalls(player);
+            }
+          }
+        });
+      }
+
+      function isOnIce(player) {
+        const world = state.world;
+        const fy = Math.floor((player.y + player.h + 2) / TILE);
+        const fx0 = Math.floor(player.x / TILE), fx1 = Math.floor((player.x + player.w - 1) / TILE);
+        for (let fx = fx0; fx <= fx1; fx++) {
+          if (tileAt(world, fx, fy) === '_') return true;
+        }
+        return false;
+      }
+
+      function onUpdraft(player) {
+        const world = state.world;
+        const tx0 = Math.floor(player.x / TILE), tx1 = Math.floor((player.x + player.w - 1) / TILE);
+        const ty0 = Math.floor(player.y / TILE), ty1 = Math.floor((player.y + player.h - 1) / TILE);
+        for (let ty = ty0; ty <= ty1; ty++) {
+          for (let tx = tx0; tx <= tx1; tx++) {
+            if (tileAt(world, tx, ty) === 'v') return true;
+          }
+        }
+        return false;
+      }
+
+      function tryPushBoxes(player, dt) {
+        const world = state.world;
+        if (!world || !world.boxes || !world.boxes.length) return;
+        if (!player.onGround) return;
+        const dir = inputDown(player, 'right') ? 1 : inputDown(player, 'left') ? -1 : 0;
+        if (!dir) return;
+        const move = Math.max(60, Math.abs(player.vx)) * dt;
+        for (let i = 0; i < world.boxes.length; i++) {
+          const box = world.boxes[i];
+          const vOverlap = player.y < box.y + box.h - 2 && player.y + player.h > box.y + 2;
+          if (!vOverlap) continue;
+          if (dir > 0 && Math.abs((player.x + player.w) - box.x) <= 5) {
+            if (!boxHitsWorld(box, box.x + move, box.y, i)) {
+              box.x += move; player.x = box.x - player.w; player.vx *= 0.4;
+            }
+            return;
+          }
+          if (dir < 0 && Math.abs(player.x - (box.x + box.w)) <= 5) {
+            if (!boxHitsWorld(box, box.x - move, box.y, i)) {
+              box.x -= move; player.x = box.x + box.w; player.vx *= 0.4;
+            }
+            return;
+          }
+        }
+      }
+
+      function canPlacePlayer(player, x, y) {
+        const box = { x, y, w: player.w, h: player.h };
+        return !gatherSolids(state.world, state.world.switches).some((solid) => rectOverlap(box, solid));
+      }
+
+      function separatePlayersHorizontally(left, right, overlap) {
+        const half = overlap / 2 + 0.01;
+        const leftTarget = left.x - half;
+        const rightTarget = right.x + half;
+        const canMoveLeft = canPlacePlayer(left, leftTarget, left.y);
+        const canMoveRight = canPlacePlayer(right, rightTarget, right.y);
+
+        if (canMoveLeft && canMoveRight) {
+          left.x = leftTarget;
+          right.x = rightTarget;
+        } else if (canMoveLeft && canPlacePlayer(left, left.x - overlap - 0.01, left.y)) {
+          left.x -= overlap + 0.01;
+        } else if (canMoveRight && canPlacePlayer(right, right.x + overlap + 0.01, right.y)) {
+          right.x += overlap + 0.01;
+        }
+
+        // Sharing velocity lets a moving character push a stationary one while
+        // opposing inputs still behave like two solid bodies.
+        const sharedVelocity = (left.vx + right.vx) * 0.5;
+        left.vx = sharedVelocity;
+        right.vx = sharedVelocity;
+        left.standingOn = null;
+        right.standingOn = null;
+      }
+
+      function placeOnPlayer(rider, support) {
+        rider.y = support.y - rider.h;
+        rider.vy = Math.min(rider.vy, support.vy, 0);
+        rider.onGround = true;
+        rider.standingOn = support.kind;
+        rider.coyoteTimer = COYOTE_TIME;
+      }
+
+      function resolvePlayerCollisions() {
+        const a = fire;
+        const b = water;
+        if (!a.alive || a.escaped || !b.alive || b.escaped) return;
+
+        const aRect = playerRect(a);
+        const bRect = playerRect(b);
+        if (rectOverlap(aRect, bRect)) {
+          const overlapX = Math.min(aRect.x + aRect.w, bRect.x + bRect.w) - Math.max(aRect.x, bRect.x);
+          const overlapY = Math.min(aRect.y + aRect.h, bRect.y + bRect.h) - Math.max(aRect.y, bRect.y);
+
+          if (overlapY <= overlapX) {
+            const upper = a.y + a.h / 2 < b.y + b.h / 2 ? a : b;
+            const lower = upper === a ? b : a;
+            const landedFromAbove = upper.prevY + upper.h <= lower.prevY + 3 && upper.vy >= lower.vy;
+            if (landedFromAbove) {
+              placeOnPlayer(upper, lower);
+            } else {
+              lower.y = upper.y + upper.h;
+              lower.vy = Math.max(0, upper.vy);
+              lower.onGround = false;
+              lower.standingOn = null;
+            }
+          } else if (a.x + a.w / 2 < b.x + b.w / 2) {
+            separatePlayersHorizontally(a, b, overlapX);
+          } else {
+            separatePlayersHorizontally(b, a, overlapX);
+          }
+        }
+
+        // Exact edge contact has no overlap, so explicitly retain head support.
+        for (const rider of players) {
+          const support = rider === a ? b : a;
+          const horizontalOverlap = rider.x < support.x + support.w && rider.x + rider.w > support.x;
+          const footGap = support.y - (rider.y + rider.h);
+          if (horizontalOverlap && footGap >= -0.05 && footGap <= 2.5 && rider.vy >= support.vy) {
+            placeOnPlayer(rider, support);
+          } else if (rider.standingOn === support.kind) {
+            rider.standingOn = null;
+          }
+        }
+      }
+
+      function movePlayer(player, dt) {
+        if (!player.alive || player.escaped) return;
+
+        const left = inputDown(player, 'left');
+        const right = inputDown(player, 'right');
+        const jump = inputDown(player, 'jump');
+        const jumpPressed = jump && !player.jumpHeld;
+
+        player.jumpHeld = jump;
+        if (jumpPressed) {
+          player.jumpBuffer = JUMP_BUFFER_TIME;
+        } else {
+          player.jumpBuffer = Math.max(0, player.jumpBuffer - dt);
+        }
+
+        if (player.onGround) {
+          player.coyoteTimer = COYOTE_TIME;
+        } else {
+          player.coyoteTimer = Math.max(0, player.coyoteTimer - dt);
+        }
+
+        if (left && !right) {
+          player.vx = Math.max(player.vx - MOVE_ACCEL * dt, -MOVE_TOP);
+          player.face = -1;
+        } else if (right && !left) {
+          player.vx = Math.min(player.vx + MOVE_ACCEL * dt, MOVE_TOP);
+          player.face = 1;
+        } else {
+          const fric = isOnIce(player) ? 0.985 : FRICTION;
+          player.vx *= Math.pow(fric, dt * 60);
+          if (Math.abs(player.vx) < 8) player.vx = 0;
+        }
+
+        tryStartJump(player);
+
+        player.vy = Math.min(player.vy + GRAVITY * getDiffMult().gravityMult * dt, MAX_FALL);
+        if (onUpdraft(player)) {
+          player.vy -= FAN_FORCE * dt;
+          if (player.vy < -FAN_MAX) player.vy = -FAN_MAX;
+        }
+
+        const world = state.world;
+        const switches = world.switches;
+        const solids = gatherSolids(world, switches);
+
+        player.onGround = false;
+        player.standingOn = null;
+        let nextX = player.x + player.vx * dt;
+        let nextY = player.y;
+
+        let box = { x: nextX, y: nextY, w: player.w, h: player.h };
+        for (const solid of solids) {
+          if (!rectOverlap(box, solid)) continue;
+          if (player.vx > 0) {
+            nextX = solid.x - player.w;
+          } else if (player.vx < 0) {
+            nextX = solid.x + solid.w;
+          } else {
+            // 零速度（多为被平台推动）时按最小水平穿透推出，避免嵌墙
+            const penL = (player.x + player.w) - solid.x;
+            const penR = (solid.x + solid.w) - player.x;
+            nextX = penL < penR ? solid.x - player.w : solid.x + solid.w;
+          }
+          player.vx = 0;
+          box.x = nextX;
+        }
+        player.x = nextX;
+
+        const wasFalling = player.vy > 0;
+        nextY = player.y + player.vy * dt;
+        box = { x: player.x, y: nextY, w: player.w, h: player.h };
+        player.riding = -1;
+        for (const solid of solids) {
+          if (!rectOverlap(box, solid)) continue;
+          if (player.vy > 0) {
+            nextY = solid.y - player.h;
+            player.onGround = true;
+            if (solid.kind === 'platform') player.riding = solid.index;
+            else if (solid.kind === 'box') player.riding = 1000 + solid.index;
+          } else {
+            // vy<=0（含零速度被顶）按最小垂直穿透推出
+            const penU = (player.y + player.h) - solid.y;
+            const penD = (solid.y + solid.h) - player.y;
+            nextY = penU < penD ? solid.y - player.h : solid.y + solid.h;
+          }
+          player.vy = 0;
+          box.y = nextY;
+        }
+        player.y = nextY;
+
+        tryPushBoxes(player, dt);
+
+        if (player.onGround) {
+          // 借力平台（弹簧板 *）：下落着地且脚下是弹簧板则向上弹射
+          const footY = Math.floor((player.y + player.h + 1) / TILE);
+          const fx0 = Math.floor(player.x / TILE);
+          const fx1 = Math.floor((player.x + player.w - 1) / TILE);
+          let onSpring = false;
+          for (let fx = fx0; fx <= fx1; fx++) {
+            if (tileAt(world, fx, footY) === '*') { onSpring = true; break; }
+          }
+          if (onSpring && wasFalling) {
+            player.vy = -SPRING_SPEED;
+            player.onGround = false;
+            player.coyoteTimer = 0;
+            playJump();
+          } else {
+            player.coyoteTimer = COYOTE_TIME;
+            if (tryStartJump(player)) playJump();
+          }
+        }
+
+        resolveHazards(player);
+        pickCrystals(player);
+
+        if (player.y > world.height * TILE + 240) {
+          failLevel('掉出地图了，重来一次');
+        }
+      }
+
+      function resolveHazards(player) {
+        const world = state.world;
+        const minTX = Math.floor(player.x / TILE);
+        const maxTX = Math.floor((player.x + player.w - 1) / TILE);
+        const minTY = Math.floor(player.y / TILE);
+        const maxTY = Math.floor((player.y + player.h - 1) / TILE);
+
+        for (let ty = minTY; ty <= maxTY; ty++) {
+          for (let tx = minTX; tx <= maxTX; tx++) {
+            const ch = tileAt(world, tx, ty);
+            if (!isHazard(ch)) continue;
+            const tileBox = { x: tx * TILE, y: ty * TILE, w: TILE, h: TILE };
+            if (!rectOverlap(playerRect(player), tileBox)) continue;
+            if (ch === 'x') {
+              failLevel('尖刺扎到了，重来一次');
+              return;
+            }
+            if (player.kind === 'fire' && ch === '~') {
+              failLevel('火人碰到水了，重来一次');
+              return;
+            }
+            if (player.kind === 'water' && ch === '^') {
+              failLevel('水妹碰到火焰了，重来一次');
+              return;
+            }
+          }
+        }
+      }
+
+      function pickCrystals(player) {
+        for (const crystal of state.world.crystals) {
+          if (crystal.taken || crystal.kind !== player.kind) continue;
+          const cRect = { x: crystal.x - 12, y: crystal.y - 12, w: 24, h: 24 };
+          if (rectOverlap(playerRect(player), cRect)) {
+            crystal.taken = true;
+            playCollect();
+            state.collected += 1;
+            crystalText.textContent = `${state.collected}/${state.totalCrystals}`;
+            state.message = player.kind === 'fire' ? '\u706b\u5b9d\u77f3 +1' : '\u51b0\u5b9d\u77f3 +1';
+            state.messageTimer = 0.5;
+          }
+        }
+      }
+
+      function resolveTeamExit(dt) {
+        if (state.collected < state.totalCrystals) {
+          fire.exitHold = 0;
+          water.exitHold = 0;
+          return;
+        }
+
+        const atExit = {};
+        for (const player of players) {
+          const exit = state.world.exits[player.kind];
+          const box = {
+            x: exit.x * TILE + 6,
+            y: exit.y * TILE + 4,
+            w: TILE - 12,
+            h: TILE - 8,
+          };
+          atExit[player.kind] = rectOverlap(playerRect(player), box);
+        }
+
+        if (!atExit.fire || !atExit.water) {
+          fire.exitHold = 0;
+          water.exitHold = 0;
+          if (atExit.fire || atExit.water) {
+            state.message = '\u7b49\u5f85\u961f\u53cb\u5230\u8fbe\u53e6\u4e00\u6247\u95e8';
+            state.messageTimer = 0.2;
+          }
+          return;
+        }
+
+        fire.exitHold += dt;
+        water.exitHold += dt;
+        if (Math.min(fire.exitHold, water.exitHold) < 0.45) return;
+
+        for (const player of players) {
+          const exit = state.world.exits[player.kind];
+          player.exitHold = 0;
+          player.escaped = true;
+          player.vx = 0;
+          player.vy = 0;
+          player.x = exit.x * TILE + 12;
+          player.y = exit.y * TILE + 10;
+        }
+        completeLevel();
+      }
+
+      function failLevel(text) {
+        if (state.transitionTimer > 0 || state.playerWon) return;
+        state.message = text;
+        state.messageTimer = 1.0;
+        state.transitionTimer = 0.85;
+        state.playerWon = false;
+        playDeath();
+      }
+
+      function completeLevel() {
+        state.message = '过关！准备进入下一关';
+        state.messageTimer = 1.0;
+        state.transitionTimer = 1.0;
+        state.playerWon = true;
+        playWin();
+      }
+
+      function resetPlayers() {
+        const world = state.world;
+        fire.x = fire.spawnX;
+        fire.y = fire.spawnY;
+        fire.vx = 0;
+        fire.vy = 0;
+        fire.face = 1;
+        fire.onGround = false;
+        fire.alive = true;
+        fire.escaped = false;
+        fire.exitHold = 0;
+        fire.riding = -1;
+        fire.standingOn = null;
+        fire.coyoteTimer = 0;
+        fire.jumpBuffer = 0;
+        fire.jumpHeld = false;
+
+        water.x = water.spawnX;
+        water.y = water.spawnY;
+        water.vx = 0;
+        water.vy = 0;
+        water.face = 1;
+        water.onGround = false;
+        water.alive = true;
+        water.escaped = false;
+        water.exitHold = 0;
+        water.riding = -1;
+        water.standingOn = null;
+        water.coyoteTimer = 0;
+        water.jumpBuffer = 0;
+        water.jumpHeld = false;
+
+        for (const crystal of world.crystals) {
+          crystal.taken = false;
+        }
+        state.collected = 0;
+        crystalText.textContent = `0/${state.totalCrystals}`;
+      }
+
+      function restartLevel(message = '本关重来') {
+        buildLevel(state.levelIndex);
+        state.message = message;
+        state.messageTimer = 1.0;
+      }
+
+      function advanceLevel() {
+        const next = state.levelIndex + 1;
+        if (next >= levelDefs.length) {
+          state.started = false;
+          overlay.style.display = 'grid';
+          menuTitle.textContent = '🎉 全部通关！';
+          menuSubtitle.textContent = '恭喜你完成了所有关卡！选择难度挑战更高难度，或重新体验。';
+          startBtn.textContent = '🔄 重新开始（当前难度）';
+          
+          // 在通关界面注入难度选择区
+          let diffArea = document.getElementById('victoryDiffSelect');
+          if (!diffArea) {
+            diffArea = document.createElement('div');
+            diffArea.id = 'victoryDiffSelect';
+            diffArea.style.cssText = 'display:grid;gap:8px;margin:14px 0 6px;';
+            diffArea.innerHTML = `
+              <div style="font-size:13px;color:var(--muted);margin-bottom:2px;">🎯 选择难度重新挑战</div>
+              <div id="victoryDiffBtns" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
+            `;
+            // 插入到 actions 前面
+            const actionsEl = overlay.querySelector('.actions');
+            if (actionsEl) actionsEl.parentNode.insertBefore(diffArea, actionsEl);
+            
+            // 渲染难度按钮
+            const btnContainer = document.getElementById('victoryDiffBtns');
+            Object.entries(DIFFICULTIES).forEach(([key, d]) => {
+            const btn = document.createElement('button');
+              btn.className = key === currentDifficulty ? 'primary' : 'ghost';
+              btn.innerHTML = `<b>${d.label}</b><span style="font-size:11px;opacity:0.8">${d.desc}</span>`;
+              btn.style.cssText = 'display:inline-grid;gap:2px;text-align:left;padding:10px 14px;';
+              btn.onclick = () => {
+                setDifficulty(key);
+                // 更新按钮状态
+                btnContainer.querySelectorAll('button').forEach(b => { b.className = 'ghost'; });
+                btn.className = 'primary';
+                startBtn.textContent = `🔄 ${d.name}难度重新开始`;
+                state.message = `已切换到${d.name}模式，准备就绪！`;
+                state.messageTimer = 1.5;
+              };
+              btnContainer.appendChild(btn);
+            });
+          }
+          
+          state.message = '你已经通关全部关卡！选择难度再战一轮。';
+          state.messageTimer = 0;
+          return;
+        }
+        state.levelIndex = next;
+        saveLevelProgress(next);
+        buildLevel(next);
+      }
+
+      function updateCamera(dt) {
+        if (!state.world) return;
+
+        const viewW = window.innerWidth;
+        const viewH = window.innerHeight;
+        const points = [];
+        for (const player of players) {
+          points.push(player.x + player.w / 2, player.y + player.h / 2);
+        }
+        const minX = Math.min(points[0], points[2]);
+        const minY = Math.min(points[1], points[3]);
+        const maxX = Math.max(points[0], points[2]);
+        const maxY = Math.max(points[1], points[3]);
+        const worldW = state.world.width * TILE;
+        const worldH = state.world.height * TILE;
+        const padX = 320;
+        const padY = 220;
+
+        const spanW = Math.max(7 * TILE, maxX - minX + padX);
+        const spanH = Math.max(6 * TILE, maxY - minY + padY);
+        const fitScale = Math.min(viewW / spanW, viewH / spanH);
+        const levelFit = Math.min(viewW / (worldW + 120), viewH / (worldH + 120));
+        const desiredScale = clamp(Math.min(fitScale, levelFit, 1.35), 0.72, 1.35);
+
+        const desiredX = (minX + maxX) / 2;
+        const desiredY = (minY + maxY) / 2;
+
+        state.camera.x += (desiredX - state.camera.x) * Math.min(1, dt * 8);
+        state.camera.y += (desiredY - state.camera.y) * Math.min(1, dt * 8);
+        state.camera.scale += (desiredScale - state.camera.scale) * Math.min(1, dt * 7);
+      }
+
+      function update(dt) {
+        if (!state.started || !state.world) return;
+
+        if (state.messageTimer > 0) {
+          state.messageTimer = Math.max(0, state.messageTimer - dt);
+        }
+
+        if (state.transitionTimer > 0) {
+          state.transitionTimer -= dt;
+          if (state.transitionTimer <= 0) {
+            if (state.playerWon) {
+              state.playerWon = false;
+              advanceLevel();
+            } else {
+              restartLevel(state.message);
+            }
+          }
+          return;
+        }
+
+        updatePlatforms(dt);
+        carryRiders();
+        if (state.world) updateBoxes(dt);
+        updateSwitches();
+        if (state.world) updateGateAnim(dt);
+        for (const player of players) {
+          player.prevX = player.x;
+          player.prevY = player.y;
+          if (!player.standingOn) continue;
+          const support = players.find((candidate) => candidate.kind === player.standingOn);
+          if (support && support.alive && !support.escaped) {
+            player.x += support.vx * dt;
+          }
+        }
+        for (const player of players) {
+          movePlayer(player, dt);
+        }
+        if (state.world) carryBoxRiders();
+        resolvePlayerCollisions();
+        resolveTeamExit(dt);
+        updateSwitches();
+        if (state.world) updateGateAnim(dt);
+        updateCamera(dt);
+      }
+
+      function drawBackground(time) {
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+        const sky = ctx.createLinearGradient(0, 0, 0, h);
+        sky.addColorStop(0, '#173826');
+        sky.addColorStop(0.58, '#0d1d14');
+        sky.addColorStop(1, '#07110b');
+        ctx.fillStyle = sky;
+        ctx.fillRect(0, 0, w, h);
+
+        ctx.save();
+        ctx.globalAlpha = 0.18;
+        for (let i = 0; i < 16; i++) {
+          const px = (i * 168 - (state.camera.x * 0.12) % 168) - 60;
+          const py = h - 36 - (i % 3) * 16;
+          drawPine(px, py, 60 + (i % 4) * 10, 120 + (i % 3) * 14, '#1f4a30');
+        }
+        ctx.restore();
+
+        ctx.save();
+        ctx.globalAlpha = 0.08;
+        for (let i = 0; i < 28; i++) {
+          const x = (i * 240 + time * 0.015) % (w + 360) - 180;
+          const y = 28 + (i % 5) * 24;
+          drawCloud(x, y, 120 + (i % 3) * 16, 36 + (i % 2) * 8);
+        }
+        ctx.restore();
+      }
+
+      function drawCloud(x, y, w, h) {
+        ctx.fillStyle = '#c8decf';
+        ctx.beginPath();
+        ctx.ellipse(x, y, w * 0.24, h * 0.4, 0, 0, Math.PI * 2);
+        ctx.ellipse(x + w * 0.24, y - h * 0.12, w * 0.31, h * 0.48, 0, 0, Math.PI * 2);
+        ctx.ellipse(x + w * 0.5, y, w * 0.28, h * 0.42, 0, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      function drawPine(x, y, w, h, color) {
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x + w * 0.5, y - h);
+        ctx.lineTo(x + w, y);
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillRect(x + w * 0.42, y, w * 0.16, h * 0.34);
+      }
+
+      function drawWorld(time) {
+        const world = state.world;
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+
+        ctx.save();
+        ctx.translate(w / 2, h / 2);
+        ctx.scale(state.camera.scale, state.camera.scale);
+        ctx.translate(-state.camera.x, -state.camera.y);
+
+        drawFarForest(world, time);
+
+        for (let y = 0; y < world.height; y++) {
+          for (let x = 0; x < world.width; x++) {
+            const ch = world.tiles[y][x];
+            const px = x * TILE;
+            const py = y * TILE;
+            if (ch === '#') {
+              const above = y > 0 ? world.tiles[y - 1][x] : '#';
+              const topInset = !isSolidTile(above, world.switches) ? STEP_TOP_INSET : 0;
+              drawBlock(px, py, '#22382a', '#385b40', topInset);
+            } else if (ch === 'a') {
+              drawGate(px, py, '#8d6b43', '#d0b17f', !world.switches.a, 'A');
+            } else if (ch === 'b') {
+              drawGate(px, py, '#4c6d87', '#a8d8ff', !world.switches.b, 'B');
+            } else if (ch === 'F') {
+              drawExit(px, py, '#ff6b4a', '#ffc9b6');
+            } else if (ch === 'W') {
+              drawExit(px, py, '#5baaff', '#d0ebff');
+            } else if (ch === '~' || ch === '^') {
+              if (x > 0 && world.tiles[y][x - 1] === ch) continue;
+              let run = 1;
+              while (x + run < world.width && world.tiles[y][x + run] === ch) run += 1;
+              if (ch === '~') drawWaterPit(px, py, run * TILE, time);
+              else drawFirePit(px, py, run * TILE, time);
+            } else if (ch === 'x') {
+              drawSpikes(px, py);
+            } else if (ch === '*') {
+              drawSpring(px, py, time);
+            } else if (ch === '_') {
+              drawIce(px, py);
+            } else if (ch === 'v') {
+              drawFan(px, py, time);
+            } else if (ch === '.') {
+              if (y > 0 && world.tiles[y - 1][x] === '#') {
+                drawMoss(px, py);
+              }
+            }
+          }
+        }
+
+        for (const plate of world.plateRects.a) drawPressurePlate(plate.x, plate.y, true, world.switches.a);
+        for (const plate of world.plateRects.b) drawPressurePlate(plate.x, plate.y, false, world.switches.b);
+
+        for (const platform of world.platforms) {
+          drawPlatform(platform.x, platform.y, platform.w, platform.h);
+        }
+
+        for (const box of (world.boxes || [])) {
+          drawCrate(box.x, box.y, box.w, box.h);
+        }
+
+        for (const crystal of world.crystals) {
+          if (crystal.taken) continue;
+          crystal.pulse += 0.05;
+          drawCrystal(crystal.x, crystal.y, 12 + Math.sin(crystal.pulse) * 2.5, crystal.kind);
+        }
+
+        drawCharacter(fire, time);
+        drawCharacter(water, time);
+
+        ctx.restore();
+      }
+
+      function drawFarForest(world, time) {
+        ctx.save();
+        ctx.globalAlpha = 0.1;
+        for (let i = 0; i < 24; i++) {
+          const x = i * 220 - (state.camera.x * 0.18) % 220 - 120;
+          const y = world.height * TILE - 24;
+          drawPine(x, y, 80, 170, '#184329');
+        }
+        ctx.restore();
+      }
+
+      function drawBlock(x, y, base, top, topInset = 0) {
+        y += topInset;
+        const height = TILE - topInset;
+        const grad = ctx.createLinearGradient(x, y, x, y + height);
+        grad.addColorStop(0, top);
+        grad.addColorStop(1, base);
+        ctx.fillStyle = grad;
+        roundRect(x, y, TILE, height, 10);
+        ctx.fill();
+        ctx.fillStyle = 'rgba(255,255,255,0.07)';
+        ctx.fillRect(x + 6, y + 6, TILE - 12, 4);
+      }
+
+      // 机关门开关状态追踪（用于动画）
+      let gateAnimState = { a: { opened: false, t: 0 }, b: { opened: false, t: 0 } };
+
+      function drawGate(x, y, base, glow, closed, label) {
+        ctx.save();
+        const key = label === 'A' ? 'a' : 'b';
+        const anim = gateAnimState[key];
+        
+        if (closed) {
+          // 关闭状态：实心门 + 编号 + 锁图标
+          ctx.shadowColor = glow;
+          ctx.shadowBlur = 12;
+          ctx.fillStyle = base;
+          roundRect(x + 3, y + 2, TILE - 6, TILE - 4, 10);
+          ctx.fill();
+          ctx.shadowBlur = 0;
+          
+          // 内框
+          ctx.strokeStyle = glow;
+          ctx.lineWidth = 2;
+          roundRect(x + 9, y + 7, TILE - 18, TILE - 14, 6);
+          ctx.stroke();
+          
+          // 编号标签（A/B）
+          ctx.fillStyle = glow;
+          ctx.font = 'bold 15px Microsoft YaHei, sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(label, x + TILE / 2, y + TILE / 2 - 4);
+          
+          // 小锁图标
+          ctx.font = '11px sans-serif';
+          ctx.fillText('🔒', x + TILE / 2, y + TILE / 2 + 12);
+        } else {
+          // 开门动画：从 solid 渐变到透明轮廓
+          anim.opened = true;
+          const elapsed = Math.min(1, (anim.t || 0));
+          const alpha = 0.5 * (1 - elapsed * 0.6);
+          const scale = 1 + elapsed * 0.15;
+          const cx = x + TILE / 2, cy = y + TILE / 2;
+          
+          ctx.translate(cx, cy);
+          ctx.scale(scale, scale);
+          ctx.translate(-cx, -cy);
+          
+          ctx.globalAlpha = alpha;
+          ctx.strokeStyle = glow;
+          ctx.lineWidth = 2;
+          ctx.setLineDash([4, 3]);
+          roundRect(x + 9, y + 7, TILE - 18, TILE - 14, 6);
+          ctx.stroke();
+          ctx.setLineDash([]);
+          
+          // 开门后显示编号(淡)
+          ctx.globalAlpha = alpha * 0.7;
+          ctx.fillStyle = glow;
+          ctx.font = 'bold 13px Microsoft YaHei';
+          ctx.textAlign = 'center';
+          ctx.fillText(label, cx, cy);
+          ctx.globalAlpha = 1;
+        }
+        ctx.restore();
+      }
+
+      function updateGateAnim(dt) {
+        ['a','b'].forEach(k => {
+          const s = state.world?.switches;
+          if (!s) return;
+          const isOpen = k === 'a' ? s.a : s.b;
+          const anim = gateAnimState[k];
+          if (isOpen) {
+            anim.t += dt * 3; // 动画速度
+          } else {
+            anim.opened = false;
+            anim.t = 0;
+          }
+        });
+      }
+
+      function drawExit(x, y, base, glow) {
+        ctx.save();
+        ctx.shadowColor = glow;
+        ctx.shadowBlur = 14;
+        ctx.fillStyle = base;
+        roundRect(x + 5, y + 1, TILE - 10, TILE - 2, 12);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.strokeStyle = glow;
+        ctx.lineWidth = 2;
+        roundRect(x + 10, y + 8, TILE - 20, TILE - 18, 8);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      function drawPitShell(x, y, width) {
+        ctx.fillStyle = '#07100c';
+        roundRect(x + 1, y + 4, width - 2, TILE - 2, 8);
+        ctx.fill();
+
+        const rim = ctx.createLinearGradient(x, y, x, y + 14);
+        rim.addColorStop(0, '#52705a');
+        rim.addColorStop(0.45, '#263d2d');
+        rim.addColorStop(1, '#0b1710');
+        ctx.fillStyle = rim;
+        ctx.beginPath();
+        ctx.moveTo(x, y + 2);
+        ctx.lineTo(x + width, y + 2);
+        ctx.lineTo(x + width - 5, y + 13);
+        ctx.lineTo(x + 5, y + 13);
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      function drawWaterPit(x, y, width, time) {
+        ctx.save();
+        drawPitShell(x, y, width);
+        const surfaceY = y + 11;
+        const water = ctx.createLinearGradient(x, surfaceY, x, y + TILE);
+        water.addColorStop(0, '#74ddff');
+        water.addColorStop(0.18, '#168edc');
+        water.addColorStop(0.62, '#07539e');
+        water.addColorStop(1, '#032a5e');
+        ctx.fillStyle = water;
+        ctx.beginPath();
+        ctx.moveTo(x + 5, y + TILE - 2);
+        ctx.lineTo(x + 5, surfaceY);
+        for (let dx = 5; dx <= width - 5; dx += 8) {
+          const waveY = surfaceY + Math.sin(time * 0.006 + (x + dx) * 0.09) * 2;
+          ctx.lineTo(x + dx, waveY);
+        }
+        ctx.lineTo(x + width - 5, y + TILE - 2);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.strokeStyle = '#bdefff';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        for (let dx = 7; dx <= width - 7; dx += 8) {
+          const waveY = surfaceY + Math.sin(time * 0.006 + (x + dx) * 0.09) * 2;
+          if (dx === 7) ctx.moveTo(x + dx, waveY);
+          else ctx.lineTo(x + dx, waveY);
+        }
+        ctx.stroke();
+
+        ctx.fillStyle = '#9eeaff';
+        for (let i = 0; i < Math.max(2, Math.floor(width / 42)); i++) {
+          const bx = x + 10 + ((i * 37 + time * 0.018) % Math.max(12, width - 20));
+          const by = y + 24 + Math.sin(time * 0.004 + i * 2.1) * 8;
+          ctx.beginPath();
+          ctx.arc(bx, by, 1.3 + (i % 2), 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.restore();
+      }
+
+      function drawFirePit(x, y, width, time) {
+        ctx.save();
+        drawPitShell(x, y, width);
+        const surfaceY = y + 13;
+        const lava = ctx.createLinearGradient(x, surfaceY, x, y + TILE);
+        lava.addColorStop(0, '#fff36a');
+        lava.addColorStop(0.16, '#ffb21c');
+        lava.addColorStop(0.52, '#f13a12');
+        lava.addColorStop(1, '#6f0808');
+        ctx.fillStyle = lava;
+        ctx.shadowColor = '#ff5a16';
+        ctx.shadowBlur = 12;
+        ctx.beginPath();
+        ctx.moveTo(x + 5, y + TILE - 2);
+        ctx.lineTo(x + 5, surfaceY);
+        for (let dx = 5; dx <= width - 5; dx += 7) {
+          const waveY = surfaceY + Math.sin(time * 0.009 + (x + dx) * 0.11) * 2.5;
+          ctx.lineTo(x + dx, waveY);
+        }
+        ctx.lineTo(x + width - 5, y + TILE - 2);
+        ctx.closePath();
+        ctx.fill();
+        ctx.shadowBlur = 0;
+
+        ctx.strokeStyle = '#fff6a5';
+        ctx.lineWidth = 1.7;
+        ctx.beginPath();
+        for (let dx = 7; dx <= width - 7; dx += 7) {
+          const waveY = surfaceY + Math.sin(time * 0.009 + (x + dx) * 0.11) * 2.5;
+          if (dx === 7) ctx.moveTo(x + dx, waveY);
+          else ctx.lineTo(x + dx, waveY);
+        }
+        ctx.stroke();
+
+        const bubbleCount = Math.max(2, Math.floor(width / 36));
+        for (let i = 0; i < bubbleCount; i++) {
+          const bx = x + 10 + ((i * 41 + time * 0.025) % Math.max(12, width - 20));
+          const pulse = (Math.sin(time * 0.008 + i * 2.4) + 1) * 0.5;
+          ctx.fillStyle = pulse > 0.55 ? '#fff48a' : '#ff861c';
+          ctx.beginPath();
+          ctx.arc(bx, y + 27 + i % 2 * 8, 1.8 + pulse * 2.2, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        for (let fx = 14; fx < width - 6; fx += 24) {
+          const flame = 4 + (Math.sin(time * 0.011 + fx) + 1) * 3;
+          ctx.fillStyle = '#ffca28';
+          ctx.beginPath();
+          ctx.moveTo(x + fx - 4, surfaceY + 3);
+          ctx.quadraticCurveTo(x + fx, surfaceY - flame, x + fx + 4, surfaceY + 3);
+          ctx.closePath();
+          ctx.fill();
+        }
+        ctx.restore();
+      }
+
+      function drawSpikes(x, y) {
+        ctx.fillStyle = '#9ebca7';
+        for (let i = 0; i < 4; i++) {
+          ctx.beginPath();
+          ctx.moveTo(x + i * 12, y + TILE);
+          ctx.lineTo(x + i * 12 + 6, y + 12);
+          ctx.lineTo(x + i * 12 + 12, y + TILE);
+          ctx.closePath();
+          ctx.fill();
+        }
+      }
+
+      // 借力平台（弹簧板 *）：踩上去向上弹射
+      function drawSpring(x, y, time) {
+        ctx.save();
+        // 底座
+        ctx.fillStyle = '#1b3a4a';
+        roundRect(x + 5, y + 34, TILE - 10, 12, 4);
+        ctx.fill();
+        // 弹簧线圈
+        ctx.strokeStyle = '#39d6c8';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        const cx = x + TILE / 2;
+        for (let i = 0; i <= 6; i++) {
+          const yy = y + 32 - i * 3.4;
+          const xx = cx + (i % 2 === 0 ? -8 : 8);
+          if (i === 0) ctx.moveTo(xx, yy);
+          else ctx.lineTo(xx, yy);
+        }
+        ctx.stroke();
+        // 顶板 + 向上箭头（呼吸动画提示弹射方向）
+        const bob = Math.sin(time * 0.006) * 1.6;
+        ctx.fillStyle = '#7cffe6';
+        roundRect(x + 7, y + 10 + bob, TILE - 14, 9, 4);
+        ctx.fill();
+        ctx.strokeStyle = '#bafff2';
+        ctx.lineWidth = 2.4;
+        ctx.beginPath();
+        const ay = y + 6 + bob;
+        ctx.moveTo(cx - 7, ay + 5);
+        ctx.lineTo(cx, ay - 3);
+        ctx.lineTo(cx + 7, ay + 5);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      function drawMoss(x, y) {
+        ctx.fillStyle = 'rgba(156, 199, 150, 0.12)';
+        ctx.fillRect(x + 7, y + 2, TILE - 14, 4);
+      }
+
+      function drawPressurePlate(x, y, isFirePlate, active) {
+        ctx.save();
+        // 底座
+        ctx.fillStyle = isFirePlate ? '#b98a52' : '#4b7ba1';
+        roundRect(x + 8, y + 26, TILE - 16, 10, 6);
+        ctx.fill();
+        // 按钮面（踩下时变色+下沉）
+        const btnY = active ? y + 21 : y + 18;
+        const btnH = active ? 9 : 10;
+        ctx.fillStyle = active ? (isFirePlate ? '#ffb15a' : '#7fc7ff') : 'rgba(255,255,255,0.18)';
+        roundRect(x + 14, btnY, TILE - 28, btnH, 5);
+        ctx.fill();
+        // 编号标签（显示 ① 或 ②）
+        ctx.fillStyle = active ? '#fff' : 'rgba(255,255,255,0.4)';
+        ctx.font = 'bold 11px Microsoft YaHei';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        const numLabel = isFirePlate ? '①' : '②';
+        ctx.fillText(numLabel, x + TILE / 2, btnY + btnH / 2);
+        // 发光效果（激活时）
+        if (active) {
+          ctx.shadowColor = isFirePlate ? '#ffb15a' : '#7fc7ff';
+          ctx.shadowBlur = 8;
+          ctx.fillStyle = 'rgba(255,255,255,0.15)';
+          roundRect(x + 12, y + 16, TILE - 24, 14, 5);
+          ctx.fill();
+          ctx.shadowBlur = 0;
+        }
+        ctx.restore();
+      }
+
+      function drawPlatform(x, y, w, h) {
+        ctx.save();
+        const grad = ctx.createLinearGradient(x, y, x, y + h);
+        grad.addColorStop(0, '#b08f62');
+        grad.addColorStop(1, '#6b4c2a');
+        ctx.fillStyle = grad;
+        roundRect(x, y, w, h, 8);
+        ctx.fill();
+        ctx.fillStyle = 'rgba(255,255,255,0.12)';
+        ctx.fillRect(x + 8, y + 4, w - 16, 2);
+        ctx.restore();
+      }
+
+      function drawCrystal(x, y, size, kind) {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(Math.PI / 4);
+        const isFire = kind === 'fire';
+        ctx.shadowColor = isFire ? 'rgba(255, 107, 74, 0.9)' : 'rgba(91, 170, 255, 0.9)';
+        ctx.shadowBlur = 16;
+        const crystalGrad = ctx.createLinearGradient(-size, -size, size, size);
+        crystalGrad.addColorStop(0, isFire ? '#fff08a' : '#e7fbff');
+        crystalGrad.addColorStop(0.45, isFire ? '#ff7048' : '#69d7ff');
+        crystalGrad.addColorStop(1, isFire ? '#c91522' : '#176fd1');
+        ctx.fillStyle = crystalGrad;
+        ctx.beginPath();
+        ctx.moveTo(0, -size);
+        ctx.lineTo(size * 0.55, 0);
+        ctx.lineTo(0, size);
+        ctx.lineTo(-size * 0.55, 0);
+        ctx.closePath();
+        ctx.fill();
+        ctx.strokeStyle = isFire ? '#7d1720' : '#164b91';
+        ctx.lineWidth = 1.4;
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      function drawWaterCharacter(walk, swing) {
+        const outline = '#12334a';
+        const waterGrad = ctx.createLinearGradient(0, 0, 0, 36);
+        waterGrad.addColorStop(0, '#83e9ff');
+        waterGrad.addColorStop(0.5, '#24b8f2');
+        waterGrad.addColorStop(1, '#0877c9');
+        ctx.strokeStyle = outline;
+        ctx.lineWidth = 1.6;
+        ctx.fillStyle = waterGrad;
+
+        ctx.beginPath();
+        ctx.moveTo(-7, 23);
+        ctx.lineTo(-12 - walk * 1.8, 30);
+        ctx.lineTo(-9 - walk * 1.8, 31);
+        ctx.lineTo(-4, 26);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(7, 23);
+        ctx.lineTo(12 + walk * 1.8, 30);
+        ctx.lineTo(9 + walk * 1.8, 31);
+        ctx.lineTo(4, 26);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(-8, 21);
+        ctx.quadraticCurveTo(-7, 28, -6 - swing * 1.5, 37);
+        ctx.lineTo(-1, 37);
+        ctx.lineTo(0, 29);
+        ctx.lineTo(2, 37);
+        ctx.lineTo(7 + swing * 1.5, 37);
+        ctx.quadraticCurveTo(7, 28, 8, 21);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Extra-wide cheeks make the water character rounder than the reference.
+        ctx.beginPath();
+        ctx.ellipse(0, 14, 13.4, 12.2, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(-10, 8);
+        ctx.quadraticCurveTo(-9, 1, -3, 2);
+        ctx.quadraticCurveTo(-2, -3, 4, 0);
+        ctx.quadraticCurveTo(10, 0, 10, 7);
+        ctx.quadraticCurveTo(5, 4, 1, 9);
+        ctx.quadraticCurveTo(-4, 4, -10, 8);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(1, 9);
+        ctx.quadraticCurveTo(-2, 5, -3, 2);
+        ctx.moveTo(1, 9);
+        ctx.quadraticCurveTo(5, 5, 10, 7);
+        ctx.stroke();
+
+        ctx.fillStyle = '#d6fbff';
+        ctx.beginPath();
+        ctx.ellipse(-5, 14, 3.3, 3.8, 0, 0, Math.PI * 2);
+        ctx.ellipse(5, 14, 3.3, 3.8, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = outline;
+        ctx.beginPath();
+        ctx.arc(-4.5, 14.5, 1.35, 0, Math.PI * 2);
+        ctx.arc(5.5, 14.5, 1.35, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.lineWidth = 1.5;
+        ctx.arc(0, 17, 6, 0.18 * Math.PI, 0.82 * Math.PI);
+        ctx.stroke();
+      }
+
+      function drawFireCharacter(walk, swing) {
+        const outline = '#4a1711';
+        const fireGrad = ctx.createLinearGradient(0, 0, 0, 36);
+        fireGrad.addColorStop(0, '#ffb11f');
+        fireGrad.addColorStop(0.32, '#ff4a20');
+        fireGrad.addColorStop(1, '#d90b12');
+        ctx.strokeStyle = outline;
+        ctx.lineWidth = 1.7;
+        ctx.fillStyle = fireGrad;
+
+        ctx.beginPath();
+        ctx.moveTo(-7, 23);
+        ctx.lineTo(-12 - walk * 1.8, 30);
+        ctx.lineTo(-9 - walk * 1.8, 31);
+        ctx.lineTo(-4, 26);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(7, 23);
+        ctx.lineTo(12 + walk * 1.8, 30);
+        ctx.lineTo(9 + walk * 1.8, 31);
+        ctx.lineTo(4, 26);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(-8, 21);
+        ctx.quadraticCurveTo(-7, 29, -6 - swing * 1.5, 37);
+        ctx.lineTo(-1, 37);
+        ctx.lineTo(0, 29);
+        ctx.lineTo(2, 37);
+        ctx.lineTo(7 + swing * 1.5, 37);
+        ctx.quadraticCurveTo(7, 29, 8, 21);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(-11, 17);
+        ctx.quadraticCurveTo(-14, 10, -11, 1);
+        ctx.lineTo(-5, 8);
+        ctx.lineTo(-2, -1);
+        ctx.lineTo(3, 8);
+        ctx.lineTo(7, 1);
+        ctx.lineTo(10, 10);
+        ctx.lineTo(14, 5);
+        ctx.quadraticCurveTo(15, 16, 10, 22);
+        ctx.quadraticCurveTo(4, 27, -4, 24);
+        ctx.quadraticCurveTo(-9, 22, -11, 17);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = '#ffe83e';
+        ctx.beginPath();
+        ctx.ellipse(-5, 15, 3.4, 3.1, 0, 0, Math.PI * 2);
+        ctx.ellipse(5, 15, 3.4, 3.1, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = outline;
+        ctx.beginPath();
+        ctx.arc(-5, 15, 1.15, 0, Math.PI * 2);
+        ctx.arc(5, 15, 1.15, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.lineWidth = 1.5;
+        ctx.arc(0, 17, 6, 0.18 * Math.PI, 0.82 * Math.PI);
+        ctx.stroke();
+      }
+
+
+      function drawIce(x, y) {
+        ctx.save();
+        const grad = ctx.createLinearGradient(x, y, x, y + TILE);
+        grad.addColorStop(0, 'rgba(200,240,255,0.55)');
+        grad.addColorStop(1, 'rgba(150,210,255,0.28)');
+        ctx.fillStyle = grad;
+        roundRect(x + 1, y + 1, TILE - 2, TILE - 2, 8);
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(x + 8, y + 10); ctx.lineTo(x + 20, y + 6);
+        ctx.moveTo(x + 26, y + 16); ctx.lineTo(x + 38, y + 12);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      function drawFan(x, y, time) {
+        ctx.save();
+        const grad = ctx.createLinearGradient(x, y, x, y + TILE);
+        grad.addColorStop(0, 'rgba(150,230,255,0.35)');
+        grad.addColorStop(1, 'rgba(120,200,255,0.08)');
+        ctx.fillStyle = grad;
+        ctx.fillRect(x + 10, y, TILE - 20, TILE);
+        ctx.fillStyle = 'rgba(220,245,255,0.85)';
+        const off = (time * 0.06) % 16;
+        for (let i = 0; i < 2; i++) {
+          const ay = y + TILE - ((off + i * 8) % TILE);
+          ctx.beginPath();
+          ctx.moveTo(x + TILE / 2, ay - 6);
+          ctx.lineTo(x + TILE / 2 - 5, ay + 2);
+          ctx.lineTo(x + TILE / 2 + 5, ay + 2);
+          ctx.closePath();
+          ctx.fill();
+        }
+        ctx.fillStyle = '#3a5a6b';
+        roundRect(x + 6, y + TILE - 12, TILE - 12, 10, 4);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      function drawCrate(x, y, w, h) {
+        ctx.save();
+        const grad = ctx.createLinearGradient(x, y, x, y + h);
+        grad.addColorStop(0, '#c79b5e');
+        grad.addColorStop(1, '#8a6328');
+        ctx.fillStyle = grad;
+        roundRect(x, y, w, h, 6);
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(60,40,15,0.7)';
+        ctx.lineWidth = 2;
+        roundRect(x + 2, y + 2, w - 4, h - 4, 5);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(x + 4, y + 4); ctx.lineTo(x + w - 4, y + h - 4);
+        ctx.moveTo(x + w - 4, y + 4); ctx.lineTo(x + 4, y + h - 4);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      function drawCharacter(player, time) {
+        if (!player.alive) return;
+        const bob = Math.sin(time * 0.012 + player.x * 0.018) * 1.1;
+        const walk = Math.sin(time * 0.016 + Math.abs(player.vx) * 0.02);
+        const swing = Math.max(-1, Math.min(1, player.vx / MOVE_TOP));
+        const centerX = player.x + player.w / 2;
+
+        ctx.save();
+        ctx.translate(centerX, player.y + bob);
+        ctx.globalAlpha = player.escaped ? 0.92 : 1;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.shadowColor = player.color;
+        ctx.shadowBlur = 10;
+        if (player.kind === 'fire') drawFireCharacter(walk, swing);
+        else drawWaterCharacter(walk, swing);
+
+        if (player.escaped) {
+          ctx.globalAlpha = 0.2;
+          ctx.fillStyle = player.color;
+          ctx.beginPath();
+          ctx.arc(0, 18, 22, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.restore();
+      }
+      function drawFrame(time) {
+        drawBackground(time);
+        if (state.world) drawWorld(time);
+        drawStatusText();
+      }
+
+      function drawStatusText() {
+        const msg = state.messageTimer > 0 ? state.message : '';
+        if (!msg) return;
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+        ctx.save();
+        ctx.font = '600 18px "Microsoft YaHei", sans-serif';
+        const padX = 18;
+        const textW = ctx.measureText(msg).width;
+        const boxW = Math.min(w - 24, textW + padX * 2);
+        const boxH = 46;
+        const x = (w - boxW) / 2;
+        const y = h - 84;
+        ctx.fillStyle = 'rgba(4, 10, 7, 0.62)';
+        roundRect(x, y, boxW, boxH, 16);
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+        ctx.stroke();
+        ctx.fillStyle = '#f3f7f2';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(msg, w / 2, y + boxH / 2 + 1);
+        ctx.restore();
+      }
+
+      function roundRect(x, y, w, h, r) {
+        const radius = Math.min(r, w / 2, h / 2);
+        ctx.beginPath();
+        ctx.moveTo(x + radius, y);
+        ctx.arcTo(x + w, y, x + w, y + h, radius);
+        ctx.arcTo(x + w, y + h, x, y + h, radius);
+        ctx.arcTo(x, y + h, x, y, radius);
+        ctx.arcTo(x, y, x + w, y, radius);
+        ctx.closePath();
+      }
+
+      function tick(now) {
+        if (!tick.last) tick.last = now;
+        const dt = Math.min(0.033, (now - tick.last) / 1000);
+        tick.last = now;
+        update(dt);
+        drawFrame(now);
+        requestAnimationFrame(tick);
+      }
+
+      // ===== 背景音乐 BGM =====
+      // 原版音乐：把文件命名为 bgm.mp3 / bgm.ogg 放到 index.html 同目录即可自动循环播放。
+      // 未放原版文件时，用 Web Audio 合成一段轻柔的森林氛围循环作为默认 BGM。
+      // 浏览器自动播放策略：必须在用户手势（点「开始冒险」）后才能起播。
+      const BGM_STORAGE_KEY = 'forestIcefire.bgmMuted';
+      let bgmAudio = null;
+      let bgmCtx = null, bgmMaster = null, bgmChimeTimer = null;
+      let bgmMuted = false;
+      try { bgmMuted = localStorage.getItem(BGM_STORAGE_KEY) === '1'; } catch (e) { /* ignore */ }
+
+      function updateBgmBtn() {
+        if (!bgmBtn) return;
+        bgmBtn.textContent = bgmMuted ? '🔇 静音' : '🎵 音乐';
+        bgmBtn.classList.toggle('muted', bgmMuted);
+      }
+
+      function stopProceduralBgm() {
+        if (bgmChimeTimer) { clearTimeout(bgmChimeTimer); bgmChimeTimer = null; }
+        if (bgmCtx) {
+          try { bgmCtx.close(); } catch (e) { /* ignore */ }
+          bgmCtx = null; bgmMaster = null;
+        }
+      }
+
+      // Web Audio 合成的森林氛围兜底（无原版文件时启用）
+      function startProceduralBgm() {
+        if (bgmMuted || bgmCtx) return;
+        try {
+          const AC = window.AudioContext || window.webkitAudioContext;
+          if (!AC) return;
+          bgmCtx = new AC();
+          bgmMaster = bgmCtx.createGain();
+          bgmMaster.gain.value = bgmMuted ? 0 : 0.16; // 轻柔
+          bgmMaster.connect(bgmCtx.destination);
+          // 缓慢和弦 pad：森林般的宁静底色
+          const chord = [164.81, 220.0, 277.18, 329.63]; // E3 A3 C#4 E4
+          chord.forEach((f, i) => {
+            const osc = bgmCtx.createOscillator();
+            const g = bgmCtx.createGain();
+            osc.type = i % 2 ? 'sine' : 'triangle';
+            osc.frequency.value = f;
+            const lfo = bgmCtx.createOscillator();
+            const lfoG = bgmCtx.createGain();
+            lfo.frequency.value = 0.05 + i * 0.017;
+            lfoG.gain.value = 0.05;
+            lfo.connect(lfoG);
+            lfoG.connect(g.gain);
+            g.gain.value = 0.05;
+            osc.connect(g); g.connect(bgmMaster);
+            osc.start(); lfo.start();
+          });
+          scheduleBgmChime();
+        } catch (e) { /* 不支持则静默 */ }
+      }
+
+      function scheduleBgmChime() {
+        if (!bgmCtx) return;
+        const t = bgmCtx.currentTime;
+        const notes = [523.25, 659.25, 783.99, 880.0, 987.77]; // 风铃/鸟鸣感
+        const n = notes[Math.floor(Math.random() * notes.length)];
+        const osc = bgmCtx.createOscillator();
+        const g = bgmCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = n;
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.linearRampToValueAtTime(0.09, t + 0.06);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + 1.3);
+        osc.connect(g); g.connect(bgmMaster);
+        osc.start(t); osc.stop(t + 1.4);
+        bgmChimeTimer = setTimeout(scheduleBgmChime, 2600 + Math.random() * 4200);
+      }
+
+      function startBgm() {
+        if (!state.started) return; // 必须在用户手势（开始游戏）之后
+        if (bgmAudio || bgmCtx) return; // 已在播放则跳过
+        updateBgmBtn();
+        if (bgmMuted) return; // 静音态：仅显示状态，不起播
+        // 优先尝试同目录的原版音乐文件
+        const a = new Audio();
+        a.loop = true;
+        a.preload = 'auto';
+        a.volume = 0.5;
+        a.src = 'bgm.mp3';
+        let settled = false;
+        const onOk = () => {
+          if (settled) return;
+          settled = true;
+          bgmAudio = a;
+          a.play().catch(() => { /* 自动播放被拦截则保持静默 */ });
+        };
+        const onFail = () => {
+          if (settled) return;
+          settled = true;
+          a.removeEventListener('playing', onOk);
+          startProceduralBgm();
+        };
+        a.addEventListener('playing', onOk, { once: true });
+        a.addEventListener('canplaythrough', onOk, { once: true });
+        a.addEventListener('error', onFail, { once: true });
+        a.load();
+        // 兜底：1.5s 内既没播放也没报错，默认走合成氛围
+        setTimeout(() => { if (!settled) { settled = true; onFail(); } }, 1500);
+        updateBgmBtn();
+      }
+
+      function setBgmMuted(m) {
+        bgmMuted = m;
+        try { localStorage.setItem(BGM_STORAGE_KEY, m ? '1' : '0'); } catch (e) { /* ignore */ }
+        if (bgmAudio) bgmAudio.muted = m;
+        if (bgmMaster) bgmMaster.gain.value = m ? 0 : 0.16;
+        if (sfxMaster) sfxMaster.gain.value = m ? 0 : 0.38;
+        if (sfxWindGain) sfxWindGain.gain.value = m ? 0 : 0.05;
+        if (!m) startBgm(); // 取消静音且尚未起播时主动起播
+        updateBgmBtn();
+      }
+
+      function toggleBgm() { setBgmMuted(!bgmMuted); }
+
+      function bindBgmButtons() {
+        if (bgmBtn) bgmBtn.addEventListener('click', toggleBgm);
+        updateBgmBtn();
+      }
+
+      // ===== 游戏音效 SFX（Web Audio 合成，风格仿森林冰火人）=====
+      let sfxCtx = null, sfxMaster = null;
+      let sfxWindSrc = null, sfxWindGain = null, sfxLeafTimer = null;
+
+      function initSfx() {
+        if (sfxCtx) { if (sfxCtx.state === 'suspended') sfxCtx.resume(); return; }
+        try {
+          const AC = window.AudioContext || window.webkitAudioContext;
+          if (!AC) return;
+          sfxCtx = new AC();
+          sfxMaster = sfxCtx.createGain();
+          sfxMaster.gain.value = bgmMuted ? 0 : 0.38;
+          sfxMaster.connect(sfxCtx.destination);
+          startWindSfx();
+        } catch (e) { /* 不支持则静默 */ }
+      }
+
+      function sfxReady() { return sfxCtx && !bgmMuted; }
+
+      // 单个音：振荡器 + ADSR 包络（含可选频率滑音）
+      function blip(type, f0, f1, dur, peak, when) {
+        if (!sfxReady()) return;
+        const t = when || sfxCtx.currentTime;
+        const osc = sfxCtx.createOscillator();
+        const g = sfxCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(f0, t);
+        if (f1 && f1 !== f0) osc.frequency.exponentialRampToValueAtTime(f1, t + dur);
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.linearRampToValueAtTime(peak, t + 0.012);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+        osc.connect(g); g.connect(sfxMaster);
+        osc.start(t); osc.stop(t + dur + 0.02);
+      }
+
+      // 死亡音效：双音下滑哀鸣（经典平台游戏"挂了"感）
+      function playDeath() {
+        if (!sfxReady()) return;
+        const t = sfxCtx.currentTime;
+        blip('triangle', 330, 110, 0.62, 0.5, t);
+        blip('triangle', 247, 82, 0.62, 0.3, t + 0.03);
+      }
+
+      // 跳跃：轻快"蹦"
+      function playJump() { blip('square', 300, 620, 0.13, 0.2); }
+
+      // 收集晶体：清脆铃音（双音上行）
+      function playCollect() {
+        if (!sfxReady()) return;
+        const t = sfxCtx.currentTime;
+        blip('sine', 880, 880, 0.18, 0.28, t);
+        blip('sine', 1318.5, 1318.5, 0.22, 0.24, t + 0.07);
+      }
+
+      // 过关：上行大三和弦琶音（凯旋感）
+      function playWin() {
+        if (!sfxReady()) return;
+        const t = sfxCtx.currentTime;
+        const notes = [523.25, 659.25, 783.99, 1046.5];
+        notes.forEach((n, i) => blip('triangle', n, n, 0.24, 0.32, t + i * 0.11));
+      }
+
+      // 背景环境音效：森林风声循环 + 偶发树叶沙沙
+      function startWindSfx() {
+        if (!sfxCtx || sfxWindSrc) return;
+        try {
+          const bufLen = Math.floor(sfxCtx.sampleRate * 2);
+          const buf = sfxCtx.createBuffer(1, bufLen, sfxCtx.sampleRate);
+          const data = buf.getChannelData(0);
+          let last = 0;
+          for (let i = 0; i < bufLen; i++) {
+            const white = Math.random() * 2 - 1;
+            last = (last + 0.02 * white) / 1.02; // 粉噪感
+            data[i] = last * 3.0;
+          }
+          const src = sfxCtx.createBufferSource();
+          src.buffer = buf; src.loop = true;
+          const lp = sfxCtx.createBiquadFilter();
+          lp.type = 'lowpass'; lp.frequency.value = 430;
+          const g = sfxCtx.createGain();
+          g.gain.value = bgmMuted ? 0 : 0.05;
+          // 阵风起伏：LFO 缓慢调制增益
+          const lfo = sfxCtx.createOscillator();
+          const lfoG = sfxCtx.createGain();
+          lfo.frequency.value = 0.07; lfoG.gain.value = 0.03;
+          lfo.connect(lfoG); lfoG.connect(g.gain);
+          src.connect(lp); lp.connect(g); g.connect(sfxMaster);
+          src.start(); lfo.start();
+          sfxWindSrc = src; sfxWindGain = g;
+          scheduleLeafSfx();
+        } catch (e) { /* ignore */ }
+      }
+
+      function scheduleLeafSfx() {
+        if (!sfxCtx) return;
+        if (sfxWindSrc && !bgmMuted) {
+          const t = sfxCtx.currentTime;
+          const len = Math.floor(sfxCtx.sampleRate * 0.16);
+          const b = sfxCtx.createBuffer(1, len, sfxCtx.sampleRate);
+          const d = b.getChannelData(0);
+          for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / len);
+          const s = sfxCtx.createBufferSource(); s.buffer = b;
+          const bp = sfxCtx.createBiquadFilter();
+          bp.type = 'bandpass'; bp.frequency.value = 2200 + Math.random() * 1500; bp.Q.value = 0.8;
+          const g = sfxCtx.createGain(); g.gain.value = 0.045;
+          s.connect(bp); bp.connect(g); g.connect(sfxMaster);
+          s.start(t); s.stop(t + 0.16);
+        }
+        sfxLeafTimer = setTimeout(scheduleLeafSfx, 1800 + Math.random() * 3600);
+      }
+
+      function openMenu() {
+        overlay.style.display = 'grid';
+      }
+
+      function startGame() {
+        state.started = true;
+        menuTitle.textContent = '森林冰火人';
+        startBtn.textContent = state.mode === 'coop' ? '开始双人冒险' : '开始单人冒险';
+        overlay.style.display = 'none';
+        state.message = `开始 ${levelDefs[state.levelIndex].name}`;
+        state.messageTimer = 1.0;
+        startBgm();
+        initSfx();
+      }
+
+      function onModeClick(mode) {
+        setMode(mode);
+        state.keys = Object.create(null);
+        state.touch = Object.create(null);
+        menuTitle.textContent = '森林冰火人';
+        if (mode === 'coop') {
+          startBtn.textContent = '开始双人冒险';
+        } else {
+          startBtn.textContent = '开始单人冒险';
+        }
+      }
+
+      function bindAIButtons() {
+        aiButton.addEventListener('click', () => {
+          const visible = aiPanel.classList.contains('visible');
+          setAIPanelVisible(!visible);
+          if (!visible && !aiPrompt.value.trim()) {
+            fillAISample();
+          }
+          if (!visible) {
+            aiPrompt.focus();
+          }
+        });
+        aiCloseBtn.addEventListener('click', () => setAIPanelVisible(false));
+        aiSaveBtn.addEventListener('click', handleAIConfigSave);
+        aiResetBtn.addEventListener('click', handleAIConfigReset);
+        aiSampleBtn.addEventListener('click', fillAISample);
+        aiSendBtn.addEventListener('click', sendAIRequest);
+        [aiPrompt, aiApiKey, aiBaseUrl, aiModel].forEach((field) => field.addEventListener('keydown', (event) => {
+          if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+            event.preventDefault();
+            if (field === aiPrompt) {
+              sendAIRequest();
+            } else {
+              handleAIConfigSave();
+            }
+          }
+        }));
+      }
+
+      function shouldIgnoreGlobalHotkeys(target) {
+        if (!(target instanceof HTMLElement)) return false;
+        return target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON'].includes(target.tagName);
+      }
+
+      function resetInputs() {
+        state.keys = Object.create(null);
+        state.touch = Object.create(null);
+      }
+
+      function handleKeyDown(e) {
+        if (tutorialOverlay.classList.contains('visible')) {
+          if (e.code === 'Escape') { closeTutorial(); e.preventDefault(); return; }
+          if (e.code === 'ArrowRight' || e.code === 'Enter' || e.code === 'Space') { tutNext(); e.preventDefault(); return; }
+          if (e.code === 'ArrowLeft') { tutPrev(); e.preventDefault(); return; }
+          return;
+        }
+        if (e.code === 'Escape' && aiPanel.classList.contains('visible')) {
+          setAIPanelVisible(false);
+          e.preventDefault();
+          return;
+        }
+        if (shouldIgnoreGlobalHotkeys(e.target)) {
+          return;
+        }
+        if (e.code === 'Escape') {
+          openMenu();
+          state.started = false;
+          resetInputs();
+          return;
+        }
+        if (e.code === 'KeyR') {
+          restartLevel('已重开');
+          resetInputs();
+          return;
+        }
+        if (e.code === 'Enter' || e.code === 'Space') {
+          if (overlay.style.display !== 'none') {
+            startGame();
+          }
+          return;
+        }
+
+        const controls = MODE_KEYS[state.mode];
+        const allKeys = [
+          controls.fire.left,
+          controls.fire.right,
+          controls.fire.jump,
+          controls.water.left,
+          controls.water.right,
+          controls.water.jump,
+        ];
+        if (allKeys.includes(e.code)) {
+          state.keys[e.code] = true;
+          e.preventDefault();
+        }
+      }
+
+      function handleKeyUp(e) {
+        if (state.keys[e.code]) {
+          state.keys[e.code] = false;
+          e.preventDefault();
+        }
+      }
+
+      function bindTouchButtons() {
+        document.querySelectorAll('.pad button').forEach((btn) => {
+          const kind = btn.dataset.player;
+          const action = btn.dataset.key;
+          const down = (e) => {
+            e.preventDefault();
+            if (typeof btn.setPointerCapture === 'function') {
+              btn.setPointerCapture(e.pointerId);
+            }
+            setTouch(kind, action, true);
+          };
+          const up = (e) => {
+            e.preventDefault();
+            if (typeof btn.releasePointerCapture === 'function' && btn.hasPointerCapture?.(e.pointerId)) {
+              btn.releasePointerCapture(e.pointerId);
+            }
+            setTouch(kind, action, false);
+          };
+          btn.addEventListener('pointerdown', down);
+          btn.addEventListener('pointerup', up);
+          btn.addEventListener('pointercancel', up);
+          btn.addEventListener('pointerleave', up);
+          btn.addEventListener('lostpointercapture', up);
+        });
+      }
+
+      const TUT_STORAGE_KEY = 'forestIcefire.tutorialSeen';
+      const TUT_TOTAL = 5;
+      const LEVEL_PROGRESS_KEY = 'forestIcefire.levelProgress';
+      const DIFFICULTY_KEY = 'forestIcefire.difficulty';
+
+      // ===== 难度系统 =====
+      const DIFFICULTIES = {
+        easy:   { name: '简单', label: '🌱 简单', speedMult: 0.65, gravityMult: 0.9,  desc: '平台慢速，容错率高' },
+        normal: { name: '普通', label: '⚔️ 普通', speedMult: 1.0,  gravityMult: 1.0, desc: '标准挑战' },
+        hard:   { name: '困难', label: '🔥 困难', speedMult: 1.45, gravityMult: 1.15, desc: '平台加速，重力增强' },
+      };
+      
+      let currentDifficulty = 'normal';
+      
+      function getDifficulty() {
+        try {
+          const d = localStorage.getItem(DIFFICULTY_KEY);
+          if (d && DIFFICULTIES[d]) return d;
+        } catch (e) { /* ignore */ }
+        return 'normal';
+      }
+      
+      function setDifficulty(d) {
+        if (!DIFFICULTIES[d]) return;
+        const wasHard = currentDifficulty === 'hard';
+        currentDifficulty = d;
+        try { localStorage.setItem(DIFFICULTY_KEY, d); } catch (e) { /* ignore */ }
+        // 更新 HUD 显示
+        const diffChip = document.getElementById('diffText');
+        if (diffChip) diffChip.textContent = DIFFICULTIES[d].name;
+        // 切换难度且游戏中 → 重建当前关卡(用 hardMap/hardPlatforms)
+        if (state && state.started && state.world && wasHard !== (d === 'hard')) {
+          try { restartLevel(); } catch (e) { buildLevel(state.levelIndex); }
+        }
+      }
+      
+      function getDiffMult() {
+        return DIFFICULTIES[currentDifficulty] || DIFFICULTIES.normal;
+      }
+
+      // ===== 关卡进度持久化 & 关卡选择 =====
+      function getLevelProgress() {
+        try {
+          const raw = localStorage.getItem(LEVEL_PROGRESS_KEY);
+          if (raw) { const p = JSON.parse(raw); if (typeof p === 'number') return Math.max(0, Math.min(p, levelDefs.length - 1)); }
+        } catch (e) { /* ignore */ }
+        return 0;
+      }
+      function saveLevelProgress(idx) {
+        try {
+          const prev = getLevelProgress();
+          const next = Math.max(prev, idx); // 只进不退，记录历史最高
+          localStorage.setItem(LEVEL_PROGRESS_KEY, String(next));
+        } catch (e) { /* ignore */ }
+      }
+      // 实时同步当前进度到 localStorage（F5/关闭页面前自动存）
+      function syncLevelProgress() {
+        saveLevelProgress(state.levelIndex);
+      }
+
+      const levelSelectOverlay = document.getElementById('levelSelectOverlay');
+      const levelGrid = document.getElementById('levelGrid');
+      const levelSelectBtn = document.getElementById('levelSelectBtn');
+      const levelSelectCloseBtn = document.getElementById('levelSelectCloseBtn');
+
+      function renderLevelGrid() {
+        const current = state.levelIndex;
+        const saved = getLevelProgress();
+        // 已解锁 = 当前已到达过的最高关卡（saved），以及之前所有关卡
+        let html = '';
+        for (let i = 0; i < levelDefs.length; i++) {
+          const def = levelDefs[i];
+          const unlocked = i <= saved;
+          const isCurrent = i === current;
+          const done = i < current || (saved >= levelDefs.length - 1 && i <= saved);
+          html += `<div class="level-card ${isCurrent ? 'current' : ''} ${!unlocked ? 'locked' : ''}" data-level="${i}">
+            <div class="level-num">${unlocked ? i + 1 : '🔒'}</div>
+            <div class="level-info"><b>${def.name}</b><span>${def.hint}</span></div>
+            <span class="level-badge ${done && !isCurrent ? 'badge-done' : isCurrent ? 'badge-current' : ''}">${done && !isCurrent ? '已完成' : isCurrent ? '当前' : '可挑战'}</span>
+          </div>`;
+        }
+        levelGrid.innerHTML = html;
+        levelGrid.querySelectorAll('.level-card:not(.locked)').forEach(card => {
+          card.addEventListener('click', () => {
+            const idx = parseInt(card.dataset.level, 10);
+            state.levelIndex = idx;
+            buildLevel(idx);
+            closeLevelSelect();
+            startGame();
+          });
+        });
+      }
+
+      function openLevelSelect() {
+        syncLevelProgress(); // 打开前同步当前进度
+        renderLevelGrid();
+        levelSelectOverlay.classList.add('visible');
+      }
+      function closeLevelSelect() {
+        levelSelectOverlay.classList.remove('visible');
+      }
+      function bindLevelSelectButtons() {
+        if (levelSelectBtn) levelSelectBtn.addEventListener('click', openLevelSelect);
+        if (levelSelectCloseBtn) levelSelectCloseBtn.addEventListener('click', closeLevelSelect);
+        levelSelectOverlay.addEventListener('click', (e) => { if (e.target === levelSelectOverlay) closeLevelSelect(); });
+        // F5/关闭页面时自动保存当前关卡进度
+        window.addEventListener('beforeunload', syncLevelProgress);
+      }
+      const tutState = { step: 0 };
+      const tutorialOverlay = document.getElementById('tutorialOverlay');
+      const tutorialBtn = document.getElementById('tutorialBtn');
+      const tutorialSteps = Array.from(document.querySelectorAll('.tutorial-step'));
+      const tutorialControls = document.getElementById('tutorialControls');
+      const tutControlsDesc = document.getElementById('tutControlsDesc');
+      const tutDots = document.getElementById('tutDots');
+      const tutNextBtn = document.getElementById('tutNextBtn');
+      const tutPrevBtn = document.getElementById('tutPrevBtn');
+      const tutSkipBtn = document.getElementById('tutSkipBtn');
+
+      function tutKeyLabel(code) {
+        const map = {
+          ArrowLeft: '←', ArrowRight: '→', ArrowUp: '↑', ArrowDown: '↓', Space: '空格',
+        };
+        if (map[code]) return map[code];
+        return code.replace('Key', '').replace('Digit', '');
+      }
+
+      function renderTutorialControls() {
+        if (!tutorialControls) return;
+        const mode = state.mode;
+        const f = MODE_KEYS[mode].fire;
+        const w = MODE_KEYS[mode].water;
+        const kb = (c) => `<span class="tut-key">${tutKeyLabel(c)}</span>`;
+        tutorialControls.innerHTML =
+          `<div class="tut-item"><b style="color:var(--fire)">🔥 火人</b>左 ${kb(f.left)} 右 ${kb(f.right)} 跳 ${kb(f.jump)}</div>` +
+          `<div class="tut-item"><b style="color:var(--water)">💧 水妹</b>左 ${kb(w.left)} 右 ${kb(w.right)} 跳 ${kb(w.jump)}</div>`;
+        if (tutControlsDesc) {
+          tutControlsDesc.textContent = mode === 'coop'
+            ? '双人模式：两位玩家各用一套按键，适合两个人一起玩。'
+            : '单人模式：一个人双手分别操控两位角色。';
+        }
+      }
+
+      function renderTutorial() {
+        tutorialSteps.forEach((el, i) => el.classList.toggle('active', i === tutState.step));
+        if (tutDots) {
+          Array.from(tutDots.children).forEach((d, i) => d.classList.toggle('active', i === tutState.step));
+        }
+        if (tutPrevBtn) tutPrevBtn.style.visibility = tutState.step === 0 ? 'hidden' : 'visible';
+        if (tutNextBtn) tutNextBtn.textContent = tutState.step === TUT_TOTAL - 1 ? '开始游戏' : '下一步';
+        if (tutState.step === 2) renderTutorialControls();
+      }
+
+      function openTutorial() {
+        tutState.step = 0;
+        renderTutorial();
+        tutorialOverlay.classList.add('visible');
+      }
+
+      function closeTutorial() {
+        tutorialOverlay.classList.remove('visible');
+        try { localStorage.setItem(TUT_STORAGE_KEY, '1'); } catch (e) { /* ignore */ }
+      }
+
+      function tutNext() {
+        if (tutState.step >= TUT_TOTAL - 1) { closeTutorial(); return; }
+        tutState.step += 1;
+        renderTutorial();
+      }
+
+      function tutPrev() {
+        if (tutState.step <= 0) return;
+        tutState.step -= 1;
+        renderTutorial();
+      }
+
+      function bindTutorialButtons() {
+        if (tutDots) {
+          for (let i = 0; i < TUT_TOTAL; i++) {
+            const dot = document.createElement('div');
+            dot.className = 'tut-dot' + (i === 0 ? ' active' : '');
+            tutDots.appendChild(dot);
+          }
+        }
+        if (tutNextBtn) tutNextBtn.addEventListener('click', tutNext);
+        if (tutPrevBtn) tutPrevBtn.addEventListener('click', tutPrev);
+        if (tutSkipBtn) tutSkipBtn.addEventListener('click', closeTutorial);
+        if (tutorialBtn) tutorialBtn.addEventListener('click', openTutorial);
+      }
+
+      function maybeShowTutorialOnFirstRun() {
+        let seen = false;
+        try { seen = localStorage.getItem(TUT_STORAGE_KEY) === '1'; } catch (e) { seen = false; }
+        if (!seen) openTutorial();
+      }
+
+      function bindMenuButtons() {
+        modeCoopBtn.addEventListener('click', () => onModeClick('coop'));
+        modeSoloBtn.addEventListener('click', () => onModeClick('solo'));
+        startBtn.addEventListener('click', () => {
+          if (overlay.querySelector('.title').textContent.includes('通关')) {
+            state.levelIndex = 0;
+            saveLevelProgress(0);
+            buildLevel(0);
+          }
+          startGame();
+        });
+        restartBtn.addEventListener('click', () => {
+          buildLevel(state.levelIndex);
+          state.started = false;
+          state.message = '已重开当前关';
+          state.messageTimer = 1.0;
+          openMenu();
+        });
+      }
+
+      function syncControlsToMode() {
+        const mode = state.mode;
+        const fireKeys = MODE_KEYS[mode].fire;
+        const waterKeys = MODE_KEYS[mode].water;
+        const fireLabel = `火人：${fireKeys.left.replace('Key', '')}/${fireKeys.right.replace('Key', '')}/${fireKeys.jump.replace('Key', '')}`;
+        const waterLabel = mode === 'coop'
+          ? '水妹：方向键'
+          : `水妹：${waterKeys.left.replace('Key', '')}/${waterKeys.right.replace('Key', '')}/${waterKeys.jump.replace('Key', '')}`;
+        legendFire.innerHTML = `<b style="color:var(--fire)">火人</b>：${fireLabel.split('：')[1]}`;
+        legendWater.innerHTML = `<b style="color:var(--water)">水妹</b>：${waterLabel.split('：')[1]}`;
+      }
+
+      function updateOverlayCopy() {
+        if (state.mode === 'coop') {
+          menuSubtitle.textContent = '双人协作模式更接近原版体验，适合两个人一起玩。';
+        } else {
+          menuSubtitle.textContent = '单人模式下，火人使用 WASD，水妹使用 J/L/I；你可以一人完成整套合作解谜。';
+        }
+      }
+
+      function refreshMenuState() {
+        modeText.textContent = state.mode === 'coop' ? '双人' : '单人';
+        modeCoopBtn.classList.toggle('active', state.mode === 'coop');
+        modeSoloBtn.classList.toggle('active', state.mode === 'solo');
+        syncControlsToMode();
+        updateOverlayCopy();
+      }
+
+      window.addEventListener('keydown', handleKeyDown);
+      window.addEventListener('keyup', handleKeyUp);
+      window.addEventListener('resize', resizeCanvas);
+      window.addEventListener('blur', resetInputs);
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) resetInputs();
+      });
+
+      resizeCanvas();
+      bindTouchButtons();
+      bindMenuButtons();
+      bindTutorialButtons();
+      bindAIButtons();
+      bindBgmButtons();
+      syncAIInputs();
+      onModeClick('coop');
+      // 从 localStorage 恢复关卡进度，F5 刷新不再回到第1关
+      state.levelIndex = getLevelProgress();
+      syncLevelProgress(); // 立即同步：确保当前关卡位置已持久化
+      buildLevel(state.levelIndex);
+      refreshMenuState();
+      openMenu();
+      bindLevelSelectButtons();
+      
+      // ===== 难度系统初始化 =====
+      currentDifficulty = getDifficulty();
+      document.getElementById('diffText').textContent = DIFFICULTIES[currentDifficulty].name;
+      
+      function renderMenuDiffButtons() {
+        const row = document.getElementById('menuDiffRow');
+        if (!row) return;
+        row.innerHTML = '';
+        Object.entries(DIFFICULTIES).forEach(([key, d]) => {
+          const btn = document.createElement('button');
+          btn.className = key === currentDifficulty ? 'primary' : 'ghost';
+          btn.textContent = d.label;
+          btn.style.cssText = 'padding:8px 16px;font-size:13px;border-radius:12px;';
+          btn.onclick = () => {
+            setDifficulty(key);
+            renderMenuDiffButtons(); // 刷新按钮状态
+            state.message = `难度已切换为：${d.name}`;
+            state.messageTimer = 1.2;
+          };
+          row.appendChild(btn);
+        });
+      }
+      renderMenuDiffButtons();
+      
+      maybeShowTutorialOnFirstRun();
+      requestAnimationFrame(tick);
+    })();
+  </script>
+</body>
+</html>

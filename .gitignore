@@ -1,0 +1,14 @@
+_chrome_profile/
+_chrome_profile2/
+_check.js
+_check_*.js
+_test_*.js
+*.tmp
+*.bak
+*.log
+dist/
+.DS_Store
+Thumbs.db
+deploy.bat
+test_*.js
+check*.js

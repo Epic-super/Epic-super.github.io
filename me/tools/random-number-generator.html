@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>随机数生成器 - 小待的个人藏宝库</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <main>
+        <section id="random-number-tool" class="tool-container">
+            <h2>随机数生成器</h2>
+            <div>
+                <label for="minNumber">最小值：</label>
+                <input type="number" id="minNumber" value="1">
+            </div>
+            <div>
+                <label for="maxNumber">最大值：</label>
+                <input type="number" id="maxNumber" value="100">
+            </div>
+            <button onclick="generateRandomNumber()">生成随机数</button>
+            <div id="randomNumberResult"></div>
+        </section>
+    </main>
+
+    <script>
+        function generateRandomNumber() {
+            const min = parseInt(document.getElementById('minNumber').value);
+            const max = parseInt(document.getElementById('maxNumber').value);
+            const resultDiv = document.getElementById('randomNumberResult');
+
+            if (isNaN(min) || isNaN(max)) {
+                resultDiv.textContent = '请输入有效的数字！';
+                resultDiv.style.color = 'red';
+                return;
+            }
+
+            if (min >= max) {
+                resultDiv.textContent = '最小值必须小于最大值！';
+                resultDiv.style.color = 'red';
+                return;
+            }
+
+            const randomNumber = Math.floor(Math.random() * (max - min + 1)) + min;
+            resultDiv.textContent = '生成的随机数是: ' + randomNumber;
+            resultDiv.style.color = '#28a745';
+        }
+    </script>
+    <script src="../js/script.js"></script>
+    <script src="../js/components.js"></script>
+
+</body>
+</html>

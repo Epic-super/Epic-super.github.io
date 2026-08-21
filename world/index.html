@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<title>3D 小世界 · 小待</title>
+<style>
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#070b12;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;color:#e8efe9}
+  #app,#scene{position:fixed;inset:0;width:100%;height:100%;display:block}
+  /* 准星 */
+  #crosshair{position:fixed;left:50%;top:50%;width:18px;height:18px;transform:translate(-50%,-50%);
+    pointer-events:none;opacity:0;transition:opacity .2s}
+  #crosshair::before,#crosshair::after{content:"";position:absolute;background:rgba(255,255,255,.75)}
+  #crosshair::before{left:50%;top:0;width:2px;height:100%;transform:translateX(-50%)}
+  #crosshair::after{top:50%;left:0;height:2px;width:100%;transform:translateY(-50%)}
+  /* 提示条 */
+  #hint{position:fixed;left:50%;bottom:78px;transform:translateX(-50%);
+    background:rgba(15,19,17,.72);border:1px solid rgba(52,211,153,.4);color:#d6f5ea;
+    padding:9px 16px;border-radius:12px;font-size:14px;font-weight:600;backdrop-filter:blur(8px);
+    opacity:0;transition:opacity .25s;pointer-events:none;white-space:nowrap;z-index:7}
+  /* 顶栏 */
+  #topbar{position:fixed;top:0;left:0;right:0;padding:12px 16px;display:flex;align-items:center;gap:10px;
+    pointer-events:none;z-index:5}
+  #topbar .t{font-weight:800;font-size:15px;letter-spacing:.4px;text-shadow:0 1px 6px rgba(0,0,0,.6)}
+  #topbar .v{font-size:11px;color:#8b9b93;background:rgba(15,19,17,.5);padding:2px 8px;border-radius:999px}
+  /* HUD（坐标 / 时刻 / 收集 / FPS） */
+  #hud{position:fixed;left:14px;top:54px;z-index:5;font-size:12px;color:#bcd3c8;
+    background:rgba(15,19,17,.5);border:1px solid rgba(52,211,153,.18);padding:7px 11px;border-radius:10px;
+    pointer-events:none;line-height:1.55;font-variant-numeric:tabular-nums}
+  #hud b{color:#7df9c8;font-weight:700}
+  /* 小地图 */
+  #minimap{position:fixed;right:14px;top:54px;z-index:6;width:160px;height:160px;
+    border-radius:14px;border:1px solid rgba(52,211,153,.28);background:rgba(8,14,12,.55);
+    box-shadow:0 6px 20px rgba(0,0,0,.4);pointer-events:none}
+  /* 控制说明 */
+  #controls{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);font-size:12px;color:#9fb0a6;
+    background:rgba(15,19,17,.5);padding:6px 14px;border-radius:999px;pointer-events:none;z-index:5}
+  /* 帮助浮层 */
+  #help{position:fixed;inset:0;z-index:9;display:flex;align-items:center;justify-content:center;
+    background:rgba(7,11,18,.78);backdrop-filter:blur(5px);padding:24px}
+  #help .panel{max-width:480px;width:100%;background:rgba(13,20,17,.95);border:1px solid rgba(52,211,153,.35);
+    border-radius:18px;padding:22px 26px}
+  #help h2{margin:0 0 12px;font-size:19px;color:#7df9c8}
+  #help .row{display:flex;justify-content:space-between;gap:16px;padding:6px 0;border-bottom:1px dashed rgba(255,255,255,.08);font-size:14px}
+  #help .row:last-child{border-bottom:none}
+  #help .k{font-weight:700;color:#d6f5ea;white-space:nowrap}
+  #help .d{color:#9fb0a6;text-align:right}
+  #help .cls{margin-top:16px;text-align:center;color:#8b9b93;font-size:13px}
+  #help.hidden{display:none}
+  /* 对话面板 */
+  #dialog{position:fixed;left:50%;bottom:96px;transform:translateX(-50%) translateY(10px);z-index:8;
+    width:min(560px,calc(100% - 32px));background:rgba(10,16,14,.9);border:1px solid rgba(52,211,153,.45);
+    border-radius:16px;padding:14px 18px 12px;backdrop-filter:blur(10px);box-shadow:0 10px 34px rgba(0,0,0,.5);
+    opacity:0;pointer-events:none;transition:opacity .18s,transform .18s}
+  #dialog.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  #dialog .hd{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+  #dialog .dot{width:10px;height:10px;border-radius:50%;box-shadow:0 0 10px currentColor;background:currentColor}
+  #dialog .nm{font-weight:800;font-size:14px;color:#d6f5ea}
+  #dialog .tg{margin-left:auto;font-size:11px;color:#7df9c8;border:1px solid rgba(52,211,153,.35);
+    padding:2px 8px;border-radius:999px}
+  #dialog .tx{font-size:14px;line-height:1.7;color:#e8efe9;min-height:3.4em}
+  #dialog .tx .car{color:#7df9c8;animation:blink 1s steps(1) infinite}
+  #dialog .cta{margin-top:8px;display:flex;gap:14px;font-size:11.5px;color:#8b9b93;flex-wrap:wrap;align-items:center}
+  #dialog .cta b{color:#cfe9df}
+  #dialog .cta button{pointer-events:auto;cursor:pointer;font:inherit;color:#9fb0a6;
+    background:rgba(52,211,153,.10);border:1px solid rgba(52,211,153,.4);border-radius:999px;padding:4px 12px}
+  #dialog .cta button:active{background:rgba(52,211,153,.24)}
+  @keyframes blink{50%{opacity:0}}
+  /* 进入遮罩 */
+  #overlay{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    background:radial-gradient(900px 500px at 50% 40%,rgba(52,211,153,.10),transparent 60%),rgba(7,11,18,.86);
+    backdrop-filter:blur(4px);cursor:pointer;text-align:center;padding:24px}
+  #overlay h1{font-size:26px;margin:0 0 8px;font-weight:800;letter-spacing:.5px}
+  #overlay p{margin:4px 0;color:#9fb0a6;font-size:14px;line-height:1.6;max-width:440px}
+  #overlay .enter{margin-top:22px;display:inline-flex;align-items:center;gap:8px;padding:13px 26px;border-radius:14px;
+    background:#34d399;color:#06231a;font-weight:800;font-size:15px;box-shadow:0 8px 24px rgba(52,211,153,.3)}
+  #overlay .keys{margin-top:18px;display:flex;gap:8px;flex-wrap:wrap;justify-content:center;max-width:480px}
+  #overlay .key{border:1px solid #2a322d;background:rgba(255,255,255,.04);border-radius:8px;padding:5px 9px;font-size:12px;color:#cfe9df}
+  #overlay .back{margin-top:26px}
+  #overlay .back a{color:#8b9b93;text-decoration:none;font-size:13px;padding:8px 14px;border:1px solid #2a322d;border-radius:999px}
+  #overlay .back a:hover{color:#d6f5ea;border-color:rgba(52,211,153,.5)}
+  #overlay.hidden{display:none}
+  /* 移动端摇杆 */
+  #joy{position:fixed;left:18px;bottom:18px;width:120px;height:120px;border-radius:50%;
+    background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);touch-action:none;display:none;z-index:6}
+  #joy .nub{position:absolute;left:50%;top:50%;width:50px;height:50px;border-radius:50%;transform:translate(-50%,-50%);
+    background:rgba(52,211,153,.55);border:1px solid rgba(52,211,153,.8)}
+  #lookpad{position:fixed;right:0;top:0;width:55%;height:100%;touch-action:none;display:none;z-index:6}
+  @media (hover:none){#joy,#lookpad{display:block}#controls{display:none}}
+</style>
+</head>
+<body>
+<canvas id="scene"></canvas>
+<div id="crosshair"></div>
+<div id="topbar"><span class="t">3D 小世界</span><span class="v">Three.js r160 · 程序化生成 + AI 角色 · v2.1 对话/同行</span></div>
+<div id="hud">坐标 <b>0,0</b> · <b>--:--</b> · 💎 <b>0/14</b> · 👥 <b>0/4</b> · <b>0</b> FPS</div>
+<canvas id="minimap" width="160" height="160"></canvas>
+<div id="hint"></div>
+<div id="dialog">
+  <div class="hd"><span class="dot" id="dlgDot"></span><span class="nm" id="dlgName">NPC</span><span class="tg" id="dlgTag">对话中</span></div>
+  <div class="tx" id="dlgText"></div>
+  <div class="cta"><span><b>点击 / F / 空格</b> 继续</span><button id="dlgFollow"><b>G</b> 让 TA 跟随</button><span><b>Esc</b> 结束</span></div>
+</div>
+<div id="controls">WASD 移动 · 鼠标视角 · Shift 加速 · E 进信标 · F 对话 · G 跟随 · H 帮助 · P 截图 · T 昼夜</div>
+
+<div id="help" class="hidden">
+  <div class="panel">
+    <h2>🎮 操作指南</h2>
+    <div class="row"><span class="k">W / A / S / D · 方向键</span><span class="d">移动</span></div>
+    <div class="row"><span class="k">鼠标移动</span><span class="d">转动视角</span></div>
+    <div class="row"><span class="k">Shift</span><span class="d">加速奔跑</span></div>
+    <div class="row"><span class="k">E</span><span class="d">进入最近的信标（学习区 / 游戏区 / 指挥台）</span></div>
+    <div class="row"><span class="k">靠近发光水晶</span><span class="d">自动收集（共 14 颗）</span></div>
+    <div class="row"><span class="k">F · 鼠标左键</span><span class="d">和准星对准 / 最近的 NPC 对话（再按继续下一句）</span></div>
+    <div class="row"><span class="k">G</span><span class="d">让 NPC 跟随 / 解散（最多 4 位同行）</span></div>
+    <div class="row"><span class="k">T</span><span class="d">暂停 / 继续 自动昼夜</span></div>
+    <div class="row"><span class="k">[ / ]</span><span class="d">手动快退 / 快进 时间</span></div>
+    <div class="row"><span class="k">K / L</span><span class="d">切换 阴影 / 粒子</span></div>
+    <div class="row"><span class="k">P</span><span class="d">截图保存 PNG</span></div>
+    <div class="row"><span class="k">H</span><span class="d">打开 / 关闭 本帮助</span></div>
+    <div class="row"><span class="k">Esc</span><span class="d">退出鼠标锁定</span></div>
+    <div class="cls">按 H 或点击空白处关闭</div>
+  </div>
+</div>
+
+<div id="joy"><div class="nub" id="nub"></div></div>
+<div id="lookpad"></div>
+
+<div id="overlay">
+  <h1>🌐 小待的 3D 小世界</h1>
+  <p>一个可以走进去漫游的小世界 v2.1。世界里住着<strong>引导员</strong>与 <strong>7 位动漫角色</strong>：用准星对准他们按 <strong>F</strong> 就能<strong>对话</strong>（头顶冒气泡），按 <strong>G</strong> 可以让 TA <strong>跟随你同行</strong>。顺便收集 14 颗发光水晶、探索昼夜与湖泊森林。</p>
+  <div class="keys">
+    <span class="key">W/A/S/D 移动</span><span class="key">鼠标 转视角</span>
+    <span class="key">Shift 加速</span><span class="key">E 进信标</span>
+    <span class="key">F 对话</span><span class="key">G 跟随</span>
+    <span class="key">H 帮助</span><span class="key">P 截图</span><span class="key">T 昼夜</span><span class="key">Esc 退出</span>
+  </div>
+  <div class="enter">点击进入 ▶</div>
+  <div class="back"><a href="../index.html">← 返回指挥台</a></div>
+</div>
+
+<script type="importmap">
+{ "imports": { "three": "../lib/three/three.module.min.js" } }
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from '../lib/three/GLTFLoader.js';
+
+const canvas = document.getElementById('scene');
+const overlay = document.getElementById('overlay');
+const crosshair = document.getElementById('crosshair');
+const hint = document.getElementById('hint');
+const hud = document.getElementById('hud');
+const mm = document.getElementById('minimap');
+const mctx = mm.getContext('2d');
+const dlgEl = document.getElementById('dialog');
+const dlgName = document.getElementById('dlgName');
+const dlgText = document.getElementById('dlgText');
+const dlgDot = document.getElementById('dlgDot');
+const dlgTag = document.getElementById('dlgTag');
+const dlgFollowBtn = document.getElementById('dlgFollow');
+const helpEl = document.getElementById('help');
+const joy = document.getElementById('joy'), nub = document.getElementById('nub'), lookpad = document.getElementById('lookpad');
+let renderer = null;
+try {
+  renderer = new THREE.WebGLRenderer({ canvas, antialias:true, powerPreference:'high-performance', preserveDrawingBuffer:true });
+} catch (e) {
+  overlay.innerHTML = '<h1>⚠️ 当前设备不支持 3D</h1><p>浏览器或显卡不支持 WebGL，无法进入小世界。</p><div class="back"><a href="../index.html">← 返回指挥台</a></div>';
+  throw e;
+}
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+const scene = new THREE.Scene();
+const SKY_TOP = new THREE.Color(0x0b1a2e);
+const SKY_HORIZON = new THREE.Color(0x123a4a);
+scene.fog = new THREE.Fog(SKY_HORIZON.getHex(), 30, 140);
+
+const camera = new THREE.PerspectiveCamera(70, innerWidth/innerHeight, 0.1, 500);
+const EYE = 1.7;
+camera.position.set(0, EYE, 18);
+camera.rotation.order = 'YXZ';
+
+// ---- 天空穹顶（垂直渐变）----
+const sky = new THREE.Mesh(
+  new THREE.SphereGeometry(250, 32, 16),
+  new THREE.ShaderMaterial({
+    side: THREE.BackSide,
+    uniforms:{ top:{value:SKY_TOP.clone()}, bottom:{value:SKY_HORIZON.clone()}, off:{value:30} },
+    vertexShader:`varying vec3 vP; void main(){ vP=position; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}`,
+    fragmentShader:`varying vec3 vP; uniform vec3 top; uniform vec3 bottom; uniform float off;
+      void main(){ float h=normalize(vP).y; float t=clamp((h*1.0+0.15),0.0,1.0); gl_FragColor=vec4(mix(bottom,top,t),1.0);}`
+  })
+);
+scene.add(sky);
+
+// ---- 灯光 ----
+const hemi = new THREE.HemisphereLight(0xbfe6ff, 0x14202c, 0.7); scene.add(hemi);
+const ambient = new THREE.AmbientLight(0xffffff, 0.18); scene.add(ambient);
+const sun = new THREE.DirectionalLight(0xfff2dd, 1.4);
+sun.position.set(40, 60, 20);
+sun.castShadow = true;
+sun.shadow.mapSize.set(1024,1024);
+sun.shadow.camera.near = 1; sun.shadow.camera.far = 200;
+sun.shadow.camera.left=-80; sun.shadow.camera.right=80; sun.shadow.camera.top=80; sun.shadow.camera.bottom=-80;
+scene.add(sun);
+const rim = new THREE.DirectionalLight(0x4ECDC4, 0.4); rim.position.set(-30,20,-30); scene.add(rim);
+
+// ---- 地面（程序化网格纹理）----
+function gridTexture(){
+  const c=document.createElement('canvas'); c.width=c.height=512; const x=c.getContext('2d');
+  x.fillStyle='#0e1a16'; x.fillRect(0,0,512,512);
+  x.strokeStyle='rgba(52,211,153,.35)'; x.lineWidth=2;
+  for(let i=0;i<=512;i+=32){ x.beginPath();x.moveTo(i,0);x.lineTo(i,512);x.stroke();
+    x.beginPath();x.moveTo(0,i);x.lineTo(512,i);x.stroke(); }
+  const t=new THREE.CanvasTexture(c); t.wrapS=t.wrapT=THREE.RepeatWrapping; t.repeat.set(40,40); return t;
+}
+const ground = new THREE.Mesh(
+  new THREE.PlaneGeometry(400,400),
+  new THREE.MeshStandardMaterial({ map:gridTexture(), roughness:0.95, metalness:0.0 })
+);
+ground.rotation.x = -Math.PI/2; ground.receiveShadow = true; scene.add(ground);
+
+// ---- 建筑（带亮灯窗户的盒子）----
+function windowTexture(){
+  const c=document.createElement('canvas'); c.width=64; c.height=128; const x=c.getContext('2d');
+  x.fillStyle='#0c1411'; x.fillRect(0,0,64,128);
+  for(let yy=8; yy<128; yy+=16){ for(let xx=8; xx<64; xx+=16){
+    x.fillStyle = Math.random()<0.5 ? 'rgba(255,221,150,.9)' : 'rgba(120,200,255,.35)';
+    x.fillRect(xx,yy,9,10); } }
+  return new THREE.CanvasTexture(c);
+}
+function building(w,h,d){
+  const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),
+    new THREE.MeshStandardMaterial({ map:windowTexture(), roughness:0.8, metalness:0.1, color:0x223 }));
+  m.castShadow=true; m.receiveShadow=true; return m;
+}
+const city = new THREE.Group(); scene.add(city);
+for(let i=0;i<26;i++){
+  const w=3+Math.random()*4, h=6+Math.random()*22, d=3+Math.random()*4;
+  const b=building(w,h,d);
+  const ang=Math.random()*Math.PI*2, rad=24+Math.random()*55;
+  b.position.set(Math.cos(ang)*rad, h/2, Math.sin(ang)*rad);
+  b.rotation.y=Math.random()*Math.PI;
+  city.add(b);
+}
+
+// ---- 树 ----
+function tree(){
+  const g=new THREE.Group();
+  const trunk=new THREE.Mesh(new THREE.CylinderGeometry(0.25,0.35,2,8),
+    new THREE.MeshStandardMaterial({color:0x5a3b22,roughness:1}));
+  trunk.position.y=1; trunk.castShadow=true; g.add(trunk);
+  const leaf=new THREE.Mesh(new THREE.IcosahedronGeometry(1.4,0),
+    new THREE.MeshStandardMaterial({color:0x2f9e5c,roughness:0.9,flatShading:true}));
+  leaf.position.y=2.6; leaf.castShadow=true; g.add(leaf);
+  return g;
+}
+for(let i=0;i<18;i++){
+  const t=tree(); const ang=Math.random()*Math.PI*2, rad=10+Math.random()*40;
+  t.position.set(Math.cos(ang)*rad,0,Math.sin(ang)*rad);
+  t.scale.setScalar(0.8+Math.random()*0.8); scene.add(t);
+}
+// 额外密集森林
+for(let i=0;i<12;i++){
+  const t=tree(); const ang=Math.random()*Math.PI*2, rad=66+Math.random()*22;
+  t.position.set(Math.cos(ang)*rad,0,Math.sin(ang)*rad);
+  t.scale.setScalar(0.9+Math.random()*0.9); scene.add(t);
+}
+
+// ---- 中央发光广场 ----
+const plaza = new THREE.Mesh(
+  new THREE.TorusGeometry(6, 0.16, 12, 80),
+  new THREE.MeshStandardMaterial({color:0x0a3a33, emissive:0x34d399, emissiveIntensity:1.5, roughness:0.4})
+);
+plaza.rotation.x = -Math.PI/2; plaza.position.y = 0.06; scene.add(plaza);
+const plaza2 = new THREE.Mesh(
+  new THREE.TorusGeometry(6, 0.05, 8, 80),
+  new THREE.MeshStandardMaterial({color:0x0a3a33, emissive:0x9fe8d8, emissiveIntensity:1.0, roughness:0.4})
+);
+plaza2.rotation.x = -Math.PI/2; plaza2.position.y = 0.08; scene.add(plaza2);
+
+// ---- 湖泊（带涟漪）----
+const lakeGeo = new THREE.PlaneGeometry(34, 24, 22, 16);
+const lake = new THREE.Mesh(lakeGeo, new THREE.MeshStandardMaterial({
+  color:0x1d7a96, transparent:true, opacity:0.66, roughness:0.22, metalness:0.45,
+  emissive:0x0a3a4a, emissiveIntensity:0.4
+}));
+lake.rotation.x = -Math.PI/2; lake.position.set(-46, 0.06, 24); scene.add(lake);
+
+// ---- 路灯 ----
+const streetLamps = [];
+function lamp(x,z){
+  const g=new THREE.Group();
+  const pole=new THREE.Mesh(new THREE.CylinderGeometry(0.12,0.16,4,8),
+    new THREE.MeshStandardMaterial({color:0x2a2f2c,roughness:0.8}));
+  pole.position.y=2; g.add(pole);
+  const head=new THREE.Mesh(new THREE.SphereGeometry(0.34,12,12),
+    new THREE.MeshStandardMaterial({color:0xffe6a8,emissive:0xffd27a,emissiveIntensity:1.4}));
+  head.position.y=4.05; g.add(head);
+  const pl=new THREE.PointLight(0xffd9a0, 0, 10); pl.position.y=4.05; g.add(pl);
+  g.position.set(x,0,z); scene.add(g);
+  streetLamps.push(pl);
+}
+for(let i=0;i<8;i++){ const a=i/8*Math.PI*2; lamp(Math.cos(a)*9, Math.sin(a)*9); }
+lamp(0,16); lamp(0,-22);
+
+// ---- 信标 / 传送门 ----
+function makeBeacon(x,z,colorInt,colorHex,name,target){
+  const g=new THREE.Group(); g.position.set(x,2.2,z);
+  const ring=new THREE.Mesh(new THREE.TorusGeometry(2,0.22,16,48),
+    new THREE.MeshStandardMaterial({color:0x091a18,emissive:colorInt,emissiveIntensity:1.7,roughness:0.4}));
+  g.add(ring);
+  const disc=new THREE.Mesh(new THREE.CircleGeometry(1.85,48),
+    new THREE.MeshBasicMaterial({color:colorInt,transparent:true,opacity:0.5,side:THREE.DoubleSide}));
+  g.add(disc);
+  const pl=new THREE.PointLight(colorInt,2.2,18); pl.position.y=0; g.add(pl);
+  g.userData={name,target,colorHex,near:false};
+  scene.add(g);
+  return g;
+}
+// 学习区（保留原传送门外观）
+const portal = new THREE.Group(); portal.position.set(0,2.2,-14);
+const ring = new THREE.Mesh(new THREE.TorusGeometry(2,0.22,16,48),
+  new THREE.MeshStandardMaterial({color:0x0a3a33,emissive:0x34d399,emissiveIntensity:1.6,roughness:0.4}));
+portal.add(ring);
+const disc = new THREE.Mesh(new THREE.CircleGeometry(1.85,48),
+  new THREE.MeshBasicMaterial({color:0x0d5b4e,transparent:true,opacity:0.55,side:THREE.DoubleSide}));
+portal.add(disc);
+const plight = new THREE.PointLight(0x34d399, 2.2, 18); plight.position.y=0; portal.add(plight);
+portal.userData={name:'学习区', target:'../study.html', colorHex:'#34d399', near:false};
+scene.add(portal);
+// 游戏区 / 指挥台 / 个人项目
+const gameBeacon = makeBeacon(15, -7, 0xff9a4d, '#ff9a4d', '游戏区', '../games/index.html');
+const cmdBeacon  = makeBeacon(-15, -7, 0x5aa9ff, '#5aa9ff', '指挥台', '../index.html');
+const projBeacon = makeBeacon(0, 17, 0xb48cff, '#b48cff', '个人项目', '../projects.html');
+const beacons = [portal, gameBeacon, cmdBeacon, projBeacon];
+
+// ---- 引导员 NPC（AI 文生 3D 动漫角色 character.glb）----
+const MODEL_FLIP = Math.PI;
+let npc = null, npcBaseY = 0;
+const npcLight = new THREE.PointLight(0xffe0b0, 1.4, 9); npcLight.position.set(2.8, 2.4, -13.5); scene.add(npcLight);
+hint.textContent = '正在加载引导员…'; hint.style.opacity = 1;
+new GLTFLoader().load('models/character.glb', (gltf) => {
+  npc = gltf.scene;
+  npc.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+  const box = new THREE.Box3().setFromObject(npc);
+  const size = new THREE.Vector3(); box.getSize(size);
+  npc.scale.setScalar(1.8 / size.y);
+  box.setFromObject(npc);
+  npcBaseY = -box.min.y;
+  npc.position.set(2.8, npcBaseY, -13.5);
+  npc.rotation.y = MODEL_FLIP;
+  scene.add(npc);
+  hint.textContent = '引导员就位 ✦ 去找信标吧'; setTimeout(() => { if(!nearInteractable && !nearCrystalFlag) hint.style.opacity = 0; }, 2600);
+}, undefined, (err) => {
+  console.warn('引导员加载失败:', err);
+  hint.textContent = '引导员加载失败（不影响游玩）'; setTimeout(() => { if(!nearInteractable && !nearCrystalFlag) hint.style.opacity = 0; }, 2600);
+});
+
+// ---- 伙伴 NPC（程序化动漫形象，向经典动画 archetype 致敬）----
+function rr(x,a,b,w,h,r){ x.beginPath(); x.moveTo(a+r,b); x.arcTo(a+w,b,a+w,b+h,r);
+  x.arcTo(a+w,b+h,a,b+h,r); x.arcTo(a,b+h,a,b,r); x.arcTo(a,b,a+w,b,r); x.closePath(); }
+function makeLabel(text, bg){
+  const c=document.createElement('canvas'); c.width=256; c.height=64; const x=c.getContext('2d');
+  x.fillStyle=bg||'rgba(8,14,12,0.82)'; rr(x,4,4,248,56,14); x.fill();
+  x.strokeStyle='rgba(52,211,153,0.6)'; x.lineWidth=2; rr(x,4,4,248,56,14); x.stroke();
+  x.fillStyle='#eafff6'; x.font='bold 30px "PingFang SC","Microsoft YaHei",sans-serif';
+  x.textAlign='center'; x.textBaseline='middle'; x.fillText(text,128,34);
+  const tex=new THREE.CanvasTexture(c); tex.colorSpace=THREE.SRGBColorSpace;
+  const s=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true,depthWrite:false}));
+  s.scale.set(2.3,0.58,1); return s;
+}
+function makeAnimeNPC(cfg){
+  const g=new THREE.Group();
+  const skin=cfg.skin||0xffd9b3;
+  const M=(c,o={})=>new THREE.MeshStandardMaterial({color:c,roughness:0.82,metalness:0.05,...o});
+  const legGeo=new THREE.CylinderGeometry(0.12,0.12,0.55,10);
+  const legL=new THREE.Mesh(legGeo,M(cfg.outfit2||0x2a2f3a)); legL.position.set(-0.13,0.28,0);
+  const legR=legL.clone(); legR.position.x=0.13; g.add(legL,legR);
+  const torso=new THREE.Mesh(new THREE.CylinderGeometry(0.22,0.29,0.7,12), M(cfg.outfit||0x34d399));
+  torso.position.y=0.9; g.add(torso);
+  const armGeo=new THREE.CylinderGeometry(0.08,0.08,0.55,8);
+  const armL=new THREE.Mesh(armGeo,M(cfg.outfit2||0x2a2f3a)); armL.position.set(-0.33,0.95,0); armL.rotation.z=0.25;
+  const armR=armL.clone(); armR.position.x=0.33; armR.rotation.z=-0.25; g.add(armL,armR);
+  const head=new THREE.Mesh(new THREE.SphereGeometry(0.3,20,20), M(skin)); head.position.y=1.5; g.add(head);
+  const hairM=M(cfg.hair||0x222222,{roughness:0.6});
+  const hairCap=new THREE.Mesh(new THREE.SphereGeometry(0.32,20,20,0,Math.PI*2,0,Math.PI*0.62), hairM);
+  hairCap.position.y=1.52; g.add(hairCap);
+  const addHair=(geo,px,py,pz,rx,rz)=>{ const m=new THREE.Mesh(geo,hairM); m.position.set(px,py,pz);
+    if(rx)m.rotation.x=rx; if(rz)m.rotation.z=rz; g.add(m); };
+  if(cfg.hairStyle==='spiky'){
+    for(let i=0;i<8;i++){ const a=i/8*Math.PI*2; addHair(new THREE.ConeGeometry(0.07,0.34,6),
+      Math.cos(a)*0.17,1.72,Math.sin(a)*0.17, -Math.sin(a)*0.55, Math.cos(a)*0.55); } }
+  else if(cfg.hairStyle==='twin'){
+    for(const sx of [-1,1]){ addHair(new THREE.CylinderGeometry(0.09,0.05,0.55,8), sx*0.3,1.45,0, 0, sx*0.55);
+      addHair(new THREE.SphereGeometry(0.13,10,10), sx*0.43,1.16,0); } }
+  else if(cfg.hairStyle==='cat'){
+    for(const sx of [-1,1]){ addHair(new THREE.ConeGeometry(0.1,0.24,8), sx*0.16,1.8,0); } }
+  else if(cfg.hairStyle==='long'){
+    addHair(new THREE.CylinderGeometry(0.3,0.22,0.8,12), 0,1.3,-0.16, 0.12, 0); }
+  const eyeM=new THREE.MeshStandardMaterial({color:0x1a1a22,roughness:0.4});
+  for(const sx of [-1,1]){ const e=new THREE.Mesh(new THREE.SphereGeometry(0.055,8,8),eyeM); e.position.set(sx*0.11,1.5,0.27); g.add(e); }
+  if(cfg.sword){ const sw=new THREE.Mesh(new THREE.BoxGeometry(0.05,0.95,0.02), M(0xcfd8e0,{metalness:0.6,roughness:0.3}));
+    sw.position.set(0.42,1.05,0.08); sw.rotation.z=-0.32; g.add(sw);
+    const hilt=new THREE.Mesh(new THREE.CylinderGeometry(0.04,0.04,0.2,8),M(0x8a5a2b)); hilt.position.set(0.49,0.6,0.08); hilt.rotation.z=-0.32; g.add(hilt); }
+  const label=makeLabel(cfg.name, cfg.labelBg); label.position.y=2.3; g.add(label);
+  g.traverse(o=>{ if(o.isMesh) o.castShadow=true; });
+  g.userData={ cfg, label, t:Math.random()*6.28, wave:false,
+    limbs:{legL,legR,armL,armR},          // 跟随时做走路摆动
+    follow:false, phase:Math.random()*6.28, spd:0, chatAt:0, home:null };
+  return g;
+}
+const companions = [
+  { name:'主角·小待', hair:0x1b3a6b, hairStyle:'spiky', outfit:0x2e8b57, outfit2:0x16324a, skin:0xffd9b3, labelBg:'rgba(20,60,40,0.85)', pos:[3,0,11],
+    accent:'#34d399', role:'热血主角',
+    lines:['哟，你终于来了！这座小世界是我们一起搭起来的。',
+           '看到那三束光柱了吗？绿色去学习区、橙色去游戏区、蓝色回指挥台。',
+           '天会黑，路灯会自己亮起来——夜里的萤火虫值得等一等。',
+           '要一起走走吗？按 G 我就跟着你。'],
+    chat:['前面那片湖，晚上会映出星星。','别忘了捡水晶，14 颗全齐有惊喜。','需要带路就喊我。'] },
+  { name:'魔法少女', hair:0xffe08a, hairStyle:'twin', outfit:0xff7ab0, outfit2:0xfff0f6, skin:0xffe0c4, labelBg:'rgba(90,30,60,0.85)', pos:[-7,0,7],
+    accent:'#ff7ab0', role:'魔法系',
+    lines:['以月光的名义——欢迎来到这里！',
+           '那些发光水晶其实是凝固的魔力，靠近就会被你吸收哦。',
+           '如果天太黑，按 ] 可以把时间往前拨一点，太阳会回来的。',
+           '我可以陪你一段路，按 G 就好。'],
+    chat:['你的水晶在发光呢。','要变身吗？开玩笑的。','这里的夜空我画过好多遍。'] },
+  { name:'忍者·橙', hair:0xff7a1a, hairStyle:'spiky', outfit:0xff6a00, outfit2:0x1a1a1a, skin:0xf0c39a, labelBg:'rgba(80,40,10,0.85)', pos:[9,0,-2],
+    accent:'#ff9c3a', role:'速度型',
+    lines:['嘿！你走得太慢了，按住 Shift 试试。',
+           '我在屋顶间跑过一整圈，这世界比看起来大——边界大概 95 米。',
+           '修行的秘诀？把同一条路跑到闭着眼也不会撞墙。',
+           '想比一场？按 G，我跟着你跑。'],
+    chat:['再快一点！','屋顶上的风景不错。','别停下来。'] },
+  { name:'猫耳少女', hair:0x9b6bff, hairStyle:'cat', outfit:0x7c5cff, outfit2:0x3a2f6b, skin:0xffd9c2, labelBg:'rgba(50,30,90,0.85)', pos:[-9,0,1],
+    accent:'#a78bfa', role:'治愈系',
+    lines:['喵…你身上有股新来的味道。',
+           '我最喜欢正午的广场，灯带是暖的，可以睡一小会儿。',
+           '按 P 可以把眼前的画面存成图片，我帮你摆好姿势。',
+           '要我跟着吗？按 G，我不吵的。'],
+    chat:['喵～','那只无人机好像也想被摸。','太阳晒得刚刚好。'] },
+  { name:'机甲驾驶员', hair:0x3a3f4a, hairStyle:'short', outfit:0xff8c1a, outfit2:0xeef2f6, skin:0xf2cba0, labelBg:'rgba(70,45,15,0.85)', pos:[7,0,9],
+    accent:'#fbbf24', role:'技术型',
+    lines:['系统自检完成，欢迎回到驾驶舱视角。',
+           '你头顶那台无人机是我调的，它会一直跟在你身后上方。',
+           '帧率掉了就按 K 关阴影、按 L 关粒子，能省不少算力。',
+           '需要僚机吗？按 G，我编入你的队列。'],
+    chat:['能量读数正常。','阴影开销有点高。','小地图右上角，别迷路。'] },
+  { name:'剑士', hair:0x2b6cff, hairStyle:'long', outfit:0x244b8a, outfit2:0x16243f, skin:0xffd9b3, sword:true, labelBg:'rgba(20,40,80,0.85)', pos:[-6,0,-7],
+    accent:'#60a5fa', role:'剑术',
+    lines:['止步。……不必紧张，我只是在守着这条路。',
+           '森林那侧更密，树影里容易走偏，靠灯柱走。',
+           '剑不是为了砍谁，是为了让路能一直走下去。',
+           '若你要远行，按 G，我随行。'],
+    chat:['风向变了。','守夜是件安静的事。','走稳些。'] },
+  { name:'武士', hair:0x222222, hairStyle:'short', outfit:0xb33b3b, outfit2:0x2a1414, skin:0xf0c39a, sword:true, labelBg:'rgba(80,20,20,0.85)', pos:[11,0,3],
+    accent:'#f87171', role:'守卫',
+    lines:['来者何人。——好，你的脚步不慌。',
+           '日落时分这里最美，也最容易松懈，记得回头看看身后。',
+           '按 T 能让时间停在你喜欢的那一刻。',
+           '同行否？按 G。'],
+    chat:['风起了。','刀在鞘中最好。','黄昏将至。'] },
+];
+const companionGroups = companions.map(c=>{
+  const g = makeAnimeNPC(c);
+  g.position.set(c.pos[0], c.pos[1], c.pos[2]);
+  g.rotation.y = Math.random()*Math.PI*2;
+  g.userData.home = new THREE.Vector3(c.pos[0], c.pos[1], c.pos[2]);
+  g.userData.homeRot = g.rotation.y;
+  scene.add(g);
+  return g;
+});
+
+// ---- 头顶对话气泡（3D 精灵，共用一张动态画布）----
+const bubCv = document.createElement('canvas'); bubCv.width=512; bubCv.height=200;
+const bubCtx = bubCv.getContext('2d');
+const bubTex = new THREE.CanvasTexture(bubCv); bubTex.colorSpace = THREE.SRGBColorSpace;
+const bubble = new THREE.Sprite(new THREE.SpriteMaterial({ map:bubTex, transparent:true, depthWrite:false, depthTest:false }));
+bubble.scale.set(4.4,1.72,1); bubble.renderOrder = 999; bubble.visible = false;
+function roundRect(ctx,x,y,w,h,r){ ctx.beginPath();
+  ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y); ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+  ctx.lineTo(x+w,y+h-r); ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  ctx.lineTo(x+r,y+h); ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+  ctx.lineTo(x,y+r); ctx.quadraticCurveTo(x,y,x+r,y); ctx.closePath(); }
+function drawBubble(text, accent){
+  const W=bubCv.width, H=bubCv.height;
+  bubCtx.clearRect(0,0,W,H);
+  bubCtx.font='600 30px "PingFang SC","Microsoft YaHei",sans-serif';
+  bubCtx.textBaseline='top';
+  // 中文逐字折行
+  const maxW=W-64, lines=[]; let cur='';
+  for(const ch of text){
+    if(ch==='\n'){ lines.push(cur); cur=''; continue; }
+    if(bubCtx.measureText(cur+ch).width>maxW){ lines.push(cur); cur=ch; }
+    else cur+=ch;
+    if(lines.length>=3) break;
+  }
+  if(cur && lines.length<3) lines.push(cur);
+  const lh=38, bodyH=Math.max(lh+22, lines.length*lh+22);
+  const top=(H-26-bodyH)/2;
+  bubCtx.fillStyle='rgba(10,16,14,0.9)';
+  bubCtx.strokeStyle=accent||'#34d399'; bubCtx.lineWidth=3;
+  roundRect(bubCtx,10,top,W-20,bodyH,22); bubCtx.fill(); bubCtx.stroke();
+  // 小尾巴
+  bubCtx.beginPath();
+  bubCtx.moveTo(W/2-16,top+bodyH-1); bubCtx.lineTo(W/2,top+bodyH+22); bubCtx.lineTo(W/2+16,top+bodyH-1);
+  bubCtx.closePath(); bubCtx.fillStyle='rgba(10,16,14,0.9)'; bubCtx.fill();
+  bubCtx.strokeStyle=accent||'#34d399'; bubCtx.stroke();
+  bubCtx.fillStyle='#e8efe9';
+  lines.forEach((l,i)=> bubCtx.fillText(l, 32, top+13+i*lh));
+  bubTex.needsUpdate=true;
+}
+function showBubble(g, text, accent){
+  drawBubble(text, accent);
+  if(bubble.parent!==g){ if(bubble.parent) bubble.parent.remove(bubble); g.add(bubble); }
+  bubble.position.set(0, 3.05, 0); bubble.visible = true;
+}
+function hideBubble(){ bubble.visible=false; if(bubble.parent) bubble.parent.remove(bubble); }
+
+// ---- 对话系统 ----
+const dialog = { active:false, g:null, idx:0, shown:0, full:'', done:false };
+function startDialog(g){
+  if(!g) return;
+  dialog.active=true; dialog.g=g; dialog.idx=0;
+  loadLine();
+  dlgName.textContent = g.userData.cfg.name;
+  dlgDot.style.color  = g.userData.cfg.accent || '#34d399';
+  dlgTag.textContent  = g.userData.cfg.role || '对话中';
+  dlgEl.classList.add('show');
+}
+function loadLine(){
+  const u=dialog.g.userData;
+  dialog.full = (u.cfg.lines && u.cfg.lines[dialog.idx]) || '……';
+  dialog.shown = 0; dialog.done = false;
+  dlgText.innerHTML = '<span class="car">▌</span>';
+  showBubble(dialog.g, dialog.full, u.cfg.accent);
+}
+function advanceDialog(){
+  if(!dialog.active) return;
+  if(!dialog.done){ dialog.shown = dialog.full.length; renderLine(); return; }   // 先跳过打字机
+  const lines = dialog.g.userData.cfg.lines || [];
+  if(dialog.idx < lines.length-1){ dialog.idx++; loadLine(); }
+  else endDialog();
+}
+function renderLine(){
+  const t = dialog.full.slice(0, Math.floor(dialog.shown));
+  dialog.done = dialog.shown >= dialog.full.length;
+  dlgText.innerHTML = t + (dialog.done ? '' : '<span class="car">▌</span>');
+  if(dialog.done) showBubble(dialog.g, dialog.full, dialog.g.userData.cfg.accent);
+  else drawBubble(t + '▌', dialog.g.userData.cfg.accent);
+}
+function endDialog(){
+  dialog.active=false; dialog.g=null;
+  dlgEl.classList.remove('show'); hideBubble();
+}
+function updateDialog(dt){
+  if(!dialog.active || dialog.done) return;
+  dialog.shown += dt*34;                 // 每秒 ~34 字
+  renderLine();
+}
+
+// ---- 跟随系统 ----
+const followers = [];
+const MAX_FOLLOW = 4;
+function toggleFollow(g){
+  if(!g) return;
+  const u=g.userData;
+  if(u.follow){
+    u.follow=false; followers.splice(followers.indexOf(g),1);
+    flashHint('👋 '+u.cfg.name+' 留在这里了');
+  } else {
+    if(followers.length>=MAX_FOLLOW){ flashHint('队伍已满（最多 '+MAX_FOLLOW+' 位同行）'); return; }
+    u.follow=true; followers.push(g);
+    flashHint('🤝 '+u.cfg.name+' 加入同行（'+followers.length+'/'+MAX_FOLLOW+'）');
+  }
+}
+
+// ---- NPC 选取：准星射线 + 就近兜底 ----
+const npcRay = new THREE.Raycaster();
+const screenCenter = new THREE.Vector2(0,0);
+function pickNPC(maxDist=9){
+  camera.updateMatrixWorld();
+  npcRay.setFromCamera(screenCenter, camera);
+  const hits = npcRay.intersectObjects(companionGroups, true);
+  for(const h of hits){
+    if(h.distance>maxDist) break;
+    let o=h.object; while(o && !o.userData.cfg) o=o.parent;
+    if(o) return o;
+  }
+  // 兜底：取最近的一位
+  let best=null, bd=4.2;
+  for(const g of companionGroups){
+    const d=Math.hypot(camera.position.x-g.position.x, camera.position.z-g.position.z);
+    if(d<bd){ bd=d; best=g; }
+  }
+  return best;
+}
+function talkOrAdvance(){
+  if(dialog.active) advanceDialog();
+  else { const g=pickNPC(); if(g) startDialog(g); else flashHint('附近没有可以对话的人'); }
+}
+// 移动端：对话面板里的「跟随」按钮
+dlgFollowBtn.addEventListener('click', e=>{ e.stopPropagation(); if(dialog.active) toggleFollow(dialog.g); });
+dlgFollowBtn.addEventListener('touchstart', e=>{ e.stopPropagation(); }, {passive:true});
+
+// ---- 漂浮粒子（白天）----
+const pCount=600, pos=new Float32Array(pCount*3);
+for(let i=0;i<pCount;i++){ pos[i*3]=(Math.random()-0.5)*160; pos[i*3+1]=Math.random()*40; pos[i*3+2]=(Math.random()-0.5)*160; }
+const pGeo=new THREE.BufferGeometry(); pGeo.setAttribute('position',new THREE.BufferAttribute(pos,3));
+const particles=new THREE.Points(pGeo,new THREE.PointsMaterial({color:0x9fe8d8,size:0.18,transparent:true,opacity:0.6}));
+scene.add(particles);
+
+// ---- 萤火虫（夜晚）----
+const fCount=140, fpos=new Float32Array(fCount*3);
+for(let i=0;i<fCount;i++){ const a=Math.random()*Math.PI*2, r=8+Math.random()*70;
+  fpos[i*3]=Math.cos(a)*r; fpos[i*3+1]=0.5+Math.random()*3.2; fpos[i*3+2]=Math.sin(a)*r; }
+const fGeo=new THREE.BufferGeometry(); fGeo.setAttribute('position',new THREE.BufferAttribute(fpos,3));
+const fireflies=new THREE.Points(fGeo,new THREE.PointsMaterial({color:0xaef0c8,size:0.22,transparent:true,opacity:0.9}));
+fireflies.visible=false; scene.add(fireflies);
+
+// ---- 收集水晶 ----
+const crystals=[]; const crystalCount=14;
+const crystalCols=[0x7df9ff,0xb388ff,0x7CFFB2];
+let collectedCount=0;
+let bestCrystals = parseInt(localStorage.getItem('world_best_crystals') || '0', 10) || 0;
+for(let i=0;i<crystalCount;i++){
+  const ang=Math.random()*Math.PI*2, rad=8+Math.random()*62;
+  const col=crystalCols[i%3];
+  const m=new THREE.Mesh(new THREE.OctahedronGeometry(0.5,0),
+    new THREE.MeshStandardMaterial({color:col,emissive:col,emissiveIntensity:1.3,roughness:0.3,metalness:0.2,transparent:true,opacity:1,flatShading:true}));
+  m.position.set(Math.cos(ang)*rad, 1.2, Math.sin(ang)*rad);
+  m.userData={baseY:1.2, collected:false, collecting:false, phase:Math.random()*6.28};
+  scene.add(m); crystals.push(m);
+}
+
+// ---- 伙伴无人机 ----
+const drone=new THREE.Group();
+const dBody=new THREE.Mesh(new THREE.SphereGeometry(0.32,16,16),
+  new THREE.MeshStandardMaterial({color:0x0c1411,emissive:0x34d399,emissiveIntensity:0.8,roughness:0.4,metalness:0.6}));
+drone.add(dBody);
+const dRing=new THREE.Mesh(new THREE.TorusGeometry(0.5,0.06,10,28),
+  new THREE.MeshStandardMaterial({color:0x34d399,emissive:0x34d399,emissiveIntensity:1.2,roughness:0.4}));
+drone.add(dRing);
+const dLight=new THREE.PointLight(0x9fe8d8, 0.9, 6); drone.add(dLight);
+drone.position.set(0,3,22); scene.add(drone);
+
+// ---- 昼夜系统 ----
+const DAY_TOP=new THREE.Color(0x0b1a2e), DAY_BOT=new THREE.Color(0x123a4a);
+const NIGHT_TOP=new THREE.Color(0x03060d), NIGHT_BOT=new THREE.Color(0x0a1626);
+const SUN_NOON=new THREE.Color(0xfff2dd), SUN_DAWN=new THREE.Color(0xff9a4d);
+let timeOfDay=0.42, autoTime=true;
+function applyTimeOfDay(){
+  const t=timeOfDay;
+  const elev=Math.sin((t-0.25)*Math.PI*2);
+  const day=THREE.MathUtils.clamp(elev*0.5+0.5,0,1);
+  const az=(t-0.25)*Math.PI*2;
+  sun.position.set(Math.cos(az)*60, Math.max(-30, elev*75), 25+Math.sin(az)*12);
+  sun.intensity = Math.max(0, day*1.6);
+  sun.color.copy(SUN_DAWN).lerp(SUN_NOON, THREE.MathUtils.clamp(elev*1.5+0.5,0,1));
+  hemi.intensity = 0.15 + day*0.6;
+  ambient.intensity = 0.06 + day*0.15;
+  sky.material.uniforms.top.value.copy(NIGHT_TOP).lerp(DAY_TOP, day);
+  sky.material.uniforms.bottom.value.copy(NIGHT_BOT).lerp(DAY_BOT, day);
+  scene.fog.color.copy(sky.material.uniforms.bottom.value);
+  const night=1-day;
+  streetLamps.forEach(l=> l.intensity = night*1.4);
+  fireflies.visible = night>0.32;
+}
+
+// ---- 控制器：指针锁定 + WASD ----
+let locked=false, yaw=0, pitch=0;
+const keys={}; const move={x:0,z:0};
+const HAS_POINTER_LOCK = 'pointerLockElement' in document;
+function enterWorld(){
+  if (HAS_POINTER_LOCK) { canvas.requestPointerLock(); }
+  else { locked = true; overlay.classList.add('hidden'); crosshair.style.opacity = 0; }
+}
+overlay.addEventListener('click', enterWorld);
+canvas.addEventListener('click',()=>{ if(!locked) enterWorld(); });
+// 锁定后：左键对准 NPC → 对话 / 推进下一句
+canvas.addEventListener('mousedown',e=>{ if(locked && e.button===0) talkOrAdvance(); });
+document.addEventListener('pointerlockchange',()=>{
+  locked = document.pointerLockElement===canvas;
+  overlay.classList.toggle('hidden', locked);
+  crosshair.style.opacity = locked ? 1 : 0;
+});
+addEventListener('mousemove',e=>{ if(!locked) return;
+  yaw   -= e.movementX*0.0022;
+  pitch -= e.movementY*0.0022;
+  pitch = Math.max(-1.3, Math.min(1.3, pitch));
+});
+
+// 工具：提示闪烁
+let flashText=null, flashUntil=0;
+function flashHint(t){ flashText=t; flashUntil=performance.now()+1500; }
+// 工具：开关
+function toggleHelp(){ helpEl.classList.toggle('hidden'); }
+let shadowsOn=true;
+function toggleShadows(){ shadowsOn=!shadowsOn; renderer.shadowMap.enabled=shadowsOn;
+  scene.traverse(o=>{ if(o.isMesh && o.material) o.material.needsUpdate=true; });
+  flashHint(shadowsOn?'☀️ 阴影开':'🌑 阴影关'); }
+let particlesOn=true;
+function toggleParticles(){ particlesOn=!particlesOn; particles.visible=particlesOn;
+  flashHint(particlesOn?'✨ 粒子开':'✨ 粒子关'); }
+function takePhoto(){
+  try{
+    const url=renderer.domElement.toDataURL('image/png');
+    const a=document.createElement('a'); a.href=url; a.download='3d-world-'+Date.now()+'.png'; a.click();
+    flashHint('📸 已截图保存');
+  }catch(err){ flashHint('截图失败'); }
+}
+
+addEventListener('keydown',e=>{ keys[e.code]=true;
+  if(e.code==='KeyE' && nearInteractable && !dialog.active){ location.href = nearInteractable.userData.target; }
+  // 对话 / 跟随
+  if(e.code==='KeyF'){ talkOrAdvance(); }
+  if(e.code==='Space' && dialog.active){ e.preventDefault(); advanceDialog(); }
+  if(e.code==='KeyG'){ toggleFollow(dialog.active ? dialog.g : pickNPC()); }
+  if(e.code==='Escape' && dialog.active) endDialog();
+  if(e.code==='KeyH') toggleHelp();
+  if(e.code==='KeyK') toggleShadows();
+  if(e.code==='KeyL') toggleParticles();
+  if(e.code==='KeyP') takePhoto();
+  if(e.code==='KeyT'){ autoTime=!autoTime; flashHint(autoTime?'🕒 自动昼夜开':'⏸ 自动昼夜暂停'); }
+  if(e.code==='BracketLeft'){ timeOfDay=(timeOfDay-0.02+1)%1; applyTimeOfDay(); }
+  if(e.code==='BracketRight'){ timeOfDay=(timeOfDay+0.02)%1; applyTimeOfDay(); }
+});
+addEventListener('keyup',e=>keys[e.code]=false);
+
+// 移动端摇杆
+let joyId=null, lookId=null, lastX=0,lastY=0;
+joy.addEventListener('touchstart',e=>{joyId=e.changedTouches[0].identifier;const r=joy.getBoundingClientRect();
+  joy.center={x:r.left+r.width/2,y:r.top+r.height/2};},{passive:true});
+joy.addEventListener('touchmove',e=>{ for(const t of e.changedTouches){ if(t.identifier!==joyId)continue;
+  let dx=t.clientX-joy.center.x, dy=t.clientY-joy.center.y; const max=35;
+  const d=Math.hypot(dx,dy); if(d>max){dx*=max/d;dy*=max/d;}
+  nub.style.transform=`translate(${dx-25}px,${dy-25}px)`;
+  move.x=dx/max; move.z=dy/max; } },{passive:true});
+joy.addEventListener('touchend',e=>{ for(const t of e.changedTouches){ if(t.identifier===joyId){joyId=null;
+  nub.style.transform='translate(-50%,-50%)'; move.x=0;move.z=0;} } },{passive:true});
+let tapT0=0, tapX0=0, tapY0=0, tapMoved=false;
+lookpad.addEventListener('touchstart',e=>{lookId=e.changedTouches[0].identifier;lastX=e.changedTouches[0].clientX;lastY=e.changedTouches[0].clientY;
+  tapT0=performance.now(); tapX0=lastX; tapY0=lastY; tapMoved=false;},{passive:true});
+lookpad.addEventListener('touchmove',e=>{ for(const t of e.changedTouches){ if(t.identifier!==lookId)continue;
+  yaw-=(t.clientX-lastX)*0.005; pitch-=(t.clientY-lastY)*0.005;
+  pitch=Math.max(-1.3,Math.min(1.3,pitch)); lastX=t.clientX; lastY=t.clientY;
+  if(Math.hypot(t.clientX-tapX0,t.clientY-tapY0)>12) tapMoved=true; } },{passive:true});
+lookpad.addEventListener('touchend',e=>{ for(const t of e.changedTouches){ if(t.identifier===lookId){ lookId=null;
+  // 轻点（未拖动）→ 对话 / 下一句
+  if(!tapMoved && performance.now()-tapT0<320) talkOrAdvance(); } } },{passive:true});
+
+// 帮助浮层点击关闭
+helpEl.addEventListener('click', ()=> helpEl.classList.add('hidden'));
+
+let nearInteractable=null, nearCrystalFlag=false, npcNearName=null;
+const clock=new THREE.Clock();
+let fpsSmooth=60;
+
+// 更新函数
+function updateTime(dt){ if(autoTime){ timeOfDay=(timeOfDay+dt/140)%1; } applyTimeOfDay(); }
+
+function updateCollectibles(dt, now){
+  nearCrystalFlag=false;
+  for(const c of crystals){
+    const u=c.userData;
+    if(u.collected) continue;
+    c.rotation.y += dt*1.3; c.rotation.x += dt*0.5;
+    c.position.y = u.baseY + Math.sin(now*0.002+u.phase)*0.18;
+    if(u.collecting){
+      c.scale.multiplyScalar(1+dt*4); c.material.opacity -= dt*2.2;
+      if(c.material.opacity<=0){ c.visible=false; u.collecting=false; }
+      continue;
+    }
+    const dx=camera.position.x-c.position.x, dz=camera.position.z-c.position.z;
+    const d=Math.hypot(dx,dz);
+    if(d<2.5){
+      u.collecting=true; u.collected=true; collectedCount++;
+      if(collectedCount>bestCrystals){ bestCrystals=collectedCount; localStorage.setItem('world_best_crystals', String(bestCrystals));
+        flashHint('🏆 新纪录！💎 '+collectedCount+'/'+crystalCount); }
+      else flashHint('💎 收集 +1 ('+collectedCount+'/'+crystalCount+')');
+    } else if(d<5){ nearCrystalFlag=true; }
+  }
+}
+
+function updateBeacons(dt, now){
+  nearInteractable=null; let nd=6, tgt=null;
+  for(const b of beacons){
+    const d=camera.position.distanceTo(b.position);
+    b.rotation.z += dt*0.4;
+    b.children[1].material.opacity = 0.42+0.16*Math.sin(now*0.003);
+    if(d<nd){ nd=d; tgt=b; }
+  }
+  nearInteractable = tgt;
+}
+
+function turnTo(g, angle, dt, rate){
+  let diff=angle-g.rotation.y;
+  while(diff>Math.PI) diff-=Math.PI*2; while(diff<-Math.PI) diff+=Math.PI*2;
+  g.rotation.y += diff*Math.min(1, dt*(rate||3));
+}
+function updateNPCs(dt, now){
+  npcNearName=null; let best=4, name=null;
+  // 跟随者队形槽位（玩家身后左右交错）
+  const fwdX=Math.sin(yaw), fwdZ=-Math.cos(yaw);
+  const rgtX=Math.cos(yaw), rgtZ=Math.sin(yaw);
+
+  for(const g of companionGroups){
+    const u=g.userData;
+    const dx=camera.position.x-g.position.x, dz=camera.position.z-g.position.z;
+    const d=Math.hypot(dx,dz);
+    if(d<best){ best=d; name=u.cfg.name; }
+
+    if(u.follow){
+      // —— 跟随：走向玩家身后的槽位 ——
+      const i=followers.indexOf(g);
+      const row=Math.floor(i/2), side=(i%2===0?1:-1)*(1.25+row*0.45);
+      const back=2.3+row*1.05;
+      const tx=camera.position.x - fwdX*back + rgtX*side;
+      const tz=camera.position.z - fwdZ*back + rgtZ*side;
+      const ax=tx-g.position.x, az=tz-g.position.z, ad=Math.hypot(ax,az);
+      if(ad>0.3){
+        const sp=Math.min(ad*3.0, 13)*dt;
+        g.position.x += ax/ad*sp; g.position.z += az/ad*sp;
+        u.spd = sp/Math.max(dt,0.0001);
+        turnTo(g, Math.atan2(ax,az), dt, 7);
+      } else {
+        u.spd *= 0.82;
+        turnTo(g, Math.atan2(dx,dz), dt, 4);   // 站定时看向玩家
+      }
+    } else {
+      // —— 非跟随：面向玩家，若被带远则慢慢走回原位 ——
+      const hx=u.home.x-g.position.x, hz=u.home.z-g.position.z, hd=Math.hypot(hx,hz);
+      if(hd>0.4){
+        const sp=Math.min(hd*2.0, 6)*dt;
+        g.position.x += hx/hd*sp; g.position.z += hz/hd*sp;
+        u.spd = sp/Math.max(dt,0.0001);
+        turnTo(g, Math.atan2(hx,hz), dt, 5);
+      } else {
+        u.spd *= 0.8;
+        turnTo(g, Math.atan2(dx,dz), dt, 3);
+      }
+    }
+
+    // 走路摆动 / idle 浮动
+    const moving = u.spd>0.4;
+    if(moving){
+      u.phase += dt*Math.min(u.spd,12)*1.5;
+      const s=Math.sin(u.phase)*0.55;
+      u.limbs.legL.rotation.x =  s; u.limbs.legR.rotation.x = -s;
+      u.limbs.armL.rotation.x = -s*0.8; u.limbs.armR.rotation.x = s*0.8;
+      g.position.y = Math.abs(Math.sin(u.phase))*0.06;
+    } else {
+      const k=1-Math.exp(-dt*6);
+      u.limbs.legL.rotation.x += (0-u.limbs.legL.rotation.x)*k;
+      u.limbs.legR.rotation.x += (0-u.limbs.legR.rotation.x)*k;
+      u.limbs.armL.rotation.x += (0-u.limbs.armL.rotation.x)*k;
+      u.limbs.armR.rotation.x += (0-u.limbs.armR.rotation.x)*k;
+      g.position.y = (d<3.2 && !dialog.active)
+        ? Math.abs(Math.sin(now*0.006+u.t))*0.18      // 靠近时小跳打招呼
+        : Math.sin(now*0.0015+u.t)*0.05;
+    }
+
+    // 名牌：靠近 / 跟随 时更醒目
+    const hot = d<3.2 || u.follow;
+    u.label.material.opacity = hot?1:0.92;
+    u.label.scale.set(hot?2.6:2.3, hot?0.66:0.58, 1);
+    u.wave = d<3.2;
+  }
+
+  // 闲聊气泡：没有在对话时，最近的 NPC 偶尔冒一句
+  if(!dialog.active){
+    let near=null, nd=3.6;
+    for(const g of companionGroups){
+      const d=Math.hypot(camera.position.x-g.position.x, camera.position.z-g.position.z);
+      if(d<nd){ nd=d; near=g; }
+    }
+    if(near){
+      const u=near.userData;
+      if(now>u.chatAt){
+        const pool=u.cfg.chat||[];
+        if(pool.length){
+          showBubble(near, pool[Math.floor(Math.random()*pool.length)], u.cfg.accent);
+          u.chatAt = now + 9000; u.chatEnd = now + 3000;
+        }
+      }
+      if(u.chatEnd && now>u.chatEnd && bubble.parent===near) hideBubble();
+    } else if(bubble.visible){ hideBubble(); }
+  }
+}
+
+function updateDrone(dt, now){
+  const bx = camera.position.x + Math.sin(yaw)*2.6;
+  const bz = camera.position.z + Math.cos(yaw)*2.6;
+  const desired = new THREE.Vector3(bx, EYE+1.4, bz);
+  drone.position.lerp(desired, 1-Math.exp(-dt*3));
+  drone.position.y += Math.sin(now*0.003)*0.12;
+  dRing.rotation.x += dt*1.5; dRing.rotation.y += dt*1.1;
+}
+
+function updateLake(now){
+  const p=lakeGeo.attributes.position;
+  for(let i=0;i<p.count;i++){
+    const ix=p.getX(i), iy=p.getY(i);
+    p.setZ(i, Math.sin(ix*0.4+now*0.002)*0.22 + Math.cos(iy*0.5+now*0.0017)*0.18);
+  }
+  p.needsUpdate=true; lakeGeo.computeVertexNormals();
+}
+
+function updateMinimap(){
+  const w=mm.width, h=mm.height; mctx.clearRect(0,0,w,h);
+  mctx.fillStyle='rgba(8,14,12,0.7)'; mctx.beginPath(); mctx.arc(w/2,h/2,w/2-2,0,7); mctx.fill();
+  mctx.strokeStyle='rgba(52,211,153,.35)'; mctx.lineWidth=1.5; mctx.beginPath(); mctx.arc(w/2,h/2,w/2-2,0,7); mctx.stroke();
+  const R=95;
+  const toMap=(x,z)=>[ w/2 + x/R*(w/2-8), h/2 + z/R*(h/2-8) ];
+  beacons.forEach(b=>{ const [mx,my]=toMap(b.position.x,b.position.z);
+    mctx.fillStyle=b.userData.colorHex; mctx.beginPath(); mctx.arc(mx,my,4,0,7); mctx.fill(); });
+  companionGroups.forEach(g=>{ const [mx,my]=toMap(g.position.x,g.position.z);
+    const f=g.userData.follow;
+    mctx.fillStyle=f?'#7df9c8':'#ffd27a'; mctx.beginPath(); mctx.arc(mx,my,f?3.2:2.4,0,7); mctx.fill();
+    if(f){ mctx.strokeStyle='rgba(125,249,200,.55)'; mctx.lineWidth=1; mctx.beginPath(); mctx.arc(mx,my,5.5,0,7); mctx.stroke(); } });
+  crystals.forEach(c=>{ if(c.userData.collected) return; const [mx,my]=toMap(c.position.x,c.position.z);
+    mctx.fillStyle='#9fe8ff'; mctx.fillRect(mx-1.5,my-1.5,3,3); });
+  const [px,py]=toMap(camera.position.x,camera.position.z);
+  mctx.fillStyle='#34d399'; mctx.beginPath(); mctx.arc(px,py,4,0,7); mctx.fill();
+  mctx.strokeStyle='#34d399'; mctx.lineWidth=2; mctx.beginPath(); mctx.moveTo(px,py);
+  mctx.lineTo(px - Math.sin(yaw)*11, py - Math.cos(yaw)*11); mctx.stroke();
+}
+
+function updateHUD(dt){
+  const h = Math.floor(timeOfDay*24);
+  const m = Math.floor((timeOfDay*24 - h)*60);
+  const hh = String(h).padStart(2,'0'), mm2 = String(m).padStart(2,'0');
+  if(dt>0) fpsSmooth = fpsSmooth*0.9 + (1/dt)*0.1;
+  hud.innerHTML = `坐标 <b>${camera.position.x.toFixed(0)},${camera.position.z.toFixed(0)}</b> · <b>${hh}:${mm2}</b> · 💎 <b>${collectedCount}/${crystalCount}</b>${collectedCount>=bestCrystals?'':' · 纪录 '+bestCrystals} · 👥 <b>${followers.length}/${MAX_FOLLOW}</b> · <b>${fpsSmooth.toFixed(0)}</b> FPS`;
+}
+
+function animate(){
+  requestAnimationFrame(animate);
+  const dt=Math.min(clock.getDelta(),0.05);
+  const now=performance.now();
+  // 移动输入
+  let f=0,r=0;
+  if(keys['KeyW']||keys['ArrowUp'])f+=1;
+  if(keys['KeyS']||keys['ArrowDown'])f-=1;
+  if(keys['KeyD']||keys['ArrowRight'])r+=1;
+  if(keys['KeyA']||keys['ArrowLeft'])r-=1;
+  f -= move.z; r += move.x;
+  if(dialog.active){ f=0; r=0; }                 // 对话中锁住脚步
+  const speed=(keys['ShiftLeft']||keys['ShiftRight']?14:7)*dt;
+  const sin=Math.sin(yaw), cos=Math.cos(yaw);
+  camera.position.x += (sin*f + cos*r)*speed;
+  camera.position.z += (-cos*f + sin*r)*speed;
+  camera.position.x=Math.max(-95,Math.min(95,camera.position.x));
+  camera.position.z=Math.max(-95,Math.min(95,camera.position.z));
+  camera.position.y=EYE;
+  camera.rotation.y=yaw; camera.rotation.x=pitch;
+  // 系统更新
+  updateTime(dt);
+  updateCollectibles(dt, now);
+  updateBeacons(dt, now);
+  updateNPCs(dt, now);
+  updateDialog(dt);
+  updateDrone(dt, now);
+  updateLake(now);
+  particles.rotation.y += dt*0.02;
+  // 引导员：面向玩家 + 轻微浮动
+  if (npc) {
+    const dx = camera.position.x - npc.position.x, dz = camera.position.z - npc.position.z;
+    npc.rotation.y = Math.atan2(dx, dz) + MODEL_FLIP;
+    npc.position.y = npcBaseY + Math.sin(now * 0.0018) * 0.06;
+  }
+  // 提示
+  if(dialog.active){ hint.style.opacity=0; }
+  else if(now<flashUntil){ hint.textContent=flashText; hint.style.opacity=1; }
+  else if(nearInteractable){ hint.textContent='按 E 进入 '+nearInteractable.userData.name+' →'; hint.style.opacity=1; }
+  else if(nearCrystalFlag){ hint.textContent='💎 靠近即可收集'; hint.style.opacity=1; }
+  else if(npcNearName){ hint.textContent='💬 按 F 和 '+npcNearName+' 对话 · G 让 TA 跟随'; hint.style.opacity=1; }
+  else hint.style.opacity=0;
+  updateMinimap();
+  updateHUD(dt);
+  renderer.render(scene,camera);
+}
+addEventListener('resize',()=>{ camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth,innerHeight); });
+renderer.setSize(innerWidth,innerHeight);
+applyTimeOfDay();
+animate();
+</script>
+</body>
+</html>

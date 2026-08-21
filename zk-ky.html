@@ -1,0 +1,2385 @@
+<!DOCTYPE html>
+<!-- 自考·考研双线作战台 | 单文件 HTML，全内联零外链，数据存 localStorage -->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="app-version" content="1.0.64">
+<meta name="app-released" content="2026-08-17T20:56:00+08:00">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#B01F24">
+<title>双线作战台 · 自考本科 × 交大AI考研</title>
+<style>
+:root{
+  --red:#B01F24; --red-d:#8E1519; --red-l:#F7EBEC; --navy:#1B3A57; --navy-l:#EAF0F5;
+  --green:#137A4B; --green-l:#E7F4EE; --amber:#B4690E; --amber-l:#FDF1DF;
+  --bg:#F1F3F6; --card:#FFFFFF; --line:#E6E9EE; --line-s:#EFF1F5;
+  --t1:#14171C; --t2:#586372; --t3:#8A93A1;
+  --r:14px; --r-sm:10px; --r-lg:18px; --r-f:999px;
+  /* 分层阴影：越高越浮 */
+  --sh:0 1px 2px rgba(16,24,40,.04),0 1px 3px rgba(16,24,40,.045);
+  --sh-md:0 2px 5px rgba(16,24,40,.045),0 6px 16px rgba(16,24,40,.055);
+  --sh-lg:0 10px 30px rgba(16,24,40,.10),0 3px 8px rgba(16,24,40,.05);
+  --ease:cubic-bezier(.32,.72,0,1);
+  --tf:.16s var(--ease); --tm:.3s var(--ease);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+html,body{margin:0;padding:0;overflow-x:hidden}
+body{
+  font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI Variable Display","Segoe UI",Roboto,"Helvetica Neue","PingFang SC","HarmonyOS Sans SC","MiSans","Microsoft YaHei",sans-serif;
+  background:var(--bg);color:var(--t1);font-size:15px;line-height:1.55;
+  padding-bottom:calc(72px + env(safe-area-inset-bottom));
+  -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
+  text-rendering:optimizeLegibility;
+  font-feature-settings:"kern" 1,"liga" 1,"cv11" 1;
+  letter-spacing:-.003em;
+}
+/* 数字统一等宽对齐，避免跳动 */
+.cd .nm,.st b,.rgnum,.ks .kh span,.cs .cc,.bar+*{font-variant-numeric:tabular-nums}
+button,input,select,textarea{font-family:inherit;font-size:16px}
+button{cursor:pointer;border:none;background:none;color:inherit}
+.wrap{max-width:1120px;margin:0 auto;padding:0 14px}
+
+/* ---------- 顶栏 ---------- */
+.top{
+  position:relative;color:#fff;padding:16px 0 18px;padding-top:calc(16px + env(safe-area-inset-top));
+  background:
+    radial-gradient(120% 140% at 8% -10%,rgba(255,255,255,.16) 0%,rgba(255,255,255,0) 46%),
+    radial-gradient(90% 120% at 92% 0%,rgba(27,58,87,.55) 0%,rgba(27,58,87,0) 60%),
+    linear-gradient(134deg,#7E1216 0%,#A81D22 42%,#8C1A2E 72%,#1B3A57 130%);
+  box-shadow:0 1px 0 rgba(255,255,255,.10) inset,0 6px 20px rgba(16,24,40,.10);
+  overflow:hidden;
+}
+/* 顶栏底部高光分隔，制造"面"的边界 */
+.top::after{content:'';position:absolute;left:0;right:0;bottom:0;height:1px;background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.28) 30%,rgba(255,255,255,.28) 70%,rgba(255,255,255,0))}
+.top-row{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.brand{flex:1;min-width:200px}
+.brand h1{margin:0;font-size:19.5px;font-weight:700;letter-spacing:-.01em;display:flex;align-items:center;gap:8px;text-shadow:0 1px 2px rgba(0,0,0,.12)}
+.brand p{margin:4px 0 0;font-size:12.5px;opacity:.8;letter-spacing:.005em}
+.top-acts{display:flex;gap:7px;flex-wrap:wrap}
+.tbtn{background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.22);color:#fff;padding:7px 12px;border-radius:var(--r-sm);font-size:13px;font-weight:500;min-height:36px;display:inline-flex;align-items:center;gap:5px;
+  -webkit-backdrop-filter:blur(10px) saturate(1.4);backdrop-filter:blur(10px) saturate(1.4);
+  transition:background var(--tf),border-color var(--tf),transform var(--tf),box-shadow var(--tf)}
+.tbtn:hover{background:rgba(255,255,255,.22);border-color:rgba(255,255,255,.4);box-shadow:0 3px 10px rgba(0,0,0,.12)}
+.tbtn:active{background:rgba(255,255,255,.3);transform:scale(.96)}
+.store-chip{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.16);border-radius:var(--r-f);padding:4.5px 11px;margin-top:9px;
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.dot{width:7px;height:7px;border-radius:50%;background:#5BD48A;display:inline-block;box-shadow:0 0 0 0 rgba(91,212,138,.7);animation:pulse 2.4s ease-out infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(91,212,138,.55)}70%{box-shadow:0 0 0 6px rgba(91,212,138,0)}100%{box-shadow:0 0 0 0 rgba(91,212,138,0)}}
+
+.cds{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:14px}
+.cd{background:linear-gradient(160deg,rgba(255,255,255,.17),rgba(255,255,255,.09));border:1px solid rgba(255,255,255,.18);border-radius:var(--r);padding:11px 13px;
+  -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
+  box-shadow:0 1px 0 rgba(255,255,255,.14) inset;
+  transition:transform var(--tf),box-shadow var(--tf),border-color var(--tf)}
+.cd:hover{transform:translateY(-2px);border-color:rgba(255,255,255,.32);box-shadow:0 8px 22px rgba(0,0,0,.14),0 1px 0 rgba(255,255,255,.2) inset}
+.cd .lb{font-size:11.5px;opacity:.85;display:flex;justify-content:space-between;gap:6px;letter-spacing:.01em}
+.cd .nm{font-size:27px;font-weight:800;line-height:1.12;margin-top:3px;letter-spacing:-.035em;font-variant-numeric:tabular-nums}
+.cd .nm small{font-size:12px;font-weight:500;opacity:.85;margin-left:3px}
+.cd .sub{font-size:11px;opacity:.78;margin-top:1px}
+
+/* ---------- 通用卡片 ---------- */
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh);padding:16px;margin-top:13px;
+  transition:box-shadow var(--tm),transform var(--tm),border-color var(--tm)}
+.card:hover{box-shadow:var(--sh-md);border-color:#DFE3E9}
+.ch{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.ch h2{margin:0;font-size:15.5px;font-weight:700;display:flex;align-items:center;gap:8px;flex:1;letter-spacing:-.012em}
+.ch .hint{font-size:12px;color:var(--t3);font-weight:450;letter-spacing:.005em}
+.ico{width:17px;height:17px;flex:none}
+
+/* ---------- 今天要处理 ---------- */
+.today{border-left:4px solid var(--red)}
+.tl{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.ti{display:flex;align-items:flex-start;gap:10px;padding:11px 12px;border:1px solid var(--line-s);border-radius:12px;background:#FCFCFD;
+  transition:background var(--tf),border-color var(--tf),box-shadow var(--tf),opacity var(--tm)}
+.ti:hover{background:#fff;border-color:var(--line);box-shadow:var(--sh)}
+.ti.od{background:var(--red-l);border-color:#F0C9CB}
+.ti.dn{opacity:.45}
+.ti.dn .tt{text-decoration:line-through;text-decoration-color:var(--t3)}
+.ck{width:24px;height:24px;flex:none;border:2px solid #C7CDD6;border-radius:8px;display:flex;align-items:center;justify-content:center;background:#fff;margin-top:1px;
+  transition:background var(--tf),border-color var(--tf),transform var(--tf)}
+.ck:hover{border-color:var(--green);transform:scale(1.06)}
+.ck.on{background:var(--green);border-color:var(--green);box-shadow:0 2px 6px rgba(19,122,75,.28)}
+.ck svg{width:14px;height:14px;display:none}
+.ck.on svg{display:block;animation:ckpop .22s var(--ease)}
+@keyframes ckpop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
+.tb{flex:1;min-width:0}
+.tt{font-size:14.5px;font-weight:600;word-break:break-word}
+.tm{font-size:11.5px;color:var(--t2);margin-top:3px;display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+.tag{display:inline-block;padding:2px 8px;border-radius:var(--r-f);font-size:10.5px;font-weight:650;white-space:nowrap;letter-spacing:.015em}
+.tag.zk{background:var(--red-l);color:var(--red)}
+.tag.ky{background:var(--navy-l);color:var(--navy)}
+.tag.el{background:#EEF0F3;color:var(--t2)}
+.tag.od{background:var(--red);color:#fff}
+.tag.k8{background:var(--amber-l);color:var(--amber)}
+.tag.ok{background:var(--green-l);color:var(--green)}
+.tag.mian{background:var(--green-l);color:var(--green)}
+.badge.sci{display:inline-flex;align-items:center;gap:5px;padding:3px 11px;border-radius:999px;background:linear-gradient(120deg,#1B3A57,#2E5A82);color:#fff;font-size:12px;font-weight:650;letter-spacing:.02em;box-shadow:0 1px 4px rgba(27,58,87,.18)}
+.badge.sci svg{width:13px;height:13px}
+.cs.dim{opacity:.58;filter:saturate(.55)}
+.cs.pk{box-shadow:0 0 0 2px var(--green) inset,0 2px 10px rgba(19,122,75,.14);border-color:var(--green)}
+.xbtn{width:32px;height:32px;flex:none;border-radius:9px;display:flex;align-items:center;justify-content:center;color:var(--t3);
+  transition:background var(--tf),color var(--tf),transform var(--tf)}
+.xbtn:hover{background:var(--red-l);color:var(--red)}
+.xbtn:active{background:#EEF0F3;transform:scale(.9)}
+.empty{text-align:center;padding:22px 10px;color:var(--t3);font-size:13.5px}
+.empty svg{width:34px;height:34px;opacity:.35;display:block;margin:0 auto 7px}
+
+/* ---------- Tab ---------- */
+.tabs{display:flex;gap:5px;margin-top:15px;background:#E7EAEF;padding:4px;border-radius:13px;overflow-x:auto;
+  box-shadow:0 1px 2px rgba(16,24,40,.04) inset;
+  position:sticky;top:0;z-index:50}
+.tab{flex:1;min-width:80px;padding:9px 8px;border-radius:10px;font-size:13.5px;font-weight:600;color:var(--t2);white-space:nowrap;text-align:center;min-height:40px;letter-spacing:-.005em;
+  transition:background var(--tf),color var(--tf),box-shadow var(--tf),transform var(--tf)}
+.tab:hover:not(.on){color:var(--t1);background:rgba(255,255,255,.55)}
+.tab:active{transform:scale(.97)}
+.tab.on{background:#fff;color:var(--red);box-shadow:0 1px 2px rgba(16,24,40,.06),0 2px 6px rgba(16,24,40,.07)}
+.pane{display:none}
+.pane.on{display:block}
+
+/* ---------- 表单 ---------- */
+.form{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.form input[type=text],.form input[type=date],.form input[type=number],.form select{
+  border:1px solid var(--line);border-radius:var(--r-sm);padding:10px 12px;background:#fff;min-height:44px;color:var(--t1);
+  transition:border-color var(--tf),box-shadow var(--tf)}
+.form input:focus,.form select:focus,.fld input:focus,.fld select:focus,.kctl input:focus,.cs select:focus{
+  outline:none;border-color:var(--navy);box-shadow:0 0 0 3.5px rgba(27,58,87,.11)}
+.form input[type=text]{flex:1;min-width:150px}
+.form input[type=number]{width:82px}
+.btn{background:linear-gradient(180deg,#BC2429 0%,var(--red) 55%,#A31C21 100%);color:#fff;padding:11px 17px;border-radius:var(--r-sm);font-weight:600;font-size:14.5px;min-height:44px;display:inline-flex;align-items:center;gap:6px;justify-content:center;letter-spacing:-.005em;
+  box-shadow:0 1px 2px rgba(176,31,36,.22),0 2px 8px rgba(176,31,36,.18),0 1px 0 rgba(255,255,255,.16) inset;
+  transition:transform var(--tf),box-shadow var(--tf),filter var(--tf)}
+.btn:hover{filter:brightness(1.06);box-shadow:0 2px 4px rgba(176,31,36,.22),0 6px 16px rgba(176,31,36,.26),0 1px 0 rgba(255,255,255,.2) inset;transform:translateY(-1px)}
+.btn:active{transform:translateY(0) scale(.975);filter:brightness(.96)}
+.btn.g{background:linear-gradient(180deg,#F3F5F8,#E9ECF1);color:var(--t1);box-shadow:0 1px 2px rgba(16,24,40,.06),0 1px 0 #fff inset}
+.btn.g:hover{filter:none;background:linear-gradient(180deg,#F7F9FB,#E4E8EE);box-shadow:0 2px 8px rgba(16,24,40,.09),0 1px 0 #fff inset}
+.btn.n{background:linear-gradient(180deg,#254A6B,var(--navy) 55%,#16324B 100%);box-shadow:0 1px 2px rgba(27,58,87,.24),0 2px 8px rgba(27,58,87,.2),0 1px 0 rgba(255,255,255,.14) inset}
+.btn.n:hover{box-shadow:0 2px 4px rgba(27,58,87,.24),0 6px 16px rgba(27,58,87,.28),0 1px 0 rgba(255,255,255,.18) inset}
+.btn.sm{padding:7px 13px;min-height:36px;font-size:13px}
+
+/* ---------- 自考看板 ---------- */
+.stat{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:12px}
+.st{background:linear-gradient(180deg,rgba(176,31,36,.09),var(--card));border:1px solid var(--line-s);border-radius:12px;padding:10px 8px;text-align:center;
+  transition:transform var(--tf),box-shadow var(--tf),border-color var(--tf)}
+.st:hover{transform:translateY(-2px);box-shadow:var(--sh);border-color:var(--line);background:var(--card)}
+.st b{display:block;font-size:20px;font-weight:750;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.st span{font-size:11px;color:var(--t2);letter-spacing:.01em}
+.ring{display:flex;align-items:center;gap:14px;padding:12px;background:linear-gradient(180deg,rgba(176,31,36,.07),var(--card));border:1px solid var(--line-s);border-radius:13px;margin-bottom:12px}
+.ring .info{flex:1;min-width:0}
+.ring .info b{font-size:15px}
+.ring .info p{margin:3px 0 0;font-size:12px;color:var(--t2)}
+.slotbar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.sf{padding:6px 12px;border:1px solid var(--line);border-radius:var(--r-f);font-size:12.5px;font-weight:500;background:var(--card);color:var(--t2);min-height:34px;
+  transition:background var(--tf),color var(--tf),border-color var(--tf),box-shadow var(--tf),transform var(--tf)}
+.sf:hover:not(.on){border-color:var(--navy);color:var(--navy);background:var(--navy-l)}
+.sf:active{transform:scale(.96)}
+.sf.on{background:linear-gradient(180deg,#24486A,var(--navy));color:#fff;border-color:var(--navy);box-shadow:0 2px 8px rgba(27,58,87,.24)}
+.warn{background:var(--amber-l);border:1px solid #F0D9AE;color:#7A4708;border-radius:10px;padding:9px 11px;font-size:12.5px;margin-bottom:10px;display:flex;gap:8px;align-items:flex-start}
+.warn svg{width:15px;height:15px;flex:none;margin-top:2px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(258px,1fr));gap:10px}
+/* 考研数学真题档案 */
+.mcard{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;box-shadow:var(--sh)}
+.mcard.wide{grid-column:1/-1}
+.myr{font-weight:700;font-size:14px;color:var(--navy);margin-bottom:8px}
+.mbtns{display:flex;flex-wrap:wrap;gap:6px}
+.mbtn{font-size:12px;border:1px solid var(--line);border-radius:8px;padding:6px 10px;background:#fff;cursor:pointer;color:var(--t2);transition:all .15s;min-height:34px}
+.mbtn:hover{transform:translateY(-1px);box-shadow:0 2px 6px rgba(0,0,0,.08)}
+.mbtn.zt{border-color:#cfe3f7;color:#1565C0;background:#F2F8FE}
+.mbtn.ans{border-color:#d7eede;color:#1E7A45;background:#F1FAF4}
+.mbtn.jx{border-color:#f6e6cf;color:#B26A00;background:#FFFBF2}
+.mbtn.off{background:#f4f4f4;color:#bbb;border-style:dashed;cursor:default}
+.mbtn.off:hover{transform:none;box-shadow:none}
+.cs{border:1px solid var(--line);border-radius:13px;padding:12px;background:var(--card);position:relative;
+  transition:transform var(--tf),box-shadow var(--tf),border-color var(--tf)}
+.cs:hover{transform:translateY(-2px);box-shadow:var(--sh-md)}
+.cs.pass{background:linear-gradient(180deg,#EBF6F0,var(--green-l));border-color:#BFE3D1}
+.cs.plan{border-color:var(--navy);box-shadow:0 0 0 1px var(--navy) inset,0 2px 8px rgba(27,58,87,.10)}
+.cs.plan:hover{box-shadow:0 0 0 1px var(--navy) inset,0 8px 20px rgba(27,58,87,.16)}
+.cs.conf{border-color:var(--red);background:var(--red-l)}
+.cs .cn{font-size:14px;font-weight:650;line-height:1.35;padding-right:4px;letter-spacing:-.008em}
+.cs .cc{font-size:11px;color:var(--t3);font-variant-numeric:tabular-nums;margin-top:2px}
+.cs .cr{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px;align-items:center}
+.cs select{width:100%;margin-top:8px;border:1px solid var(--line);border-radius:9px;padding:8px 9px;background:var(--card);min-height:40px;font-size:14px}
+.plink{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:12.5px;color:var(--t2)}
+.plink input{width:20px;height:20px;accent-color:var(--navy)}
+
+/* ---------- 考研 ---------- */
+.kyg{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
+.ks{border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--card)}
+.ks .kh{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.ks .kh b{font-size:14.5px}
+.ks .kh span{font-size:12px;color:var(--t2);font-variant-numeric:tabular-nums}
+.bar{height:9px;background:var(--line-s);border-radius:var(--r-f);overflow:hidden;margin:9px 0 8px;box-shadow:0 1px 2px rgba(16,24,40,.06) inset}
+.bar i{display:block;height:100%;border-radius:var(--r-f);transition:width .55s var(--ease);position:relative;box-shadow:0 1px 3px rgba(16,24,40,.14)}
+/* 光泽用伪元素，避免被 JS inline background 覆盖 */
+.bar i::after{content:'';position:absolute;inset:0;border-radius:inherit;background:linear-gradient(180deg,rgba(255,255,255,.32),rgba(255,255,255,0) 62%)}
+.kctl{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.kctl input{width:66px;border:1px solid var(--line);border-radius:8px;padding:7px 8px;min-height:38px;text-align:center}
+.kctl .u{font-size:12px;color:var(--t3)}
+.heat{overflow-x:auto;padding-bottom:4px}
+.heat svg{display:block}
+.lg{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--t3);margin-top:7px}
+.lg i{width:11px;height:11px;border-radius:3px;display:inline-block}
+
+/* ---------- 资讯 ---------- */
+.nf{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:11px}
+.ni{display:flex;gap:10px;padding:12px;border:1px solid var(--line-s);border-radius:12px;background:#fff;margin-bottom:8px;
+  transition:border-color var(--tf),box-shadow var(--tf),transform var(--tf)}
+.ni:hover{border-color:var(--line);box-shadow:var(--sh-md);transform:translateX(2px)}
+.ni.unread{border-left:3px solid var(--red);background:linear-gradient(90deg,#FFFBFB,#fff 40%)}
+.ni .nb{flex:1;min-width:0}
+.ni .nt{font-size:14px;font-weight:620;line-height:1.4;letter-spacing:-.008em}
+.ni .nd{font-size:12.5px;color:var(--t2);margin-top:5px;line-height:1.58}
+.ni .nm{font-size:11px;color:var(--t3);margin-top:7px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.ni a{color:var(--navy);text-decoration:none;font-weight:600;transition:color var(--tf)}
+.ni a:hover{color:var(--red);text-decoration:underline;text-underline-offset:2px}
+
+/* ---------- 底部 Tab（移动端） ---------- */
+.bnav{display:none;pointer-events:none}
+/* ---------- 弹窗 ---------- */
+.mask{position:fixed;inset:0;background:rgba(11,17,29,.46);display:none;align-items:center;justify-content:center;padding:18px;z-index:80;
+  -webkit-backdrop-filter:blur(6px) saturate(1.1);backdrop-filter:blur(6px) saturate(1.1)}
+.mask.on{display:flex;animation:mkin .22s var(--ease)}
+@keyframes mkin{from{opacity:0}to{opacity:1}}
+.modal{background:#fff;border-radius:var(--r-lg);padding:20px;max-width:440px;width:100%;max-height:86vh;overflow:auto;
+  box-shadow:0 24px 60px rgba(11,17,29,.28),0 4px 12px rgba(11,17,29,.14);
+  animation:mdin .32s var(--ease)}
+@keyframes mdin{from{opacity:0;transform:translateY(14px) scale(.97)}to{opacity:1;transform:none}}
+.modal h3{margin:0 0 10px;font-size:17px;letter-spacing:-.015em}
+.modal p{margin:0 0 15px;font-size:13.5px;color:var(--t2);line-height:1.62}
+.mact{display:flex;gap:9px;justify-content:flex-end;flex-wrap:wrap}
+.toast{position:fixed;left:50%;bottom:88px;background:rgba(20,23,28,.94);color:#fff;padding:12px 18px;border-radius:12px;font-size:13.5px;z-index:99;opacity:0;pointer-events:none;max-width:88%;text-align:center;
+  -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
+  box-shadow:0 10px 30px rgba(11,17,29,.3);border:1px solid rgba(255,255,255,.08);
+  transform:translateX(-50%) translateY(8px);transition:opacity var(--tm),transform var(--tm)}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.ver-badge{color:var(--green);border:1px solid var(--green-l);background:var(--green-l);font-weight:600;font-variant-numeric:tabular-nums;}
+.ver-badge.update{color:#fff;background:var(--amber);border-color:var(--amber);animation:pulse 1.4s infinite;}
+.ver-badge.offline{color:var(--t3);background:transparent;border-color:var(--line);}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(180,105,14,.5)}70%{box-shadow:0 0 0 8px rgba(180,105,14,0)}100%{box-shadow:0 0 0 0 rgba(180,105,14,0)}}
+.note{font-size:11.5px;color:var(--t3);line-height:1.6;margin-top:11px}
+.quicklinks{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;padding:10px 0 2px}
+.ql{display:inline-flex;align-items:center;gap:5px;background:#fff;border:1px solid var(--line);border-radius:var(--r-f);padding:7px 14px;font-size:12.5px;font-weight:600;color:var(--navy);text-decoration:none;
+  box-shadow:var(--sh);transition:border-color var(--tf),background var(--tf),transform var(--tf),box-shadow var(--tf)}
+.ql:hover{border-color:var(--navy);background:var(--navy-l);transform:translateY(-1px);box-shadow:var(--sh-md)}
+.ql:active{transform:translateY(0) scale(.97)}
+.ql svg{flex:none}
+.reslinks{display:flex;flex-wrap:wrap;gap:8px}
+.rl{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(180deg,#F0F6FA,var(--navy-l));border:1px solid #D7E2EC;border-radius:var(--r-sm);padding:9px 14px;font-size:13px;font-weight:600;color:var(--navy);text-decoration:none;min-height:40px;
+  transition:border-color var(--tf),background var(--tf),transform var(--tf),box-shadow var(--tf)}
+.rl:hover{border-color:var(--navy);background:linear-gradient(180deg,#E4EEF6,#D9E6F0);transform:translateY(-1px);box-shadow:0 4px 12px rgba(27,58,87,.14)}
+.rl:active{transform:translateY(0) scale(.98)}
+/* ===== AI 工具箱 ===== */
+.aigroup{margin-top:14px}
+.aigh{font-size:11.5px;font-weight:700;color:var(--t3);letter-spacing:.05em;text-transform:uppercase;margin-bottom:9px;display:flex;align-items:center;gap:7px}
+.aigh::before{content:"";width:3px;height:13px;border-radius:2px;background:var(--navy)}
+.aigrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(248px,1fr));gap:10px}
+.aitool{display:flex;align-items:center;gap:11px;padding:12px 13px;border:1px solid var(--line);border-radius:var(--r);background:#fff;text-decoration:none;color:var(--t1);
+  transition:transform var(--tf),box-shadow var(--tf),border-color var(--tf)}
+.aitool:hover{transform:translateY(-2px);box-shadow:var(--sh-md);border-color:var(--ac)}
+.ailogo{width:38px;height:38px;flex:none;border-radius:11px;background:var(--ac);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;letter-spacing:-.02em;box-shadow:0 3px 8px rgba(16,24,40,.16)}
+.ainfo{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.ain{font-size:14px;font-weight:650;letter-spacing:-.008em}
+.aid{font-size:11.5px;color:var(--t2);line-height:1.4;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.aig{width:16px;height:16px;flex:none;color:var(--t3);opacity:.55;transition:transform var(--tf),opacity var(--tf)}
+.aitool:hover .aig{opacity:1;transform:translate(2px,-2px);color:var(--ac)}
+/* 学习网站导航（头像网格） */
+.hotsites{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:10px}
+.hsite{display:flex;flex-direction:column;align-items:center;gap:7px;padding:13px 8px;border:1px solid var(--line);border-radius:var(--r-lg);background:#fff;text-decoration:none;color:var(--t1);
+  transition:transform var(--tf),box-shadow var(--tf),border-color var(--tf)}
+.hsite:hover{transform:translateY(-2px);box-shadow:var(--sh-md);border-color:var(--ac)}
+.hsava{width:40px;height:40px;flex:none;border-radius:12px;background:var(--ac);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;letter-spacing:-.02em;box-shadow:0 3px 8px rgba(16,24,40,.16)}
+.hsn{font-size:12.5px;font-weight:600;text-align:center;line-height:1.3;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media (max-width:560px){.hotsites{grid-template-columns:repeat(3,1fr);gap:8px}.hsite{padding:11px 4px}}
+.regcd{border-left:4px solid var(--amber);background:linear-gradient(102deg,#FFFDF8 0%,var(--card) 30%)}
+.regcd.ky{background:linear-gradient(102deg,#F8FBFE 0%,var(--card) 30%)}
+.regcd.urgent{border-left-color:var(--red);background:linear-gradient(102deg,#FFF6F6 0%,#FFFBFB 40%);animation:rgpulse 1.6s ease-in-out infinite}
+@keyframes rgpulse{0%,100%{box-shadow:0 0 0 0 rgba(176,31,36,0)}50%{box-shadow:0 0 0 5px rgba(176,31,36,.10)}}
+.cdrow{display:flex;gap:13px;flex-wrap:wrap}
+.cdrow>.card{margin-top:0;flex:1 1 240px;min-width:0}
+.regcd.ky{border-left-color:var(--navy)}
+.regcd.ky .rgnum b{color:var(--navy)}
+.regcd.ncre{border-left-color:#137A4B}
+.regcd.ncre .rgnum b{color:#137A4B}
+.regcd.ncre .ch h2{color:#137A4B}
+.regcd.ncre .ico{stroke:#137A4B}
+.rgnum{font-size:26px;font-weight:800;color:var(--t1);line-height:1.14;margin:2px 0 4px;letter-spacing:-.035em;font-variant-numeric:tabular-nums}
+.rgnum b{color:var(--amber)}
+.regcd.urgent .rgnum b{color:var(--red)}
+.rgmsg{font-size:12.5px;color:var(--t2);line-height:1.55}
+.fld{margin-bottom:12px}
+.fld label{display:block;font-size:12.5px;color:var(--t2);margin-bottom:5px;font-weight:600}
+.fld input,.fld select{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px 11px;min-height:44px}
+
+/* ---------- 全局质感收尾 ---------- */
+.pane.on{display:block;animation:panein .34s var(--ease)}
+@keyframes panein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+::selection{background:rgba(176,31,36,.16);color:var(--t1)}
+/* 键盘导航焦点环（鼠标点击不显示） */
+:focus-visible{outline:2.5px solid rgba(27,58,87,.55);outline-offset:2px;border-radius:6px}
+button:focus-visible,a:focus-visible{outline-color:var(--navy)}
+/* 细滚动条 */
+*{scrollbar-width:thin;scrollbar-color:#C8CFD9 transparent}
+::-webkit-scrollbar{width:9px;height:9px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#C8CFD9;border-radius:var(--r-f);border:2.5px solid transparent;background-clip:content-box}
+::-webkit-scrollbar-thumb:hover{background:#AEB7C4;background-clip:content-box}
+.empty svg{transition:opacity var(--tm)}
+.warn{border-radius:11px;box-shadow:0 1px 2px rgba(180,105,14,.07)}
+.slotbar,.nf{gap:7px}
+/* 尊重系统"减少动态效果"设置 */
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+  .cd:hover,.card:hover,.cs:hover,.st:hover,.ql:hover,.rl:hover,.ni:hover,.btn:hover{transform:none}
+}
+
+.quizframe{width:100%;height:calc(100dvh - 220px);min-height:540px;border:0;border-radius:var(--r-lg);background:#fff;box-shadow:var(--sh-md);display:block}
+/* 触屏设备：禁用 hover 位移动画，避免点按后卡片卡在"翘起"状态导致界面跑位 */
+@media (hover:none){
+  .tbtn:hover,.cd:hover,.ck:hover,.st:hover,.cs:hover,.ni:hover,.ql:hover,.rl:hover,.aitool:hover,.hsite:hover,.toolbtn:hover,.btn:hover{transform:none!important;box-shadow:none!important}
+}
+/* 习题题库全屏弹层（按需打开，不常驻主页） */
+.quizlayer{position:fixed;inset:0;z-index:200;background:#0f1622;display:none;flex-direction:column}
+.quizlayer.on{display:flex}
+.qlbar{display:flex;align-items:center;gap:12px;padding:10px 14px;background:#15212f;color:#E7EAEF;flex:none}
+.qlclose{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.1);border:0;color:#E7EAEF;font-size:13.5px;font-weight:600;padding:8px 14px;border-radius:var(--r-f);cursor:pointer;transition:background var(--tf)}
+.qlclose:hover{background:rgba(255,255,255,.18)}
+.qlclose svg{width:16px;height:16px;flex:none}
+.qlh{font-size:13px;color:#9FB0C3;font-weight:500}
+.qscore{font-size:12px;color:#4ECDC4;font-weight:600;background:rgba(78,205,196,.12);padding:3px 10px;border-radius:20px}
+/* 习题 tab 切换 */
+.ql-tabs{display:flex;gap:4px;background:rgba(255,255,255,.06);border-radius:10px;padding:3px}
+ .ql-tab{font-size:12px;padding:5px 12px;border:0;border-radius:8px;background:transparent;color:#94a3b8;cursor:pointer;transition:all .15s;font-weight:500;font-family:inherit}
+ .ql-tab.on{background:var(--zk);color:#fff}
+ .ql-tab:hover:not(.on){color:#E7EAEF;background:rgba(255,255,255,.1)}
+.tech-quiz-placeholder{display:flex;align-items:center;justify-content:center;height:100%}
+.quizbody{flex:1;overflow-y:auto;padding:16px 18px}
+.quiz-toolbar{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.qz-modes{display:flex;gap:6px;background:var(--navy-l,#f5f8ff);border:1px solid var(--line,#e2e8f0);border-radius:20px;padding:3px}
+.qm-btn{font-size:12px;padding:4px 14px;border:0;border-radius:16px;background:transparent;color:#64748b;cursor:pointer;transition:all .15s}
+.qm-btn:hover{color:var(--navy,#1B3A57)}
+.qm-btn.on{background:var(--zk,#B01F24);color:#fff;font-weight:600}
+.qm-btn.ghost{border:1px solid var(--line,#e2e8f0);background:#fff;border-radius:20px}
+.qm-btn.danger{border:1px solid var(--zk,#B01F24);color:var(--zk,#B01F24);border-radius:20px;background:#fff;font-weight:600}
+.qm-btn.danger:hover{background:var(--zk,#B01F24);color:#fff}
+.qz-timer{font-size:13px;font-weight:700;color:var(--navy,#1B3A57);background:var(--navy-l,#f5f8ff);border:1px solid var(--line,#e2e8f0);padding:4px 12px;border-radius:16px;letter-spacing:.5px}
+.qz-timer.warn{color:#fff;background:var(--zk,#B01F24);border-color:var(--zk,#B01F24)}
+.quiz-stats{margin-bottom:14px;padding:14px 16px;background:#fff;border:1px solid var(--line,#e2e8f0);border-radius:var(--r,#12px);font-size:13px;line-height:1.7}
+.qs-title{font-size:14px;font-weight:700;color:#1a1a2e;margin-bottom:4px}
+.qs-sub{font-size:12px;color:#94a3b8;margin-bottom:10px}
+.qs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-bottom:10px}
+.qs-cell{border:1px solid var(--line,#e2e8f0);border-radius:10px;padding:8px 10px;background:var(--navy-l,#f5f8ff)}
+.qs-cell b{display:block;font-size:12px;color:#64748b;font-weight:600;margin-bottom:2px}
+.qs-cell .n{font-size:14px;font-weight:700;color:var(--navy,#1B3A57)}
+.qs-cell.weak .n{color:var(--zk,#B01F24)}
+.qs-cell.weak{border-color:rgba(176,31,36,.35);background:#fdf2f2}
+.qs-empty{color:#94a3b8;font-size:12px;padding:6px 0}
+.qs-weaktip{font-size:12px;color:var(--zk,#B01F24);margin-top:6px}
+.quiz-nav{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.quiz-nav button{font-size:12.5px;padding:6px 14px;border:1px solid var(--line);border-radius:20px;background:#fff;color:var(--navy);cursor:pointer;transition:all var(--tf)}
+.quiz-nav button.on{background:var(--zk);color:#fff;border-color:var(--zk)}
+.quiz-nav button:hover:not(.on){border-color:var(--navy);background:var(--navy-l)}
+.quiz-q{background:#fff;border-radius:var(--r-lg);padding:20px;box-shadow:var(--sh-sm)}
+.quiz-q .qq-text{font-size:15px;line-height:1.7;color:#1a1a2e;margin-bottom:14px;font-weight:500}
+.quiz-q .qq-options{display:flex;flex-direction:column;gap:8px}
+.quiz-q .qq-opt{display:flex;align-items:center;gap:10px;padding:11px 14px;border:1.5px solid #e2e8f0;border-radius:var(--r);cursor:pointer;transition:all .15s;font-size:14px;color:#334155}
+.quiz-q .qq-opt:hover{border-color:var(--navy);background:var(--navy-l)}
+.quiz-q .qq-opt.selected{border-color:var(--zk);background:rgba(176,31,36,.06)}
+.quiz-q .qq-opt.correct{border-color:#16a34a;background:rgba(22,163,74,.08);color:#15803d}
+.quiz-q .qq-opt.wrong{border-color:var(--zk);background:rgba(176,31,36,.08);color:var(--zk)}
+.qq-opt .qtag{width:24px;height:24px;border-radius:50%;border:1.5px solid #cbd5e1;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#64748b;flex:none}
+.qq-opt.selected .qtag{border-color:var(--zk);color:var(--zk);background:rgba(176,31,36,.1)}
+.qq-opt.correct .qtag{border-color:#16a34a;color:#16a34a;background:rgba(22,163,74,.12)}
+.qq-opt.wrong .qtag{border-color:var(--zk);color:#fff;background:var(--zk)}
+.quiz-actions{display:flex;gap:8px;margin-top:14px}
+.quiz-actions button{padding:9px 20px;border-radius:var(--r);border:0;font-size:13.5px;font-weight:600;cursor:pointer;transition:all .15s}
+.btn-next{background:var(--zk);color:#fff}
+.btn-next:hover{opacity:.88}
+.btn-prev{background:#f1f5f9;color:#475569}
+.btn-prev:hover{background:#e2e8f0}
+/* 题库：筛选条 + 题型元信息 + 答案解析 + 填空输入 + 代码块 */
+.quiz-filters{display:flex;flex-direction:column;gap:7px;margin-bottom:14px;padding:10px 12px;background:var(--navy-l,#f5f8ff);border:1px solid var(--line,#e2e8f0);border-radius:var(--r,#12px)}
+.qf-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.qf-label{font-size:12px;font-weight:700;color:#64748b;min-width:34px}
+.qf-btn{font-size:12px;padding:4px 11px;border:1px solid var(--line,#e2e8f0);border-radius:20px;background:#fff;color:#334155;cursor:pointer;transition:all .15s}
+.qf-btn:hover{border-color:var(--navy,#1B3A57);background:var(--navy-l,#f5f8ff)}
+.qf-btn.on{background:var(--zk,#B01F24);color:#fff;border-color:var(--zk,#B01F24)}
+.qq-meta{font-size:12px;font-weight:600;color:#94a3b8;margin-bottom:8px;letter-spacing:.3px}
+.qq-hint{font-size:12.5px;color:#64748b;background:#f8fafc;border:1px dashed #cbd5e1;border-radius:var(--r,#12px);padding:8px 10px;margin-top:10px}
+.qq-fill{display:flex;gap:8px;margin-top:8px}
+.qf-input{flex:1;padding:9px 12px;border:1.5px solid #e2e8f0;border-radius:var(--r,#12px);font-size:14px;outline:none}
+.qf-input:focus{border-color:var(--navy,#1B3A57)}
+.qf-input.ok{border-color:#16a34a;background:rgba(22,163,74,.06)}
+.qf-input.bad{border-color:var(--zk,#B01F24);background:rgba(176,31,36,.06)}
+.btn-next.sm{padding:9px 16px}
+.qq-explain{margin-top:12px;padding:10px 12px;background:#f0fdf4;border-left:3px solid #16a34a;font-size:13px;color:#166534;border-radius:0 var(--r,#12px) var(--r,#12px) 0;line-height:1.6}
+.qq-ans{margin-top:12px;padding:10px 12px;background:#fff7ed;border-left:3px solid #ea580c;font-size:13px;color:#9a3412;border-radius:0 var(--r,#12px) var(--r,#12px) 0;line-height:1.65}
+.qq-code{margin:0;padding:12px;background:#0f172a;color:#e2e8f0;border-radius:var(--r,#12px);font-size:12.5px;line-height:1.55;white-space:pre-wrap;word-break:break-word;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+/* 首页快速工具（次级入口） */
+.toolgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.toolbtn{display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px 8px;border:1px solid var(--line);border-radius:var(--r-lg);background:#fff;cursor:pointer;transition:border-color var(--tf),background var(--tf),transform var(--tf),box-shadow var(--tf)}
+.toolbtn:hover{border-color:var(--navy);background:var(--navy-l);transform:translateY(-2px);box-shadow:var(--sh-md)}
+.toolbtn:active{transform:translateY(0) scale(.98)}
+.tbico{width:26px;height:26px;color:var(--navy)}
+.tbn{font-size:12.5px;font-weight:600;color:var(--navy)}
+@media (max-width:560px){.toolgrid{grid-template-columns:repeat(2,1fr);gap:8px}.toolbtn{padding:13px 4px}.tbico{width:23px;height:23px}}
+
+@media(max-width:768px){
+  .wrap{padding:0 11px}
+  .cds{grid-template-columns:1fr}
+  .stat{grid-template-columns:repeat(2,1fr)}
+  .grid{grid-template-columns:1fr}
+  .kyg{grid-template-columns:1fr}
+  .tabs{display:none}
+  .bnav{display:flex;position:fixed;left:0;right:0;bottom:0;background:rgba(255,255,255,.86);border-top:1px solid var(--line);z-index:60;padding-bottom:env(safe-area-inset-bottom);pointer-events:auto;
+    -webkit-backdrop-filter:blur(18px) saturate(1.6);backdrop-filter:blur(18px) saturate(1.6);
+    box-shadow:0 -2px 14px rgba(16,24,40,.06);touch-action:manipulation;}
+  .bn{flex:1 1 0;min-width:0;padding:8px 2px 7px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10.5px;color:var(--t3);min-height:52px;position:relative;z-index:1;pointer-events:auto;
+    transition:color var(--tf),transform var(--tf);white-space:nowrap;user-select:none;touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
+  .bn:active{transform:scale(.94)}
+  .bn.on{color:var(--red);font-weight:600}
+  .bn.on::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:26px;height:2.5px;border-radius:0 0 3px 3px;background:var(--red)}
+  .cdrow{gap:11px}
+  .modal{border-radius:16px;padding:17px}
+  .bn svg{width:21px;height:21px;pointer-events:none;flex-shrink:0;}
+  .brand h1{font-size:17px}
+  .top-acts .tbtn span{display:none}
+  .tbtn{padding:8px 10px}
+}
+/* 触屏设备禁用 hover 位移，避免点完卡片/按钮卡翘起、界面跑位置 */
+@media(hover:none){
+  .card:hover,.cd:hover,.ti:hover,.ck:hover,.xbtn:hover,.tab:hover:not(.on),.btn:hover,.sf:hover:not(.on),.cs:hover,.cs.plan:hover,.ni:hover,.st:hover,.tbtn:hover{transform:none !important;}
+}
+
+  /* 科研专区·技术论文监控 */
+  .mon-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+  .mtab{font-size:13px;padding:6px 14px;border-radius:20px;border:1px solid var(--line);background:var(--bg);color:var(--t2);cursor:pointer;transition:.15s}
+  .mtab.on{background:var(--green);color:#fff;border-color:var(--green)}
+  .mon-chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+  .mchip{font-size:12.5px;padding:5px 11px;border-radius:16px;border:1px solid var(--line);background:var(--bg);color:var(--t1);cursor:pointer;transition:.15s;-webkit-tap-highlight-color:transparent;min-height:32px}
+  .mchip.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+  .mon-body{min-height:40px}
+  .mon-stat{font-size:12px;color:var(--t3);margin:2px 0 10px}
+  .repo{display:block;text-decoration:none;color:inherit;padding:11px 12px;border:1px solid var(--line);border-radius:10px;margin-bottom:8px;background:var(--bg);transition:.15s}
+  .repo:hover{border-color:var(--green)}
+  .repo .rn{font-weight:700;font-size:14px;color:var(--navy);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .repo .rn .star{font-size:11px;color:var(--amber);font-weight:600}
+  .repo .rd{font-size:12.5px;color:var(--t2);margin:5px 0;line-height:1.5}
+  .repo .rm{font-size:11.5px;color:var(--t3);display:flex;gap:12px;flex-wrap:wrap}
+  .repo .rlang{display:inline-flex;align-items:center;gap:4px}
+  .repo .rlang i{width:9px;height:9px;border-radius:50%;background:var(--green);display:inline-block}
+  .pf{display:block;text-decoration:none;color:inherit;padding:11px 12px;border:1px solid var(--line);border-radius:10px;margin-bottom:8px;background:var(--bg);transition:.15s}
+  .pf:hover{border-color:var(--navy)}
+  .pf .pt{font-weight:700;font-size:13.5px;color:var(--navy);line-height:1.45}
+  .pf .pm{font-size:12px;color:var(--t2);margin-top:4px;line-height:1.5}
+  .pf .pj{font-size:11.5px;color:var(--t3);margin-top:3px}
+  .mon-loading,.mon-err{padding:18px 12px;text-align:center;font-size:13px;color:var(--t3)}
+  .mon-err{color:#c0392b}
+  .mon-warn{font-size:11.5px;color:#B4690E;background:#FDF1DF;padding:6px 10px;border-radius:8px;margin-bottom:10px}
+  .cnkns{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+  .cnkn{font-size:12.5px;padding:6px 12px;border-radius:8px;background:var(--bg);border:1px solid var(--line);color:var(--navy);text-decoration:none}
+  .cnkn:hover{border-color:var(--navy)}
+  /* 我的自动化技术栈 */
+  .tcard{border:1px solid var(--line);border-radius:12px;padding:13px 14px;background:var(--bg);transition:.15s}
+  .tcard:hover{border-color:var(--zk)}
+  .tcard .th{display:flex;align-items:center;gap:8px;margin-bottom:7px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .tcard .tico{width:26px;height:26px;flex:0 0 26px;display:flex;align-items:center;justify-content:center;border-radius:8px;background:rgba(176,31,36,.08)}
+  .tcard .tico svg{width:16px;height:16px}
+  .tcard .tname{font-size:14px;font-weight:600;color:var(--t1);line-height:1.3}
+  .tcard .tcaret{margin-left:auto;color:var(--t3);font-size:12px;transition:transform .2s}
+  .tc-collapsed .tcaret{transform:rotate(-90deg)}
+  .tcard .tdesc{font-size:12px;color:var(--t3);line-height:1.6;margin-bottom:9px}
+  .tstack{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:9px}
+  .tchip{font-size:11px;padding:2px 8px;border-radius:10px;background:rgba(176,31,36,.06);color:var(--zk);border:1px solid rgba(176,31,36,.15)}
+  .tpts{margin:0;padding-left:16px;font-size:11.5px;color:var(--t2);line-height:1.65}
+  .tpts li{margin-bottom:2px}
+  .tc-collapsed .tpts{display:none}
+  .tmods{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:9px}
+  .tmods .tm{font-size:11px;padding:2px 8px;border-radius:10px;background:rgba(64,122,160,.08);color:var(--navy);border:1px solid rgba(64,122,160,.2)}
+  .tmetrics{display:flex;flex-wrap:wrap;gap:7px;margin:2px 0 4px}
+  .tmetrics .tmt{font-size:11px;padding:3px 9px;border-radius:8px;background:rgba(22,160,133,.08);color:#169d85;border:1px solid rgba(22,160,133,.2)}
+  .tmetrics .tmt b{color:#0e7a63;font-weight:700}
+  .tlabel{font-size:10.5px;color:var(--t3);letter-spacing:.5px;margin:6px 0 2px;font-weight:600}
+  .tc-collapsed .tmods,.tc-collapsed .tmetrics,.tc-collapsed .tlabel{display:none}
+  .grp-h{font-size:11px;font-weight:700;color:var(--t3);letter-spacing:.5px;margin:16px 2px 8px;padding-left:9px;position:relative}
+  .grp-h::before{content:"";position:absolute;left:0;top:1px;bottom:1px;width:3px;border-radius:2px;background:var(--zk)}
+  .tbar{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap}
+  /* arXiv 摘要 */
+  .pdesc{font-size:11.5px;color:var(--t3);line-height:1.6;margin-top:5px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+  @media(max-width:560px){.mchip{padding:5px 9px;font-size:12px}.mtab{padding:6px 11px;font-size:12.5px}}
+  /* 课程视频链接 */
+  .cvids{display:flex;flex-direction:column;gap:6px;margin-top:10px;padding-top:9px;border-top:1px dashed var(--line)}
+  .cvid{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;color:var(--navy);text-decoration:none;line-height:1.45;min-height:32px}
+  .cvid svg{flex:none;color:#FB7299}
+  .cvid:hover{color:var(--zk)}
+  .cvid .cvl{flex:none;font-size:10px;font-weight:700;color:#FB7299;border:1px solid #FBC9D5;border-radius:5px;padding:0 5px;line-height:1.5;background:#FFF6F8}
+  /* 心法加油站（主页底部） */
+  .motto{display:flex;align-items:center;gap:12px;margin-top:14px;padding:14px 16px;border:1px dashed var(--line);border-radius:var(--r-sm);
+    background:linear-gradient(180deg,#FFF7F0,var(--card));text-decoration:none;transition:.15s}
+  .motto:hover{border-color:#FB7299}
+  .motto .mi{flex:none;font-size:22px;line-height:1}
+  .motto .mt{font-size:13.5px;font-weight:700;color:var(--t1)}
+  .motto .md{font-size:11.5px;color:var(--t3);margin-top:3px}
+  .motto .ma{margin-left:auto;flex:none;display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;color:#FB7299}
+</style>
+  <script src="lib/store.js"></script>
+  <script src="lib/sync.js"></script>
+  <script src="lib/idb-backup.js"></script>
+  <script src="lib/clock.js"></script>
+  <script src="lib/errorlog.js"></script>
+</head>
+<body>
+
+<!-- 每日资讯数据块：由定时任务每天自动改写 -->
+<script type="application/json" id="news-feed">
+{"updatedAt":"2026-08-14","items":[
+ {"id":"20260812-01","cat":"自考公告","title":"交大继教院发布 10 月自考日程：报名 9/1-9/6","desc":"交大继续教育学院已公布 10 月考期计算机科学与技术(080901)安排：理论课 10/24(六)、10/25(日) 全天四场，实践考 6 门暂定 10/31-11/1；报名窗口 9 月 1 日 9:00 至 9 月 6 日。现在对照课表锁科目、9 月初准时抢报。","url":"https://ce.sjtu.edu.cn/","date":"2026-08-12"},
+ {"id":"20260814-01","cat":"AI前沿","title":"DeepSeek 开源 Harness v0.1 智能体框架","desc":"8/14 DeepSeek 以 MIT 协议开源 Harness v0.1：基于 Cordis 微内核的“一切皆插件”智能体框架，工具/沙箱/子智能体全模块化，对标 Claude Code。你工具箱已收它，正好搭自己的编程 Agent 练手 AI 方向。","url":"https://github.com/deepseek-ai/deepseek-harness","date":"2026-08-14"},
+ {"id":"20260813-01","cat":"AI前沿","title":"DeepSeek V4 Pro 正式版上线，Agent 能力飙升","desc":"8/13 凌晨 DeepSeek 推出 V4 Pro 正式版：1M 上下文、原生支持 ResponsesAPI 与 Codex 接入，Agent/编程能力飙升。定价约为 GPT-5.6 的 1/57，对 AI Agent 方向是现成利器，写码科研优先试。","url":"https://cj.sina.com.cn/article/norm_detail?url=https%3A%2F%2Ffinance.sina.com.cn%2Froll%2F2026-08-13%2Fdoc-inineqhh4661264.shtml&finpagefr=w_110","date":"2026-08-13"},
+ {"id":"20260813-02","cat":"AI前沿","title":"阿里开源 Qwen3.8-2.4T 权重（2.4T MoE）","desc":"8/12 深夜阿里经魔搭开放 Qwen3.8-2.4T 权重：总参 2.4T、激活 95B、支持 26 万→100 万上下文，是 Qwen 首个开放权重的 Max 级模型。BF16 约 4.9TB 本地难跑；但开放底座让私有化二次开发成为可能，是 AI 方向生态利好。","url":"https://www.163.com/dy/article/L46522NE0511C4AA.html","date":"2026-08-12"},
+ {"id":"20260812-02","cat":"交大研招","title":"2027 硕士目录预计 9 月底发布，先用 2026 目录备考","desc":"交大 2027 硕士招生专业目录（含 531 人工智能学院 081200/085400）尚未公布，按往年节奏预计 9 月底在研招网发布，届时核对名额与科目有无调整。现在可沿用 2026 目录备考：初试 101+201+301+408 不变，重点关注统考名额与推免占比。","url":"https://yzb.sjtu.edu.cn/","date":"2026-08-12"},
+ {"id":"20260812-03","cat":"408备考","title":"清华等多校 2027 全面改考 408，统考版图再扩张","desc":"清华三大院系、北邮、西电、华科等 2027 级计算机类相继宣布改考 408 统考，采用 408 的院校已超 200 所。交大本就考 408，赛道更卷但复习资料更透明、调剂更友好。408 考纲本身基本稳定，仅计网“TCP/IP 模型”表述规范为“参考模型”，无需慌。","url":"https://blog.csdn.net/qiwsir/article/details/162522066","date":"2026-08-12"},
+ {"id":"20260812-04","cat":"AI前沿","title":"Meta 开源 30B Agent 模型 Muse Glimmer","desc":"8 月 10 日 Meta 实验室开源 30B 多模态 Agent 模型 Muse Glimmer（Apache 2.0，可本地运行），主打本地智能体，发布即获 llama.cpp/Ollama 等 day-0 支持。对 AI 学院「智能 Agent」方向是直接可玩的开源底座。","url":"https://so.html5.qq.com/page/real/search_news?docid=70000021_8976a7bcf5077152","date":"2026-08-12"},
+ {"id":"seed-1","cat":"自考公告","title":"2026年10月上海自考考期为 10/24、10/25、10/31","desc":"上海市教育考试院已印发《2026年10月上海市高等教育自学考试各专业课程考试日程安排表》。交大 080901 计算机科学与技术共 5 个理论场次（10/24-25），同场次课程不可兼报；实践考 6 门暂定 10/31-11/1。报名窗口 9/1-9/6，务必盯紧上海招考热线。","url":"https://www.shmeea.edu.cn/","date":"2026-08-11"},
+ {"id":"seed-2","cat":"交大研招","title":"交大人工智能学院 2026 硕士招生：总计划 45 人，推免占 25","desc":"531 人工智能学院，081200 计算机科学与技术（学硕，01 人工智能）与 085400 电子信息（专硕，01 人工智能）初试科目一致：101 政治 + 201 英语一 + 301 数学一 + 408 计算机学科专业基础。统考名额约 20 人，专硕推免占比更需留意。","url":"https://yzb.sjtu.edu.cn/","date":"2026-08-11"}
+]}
+</script>
+
+<header class="top">
+  <div class="wrap">
+    <div class="top-row">
+      <div class="brand" onclick="go('p1')" title="返回作战台" style="cursor:pointer">
+        <h1>
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+          双线作战台
+        </h1>
+        <p>自考本科 · 上海交大 计算机科学与技术（080901） × 考研 · 交大人工智能学院</p>
+        <div class="store-chip"><i class="dot" id="storeDot"></i><span id="storeTxt">本地存储模式 · 数据仅存在这台设备</span></div>
+      </div>
+      <div class="top-acts">
+        <button class="tbtn" onclick="exportJSON()"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg><span>导出备份</span></button>
+        <button class="tbtn" onclick="document.getElementById('impFile').click()"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg><span>导入恢复</span></button>
+        <button class="tbtn" onclick="openSet()"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span>设置</span></button>
+        <button class="tbtn ver-badge" id="btnVer" onclick="openVer()"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z"/><path d="M20 12h2M2 12h2M12 2v2M12 20v2"/></svg><span id="verTxt">v1.0.0</span></button>
+      </div>
+    </div>
+    <input type="file" id="impFile" accept=".json" style="display:none" onchange="importJSON(this)">
+    <div class="cds">
+      <div class="cd">
+        <div class="lb"><span>下一次自考统考</span><span id="zkDateTxt">2026-10-24</span></div>
+        <div class="nm" id="zkDays">--<small>天</small></div>
+        <div class="sub" id="zkSub">本期计划报考 0 门</div>
+      </div>
+      <div class="cd">
+        <div class="lb"><span>考研初试（2027 冬）</span><span id="kyDateTxt">2027-12-18</span></div>
+        <div class="nm" id="kyDays">--<small>天</small></div>
+        <div class="sub">政治 + 英语一 + 数学一 + 408</div>
+      </div>
+      <div class="cd">
+        <div class="lb"><span>计算机二级（上海·9月）</span><span id="ncreDateTxt">2026-09-19</span></div>
+        <div class="nm" id="ncreDays">--<small>天</small></div>
+        <div class="sub" id="ncreSub">上海报名 9 月初开放</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- 今天要处理 -->
+  <section class="card today">
+    <div class="ch">
+      <h2><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>今天要处理</h2>
+      <span class="hint" id="todayHint"></span>
+    </div>
+    <div id="todayBox"></div>
+    <div class="note" id="backupTip" style="display:none"></div>
+  </section>
+
+  <!-- Tab -->
+  <nav class="tabs">
+    <button class="tab on" data-p="p1" onclick="go('p1')">今日任务</button>
+    <button class="tab" data-p="p2" onclick="go('p2')">自考看板</button>
+    <button class="tab" data-p="p3" onclick="go('p3')">考研进度</button>
+    <button class="tab" data-p="p7" onclick="go('p7')">数学真题</button>
+  </nav>
+
+  <!-- 任务 -->
+  <section class="pane on" id="p1">
+    <div class="card">
+      <div class="ch"><h2><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="var(--navy)" stroke-width="2" stroke-linecap="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>添加学习任务</h2></div>
+      <div class="form">
+        <input type="text" id="tTitle" placeholder="今天要干什么？例：408 数据结构 第3章 树与二叉树" onkeydown="if(event.key==='Enter')addTask()">
+        <select id="tTag"><option value="考研">考研</option><option value="自考">自考</option><option value="其他">其他</option></select>
+        <input type="date" id="tDate">
+        <input type="number" id="tMin" placeholder="分钟" min="5" step="5" value="60">
+        <button class="btn" onclick="addTask()">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>添加
+        </button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ch"><h2>全部任务</h2><span class="hint" id="taskStat"></span>
+        <button class="btn g sm" onclick="clearDone()">清除已完成</button>
+      </div>
+      <div class="slotbar">
+        <button class="sf on" data-f="all" onclick="filtTask('all')">全部</button>
+        <button class="sf" data-f="考研" onclick="filtTask('考研')">考研</button>
+        <button class="sf" data-f="自考" onclick="filtTask('自考')">自考</button>
+        <button class="sf" data-f="undone" onclick="filtTask('undone')">未完成</button>
+      </div>
+      <div id="taskBox"></div>
+    </div>
+    <div class="card">
+      <div class="ch"><h2>快速工具</h2><span class="hint">次级入口</span></div>
+      <div class="toolgrid">
+        <button class="toolbtn" onclick="go('p4')">
+          <svg class="tbico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 11a9 9 0 0 1 9 9M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1.5" fill="currentColor"/></svg>
+          <span class="tbn">资讯速递</span>
+        </button>
+        <button class="toolbtn" onclick="openQuiz()">
+          <svg class="tbico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+          <span class="tbn">习题练习</span>
+        </button>
+        <button class="toolbtn" onclick="go('p6')">
+          <svg class="tbico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2h6v2h3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h3V2z"/><path d="M9 12l2 2 4-4"/></svg>
+          <span class="tbn">科研专区</span>
+        </button>
+        <button class="toolbtn" onclick="window.open('index.html#sec-tools','_blank')">
+          <svg class="tbico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"/></svg>
+          <span class="tbn">AI 工具箱</span>
+        </button>
+      </div>
+    </div>
+    <a class="motto" href="https://www.bilibili.com/video/BV1ub1XBVE7Q?vd_source=abc652e7076e43fcc3afe985c8b12326" target="_blank" rel="noopener noreferrer">
+      <span class="mi"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#FB7299" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.1V18h6v-1.2c0-.8.4-1.6 1-2.1A7 7 0 0 0 12 2z"/></svg></span>
+      <span>
+        <span class="mt">遇到困难了，就回来看看</span>
+        <div class="md">翁恺老师的「计算机圣经」—— 一条让你重新出发的视频</div>
+      </span>
+      <span class="ma">B 站观看 <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 17L17 7M17 7H9M17 7v8"/></svg></span>
+    </a>
+  </section>
+
+  <!-- 自考看板 -->
+  <section class="pane" id="p2">
+  <div class="cdrow">
+  <div class="card regcd" id="regCdBox">
+    <div class="ch"><h2><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>自考报名倒计时</h2><span class="hint" id="regCdSub"></span></div>
+    <div class="regmain" id="regCd"></div>
+  </div>
+  <div class="card regcd ky" id="kyCdBox">
+    <div class="ch"><h2><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="var(--navy)" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>考研初试倒计时</h2><span class="hint" id="kyCdSub"></span></div>
+    <div class="regmain" id="kyCd"></div>
+  </div>
+  <div class="card regcd ncre" id="ncreCdBox">
+    <div class="ch"><h2><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#137A4B" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>计算机二级（上海）倒计时</h2><span class="hint" id="ncreCdSub"></span></div>
+    <div class="regmain" id="ncreCd"></div>
+  </div>
+  </div>
+    <div class="card">
+      <div class="ch"><h2><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>学分进度</h2><span class="hint">毕业要求 74 学分</span></div>
+      <div class="ring">
+        <svg width="88" height="88" viewBox="0 0 88 88" style="flex:none">
+          <circle cx="44" cy="44" r="37" fill="none" stroke="#EDEFF2" stroke-width="10"/>
+          <circle id="ringArc" cx="44" cy="44" r="37" fill="none" stroke="#B01F24" stroke-width="10" stroke-linecap="round"
+                  stroke-dasharray="232.5" stroke-dashoffset="232.5" transform="rotate(-90 44 44)"/>
+          <text id="ringTxt" x="44" y="49" text-anchor="middle" font-size="19" font-weight="700" fill="#1A1D21">0%</text>
+        </svg>
+        <div class="info">
+          <b id="crTxt">已获 0 / 74 学分</b>
+          <div id="sciLine" style="margin:3px 0"></div>
+          <p id="crSub">还差 74 学分，按每期报满约需 4 个考期</p>
+          <p style="margin-top:6px;color:var(--navy);font-size:12px" id="deadlineTip"></p>
+        </div>
+      </div>
+      <div class="stat">
+        <div class="st"><b id="s1" style="color:var(--green)">0</b><span>已通过</span></div>
+        <div class="st"><b id="s2" style="color:var(--navy)">0</b><span>复习中</span></div>
+        <div class="st"><b id="s3" style="color:var(--amber)">0</b><span>本期报考</span></div>
+        <div class="st"><b id="s4" style="color:var(--t2)">0</b><span>未开始</span></div>
+      </div>
+      <div id="confBox"></div>
+      <div class="warn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 9v4M12 17h.01"/><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+        <span>课表依据 2026 年起实施的新计划（交大继续教育学院公布，74 学分）。带 <b class="tag k8">408</b> 的课与考研专业课重叠，优先安排、一鱼两吃。加考课理工科专科免修（已显示「理工免考」标记，不计入待考）；选考二选一已默认选「人工智能与大数据」，另一门标「未选」无需报考。</span>
+      </div>
+      <div class="slotbar" id="slotBar"></div>
+      <div class="grid" id="csBox"></div>
+    </div>
+    <div class="card">
+      <div class="ch"><h2><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="var(--navy)" stroke-width="2" stroke-linecap="round"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg>外部学习资源</h2></div>
+      <div class="reslinks" id="resLinks"></div>
+    </div>
+  </section>
+
+  <!-- 考研 -->
+  <section class="pane" id="p3">
+    <div class="card">
+      <div class="ch"><h2><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="var(--navy)" stroke-width="2" stroke-linecap="round"><path d="M12 20V10M18 20V4M6 20v-4"/></svg>四科复习进度</h2><span class="hint">目标：交大 531 人工智能学院</span></div>
+      <div class="kyg" id="kyBox"></div>
+    </div>
+    <div class="card">
+      <div class="ch"><h2><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>每日学习打卡</h2><span class="hint">点格子记录当天时长</span></div>
+      <div class="form" style="margin-bottom:12px">
+        <input type="number" id="hMin" placeholder="今天学了多少分钟" min="0" step="15" style="flex:1;min-width:150px">
+        <button class="btn n" onclick="punch()">打卡</button>
+      </div>
+      <div class="heat" id="heatBox"></div>
+      <div class="lg">少 <i style="background:#EDEFF2"></i><i style="background:#CBE5D8"></i><i style="background:#8ECBAB"></i><i style="background:#3F9E70"></i><i style="background:#137A4B"></i> 多
+        <span style="margin-left:auto" id="streakTxt"></span></div>
+    </div>
+    <div class="card">
+      <div class="ch"><h2>目标信息卡</h2></div>
+      <div style="font-size:13.5px;line-height:1.9;color:var(--t2)">
+        <div><b style="color:var(--t1)">院系</b>　531 人工智能学院（2026 总招 45：学硕 15 / 专硕 30，含推免 25）</div>
+        <div><b style="color:var(--t1)">学硕</b>　081200 计算机科学与技术 · 01 人工智能</div>
+        <div><b style="color:var(--t1)">专硕</b>　085400 电子信息 · 01 人工智能（复试含上机 + 面试）</div>
+        <div><b style="color:var(--t1)">初试</b>　101 思想政治理论 + 201 英语一 + 301 数学一 + 408 计算机学科专业基础</div>
+        <div><b style="color:var(--t1)">备选</b>　033 计算机学院 085400 电子信息 · 人工智能（清源研究院），初试科目完全一致，可作平行志愿思路</div>
+        <div class="note" style="margin-top:10px">数据来源：上海交大研究生招生网 2026 年硕士招生专业目录。每年 9 月底发布新目录，届时以官方为准；资讯栏会自动跟踪更新。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 资讯 -->
+  <section class="pane" id="p4">
+    <div class="card">
+      <div class="ch"><h2><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2" stroke-linecap="round"><path d="M4 11a9 9 0 0 1 9 9M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1.5" fill="currentColor"/></svg>每日资讯速递</h2><span class="hint" id="newsUpd"></span>
+        <button class="btn g sm" onclick="go('p1')">← 返回</button></div>
+      <div class="nf" id="newsFilt"></div>
+      <div id="newsBox"></div>
+      <div class="note">资讯由本机定时任务每天早上 8 点自动抓取（交大研招网 / 人工智能学院 / 上海招考热线 / AI 前沿），直接写入本文件。若你把工作台部署到了线上，线上版需要重新部署才能刷新资讯。</div>
+    </div>
+  </section>
+
+  <!-- 科研专区 -->
+  <section class="pane" id="p6">
+    <div class="card">
+      <div class="ch"><h2><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2h6v2h3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h3V2z"/><path d="M9 12l2 2 4-4"/></svg>科研专区</h2><span class="hint">课题 · 文献 · 投稿追踪</span>
+        <button class="btn g sm" onclick="go('p1')">← 返回</button>
+        <button class="btn g sm" onclick="exportRS()">导出备份</button>
+        <button class="btn g sm" onclick="document.getElementById('rsImp').click()">导入恢复</button>
+      </div>
+      <input type="file" id="rsImp" accept=".json" style="display:none" onchange="importRS(this)">
+      <div class="stat" id="rsStat"></div>
+    </div>
+    <div class="grp-h">科研管理</div>
+    <div class="card">
+      <div class="ch"><h2><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="var(--navy)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>研究课题</h2><button class="btn g sm" onclick="addTopic()">+ 新建课题</button></div>
+      <div class="grid" id="topicBox"></div>
+    </div>
+    <div class="card">
+      <div class="ch"><h2><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>文献阅读清单</h2><span class="hint" id="paperStat"></span><button class="btn g sm" onclick="addPaper()">+ 加论文</button></div>
+      <div id="paperBox"></div>
+    </div>
+    <div class="card">
+      <div class="ch"><h2><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3 7h7l-5.5 4 2 7L12 17l-6.5 3 2-7L2 9h7z"/></svg>投稿 · 会议追踪</h2><button class="btn g sm" onclick="addSub()">+ 加投稿</button></div>
+      <div class="grid" id="subBox"></div>
+    </div>
+
+    <div class="grp-h">AI 交叉领域</div>
+    <!-- 我的自动化技术栈 -->
+    <div class="card">
+      <div class="ch" onclick="toggleTechSec(event)" style="cursor:pointer"><h2><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="var(--zk)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>我的自动化技术栈</h2><span class="hint">AeroCAD · 中控引擎 · Excel 核算 · arXiv</span><span class="tbar"><span id="techSecCaret" style="font-size:13px;color:var(--t3);margin-right:2px">▾</span><button class="btn g sm" onclick="event.stopPropagation();collapseAllTech()">⊟ 全部收起</button><button class="btn g sm" onclick="event.stopPropagation();expandAllTech()">⊞ 全部展开</button></span></div>
+      <div id="techStackContent">
+      <div class="note" style="margin:0 0 12px;font-size:12px">围绕「自动化工程」沉淀的三套系统与论文工具，技术要点与你的科研方向互相印证。默认收起，点击卡片标题可展开 / 收起要点；右上角可一键展开 / 收起全部。</div>
+      <div class="grid" id="techStackBox"></div>
+      </div>
+    </div>
+
+    <!-- 技术 · 论文监控 -->
+    <div class="card">
+      <div class="ch"><h2><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="var(--zk)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>技术 · 论文监控</h2><span class="hint">GitHub · arXiv · 国内外顶刊</span>
+        <button class="btn g sm" onclick="refreshMon()">↻ 刷新</button>
+      </div>
+      <div class="note" style="margin:0 0 12px;font-size:12px">实时检索你论文方向（AeroCAD：CAD 解析 / BOM 清洗 / 智能报价 / 机器视觉 / 航空制造）的最新开源项目与论文。数据来自 GitHub Search、arXiv API 与 Crossref 公开接口；arXiv 因无 CORS 头改走代理取数；本机缓存 30–60 分钟，避免触发接口限流。</div>
+      <div class="mon-tabs">
+        <button class="mtab on" data-mt="gh" onclick="switchMon('gh')">GitHub 技术</button>
+        <button class="mtab" data-mt="ax" onclick="switchMon('ax')">arXiv 论文</button>
+        <button class="mtab" data-mt="intl" onclick="switchMon('intl')">国际顶刊</button>
+        <button class="mtab" data-mt="cn" onclick="switchMon('cn')">国内顶刊</button>
+      </div>
+      <div class="mon-chips" id="monChips"></div>
+      <div class="mon-body" id="monBody"></div>
+    </div>
+  </section>
+
+  <!-- 考研数学真题档案（纯索引，PDF 公式无法 OCR，点击复制本地路径） -->
+  <section class="pane" id="p7">
+    <div class="card">
+      <div class="ch"><h2><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="var(--navy)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z"/><path d="M9 9h6v6H9z"/></svg>考研数学真题档案</h2><span class="hint">纯索引 · 点击复制本地路径</span>
+        <button class="btn g sm" onclick="go('p1')">← 返回</button>
+      </div>
+      <div class="note" style="margin:0 0 12px;font-size:12px">数学真题 PDF 公式均为图片 / 私有编码，<b>无法自动 OCR 抽题</b>，故采用<b>档案索引</b>模式：按数一 / 二 / 三 + 年份归档。点击文件即复制其本地路径，去资源管理器打开即可（仅本机双击 file:// 或 localhost:8080 有效，线上链接无效）。跨年合集单独列出。数据生成于 2026-08-17。</div>
+      <div class="mon-tabs" id="mathSubTabs">
+        <button class="mtab on" data-ms="sx1" onclick="renderMath('sx1')">数学一</button>
+        <button class="mtab" data-ms="sx2" onclick="renderMath('sx2')">数学二</button>
+        <button class="mtab" data-ms="sx3" onclick="renderMath('sx3')">数学三</button>
+      </div>
+    </div>
+    <div id="mathBox"></div>
+  </section>
+
+    <div class="card">
+      <div class="ch"><h2><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>数模国赛论文库（2019–2023）</h2><span class="hint">共 32 篇 · 本地 8080 可点击阅读</span></div>
+      <div class="note" style="margin:0 0 12px;font-size:12px">全国大学生数学建模竞赛（国赛）获奖论文索引，按年份 / 题型（D 连续型、E 离散型）归档。线上版仅目录检索；在本地 8080 工作台点击条目可直接打开 PDF，原始压缩包仍保留在 E:/Desktop/有用的一切/2019-2023论文.rar。</div>
+      <details style="margin:6px 0"><summary style="cursor:pointer;font-weight:600;padding:6px 0">2019 年（10 篇）</summary><ul style="margin:6px 0 10px;padding-left:18px;font-size:13px;line-height:1.9">
+        <li style="cursor:pointer;border-radius:4px;padding:2px 4px;transition:background .15s" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='transparent'" onclick="openPaper('2019','2019D：空气质量数据的校准.pdf','空气质量数据的校准')"><span style="display:inline-block;min-width:20px;text-align:center;font-size:11px;background:#E6F0FA;color:#1565C0;border-radius:4px;padding:0 5px;margin-right:6px">D</span>空气质量数据的校准</li>
+        <li style="cursor:pointer;border-radius:4px;padding:2px 4px;transition:background .15s" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='transparent'" onclick="openPaper('2019','2019D：空气质量数据的校准（2）.pdf','空气质量数据的校准（2）')"><span style="display:inline-block;min-width:20px;text-align:center;font-size:11px;background:#E6F0FA;color:#1565C0;border-radius:4px;padding:0 5px;margin-right:6px">D</span>空气质量数据的校准（2）</li>
+        <li style="cursor:pointer;border-radius:4px;padding:2px 4px;transition:background .15s" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='transparent'" onclick="openPaper('2019','2019D：空气质量数据的校准（3）.pdf','空气质量数据的校准（3）')"><span style="display:inline-block;min-width:20px;text-align:center;font-size:11px;background:#E6F0FA;color:#1565C0;border-radius:4px;padding:0 5px;margin-right:6px">D</span>空气质量数据的校准（3）</li>
+        <li style="cursor:pointer;border-radius:4px;padding:2px 4px;transition:background .15s" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='transparent'" onclick="openPaper('2019','2019D：空气质量监测数据校准模型研究.pdf','空气质量监测数据校准模型研究')"><span style="display:inline-block;min-width:20px;text-align:center;font-size:11px;background:#E6F0FA;color:#1565C0;border-radius:4px;padding:0 5px;margin-right:6px">D</span>空气质量监测数据校准模型研究</li>
+        <li style="cursor:pointer;border-radius:4px;padding:2px 4px;transition:background .15s" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='transparent'" onclick="openPaper('2019','2019E：“薄利多销”分析.pdf','“薄利多销”分析')"><span style="display:inline-block;min-width:20px;text-align:center;font-size:11px;background:#EAF6EE;color:#1E7A45;border-radius:4px;padding:0 5px;margin-right:6px">E</span>“薄利多销”分析</li>
+        <li style="cursor:pointer;border-radius:4px;padding:2px 4px;transition:background .15s" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='transparent'" onclick="openPaper('2019','2019E：基于打折力度概念的“薄利多销”模型.pdf','基于打折力度概念的“薄利多销”模型')"><span style="display:inline-block;min-width:20px;text-align:center;font-size:11px;background:#EAF6EE;color:#1E7A45;border-radius:4px;padding:0 5px;margin-right:6px">E</span>基于打折力度概念的“薄利多销”模型</li>
+        <li style="cursor:pointer;border-radius:4px;padding:2px 4px;transition:background .15s" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='transparent'" onclick="openPaper('2019','2019E：基于数据挖掘对“薄利多销”进行分析.pdf','基于数据挖掘对“薄利多销”进行分析')"><span style="display:inline-block;min-width:20px;text-align:center;font-size:11px;background:#EAF6EE;color:#1E7A45;border-radius:4px;padding:0 5px;margin-right:6px">E</span>基于数据挖掘对“薄利多销”进行分析</li>
+        <li style="cursor:pointer;border-radius:4px;padding:2px 4px;transition:background .15s" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='transparent'" onclick="openPaper('2019','2019E：薄利多销销售策略的模型研究分析.pdf','薄利多销销售策略的模型研究分析')"><span style="display:inline-block;min-width:20px;text-align:center;font-size:11px;background:#EAF6EE;color:#1E7A45;border-radius:4px;padding:0 5px;margin-right:6px">E</span>薄利多销销售策略的模型研究分析</li>
+        <li style="cursor:pointer;border-radius:4px;padding:2px 4px;transition:background .15s" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='transparent'" onclick="openPaper('2019','CUMCM-2019-Problem-D-Chinese.pdf','CUMCM-2019-Problem-D-Chinese 赛题')"><span style="display:inline-block;min-width:20px;text-align:center;font-size:11px;background:#E6F0FA;color:#1565C0;border-radius:4px;padding:0 5px;margin-right:6px">D</span>CUMCM-2019-Problem-D-Chinese 赛题</li>
+        <li style="cursor:pointer;border-radius:4px;padding:2px 4px;transition:background .15s" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='transparent'" onclick="openPaper('2019','CUMCM-2019-Problem-E-Chinese.pdf','CUMCM-2019-Problem-E-Chinese 赛题')"><span style="display:inline-block;min-width:20px;text-align:center;font-size:11px;background:#EAF6EE;color:#1E7A45;border-radius:4px;padding:0 5px;margin-right:6px">E</span>CUMCM-2019-Problem-E-Chinese 赛题</li>
+      </ul></details>
+      <details style="margin:6px 0"><summary style="cursor:pointer;font-weight:600;padding:6px 0">2020 年（5 篇）</summary><ul style="margin:6px 0 10px;padding-left:18px;font-size:13px;line-height:1.9">
+        <li style="cursor:pointer;border-radius:4px;padding:2px 4px;transition:background .15s" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='transparent'" onclick="openPaper('2020','D008.pdf','参赛论文 D008')"><span style="display:inline-block;min-width:20px;text-align:center;font-size:11px;background:#E6F0FA;color:#1565C0;border-radius:4px;padding:0 5px;margin-right:6px">D</span>参赛论文 D008</li>
+        <li style="cursor:pointer;border-radius:4px;padding:2px 4px;transition:background .15s" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='transparent'" onclick="openPaper('2020','D011.pdf','参赛论文 D011')"><span style="display:inline-block;min-width:20px;text-align:center;font-size:11px;background:#E6F0FA;color:#1565C0;border-radius:4px;padding:0 5px;margin-right:6px">D</span>参赛论文 D011</li>
+        <li style="cursor:pointer;border-radius:4px;padding:2px 4px;transition:background .15s" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='transparent'" onclick="openPaper('2020','D027.pdf','参赛论文 D027')"><span style="display:inline-block;min-width:20px;text-align:center;font-size:11px;background:#E6F0FA;color:#1565C0;border-radius:4px;padding:0 5px;margin-right:6px">D</span>参赛论文 D027</li>
+        <li style="cursor:pointer;border-radius:4px;padding:2px 4px;transition:background .15s" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='transparent'" onclick="openPaper('2020','E029.pdf','参赛论文 E029')"><span style="display:inline-block;min-width:20px;text-align:center;font-size:11px;background:#EAF6EE;color:#1E7A45;border-radius:4px;padding:0 5px;margin-right:6px">E</span>参赛论文 E029</li>
+        <li style="cursor:pointer;border-radius:4px;padding:2px 4px;transition:background .15s" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='transparent'" onclick="openPaper('2020','E040.pdf','参赛论文 E040')"><span style="display:inline-block;min-width:20px;text-align:center;font-size:11px;background:#EAF6EE;color:#1E7A45;border-radius:4px;padding:0 5px;margin-right:6px">E</span>参赛论文 E040</li>
+      </ul></details>
+      <details style="margin:6px 0"><summary style="cursor:pointer;font-weight:600;padding:6px 0">2021 年（8 篇）</summary><ul style="margin:6px 0 10px;padding-left:18px;font-size:13px;line-height:1.9">
+        <li style="cursor:pointer;border-radius:4px;padding:2px 4px;transition:background .15s" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='transparent'" onclick="openPaper('2021','D017.pdf','参赛论文 D017')"><span style="display:inline-block;min-width:20px;text-align:center;font-size:11px;background:#E6F0FA;color:#1565C0;border-radius:4px;padding:0 5px;margin-right:6px">D</span>参赛论文 D017</li>
+        <li style="cursor:pointer;border-radius:4px;padding:2px 4px;transition:background .15s" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='transparent'" onclick="openPaper('2021','D026.pdf','参赛论文 D026')"><span style="display:inline-block;min-width:20px;text-align:center;font-size:11px;background:#E6F0FA;color:#1565C0;border-radius:4px;padding:0 5px;margin-right:6px">D</span>参赛论文 D026</li>
+        <li style="cursor:pointer;border-radius:4px;padding:2px 4px;transition:background .15s" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='transparent'" onclick="openPaper('2021','D034.pdf','参赛论文 D034')"><span style="display:inline-block;min-width:20px;text-align:center;font-size:11px;background:#E6F0FA;color:#1565C0;border-radius:4px;padding:0 5px;margin-right:6px">D</span>参赛论文 D034</li>
+        <li style="cursor:pointer;border-radius:4px;padding:2px 4px;transition:background .15s" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='transparent'" onclick="openPaper('2021','E014.pdf','参赛论文 E014')"><span style="display:inline-block;min-width:20px;text-align:center;font-size:11px;background:#EAF6EE;color:#1E7A45;border-radius:4px;padding:0 5px;margin-right:6px">E</span>参赛论文 E014</li>
+        <li style="cursor:pointer;border-radius:4px;padding:2px 4px;transition:background .15s" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='transparent'" onclick="openPaper('2021','E025.pdf','参赛论文 E025')"><span style="display:inline-block;min-width:20px;text-align:center;font-size:11px;background:#EAF6EE;color:#1E7A45;border-radius:4px;padding:0 5px;margin-right:6px">E</span>参赛论文 E025</li>
+        <li style="cursor:pointer;border-radius:4px;padding:2px 4px;transition:background .15s" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='transparent'" onclick="openPaper('2021','E037.pdf','参赛论文 E037')"><span style="display:inline-block;min-width:20px;text-align:center;font-size:11px;background:#EAF6EE;color:#1E7A45;border-radius:4px;padding:0 5px;margin-right:6px">E</span>参赛论文 E037</li>
+        <li style="cursor:pointer;border-radius:4px;padding:2px 4px;transition:background .15s" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='transparent'" onclick="openPaper('2021','CUMCM2021-D.pdf','CUMCM2021-D 赛题')"><span style="display:inline-block;min-width:20px;text-align:center;font-size:11px;background:#E6F0FA;color:#1565C0;border-radius:4px;padding:0 5px;margin-right:6px">D</span>CUMCM2021-D 赛题</li>
+        <li style="cursor:pointer;border-radius:4px;padding:2px 4px;transition:background .15s" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='transparent'" onclick="openPaper('2021','CUMCM2021-E.pdf','CUMCM2021-E 赛题')"><span style="display:inline-block;min-width:20px;text-align:center;font-size:11px;background:#EAF6EE;color:#1E7A45;border-radius:4px;padding:0 5px;margin-right:6px">E</span>CUMCM2021-E 赛题</li>
+      </ul></details>
+      <details style="margin:6px 0"><summary style="cursor:pointer;font-weight:600;padding:6px 0">2022 年（5 篇）</summary><ul style="margin:6px 0 10px;padding-left:18px;font-size:13px;line-height:1.9">
+        <li style="cursor:pointer;border-radius:4px;padding:2px 4px;transition:background .15s" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='transparent'" onclick="openPaper('2022','D999.pdf','参赛论文 D999')"><span style="display:inline-block;min-width:20px;text-align:center;font-size:11px;background:#E6F0FA;color:#1565C0;border-radius:4px;padding:0 5px;margin-right:6px">D</span>参赛论文 D999</li>
+        <li style="cursor:pointer;border-radius:4px;padding:2px 4px;transition:background .15s" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='transparent'" onclick="openPaper('2022','D题.pdf','D题 参赛论文')"><span style="display:inline-block;min-width:20px;text-align:center;font-size:11px;background:#E6F0FA;color:#1565C0;border-radius:4px;padding:0 5px;margin-right:6px">D</span>D题 参赛论文</li>
+        <li style="cursor:pointer;border-radius:4px;padding:2px 4px;transition:background .15s" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='transparent'" onclick="openPaper('2022','E014.pdf','参赛论文 E014')"><span style="display:inline-block;min-width:20px;text-align:center;font-size:11px;background:#EAF6EE;color:#1E7A45;border-radius:4px;padding:0 5px;margin-right:6px">E</span>参赛论文 E014</li>
+        <li style="cursor:pointer;border-radius:4px;padding:2px 4px;transition:background .15s" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='transparent'" onclick="openPaper('2022','E029.pdf','参赛论文 E029')"><span style="display:inline-block;min-width:20px;text-align:center;font-size:11px;background:#EAF6EE;color:#1E7A45;border-radius:4px;padding:0 5px;margin-right:6px">E</span>参赛论文 E029</li>
+        <li style="cursor:pointer;border-radius:4px;padding:2px 4px;transition:background .15s" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='transparent'" onclick="openPaper('2022','E题.pdf','E题 参赛论文')"><span style="display:inline-block;min-width:20px;text-align:center;font-size:11px;background:#EAF6EE;color:#1E7A45;border-radius:4px;padding:0 5px;margin-right:6px">E</span>E题 参赛论文</li>
+      </ul></details>
+      <details style="margin:6px 0"><summary style="cursor:pointer;font-weight:600;padding:6px 0">2023 年（4 篇）</summary><ul style="margin:6px 0 10px;padding-left:18px;font-size:13px;line-height:1.9">
+        <li style="cursor:pointer;border-radius:4px;padding:2px 4px;transition:background .15s" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='transparent'" onclick="openPaper('2023','D039.pdf','参赛论文 D039')"><span style="display:inline-block;min-width:20px;text-align:center;font-size:11px;background:#E6F0FA;color:#1565C0;border-radius:4px;padding:0 5px;margin-right:6px">D</span>参赛论文 D039</li>
+        <li style="cursor:pointer;border-radius:4px;padding:2px 4px;transition:background .15s" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='transparent'" onclick="openPaper('2023','D题.pdf','D题 参赛论文')"><span style="display:inline-block;min-width:20px;text-align:center;font-size:11px;background:#E6F0FA;color:#1565C0;border-radius:4px;padding:0 5px;margin-right:6px">D</span>D题 参赛论文</li>
+        <li style="cursor:pointer;border-radius:4px;padding:2px 4px;transition:background .15s" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='transparent'" onclick="openPaper('2023','E032.pdf','参赛论文 E032')"><span style="display:inline-block;min-width:20px;text-align:center;font-size:11px;background:#EAF6EE;color:#1E7A45;border-radius:4px;padding:0 5px;margin-right:6px">E</span>参赛论文 E032</li>
+        <li style="cursor:pointer;border-radius:4px;padding:2px 4px;transition:background .15s" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='transparent'" onclick="openPaper('2023','E176.pdf','参赛论文 E176')"><span style="display:inline-block;min-width:20px;text-align:center;font-size:11px;background:#EAF6EE;color:#1E7A45;border-radius:4px;padding:0 5px;margin-right:6px">E</span>参赛论文 E176</li>
+      </ul></details>
+    </div>
+  </section>
+
+  <!-- 自考·考研习题练习（内嵌轻量题库）+ 技术部题库（iframe，仅本地私有版） -->
+  <div class="quizlayer" id="quizLayer">
+    <div class="qlbar">
+      <button class="qlclose" onclick="closeQuiz()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        返回作战台
+      </button>
+      <div class="ql-tabs" id="quizTabs">
+        <button class="ql-tab on" data-tab="exam" onclick="quizTabSwitch('exam')">📝 自考·考研</button>
+        <button class="ql-tab" data-tab="tech" onclick="quizTabSwitch('tech')">🔧 技术部题库</button>
+      </div>
+      <div style="flex:1"></div>
+      <span class="qscore" id="quizScore">正确: 0 / 0</span>
+    </div>
+    <!-- Tab: 自考·考研 -->
+    <div class="quizbody" id="quizBodyExam">
+      <div class="quiz-toolbar" id="quizToolbar">
+        <div class="qz-modes">
+          <button class="qm-btn on" data-mode="practice" onclick="quizSetMode('practice')">练习</button>
+          <button class="qm-btn" data-mode="exam" onclick="quizSetMode('exam')">考核</button>
+        </div>
+        <div style="flex:1"></div>
+        <span class="qz-timer" id="quizTimer" style="display:none"></span>
+        <button class="qm-btn danger" id="quizSubmitBtn" style="display:none" onclick="quizSubmitAll(false)">交卷</button>
+        <button class="qm-btn ghost" onclick="toggleStats()">📊 统计</button>
+      </div>
+      <div class="quiz-stats" id="quizStats" style="display:none"></div>
+      <div class="quiz-nav" id="quizNav"></div>
+      <div class="quiz-filters" id="quizFilters"></div>
+      <div class="quiz-q" id="quizQ"></div>
+    </div>
+    <!-- Tab: 技术部题库 -->
+    <div class="quizbody" id="quizBodyTech" style="display:none">
+      <div class="tech-quiz-placeholder" id="techQuizPlaceholder">
+        <div style="text-align:center;padding:60px 20px;color:#94a3b8">
+          <div style="font-size:40px;margin-bottom:12px">📦</div>
+          <div style="font-size:15px;margin-bottom:6px">正在检测技术部题库…</div>
+        </div>
+      </div>
+      <iframe class="tech-quiz-frame" id="techQuizFrame" src="" style="display:none;border:0;width:100%;height:100%"></iframe>
+    </div>
+  </div>
+
+  <div class="quicklinks" id="quickLinks"></div>
+  <div class="note" style="text-align:center;padding:14px 0 4px">
+    数据保存在这台设备的浏览器里，清缓存 / 换设备会丢 —— 记得定期点右上角「导出备份」。
+  </div>
+</main>
+
+<nav class="bnav">
+  <button class="bn on" data-p="p1" onclick="go('p1')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>今日任务</button>
+  <button class="bn" data-p="p2" onclick="go('p2')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>自考看板</button>
+  <button class="bn" data-p="p3" onclick="go('p3')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 20V10M18 20V4M6 20v-4"/></svg>考研进度</button>
+</nav>
+
+<div class="mask" id="mask" onclick="if(event.target===this)closeM()">
+  <div class="modal" id="modal"></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="sites.js"></script>
+<script src="quiz-data.js"></script>
+<script src="quiz-data-english.js"></script>
+<script src="quiz-data-politics.js"></script>
+<script src="math-archive.js"></script>
+<script>
+/* ============ 常量 ============ */
+var K='wb_sjtu_dual_v1';
+/* 外部资源 / 常用链接：在这里增删即可，href 请填完整链接 */
+var RESES=[];
+/* AI 工具箱（想加平台往这里加一行：g 填 chat=对话类 / dev=编程智能体类） */
+var AI_TOOLS=[
+ {g:'chat',n:'DeepSeek',t:'DS',c:'#4D6BFE',d:'国产推理模型，写码与科研一把好手',u:'https://chat.deepseek.com/'},
+ {g:'chat',n:'智谱 AI（GLM）',t:'Z',c:'#5A6CF0',d:'国产大模型，长文本与智能体强',u:'https://chat.z.ai/'},
+ {g:'chat',n:'Kimi',t:'K',c:'#3A6DF0',d:'超长上下文，读论文与长文档利器',u:'https://kimi.moonshot.cn/'},
+ {g:'chat',n:'ChatGPT',t:'G',c:'#10A37F',d:'通用标杆，多模态全能',u:'https://chatgpt.com/'},
+ {g:'chat',n:'Claude',t:'C',c:'#D97757',d:'长文与代码质量高，Artifacts 好用',u:'https://claude.ai/'},
+ {g:'dev',n:'Coze 扣子',t:'Co',c:'#4E5BFF',d:'零代码搭 AI 智能体 / 工作流',u:'https://www.coze.cn/'},
+ {g:'dev',n:'Codex',t:'X',c:'#1A1A1A',d:'OpenAI 云端编程智能体，跑仓库级任务',u:'https://chatgpt.com/codex'},
+ {g:'dev',n:'Trae',t:'T',c:'#3D7EFF',d:'AI 原生 IDE，对话式写代码',u:'https://www.trae.ai/'},
+ {g:'dev',n:'DeepSeek Harness',t:'DSH',c:'#4D6BFE',d:'开源 Agent 框架，一切皆插件，对标 Claude Code',u:'https://github.com/deepseek-ai/deepseek-harness'},
+ {g:'dev',n:'WorkBuddy',t:'W',c:'#1B3A57',d:'当前这个工作台，你的 Agent 搭子',u:'https://www.workbuddy.cn/'}
+];
+/* 双线台只显示学习相关站点；数据来自 sites.js 的 SITES_DB，按 cat 过滤 */
+var HOT_SITES=(window.SITES_DB||[]).filter(function(s){return ['study','academic','dev','read','search'].indexOf(s.cat)>=0;});
+var SLOTS={
+ 1:'10/24 上午 09:00-11:30',2:'10/24 下午 14:30-17:00',
+ 3:'10/25 上午 09:00-11:30',4:'10/25 下午 14:30-17:00',
+ 5:'10/31 加场',0:'实践/非统考'
+};
+/* 自考报名窗口（上海市招考热线，每年固定区间；改这里即可） */
+var ZK_REG_OPEN='2026-09-01', ZK_REG_CLOSE='2026-09-06';
+/* 计算机二级（全国计算机等级考试 NCRE · 上海考区）报名窗口；上海一般开考 3 月/9 月，报名在考前约 2–3 周开放。改这里即可 */
+var NCRE_SH_REG_OPEN='2026-08-31', NCRE_SH_REG_CLOSE='2026-09-03';
+var COURSES=[
+ {c:'15040',n:'习近平新时代中国特色社会主义思想概论',cr:3,g:'公共基础',t:'必考',slot:1,ky:'政治'},
+ {c:'15043',n:'中国近现代史纲要',cr:2,g:'公共基础',t:'必考',slot:1,ky:'政治'},
+ {c:'13000',n:'英语(专升本)',cr:7,g:'公共基础',t:'必考',slot:1,ky:'英语一'},
+ {c:'02324',n:'离散数学',cr:4,g:'公共基础',t:'必考',slot:1,ky:'',vid:[{n:'离散数学·3小时期末速成',u:'https://www.bilibili.com/video/BV1nE421N7Fe?vd_source=abc652e7076e43fcc3afe985c8b12326'}]},
+ {c:'15044',n:'马克思主义基本原理概论',cr:4,g:'公共基础',t:'必考',slot:2,ky:'政治'},
+ {c:'00023',n:'高等数学(工本)',cr:10,g:'公共基础',t:'必考',slot:2,ky:'数学一'},
+ {c:'13180',n:'操作系统',cr:4,g:'核心专业',t:'必考',slot:2,ky:'408'},
+ {c:'13005',n:'软件工程',cr:3,g:'其他专业',t:'必考',slot:2,ky:'',vid:[{n:'软件工程·3小时期末速成',u:'https://www.bilibili.com/video/BV1xNzRYiEkz?vd_source=abc652e7076e43fcc3afe985c8b12326'}]},
+ {c:'13215',n:'Java语言程序设计',cr:3,g:'其他专业',t:'必考',slot:3,ky:''},
+ {c:'13003',n:'数据结构与算法',cr:4,g:'核心专业',t:'必考',slot:3,ky:'408',vid:[{n:'王道计算机考研 · 数据结构',u:'https://www.bilibili.com/video/BV1b7411N798?vd_source=abc652e7076e43fcc3afe985c8b12326'}]},
+ {c:'04737',n:'C++程序设计',cr:3,g:'核心专业',t:'必考',slot:3,ky:''},
+ {c:'13015',n:'计算机系统原理',cr:4,g:'核心专业',t:'必考',slot:3,ky:'408'},
+ {c:'13017',n:'计算机网络与信息安全',cr:6,g:'其他专业',t:'必考',slot:4,ky:'408',vid:[{n:'王道计算机考研 · 计算机网络',u:'https://www.bilibili.com/video/BV19E411D78Q?vd_source=abc652e7076e43fcc3afe985c8b12326'},{n:'上海交大 · 计算机网络',u:'https://www.bilibili.com/video/BV1dW411F72Q?vd_source=abc652e7076e43fcc3afe985c8b12326'}]},
+ {c:'13175',n:'线性代数(工)',cr:3,g:'其他专业',t:'必考',slot:4,ky:'数学一'},
+ {c:'13170',n:'数据库及其应用',cr:4,g:'其他专业',t:'必考',slot:4,ky:''},
+ {c:'02318',n:'计算机组成原理',cr:4,g:'加考',t:'加考',slot:4,ky:'408'},
+ {c:'13011',n:'人工智能与大数据',cr:6,g:'选考',t:'选考',slot:5,ky:'AI方向',pick:true},
+ {c:'14260',n:'数字电路与逻辑设计',cr:4,g:'选考',t:'选考',slot:5,ky:'',pick:false},
+ {c:'13176',n:'电子技术基础',cr:4,g:'加考',t:'加考',slot:5,ky:''},
+ {c:'04738',n:'C++程序设计(实践)',cr:2,g:'核心专业',t:'实践',slot:0,ky:''},
+ {c:'13004',n:'数据结构与算法(实践)',cr:2,g:'核心专业',t:'实践',slot:0,ky:''},
+ {c:'02327',n:'操作系统(实践)',cr:1,g:'核心专业',t:'实践',slot:0,ky:''},
+ {c:'13171',n:'数据库及其应用(实践)',cr:1,g:'其他专业',t:'实践',slot:0,ky:''},
+ {c:'13006',n:'软件工程(实践)',cr:2,g:'其他专业',t:'实践',slot:0,ky:''},
+ {c:'13216',n:'Java语言程序设计(实践)',cr:1,g:'其他专业',t:'实践',slot:0,ky:''},
+ {c:'13177',n:'电子技术基础(实践)',cr:2,g:'加考',t:'实践',slot:0,ky:''},
+ {c:'11689',n:'毕业设计',cr:0,g:'毕业',t:'必考',slot:0,ky:''}
+];
+var KY_DEF=[
+ {k:'m1',n:'301 数学一',u:'题',total:1000,done:0,col:'#B01F24',tip:'高数+线代+概率，与自考「高等数学(工本)」「线性代数(工)」重叠'},
+ {k:'cs',n:'408 计算机学科专业基础',u:'节',total:120,done:0,col:'#1B3A57',tip:'数据结构45+组成原理45+操作系统35+计算机网络25，与自考4门课重叠'},
+ {k:'en',n:'201 英语一',u:'套',total:25,done:0,col:'#137A4B',tip:'真题至少刷 3 遍，作文单独攒模板'},
+ {k:'po',n:'101 思想政治理论',u:'题',total:1000,done:0,col:'#B4690E',tip:'9 月后再全力开搞，自考三门政治课打底'}
+];
+
+/* ============ 状态 ============ */
+var S=null, curFilt='all', curSlot='all', curCat='全部';
+
+function today(){var d=new Date();return fmt(d);}
+function fmt(d){return d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate());}
+function p2(n){return n<10?'0'+n:''+n;}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
+function days(to){var a=new Date(today()+'T00:00:00'),b=new Date(to+'T00:00:00');return Math.round((b-a)/86400000);}
+
+function seed(){
+  var t=today(), d=new Date(); d.setDate(d.getDate()-2); var ago=fmt(d);
+  var cs={};
+  COURSES.forEach(function(x){cs[x.c]={st:'未开始',plan:false,score:''};});
+  cs['15043'].st='已通过'; cs['15043'].score='78';
+  cs['13000'].st='已通过'; cs['13000'].score='72';
+  cs['02324'].st='复习中';
+  cs['13003'].st='复习中'; cs['13003'].plan=true;
+  cs['13180'].plan=true; cs['13180'].st='复习中';
+  return {
+    v:1,
+    tasks:[
+      {id:uid(),ti:'【示例·逾期】408 数据结构 第2章 线性表 课后题 20 道',tag:'考研',date:ago,min:90,done:false},
+      {id:uid(),ti:'【示例】自考 13003 数据结构与算法 教材 P30-P58 精读',tag:'自考',date:t,min:120,done:false},
+      {id:uid(),ti:'【示例】数学一 高数 第一章 极限 强化题 15 道',tag:'考研',date:t,min:60,done:false},
+      {id:uid(),ti:'【示例】盯一下上海招考热线 10 月考期报名开放没有',tag:'自考',date:t,min:10,done:false},
+      {id:uid(),ti:'【示例】英语一 2010 年真题阅读 Text1-2 精翻',tag:'考研',date:t,min:75,done:true}
+    ],
+    cs:cs,
+    ky:JSON.parse(JSON.stringify(KY_DEF)),
+    punch:{},
+    read:{},
+    set:{zkDate:'2026-10-24',kyDate:'2027-12-18',ncreDate:'2026-09-19',isSci:true,goal:180}
+  };
+}
+function load(){
+  try{var o=store.getLegacy(K); if(o&&Array.isArray(o.tasks)){
+    if(!o.cs||typeof o.cs!=='object'||Array.isArray(o.cs))o.cs={};
+    COURSES.forEach(function(x){if(!o.cs[x.c])o.cs[x.c]={st:'未开始',plan:false,score:''};});
+    if(!o.set)o.set={zkDate:'2026-10-24',kyDate:'2027-12-18',ncreDate:'2026-09-19',isSci:true,goal:180};
+    if(!o.punch)o.punch={}; if(!o.read)o.read={};
+    if(o.set.isSci===undefined)o.set.isSci=(o.set.hideJ===undefined?true:!!o.set.hideJ);
+    if(!o.ky||!o.ky.length)o.ky=JSON.parse(JSON.stringify(KY_DEF));
+    return o;}
+  }catch(e){}
+  return seed();
+}
+function save(){try{store.setLegacy(K,S);}catch(e){toast('保存失败：本地存储可能已满');}}
+reportBridge();
+function reportBridge(){
+  try{
+    var pass=COURSES.filter(function(x){return S.cs[x.c].st==='已通过';});
+    var got=pass.reduce(function(a,b){return a+b.cr;},0);
+    var zkPct=Math.min(100,Math.round(got/74*100));
+    var kyAvg=S.ky.length?Math.round(S.ky.reduce(function(a,k){return a+(k.total>0?k.done/k.total:0);},0)/S.ky.length*100):0;
+    var t=today();
+    var od=S.tasks.filter(function(x){return !x.done&&x.date<t;});
+    var td=S.tasks.filter(function(x){return !x.done&&x.date===t;});
+    var todos=od.concat(td).map(function(x){return {id:x.id,text:x.ti,date:x.date,over:x.date<t,tag:x.tag};});
+    var bridge=store.getLegacy('wb_hub_bridge',{});
+    bridge.sjtu={name:'自考·考研',progress:Math.max(zkPct,kyAvg),sub:'学分 '+zkPct+'% · 考研 '+kyAvg+'%',zkDays:days(S.set.zkDate),kyDays:days(S.set.kyDate),todos:todos,link:'zk-ky.html',updated:Date.now()};
+    store.setLegacy('wb_hub_bridge',bridge);
+  }catch(e){}
+}
+
+/* ============ UI 工具 ============ */
+function toast(m){var t=document.getElementById('toast');t.textContent=m;t.classList.add('on');clearTimeout(t._t);t._t=setTimeout(function(){t.classList.remove('on');},2000);}
+function openVer(){
+  var btn=document.getElementById('btnVer');
+  if(btn&&btn.classList.contains('update')){ location.reload(true); return; }
+  var meta=document.querySelector('meta[name="app-version"]');
+  var ver=meta?meta.getAttribute('content'):'?';
+  var relMeta=document.querySelector('meta[name="app-released"]');
+  var relStr=relMeta?relMeta.getAttribute('content'):'';
+  var info=null; try{ info=store.getLegacy('wb_ky_verinfo'); }catch(e){}
+  var msg='当前版本 v'+ver+(relStr?(' · 发布于 '+fmtRel(relStr)):'')+' · 已是最新';
+  if(info&&info.notes&&info.notes.length){ msg+=' ｜ 最新：'+info.notes[0]; }
+  toast(msg);
+}
+function initVersion(){
+  var meta=document.querySelector('meta[name="app-version"]');
+  var ver=meta?meta.getAttribute('content'):'?';
+  var btn=document.getElementById('btnVer');
+  var txt=document.getElementById('verTxt'); if(txt) txt.textContent='v'+ver;
+  if(!btn) return;
+  fetch('version.json?_='+Date.now(),{cache:'no-store'})
+    .then(function(r){return r.ok?r.json():null;})
+    .then(function(d){
+      if(!d||!d.version) return;
+      try{ store.setLegacy('wb_ky_verinfo',d); }catch(e){}
+      if(compareVer(d.version,ver)>0){
+        if(txt) txt.textContent='v'+d.version;
+        btn.classList.add('update');
+        btn.title='发现新版本 v'+d.version+'，点击刷新';
+        toast('🎉 已发布新版本 v'+d.version+(d.releasedAt?('（'+fmtRel(d.releasedAt)+'）'):'')+'，点版本号刷新查看');
+      }
+    })
+    .catch(function(){ btn.classList.add('offline'); });
+}
+function compareVer(a,b){
+  var x=String(a).split('.').map(Number), y=String(b).split('.').map(Number);
+  for(var i=0;i<3;i++){ var d=(x[i]||0)-(y[i]||0); if(d!==0) return d; }
+  return 0;
+}
+function fmtRel(iso){
+  var d=new Date(iso); if(isNaN(d.getTime())) return iso;
+  function p(n){return (n<10?'0':'')+n;}
+  return (d.getMonth()+1)+'-'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes());
+}
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function closeM(){document.getElementById('mask').classList.remove('on');}
+function openM(h){document.getElementById('modal').innerHTML=h;document.getElementById('mask').classList.add('on');}
+var CUR='p1';
+function go(p){
+  CUR=p;
+  ['p1','p2','p3','p4','p6','p7'].forEach(function(x){var el=document.getElementById(x);if(el)el.classList.toggle('on',x===p);});
+  Array.prototype.forEach.call(document.querySelectorAll('.tab,.bn'),function(b){b.classList.toggle('on',b.dataset.p===p);});
+  if(p==='p6') initMon();
+  if(p==='p7') renderMath();
+  var target=document.getElementById(p);
+  if(!target)return;
+  var tabs=document.querySelector('.tabs');
+  var offset=tabs?tabs.getBoundingClientRect().height+12:0;
+  var rect=target.getBoundingClientRect();
+  var vh=window.innerHeight||document.documentElement.clientHeight;
+  // 只在目标面板被顶部 Tab 遮挡，或完全在视口下方时，才滚动定位
+  if(rect.top<offset-8||rect.top>vh){
+    var y=rect.top+window.pageYOffset-offset;
+    window.scrollTo({top:Math.max(0,y),behavior:'smooth'});
+  }
+}
+
+/* ============ 考研数学真题档案 ============ */
+function renderMath(subKey){
+  subKey=subKey||'sx1';
+  Array.prototype.forEach.call(document.querySelectorAll('#mathSubTabs .mtab'),function(b){b.classList.toggle('on',b.dataset.ms===subKey);});
+  var A=window.MATH_ARCHIVE, box=document.getElementById('mathBox');
+  if(!A||!A.subjects||!A.subjects[subKey]){box.innerHTML='<div class="note">索引数据未加载（math-archive.js）</div>';return;}
+  var sub=A.subjects[subKey], base=A.base, yrs=Object.keys(sub.years).map(Number).filter(function(y){return !isNaN(y);}).sort(function(a,b){return a-b;});
+  var html='<div class="grid">';
+  yrs.forEach(function(y){
+    var o=sub.years[String(y)]||{zt:[],ans:[],jx:[]};
+    function b(lbl,arr,cls){return arr.length?'<button class="mbtn '+cls+'" data-path="'+esc(base+'/'+arr[0])+'" onclick="copyMathPath(this)">'+lbl+' ('+arr.length+')</button>':'<span class="mbtn off">'+lbl+'</span>';}
+    html+='<div class="mcard"><div class="myr">'+y+'</div><div class="mbtns">'+b('真题',o.zt||[],'zt')+b('答案',o.ans||[],'ans')+b('解析',o.jx||[],'jx')+'</div></div>';
+  });
+  html+='</div>';
+  if(sub.ranges&&sub.ranges.length){
+    html+='<div class="grp-h">跨年合集</div><div class="grid">';
+    sub.ranges.forEach(function(r){html+='<div class="mcard wide"><div class="myr">'+esc(r.name)+'</div><button class="mbtn zt" data-path="'+esc(base+'/'+r.rel)+'" onclick="copyMathPath(this)">打开合集</button></div>';});
+    html+='</div>';
+  }
+  if(sub.unclassified&&sub.unclassified.length){
+    html+='<div class="grp-h">其他未归类</div><div class="grid">';
+    sub.unclassified.forEach(function(u){html+='<div class="mcard wide"><div class="myr">'+esc(u.name)+'</div><button class="mbtn zt" data-path="'+esc(base+'/'+u.rel)+'" onclick="copyMathPath(this)">打开</button></div>';});
+    html+='</div>';
+  }
+  box.innerHTML=html;
+}
+function copyMathPath(el){
+  var p=el.dataset.path||'';
+  var win=p.split('/').join('\\');
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(win).then(function(){toast('已复制路径：'+win);},function(){toast('复制失败，路径：'+win);});
+  }else{toast('路径：'+win);}
+}
+
+/* ============ 自考·考研习题练习 ============ */
+var QUIZ = window.QUIZ; /* 题库数据见 quiz-data.js */
+/* 合并考研英语真题（quiz-data-english.js）：新增 y2 科目 + 并入 yy/y2 题目 */
+(function(){
+  var QE = window.QUIZ_ENGLISH;
+  if(QE && QUIZ){
+    (QE.subjects||[]).forEach(function(s){
+      if(!QUIZ.subjects.some(function(x){return x.key===s.key;})) QUIZ.subjects.push(s);
+    });
+    for(var k in (QE.data||{})){
+      QUIZ.data[k] = (QUIZ.data[k]||[]).concat(QE.data[k]||[]);
+    }
+  }
+})();
+var quizState={sub:'zz',idx:0,correct:0,total:0,answered:false,tab:'exam',techAvailable:false,  mode:'practice',timeLeft:0,timerId:null,limit:600,statsOpen:false,wrong:[], filters:{type:'all',tier:'all',conf:'all'}, progress:loadQuizProgress(), inited:false};
+function openQuiz(){
+  var l=document.getElementById('quizLayer');if(l)l.classList.add('on');
+  if(!quizState.inited){quizState.inited=true;renderQuizNav();renderQuizFilters();renderQuizQ();detectTechQuiz();}
+}
+function closeQuiz(){var l=document.getElementById('quizLayer');if(l)l.classList.remove('on');}
+
+/* ====== 习题 tab 切换（自考·考研 / 技术部题库）====== */
+function quizTabSwitch(tab){
+  quizState.tab=tab;
+  // 更新 tab 按钮状态
+  document.querySelectorAll('.ql-tab').forEach(function(t){
+    t.classList.toggle('on', t.getAttribute('data-tab')===tab);
+  });
+  // 切换面板
+  var examBody=document.getElementById('quizBodyExam');
+  var techBody=document.getElementById('quizBodyTech');
+  if(tab==='exam'){examBody.style.display='';techBody.style.display='none';}
+  else{examBody.style.display='none';techBody.style.display='';loadTechQuiz();}
+}
+
+/* 检测技术部题库文件是否存在 */
+function detectTechQuiz(){
+  fetch('tools/tech-quiz.html',{method:'HEAD'}).then(function(r){
+    quizState.techAvailable=r.ok;
+    var techTab=document.querySelector('.ql-tab[data-tab="tech"]');
+    if(!r.ok){techTab.title='仅本地私有版可用（云端无此文件）';techTab.style.opacity='.5';}
+  }).catch(function(){
+    quizState.techAvailable=false;
+    var techTab=document.querySelector('.ql-tab[data-tab="tech"]');
+    techTab.title='仅本地私有版可用（云端无此文件）';
+    techTab.style.opacity='.5';
+  });
+}
+
+/* 加载技术部题库 iframe */
+function loadTechQuiz(){
+  var ph=document.getElementById('techQuizPlaceholder');
+  var frame=document.getElementById('techQuizFrame');
+  if(quizState.techAvailable){
+    ph.style.display='none';frame.style.display='';
+    if(!frame.src)frame.src='tools/tech-quiz.html';
+  }else{
+    ph.style.display='';frame.style.display='none';
+    ph.innerHTML='<div style="text-align:center;padding:60px 20px;color:#94a3b8">'+
+      '<div style="font-size:48px;margin-bottom:14px">🔒</div>'+
+      '<div style="font-size:16px;font-weight:600;color:#cbd5e1;margin-bottom:8px">技术部题库（仅本地可用）</div>'+
+      '<div style="font-size:13px;color:#64748b;max-width:320px;margin:0 auto;line-height:1.6">该题库仅存在于本地私有版（_private）。<br>云端 GitHub Pages 不包含此文件。<br><br>本地打开 start.html 或通过局域网访问即可使用。</div>';
+  }
+}
+/* ============ 自考·考研习题练习（通用多题型引擎） ============ */
+function loadQuizProgress(){
+  try{ var p=JSON.parse(localStorage.getItem('wb_quiz_progress_v1')); return (p&&typeof p==='object')?p:{}; }catch(e){ return {}; }
+}
+function saveQuizProgress(){ try{ localStorage.setItem('wb_quiz_progress_v1', JSON.stringify(quizState.progress||{})); }catch(e){} }
+function quizSubjects(){ return QUIZ.subjects||[]; }
+function quizList(){
+  var all=QUIZ.data[quizState.sub]||[]; var f=quizState.filters;
+  return all.filter(function(q){
+    if(f.type!=='all' && q.type!==f.type) return false;
+    if(f.tier!=='all' && q.tier!==f.tier) return false;
+    if(f.conf!=='all' && qConf(q)!==f.conf) return false;
+    return true;
+  });
+}
+function renderQuizNav(){
+  var nav=document.getElementById('quizNav'); if(!nav)return;
+  nav.innerHTML=quizSubjects().map(function(s){
+    return '<button class="'+(quizState.sub===s.key?'on':'')+'" onclick="quizSwitch(\''+s.key+'\')">'+(s.group?('['+s.group+'] '):'')+s.name+'</button>';
+  }).join('');
+}
+function renderQuizFilters(){
+  var box=document.getElementById('quizFilters'); if(!box)return;
+  var types=[['all','全部题型'],['sc','单选'],['mc','多选'],['fill','填空'],['sa','简答'],['calc','计算'],['code','算法/代码']];
+  var tiers=[['all','全部难度'],['基础','基础'],['拔高','拔高'],['创新','创新'],['真题风格','真题风格']];
+  var confs=[['all','全部来源'],['real','真题'],['adapt','改编'],['gen','拟真'],['self','自编']];
+  var h='<div class="qf-row"><span class="qf-label">题型</span>'+types.map(function(t){
+    return '<button class="qf-btn'+(quizState.filters.type===t[0]?' on':'')+'" onclick="quizSetFilter(\'type\',\''+t[0]+'\')">'+t[1]+'</button>';
+  }).join('')+'</div>';
+  h+='<div class="qf-row"><span class="qf-label">难度</span>'+tiers.map(function(t){
+    return '<button class="qf-btn'+(quizState.filters.tier===t[0]?' on':'')+'" onclick="quizSetFilter(\'tier\',\''+t[0]+'\')">'+t[1]+'</button>';
+  }).join('')+'</div>';
+  h+='<div class="qf-row"><span class="qf-label">来源</span>'+confs.map(function(t){
+    return '<button class="qf-btn'+(quizState.filters.conf===t[0]?' on':'')+'" onclick="quizSetFilter(\'conf\',\''+t[0]+'\')">'+t[1]+'</button>';
+  }).join('')+'</div>';
+  box.innerHTML=h;
+}
+function quizSetFilter(kind,val){ quizState.filters[kind]=val; quizState.idx=0; renderQuizFilters(); renderQuizQ(); }
+function quizSwitch(key){
+  if(quizState.mode==='exam') quizSetMode('practice',true);
+  quizState.sub=key; quizState.idx=0; quizState.correct=0; quizState.total=0; quizState.answered=false; quizState.wrong=[];
+  renderQuizNav(); renderQuizFilters(); renderQuizQ(); updateScore();
+}
+function quizTypeLabel(t){ return ({sc:'单选',mc:'多选',fill:'填空',sa:'简答',calc:'计算',code:'算法/代码'})[t]||t; }
+function qConf(q){ return q.conf || (q.tier==='真题风格'?'gen':'self'); }
+function qConfLabel(c){ return ({real:'真题',adapt:'改编',gen:'拟真',self:'自编'})[c]||c; }
+function renderQuizQ(){
+  var qs=quizList();
+  if(!qs.length){ document.getElementById('quizQ').innerHTML='<div class="qq-text">该筛选条件下暂无题目，换个题型/难度试试。</div>'; return; }
+  if(quizState.idx>=qs.length){ showQuizResult(); return; }
+  var subj=quizSubjects().find(function(s){return s.key===quizState.sub;});
+  var q=qs[quizState.idx]; quizState.answered=false; quizState.cur=q;
+  var meta='<div class="qq-meta">【'+subj.name+'】 · '+quizTypeLabel(q.type)+' · '+q.tier+(q.year?(' · '+q.year):'')+' · 来源:'+qConfLabel(qConf(q))+(q.chap?(' · '+q.chap):'')+'</div>';
+  var html=meta+'<div class="qq-text">'+esc(q.q)+'</div>';
+  if(q.type==='sc'||q.type==='mc'){
+    html+='<div class="qq-options">';
+    q.opts.forEach(function(o,i){
+      html+='<div class="qq-opt" onclick="quizPick(this,'+i+')" data-i="'+i+'"><span class="qtag">'+String.fromCharCode(65+i)+'</span><span>'+esc(o)+'</span></div>';
+    });
+    html+='</div>';
+    if(q.type==='mc') html+='<div class="qq-hint">多选：点选所有正确项后点「提交」</div>';
+  } else if(q.type==='fill'){
+    html+='<div class="qq-fill"><input id="quizFill" class="qf-input" placeholder="输入答案" autocomplete="off"><button class="btn-next sm" onclick="quizSubmitFill()">提交</button></div>';
+  } else {
+    html+='<div class="qq-hint">'+(quizState.mode==='exam'?'主观题：考核模式不判分，可直接「下一题」跳过':'主观题：点击下方「显示参考答案」查看标准答案')+'</div>';
+  }
+  html+='<div class="quiz-actions"><button class="btn-prev"'+(quizState.idx<=0?' style="visibility:hidden"':'')+' onclick="quizPrev()">上一题</button>';
+  if(q.type==='mc') html+='<button class="btn-next" id="quizNextBtn" onclick="quizSubmitMc()">提交</button>';
+  else if(q.type==='sa'||q.type==='calc'||q.type==='code') html+='<button class="btn-next" id="quizNextBtn" onclick="'+(quizState.mode==='exam'?'quizNext()':'quizReveal()')+'">'+(quizState.mode==='exam'?'下一题（跳过）':'显示参考答案')+'</button>';
+  else html+='<button class="btn-next" id="quizNextBtn" onclick="quizNext()" style="visibility:hidden">下一题</button>';
+  html+='</div><div id="quizExplain"></div>';
+  document.getElementById('quizQ').innerHTML=html;
+}
+function markProgress(id,correct){
+  if(!quizState.progress[id]) quizState.progress[id]={tried:0,correct:0};
+  quizState.progress[id].tried++;
+  if(correct) quizState.progress[id].correct++;
+  saveQuizProgress();
+}
+function quizPick(el,ai){
+  var q=quizState.cur; if(!q)return;
+  if(q.type==='mc'){ if(quizState.answered)return; el.classList.toggle('selected'); return; }
+  if(quizState.answered)return;
+  quizState.answered=true; quizState.total++;
+  var opts=document.querySelectorAll('.qq-opt');
+  opts.forEach(function(o){o.style.pointerEvents='none';});
+  el.classList.add('selected');
+  /* 真题原题无标准答案 → 练习模式不判分（仅高亮所选） */
+  if(q.ans==null || q.ans===undefined){
+    quizState.total--;
+    var bx=document.getElementById('quizExplain');
+    if(bx) bx.innerHTML='<div class="qq-explain"><b>练习模式：</b>该题为真题原题，暂无标准答案，已记录你的作答（不判分）。</div>';
+    var nbx=document.getElementById('quizNextBtn'); if(nbx) nbx.style.visibility='visible';
+    updateScore(); return;
+  }
+  if(ai===q.ans){ el.classList.add('correct'); quizState.correct++; el.querySelector('.qtag').textContent='✓'; markProgress(q.id,true); }
+  else { el.classList.add('wrong'); el.querySelector('.qtag').textContent='✗'; opts[q.ans].classList.add('correct'); opts[q.ans].querySelector('.qtag').textContent='✓'; markProgress(q.id,false); if(quizState.wrong.indexOf(q.id)<0)quizState.wrong.push(q.id); }
+  if(quizState.mode!=='exam') showExplain(q);
+  var nb=document.getElementById('quizNextBtn'); if(nb) nb.style.visibility='visible';
+  updateScore();
+}
+function quizSubmitMc(){
+  if(quizState.answered)return;
+  var q=quizState.cur; if(!q)return;
+  quizState.answered=true; quizState.total++;
+  var picked=[]; document.querySelectorAll('.qq-opt').forEach(function(o,i){ if(o.classList.contains('selected')) picked.push(i); });
+  var correct = picked.length===q.ans.length && q.ans.every(function(x){return picked.indexOf(x)>=0;});
+  var opts=document.querySelectorAll('.qq-opt');
+  opts.forEach(function(o,i){ o.style.pointerEvents='none';
+    if(q.ans.indexOf(i)>=0) o.classList.add('correct');
+    else if(o.classList.contains('selected')) o.classList.add('wrong');
+    if(q.ans.indexOf(i)>=0) o.querySelector('.qtag').textContent='✓';
+  });
+  if(correct){ quizState.correct++; markProgress(q.id,true); } else { markProgress(q.id,false); if(quizState.wrong.indexOf(q.id)<0)quizState.wrong.push(q.id); }
+  if(quizState.mode!=='exam') showExplain(q);
+  var nb=document.getElementById('quizNextBtn'); if(nb){ nb.textContent='下一题'; nb.setAttribute('onclick','quizNext()'); nb.style.visibility='visible'; }
+  updateScore();
+}
+function quizSubmitFill(){
+  if(quizState.answered)return;
+  var q=quizState.cur; if(!q)return;
+  var inp=document.getElementById('quizFill'); var v=(inp.value||'').trim().toLowerCase();
+  if(!v) return;
+  quizState.answered=true; quizState.total++;
+  var accept=(q.ans||[]).map(function(x){return (''+x).trim().toLowerCase();});
+  var ok=accept.indexOf(v)>=0;
+  inp.disabled=true;
+  if(ok){ inp.classList.add('ok'); quizState.correct++; markProgress(q.id,true); } else { inp.classList.add('bad'); markProgress(q.id,false); if(quizState.wrong.indexOf(q.id)<0)quizState.wrong.push(q.id); }
+  if(quizState.mode!=='exam') showExplain(q);
+  var act=document.querySelector('.quiz-actions');
+  if(act && !act.querySelector('.btn-next')){ var b=document.createElement('button'); b.className='btn-next'; b.textContent='下一题'; b.onclick=quizNext; act.appendChild(b); }
+  updateScore();
+}
+function quizReveal(){
+  if(quizState.answered)return;
+  var q=quizState.cur; if(!q)return;
+  quizState.answered=true; quizState.total++; markProgress(q.id,false);
+  showExplain(q);
+  var nb=document.getElementById('quizNextBtn'); if(nb){ nb.textContent='下一题'; nb.setAttribute('onclick','quizNext()'); nb.style.visibility='visible'; }
+  updateScore();
+}
+function showExplain(q){
+  var box=document.getElementById('quizExplain'); if(!box)return;
+  var isSubj=(q.type==='sa'||q.type==='calc'||q.type==='code');
+  var label=isSubj?'参考答案':'解析';
+  var body;
+  if(q.type==='code'){ body='<pre class="qq-code">'+esc(q.explain||'')+'</pre>'; }
+  else { body=esc(q.explain||'（暂无解析）'); }
+  box.innerHTML='<div class="'+(isSubj?'qq-ans':'qq-explain')+'"><b>'+label+'：</b>'+body+'</div>';
+}
+function quizNext(){ quizState.idx++; renderQuizQ(); }
+function quizPrev(){ if(quizState.idx>0){ quizState.idx--; renderQuizQ(); } }
+function showQuizResult(examDone){
+  var qs=quizList();
+  var pct=quizState.total>0?Math.round(quizState.correct/quizState.total*100):0;
+  var msg=pct>=80?'太棒了！':pct>=60?'继续加油！':'还需努力！';
+  var head=examDone?'考核完成':'练习完成';
+  var emoji=pct>=80?'🏆':pct>=60?'📚':'🔥';
+  var sub=examDone
+    ? '用时 '+fmtTime(quizState.limit-quizState.timeLeft)+' · 答对 '+quizState.correct+'/'+quizState.total+' 题（'+pct+'%）· 共 '+qs.length+' 题'
+    : '本组答对 '+quizState.correct+'/'+quizState.total+' 题（'+pct+'%）· 共 '+qs.length+' 题';
+  var weakAll=weakReport(null,true);
+  var weakNow=weakReport(quizState.wrong,false);
+  var weakBlock='';
+  if(examDone&&weakNow) weakBlock='<div style="text-align:left;max-width:520px;margin:0 auto 10px">'+weakNow+'</div>';
+  if(weakAll) weakBlock+='<div style="text-align:left;max-width:520px;margin:0 auto 20px">'+weakAll+'</div>';
+  document.getElementById('quizQ').innerHTML=
+    '<div style="text-align:center;padding:30px 20px">'+
+      '<div style="font-size:48px;margin-bottom:12px">'+emoji+'</div>'+
+      '<div style="font-size:20px;font-weight:700;color:#1a1a2e;margin-bottom:8px">'+head+' · '+msg+'</div>'+
+      '<div style="font-size:15px;color:#64748b;margin-bottom:20px">'+sub+'</div>'+
+      weakBlock+
+      '<div class="quiz-actions" style="justify-content:center"><button class="btn-next" onclick="quizSwitch(\''+quizState.sub+'\')">再来一次</button>'+
+      (examDone?' <button class="btn-next" style="background:var(--navy,#1B3A57)" onclick="quizSwitch(\''+quizState.sub+'\')">回练习模式</button>':'')+
+      '</div>'+
+    '</div>';
+}
+function updateScore(){
+  var el=document.getElementById('quizScore');
+  if(el)el.textContent='正确: '+quizState.correct+' / '+quizState.total;
+}
+
+/* ============ 练习 / 考核双模式 ============ */
+function quizSetMode(m,silent){
+  if(m===quizState.mode)return;
+  if(m==='exam'){
+    if(!silent && !confirm('进入考核模式：限时 '+Math.round(quizState.limit/60)+' 分钟，答题不显示解析，可随时交卷。开始？'))return;
+    quizState.mode='exam'; quizState.idx=0; quizState.correct=0; quizState.total=0; quizState.answered=false; quizState.wrong=[]; quizState.timeLeft=quizState.limit;
+    var tm=document.getElementById('quizTimer'); if(tm){tm.style.display='';tm.textContent='⏱ '+fmtTime(quizState.timeLeft);tm.classList.remove('warn');}
+    var sb=document.getElementById('quizSubmitBtn'); if(sb)sb.style.display='';
+    startQuizTimer();
+  }else{
+    stopQuizTimer(); quizState.mode='practice';
+    var tm2=document.getElementById('quizTimer'); if(tm2)tm2.style.display='none';
+    var sb2=document.getElementById('quizSubmitBtn'); if(sb2)sb2.style.display='none';
+  }
+  renderQuizModeBtns();
+  if(!silent){ renderQuizNav(); renderQuizFilters(); renderQuizQ(); updateScore(); }
+}
+function renderQuizModeBtns(){
+  document.querySelectorAll('.qz-modes .qm-btn').forEach(function(b){
+    b.classList.toggle('on',b.getAttribute('data-mode')===quizState.mode);
+  });
+}
+function startQuizTimer(){ if(!quizState.timerId) quizState.timerId=setInterval(quizTick,1000); }
+function stopQuizTimer(){ if(quizState.timerId){ clearInterval(quizState.timerId); quizState.timerId=null; } }
+function quizTick(){
+  if(quizState.timeLeft>0) quizState.timeLeft--;
+  var tm=document.getElementById('quizTimer');
+  if(tm){ tm.textContent='⏱ '+fmtTime(quizState.timeLeft); tm.classList.toggle('warn',quizState.timeLeft<=60); }
+  if(quizState.timeLeft<=0){ stopQuizTimer(); quizSubmitAll(true); }
+}
+function quizSubmitAll(auto){
+  if(quizState.mode!=='exam')return;
+  if(!auto && !confirm('确定交卷？'))return;
+  stopQuizTimer();
+  var tm=document.getElementById('quizTimer'); if(tm)tm.style.display='none';
+  var sb=document.getElementById('quizSubmitBtn'); if(sb)sb.style.display='none';
+  quizState.mode='practice';
+  showQuizResult(true);
+  renderQuizModeBtns();
+}
+function fmtTime(s){ s=Math.max(0,(s|0)); return Math.floor(s/60)+':'+(s%60<10?'0':'')+(s%60); }
+
+/* ============ 弱项分析 + 成绩统计 ============ */
+function toggleStats(){
+  quizState.statsOpen=!quizState.statsOpen;
+  var box=document.getElementById('quizStats'); if(!box)return;
+  box.style.display=quizState.statsOpen?'':'none';
+  if(quizState.statsOpen) renderQuizStats();
+}
+function aggStats(labelOf){
+  var m={};
+  Object.keys(QUIZ.data).forEach(function(sk){
+    (QUIZ.data[sk]||[]).forEach(function(q){
+      var v=labelOf(q)||'未标注';
+      m[v]=m[v]||{n:0,tried:0,correct:0};
+      m[v].n++;
+      var p=quizState.progress[q.id];
+      if(p){ m[v].tried+=p.tried; m[v].correct+=p.correct; }
+    });
+  });
+  return m;
+}
+function renderQuizStats(){
+  var box=document.getElementById('quizStats'); if(!box)return;
+  var dims=[
+    ['章节',aggStats(function(q){return q.chap||'未标注';})],
+    ['题型',aggStats(function(q){return quizTypeLabel(q.type);})],
+    ['难度',aggStats(function(q){return q.tier;})],
+    ['来源',aggStats(function(q){return qConfLabel(qConf(q));})]
+  ];
+  var totTried=0,totCorrect=0;
+  Object.keys(quizState.progress).forEach(function(id){ totTried+=quizState.progress[id].tried; totCorrect+=quizState.progress[id].correct; });
+  var h='<div class="qs-title">📊 练习统计（累计）</div>'+
+        '<div class="qs-sub">已练 '+totTried+' 题次 · 累计正确率 '+(totTried?Math.round(totCorrect/totTried*100):0)+'% · 覆盖 '+(Object.keys(QUIZ.data).filter(function(k){return (QUIZ.data[k]||[]).length;}).length)+' 科</div>';
+  dims.forEach(function(d){
+    h+='<div class="qs-sub" style="margin-bottom:6px;font-weight:700;color:#1a1a2e">按'+d[0]+'</div><div class="qs-grid">';
+    var keys=Object.keys(d[1]);
+    if(!keys.length){ h+='<div class="qs-empty">暂无数据</div>'; }
+    keys.forEach(function(k){
+      var v=d[1][k];
+      var rate=v.tried?Math.round(v.correct/v.tried*100):null;
+      var weak=v.tried>=2&&rate<60;
+      h+='<div class="qs-cell'+(weak?' weak':'')+'"><b>'+k+'</b><span class="n">'+(rate===null?'未练':rate+'%')+'</span><span style="font-size:11px;color:#94a3b8"> '+v.tried+'题次</span></div>';
+    });
+    h+='</div>';
+  });
+  h+='<div class="qs-weaktip">正确率&lt;60% 且练习≥2 次标记为薄弱项</div>';
+  box.innerHTML=h;
+}
+function weakReport(wrongIds,all){
+  var dims={};
+  if(all){
+    Object.keys(QUIZ.data).forEach(function(sk){
+      (QUIZ.data[sk]||[]).forEach(function(q){
+        var p=quizState.progress[q.id]; if(!p||p.tried<2)return;
+        if(p.correct/p.tried<0.6){
+          var k=quizTypeLabel(q.type)+'·'+q.tier;
+          dims[k]=dims[k]||{tried:0};
+          dims[k].tried+=p.tried;
+        }
+      });
+    });
+  }else if(wrongIds&&wrongIds.length){
+    quizList().forEach(function(q){
+      if(wrongIds.indexOf(q.id)>=0){
+        var k=quizTypeLabel(q.type)+'·'+q.tier;
+        dims[k]=dims[k]||{tried:0};
+        dims[k].tried++;
+      }
+    });
+  }
+  var keys=Object.keys(dims);
+  if(!keys.length) return '';
+  var h='<div class="qs-title">📉 弱项提示</div><div class="qs-grid">';
+  keys.forEach(function(k){
+    h+='<div class="qs-cell weak"><b>'+k+'</b><span class="n">'+dims[k].tried+' 次</span></div>';
+  });
+  h+='</div><div class="qs-weaktip">建议按「题型/难度」筛选针对性补练</div>';
+  return h;
+}
+
+/* ============ 倒计时 ============ */
+function renderCd(){
+  var zd=S.set.zkDate,kd=S.set.kyDate;
+  var a=days(zd),b=days(kd),aOk=!isNaN(a),bOk=!isNaN(b);
+  document.getElementById('zkDateTxt').textContent=zd||'未设';
+  document.getElementById('kyDateTxt').textContent=kd||'未设';
+  document.getElementById('zkDays').innerHTML=(!aOk?'--':(a<0?'已过':a))+'<small>天</small>';
+  document.getElementById('kyDays').innerHTML=(!bOk?'--':(b<0?'已过':b))+'<small>天</small>';
+  var pl=COURSES.filter(function(x){return S.cs[x.c]&&S.cs[x.c].plan;}).length;
+  document.getElementById('zkSub').textContent='本期计划报考 '+pl+' 门'+(aOk&&a>=0&&a<60?' · 抓紧了':'');
+  var nc=S.set.ncreDate, c=days(nc), cOk=!isNaN(c);
+  document.getElementById('ncreDateTxt').textContent=nc||'未设';
+  document.getElementById('ncreDays').innerHTML=(!cOk?'--':(c<0?'已过':c))+'<small>天</small>';
+  document.getElementById('ncreSub').textContent='上海报名 '+NCRE_SH_REG_OPEN+' 起'+(cOk&&c>=0&&c<30?' · 快到了':'');
+}
+
+/* 自考报名截止倒计时 */
+function renderReg(){
+  var el=document.getElementById('regCd'),box=document.getElementById('regCdBox'),sub=document.getElementById('regCdSub');
+  if(!el)return;
+  var dO=days(ZK_REG_OPEN), dC=days(ZK_REG_CLOSE), urgent=false;
+  if(dC<0){
+    el.innerHTML='<div class="rgnum">报名已截止</div><div class="rgmsg">窗口 '+ZK_REG_OPEN+' – '+ZK_REG_CLOSE+' 已过，全力冲刺 '+S.set.zkDate+' 统考</div>';
+    if(sub)sub.textContent='错过等下次';
+  }else if(dO>0){
+    el.innerHTML='<div class="rgnum">还有 <b>'+dO+'</b> 天</div><div class="rgmsg">自考报名 <b>'+ZK_REG_OPEN+' 9:00</b> 开放，截止 '+ZK_REG_CLOSE+'。先在 '+S.set.zkDate+' 前把 4 门复习铺开</div>';
+    if(sub)sub.textContent='9/1 开放';
+    if(dC<=7)urgent=true;
+  }else{
+    el.innerHTML='<div class="rgnum">仅剩 <b>'+dC+'</b> 天</div><div class="rgmsg">🔥 报名进行中！'+ZK_REG_OPEN+' 9:00 – '+ZK_REG_CLOSE+' 截止，逾期不可补，速去上海招考热线缴费确认</div>';
+    if(sub)sub.textContent='报名进行中';
+    urgent=true;
+  }
+  box.classList.toggle('urgent',urgent);
+}
+
+/* 考研初试倒计时（kyDate 可在设置里改） */
+function renderKyCd(){
+  var el=document.getElementById('kyCd'),box=document.getElementById('kyCdBox'),sub=document.getElementById('kyCdSub');
+  if(!el)return;
+  var d=days(S.set.kyDate),urgent=false;
+  if(d<0){
+    el.innerHTML='<div class="rgnum">已结束</div><div class="rgmsg">'+S.set.kyDate+' 初试已进行，进入复试 / 等出分阶段</div>';
+    if(sub)sub.textContent='进行中';
+  }else{
+    el.innerHTML='<div class="rgnum">还有 <b>'+d+'</b> 天</div><div class="rgmsg">考研初试 '+S.set.kyDate+'（101+201+301+408）。'+(d<=60?'🔥 冲刺阶段：四科一天都不能断':'按节奏推进四科复习，别让任何一科凉了')+'</div>';
+    if(sub)sub.textContent=S.set.kyDate;
+    if(d<=60)urgent=true;
+  }
+  box.classList.toggle('urgent',urgent);
+}
+
+/* 计算机二级（上海考区）报名 + 考试倒计时 */
+function renderNcreCd(){
+  var el=document.getElementById('ncreCd'),box=document.getElementById('ncreCdBox'),sub=document.getElementById('ncreCdSub');
+  if(!el)return;
+  var dE=days(S.set.ncreDate), dO=days(NCRE_SH_REG_OPEN), dC=days(NCRE_SH_REG_CLOSE), urgent=false;
+  var examTxt='考试 '+S.set.ncreDate+'（上海考区）';
+  if(dC<0){
+    el.innerHTML='<div class="rgnum">报名已截止</div><div class="rgmsg">上海报名窗口 '+NCRE_SH_REG_OPEN+' – '+NCRE_SH_REG_CLOSE+' 已过。'+examTxt+' 还剩 '+(dE<0?'已结束':dE+' 天')+'</div>';
+    if(sub)sub.textContent='等下考期';
+  }else if(dO>0){
+    el.innerHTML='<div class="rgnum">还有 <b>'+dO+'</b> 天报名</div><div class="rgmsg">上海报名 <b>'+NCRE_SH_REG_OPEN+' 10:00</b> 开放，截止 '+NCRE_SH_REG_CLOSE+' 16:00。'+examTxt+' 倒计时 '+(dE<0?'已结束':dE+' 天')+'</div>';
+    if(sub)sub.textContent=NCRE_SH_REG_OPEN+' 开放';
+    if(dC<=7)urgent=true;
+  }else{
+    el.innerHTML='<div class="rgnum">仅剩 <b>'+dC+'</b> 天</div><div class="rgmsg">🔥 上海报名进行中！'+NCRE_SH_REG_OPEN+' 10:00 – '+NCRE_SH_REG_CLOSE+' 16:00 截止，逾期不可补，速去 ncre-bm.neea.edu.cn 选「上海市」缴费</div>';
+    if(sub)sub.textContent='报名进行中';
+    urgent=true;
+  }
+  box.classList.toggle('urgent',urgent);
+}
+
+/* ============ 今天要处理 ============ */
+function renderToday(){
+  var t=today(),box=document.getElementById('todayBox');
+  var od=S.tasks.filter(function(x){return !x.done&&x.date<t;});
+  var td=S.tasks.filter(function(x){return !x.done&&x.date===t;});
+  var extra=[];
+  var zd=days(S.set.zkDate);
+  if(zd>=0&&zd<=45){
+    var pl=COURSES.filter(function(x){return S.cs[x.c].plan;});
+    extra.push({sys:1,ti:'自考统考还有 '+zd+' 天 · 本期报了 '+pl.length+' 门'+(pl.length?'：'+pl.map(function(x){return x.n;}).join('、'):'（还没勾选报考科目）'),tag:'自考'});
+  }
+  var dC=days(ZK_REG_CLOSE);
+  if(dC>=0&&dC<=14)extra.push({sys:1,ti:'自考报名 '+ZK_REG_CLOSE+' 截止 · 还剩 '+dC+' 天，记得去上海招考热线缴费确认',tag:'自考'});
+  var kd=days(S.set.kyDate);
+  if(kd>=0&&kd<=400)extra.push({sys:1,ti:'考研初试倒计时 '+kd+' 天 · 今天四科至少动一科',tag:'考研'});
+  var ncd=days(S.set.ncreDate);
+  if(ncd>=0&&ncd<=60)extra.push({sys:1,ti:'计算机二级（上海）考试倒计时 '+ncd+' 天 · 顺手刷一套二级真题',tag:'其他'});
+  var ndC=days(NCRE_SH_REG_CLOSE);
+  if(ndC>=0&&ndC<=14)extra.push({sys:1,ti:'计算机二级上海报名 '+NCRE_SH_REG_CLOSE+' 截止 · 还剩 '+ndC+' 天，去 ncre-bm.neea.edu.cn 缴费',tag:'其他'});
+  var unread=(NEWS.items||[]).filter(function(x){return !S.read[x.id];}).length;
+  if(unread)extra.push({sys:1,ti:'资讯速递有 '+unread+' 条未读，点这里去看看',tag:'其他',go:'p4'});
+
+  var h='';
+  if(!od.length&&!td.length&&!extra.length){
+    h='<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg>今天清空了，去歇会儿或者加个新任务</div>';
+  }else{
+    h='<ul class="tl">';
+    od.forEach(function(x){h+=row(x,true);});
+    td.forEach(function(x){h+=row(x,false);});
+    extra.forEach(function(x){
+      h+='<li class="ti" '+(x.go?'onclick="go(\''+x.go+'\')" style="cursor:pointer"':'')+'>'+
+         '<div class="ck" style="border:none;background:'+(x.tag==='自考'?'var(--red-l)':x.tag==='考研'?'var(--navy-l)':'#EEF0F3')+'">'+
+         '<svg viewBox="0 0 24 24" fill="none" stroke="'+(x.tag==='自考'?'#B01F24':x.tag==='考研'?'#1B3A57':'#8B94A3')+'" stroke-width="2.5" stroke-linecap="round" style="display:block;width:13px;height:13px"><path d="M12 8v5M12 16h.01"/></svg></div>'+
+         '<div class="tb"><div class="tt" style="font-weight:600">'+esc(x.ti)+'</div></div></li>';
+    });
+    h+='</ul>';
+  }
+  box.innerHTML=h;
+  document.getElementById('todayHint').textContent=(od.length?'逾期 '+od.length+' 项 · ':'')+'今日待办 '+td.length+' 项';
+  var n=S.tasks.length;
+  var bt=document.getElementById('backupTip');
+  if(n>=30){bt.style.display='block';bt.innerHTML='数据已积累 '+n+' 条，建议点右上角「导出备份」存一份到网盘或微信收藏。';}
+  else bt.style.display='none';
+}
+function row(x,isOd){
+  return '<li class="ti'+(isOd?' od':'')+(x.done?' dn':'')+'">'+
+   '<button class="ck'+(x.done?' on':'')+'" onclick="tog(\''+x.id+'\')" aria-label="完成"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></button>'+
+   '<div class="tb"><div class="tt">'+esc(x.ti)+'</div><div class="tm">'+
+     '<span class="tag '+(x.tag==='自考'?'zk':x.tag==='考研'?'ky':'el')+'">'+x.tag+'</span>'+
+     (isOd?'<span class="tag od">逾期 '+(-days(x.date))+' 天</span>':'')+
+     '<span>'+x.date+'</span><span>'+(x.min||0)+' 分钟</span>'+
+     (isOd?'<button class="btn g sm" style="padding:3px 9px;min-height:28px;font-size:11.5px" onclick="roll(\''+x.id+'\')">顺延到今天</button>':'')+
+   '</div></div>'+
+   '<button class="xbtn" onclick="del(\''+x.id+'\')" aria-label="删除"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:15px;height:15px"><path d="M18 6L6 18M6 6l12 12"/></svg></button></li>';
+}
+function tog(id){var t=S.tasks.filter(function(x){return x.id===id;})[0];if(t){t.done=!t.done;save();renderAll();}}
+function roll(id){var t=S.tasks.filter(function(x){return x.id===id;})[0];if(t){t.date=today();save();renderAll();toast('已顺延到今天');}}
+function del(id){S.tasks=S.tasks.filter(function(x){return x.id!==id;});save();renderAll();}
+function addTask(){
+  var ti=document.getElementById('tTitle').value.trim();
+  if(!ti){toast('先写点内容');return;}
+  S.tasks.unshift({id:uid(),ti:ti,tag:document.getElementById('tTag').value,
+    date:document.getElementById('tDate').value||today(),
+    min:parseInt(document.getElementById('tMin').value)||0,done:false});
+  document.getElementById('tTitle').value='';
+  save();renderAll();toast('已添加');
+}
+function clearDone(){
+  var n=S.tasks.filter(function(x){return x.done;}).length;
+  if(!n){toast('没有已完成的任务');return;}
+  openM('<h3>清除已完成任务</h3><p>将删除 '+n+' 条已完成任务，此操作不可撤销。建议先导出备份。</p><div class="mact"><button class="btn g" onclick="closeM()">取消</button><button class="btn" onclick="doClearDone()">确认清除</button></div>');
+}
+function doClearDone(){S.tasks=S.tasks.filter(function(x){return !x.done;});save();closeM();renderAll();toast('已清除');}
+function filtTask(f){curFilt=f;Array.prototype.forEach.call(document.querySelectorAll('#p1 .sf'),function(b){b.classList.toggle('on',b.dataset.f===f);});renderTasks();}
+function renderTasks(){
+  var t=today(),ls=S.tasks.slice();
+  if(curFilt==='undone')ls=ls.filter(function(x){return !x.done;});
+  else if(curFilt!=='all')ls=ls.filter(function(x){return x.tag===curFilt;});
+  ls.sort(function(a,b){if(a.done!==b.done)return a.done?1:-1;return a.date<b.date?-1:1;});
+  var box=document.getElementById('taskBox');
+  box.innerHTML=ls.length?'<ul class="tl">'+ls.map(function(x){return row(x,!x.done&&x.date<t);}).join('')+'</ul>'
+    :'<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>这里还没有任务</div>';
+  var done=S.tasks.filter(function(x){return x.done;}).length;
+  var mins=S.tasks.filter(function(x){return x.done&&x.date===t;}).reduce(function(a,b){return a+(b.min||0);},0);
+  document.getElementById('taskStat').textContent='共 '+S.tasks.length+' 条 · 已完成 '+done+' · 今日专注 '+mins+' 分钟';
+}
+
+/* ============ 自考看板 ============ */
+function renderZK(){
+  var list=COURSES.slice();
+  var isSci=!!S.set.isSci;
+  var need=list.filter(function(x){
+    if(isSci && x.t==='加考') return false;
+    if(x.t==='选考' && x.pick===false) return false;
+    return true;
+  });
+  document.getElementById('sciLine').innerHTML = isSci
+    ? '<span class="badge sci"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/></svg>理工科 · 加考课免修</span>'
+    : '';
+  var pass=need.filter(function(x){return S.cs[x.c].st==='已通过';});
+  var got=pass.reduce(function(a,b){return a+b.cr;},0);
+  var pc=Math.min(100,Math.round(got/74*100));
+  var C=2*Math.PI*37;
+  var arc=document.getElementById('ringArc');
+  arc.setAttribute('stroke-dasharray',C.toFixed(1));
+  arc.setAttribute('stroke-dashoffset',(C*(1-pc/100)).toFixed(1));
+  document.getElementById('ringTxt').textContent=pc+'%';
+  document.getElementById('crTxt').textContent='已获 '+got+' / 74 学分（'+pass.length+' 门通过）';
+  var left=Math.max(0,74-got);
+  document.getElementById('crSub').textContent=left?('还差 '+left+' 学分，剩 '+need.filter(function(x){return S.cs[x.c].st!=='已通过';}).length+' 门未过'):'学分已达标，别忘了毕业设计和学位英语';
+  var kyd=days(S.set.kyDate);
+  var kyYr=parseInt(S.set.kyDate);
+  document.getElementById('deadlineTip').textContent='关键节点：'+(S.set.kyDate||'未设考研日期')+' 研招报名前最好已取得或明确能取得本科毕业证，否则需按同等学力身份报考。倒推 → 全部科目建议在 '+(isNaN(kyYr)?'目标':(kyYr+1))+' 年上半年前考完并申请毕业。';
+  document.getElementById('s1').textContent=pass.length;
+  document.getElementById('s2').textContent=need.filter(function(x){return S.cs[x.c].st==='复习中';}).length;
+  document.getElementById('s3').textContent=need.filter(function(x){return S.cs[x.c].plan;}).length;
+  document.getElementById('s4').textContent=need.filter(function(x){return S.cs[x.c].st==='未开始';}).length;
+
+  // 冲突检测
+  var byslot={},conf=[];
+  list.forEach(function(x){if(S.cs[x.c].plan&&x.slot>0){(byslot[x.slot]=byslot[x.slot]||[]).push(x);}});
+  Object.keys(byslot).forEach(function(s){if(byslot[s].length>1)conf.push({s:s,ls:byslot[s]});});
+  document.getElementById('confBox').innerHTML=conf.length?conf.map(function(c){
+    return '<div class="warn" style="background:var(--red-l);border-color:#F0C9CB;color:#8E1519"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg><span><b>时段冲突：</b>「'+SLOTS[c.s]+'」这一场你勾了 '+c.ls.length+' 门 —— '+c.ls.map(function(x){return x.n;}).join('、')+'。一场只能考一门，去掉多余的。</span></div>';
+  }).join(''):'';
+
+  // 场次筛选
+  var sb=document.getElementById('slotBar');
+  if(!sb.dataset.init){
+    var h='<button class="sf on" data-s="all" onclick="filtSlot(\'all\')">全部课程</button>';
+    h+='<button class="sf" data-s="k8" onclick="filtSlot(\'k8\')">与 408 重叠</button>';
+    h+='<button class="sf" data-s="todo" onclick="filtSlot(\'todo\')">未通过</button>';
+    [1,2,3,4,5,0].forEach(function(s){h+='<button class="sf" data-s="'+s+'" onclick="filtSlot(\''+s+'\')">'+SLOTS[s]+'</button>';});
+    sb.innerHTML=h;sb.dataset.init='1';
+  }
+  var show=list.slice();
+  if(curSlot==='k8')show=show.filter(function(x){return x.ky==='408';});
+  else if(curSlot==='todo')show=show.filter(function(x){return S.cs[x.c].st!=='已通过';});
+  else if(curSlot!=='all')show=show.filter(function(x){return String(x.slot)===curSlot;});
+
+  document.getElementById('csBox').innerHTML=show.map(function(x){
+    var st=S.cs[x.c],cf=st.plan&&byslot[x.slot]&&byslot[x.slot].length>1;
+    var mian=isSci&&x.t==='加考', pkPick=x.pick===true, pkUn=x.t==='选考'&&x.pick===false;
+    var ctl='';
+    if(mian) ctl='<div class="plink" style="color:var(--green)">理工科专科免修 · 无需报考</div>';
+    else if(pkUn) ctl='<div class="plink" style="color:var(--t2)">二选一未选 · 已选「人工智能与大数据」</div>';
+    else ctl=(x.slot>0?'<label class="plink"><input type="checkbox" '+(st.plan?'checked':'')+' onchange="setPlan(\''+x.c+'\',this.checked)">本期报考这门</label>':'')
+      +(st.st==='已通过'||st.st==='未通过'?'<div class="plink"><span>成绩</span><input type="number" value="'+esc(st.score)+'" placeholder="分数" style="width:74px;border:1px solid var(--line);border-radius:8px;padding:6px 8px;min-height:36px" onchange="setSc(\''+x.c+'\',this.value)"></div>':'');
+    return '<div class="cs'+(st.st==='已通过'?' pass':'')+(st.plan?' plan':'')+(cf?' conf':'')+(mian||pkUn?' dim':'')+(pkPick?' pk':'')+'">'+
+      '<div class="cn">'+esc(x.n)+'</div>'+
+      '<div class="cc">'+x.c+' · '+x.cr+' 学分 · '+x.g+'</div>'+
+      '<div class="cr">'+
+        (mian?'<span class="tag mian">理工免考</span>':'<span class="tag '+(x.t==='必考'?'zk':x.t==='选考'?'k8':'el')+'">'+x.t+'</span>')+
+        (x.ky?'<span class="tag '+(x.ky==='408'?'k8':'ky')+'">'+(x.ky==='408'?'★ 408 重叠':'↔ '+x.ky)+'</span>':'')+
+        (x.slot>0?'<span class="tag el">'+SLOTS[x.slot].split(' ')[0]+' '+(SLOTS[x.slot].split(' ')[1]||'')+'</span>':'')+
+        (pkPick?'<span class="tag ok">已选 · 二选一</span>':'')+
+        (pkUn?'<span class="tag el">未选 · 二选一</span>':'')+
+        (st.score?'<span class="tag ok">'+st.score+' 分</span>':'')+
+      '</div>'+
+      (mian||pkUn?'':'<select onchange="setSt(\''+x.c+'\',this.value)">'+['未开始','复习中','已报考','已通过','未通过'].map(function(o){return '<option'+(st.st===o?' selected':'')+'>'+o+'</option>';}).join('')+'</select>')+
+      ctl+
+      (x.vid?'<div class="cvids">'+x.vid.map(function(v,i){return '<a class="cvid" href="'+esc(v.u)+'" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>'+esc(v.n)+(i===0?'<span class="cvl">首选</span>':'')+'</a>';}).join('')+'</div>':'')+
+    '</div>';
+  }).join('')||'<div class="empty">这个筛选下没有课程</div>';
+}
+function filtSlot(s){curSlot=s;Array.prototype.forEach.call(document.querySelectorAll('#slotBar .sf'),function(b){b.classList.toggle('on',b.dataset.s===s);});renderZK();}
+function setSt(c,v){S.cs[c].st=v;if(v==='已通过')S.cs[c].plan=false;save();renderZK();renderCd();}
+function setPlan(c,v){S.cs[c].plan=v;save();renderZK();renderCd();renderToday();}
+function setSc(c,v){S.cs[c].score=v;save();renderZK();}
+
+/* ============ 考研 ============ */
+function renderKY(){
+  document.getElementById('kyBox').innerHTML=S.ky.map(function(k,i){
+    var pc=k.total>0?Math.min(100,Math.round(k.done/k.total*100)):0;
+    return '<div class="ks"><div class="kh"><b>'+esc(k.n)+'</b><span>'+pc+'%</span></div>'+
+      '<div class="bar"><i style="width:'+pc+'%;background:'+k.col+'"></i></div>'+
+      '<div class="kctl">'+
+        '<button class="btn g sm" onclick="kyAdd('+i+',-5)">-5</button>'+
+        '<input type="number" value="'+k.done+'" min="0" onchange="kySet('+i+',\'done\',this.value)">'+
+        '<span class="u">/</span>'+
+        '<input type="number" value="'+k.total+'" min="1" onchange="kySet('+i+',\'total\',this.value)">'+
+        '<span class="u">'+k.u+'</span>'+
+        '<button class="btn sm" style="background:'+k.col+'" onclick="kyAdd('+i+',5)">+5</button>'+
+      '</div>'+
+      '<div class="note" style="margin-top:8px">'+esc(k.tip)+'</div></div>';
+  }).join('');
+}
+function kySet(i,f,v){var n=parseInt(v)||0;S.ky[i][f]=Math.max(f==='total'?1:0,n);save();renderKY();}
+function kyAdd(i,d){S.ky[i].done=Math.max(0,Math.min(S.ky[i].total,S.ky[i].done+d));save();renderKY();}
+function punch(){
+  var m=parseInt(document.getElementById('hMin').value);
+  if(!m||m<0){toast('填个分钟数');return;}
+  S.punch[today()]=(S.punch[today()]||0)+m;
+  document.getElementById('hMin').value='';
+  save();renderHeat();toast('打卡 +'+m+' 分钟');
+}
+function renderHeat(){
+  var W=8*7,cell=15,gap=3,cols=8;
+  var end=new Date(today()+'T00:00:00');
+  var dow=end.getDay();var back=(cols-1)*7+dow;
+  var start=new Date(end);start.setDate(start.getDate()-back);
+  var w=cols*(cell+gap)+26,h=7*(cell+gap)+18;
+  var svg='<svg width="'+w+'" height="'+h+'" viewBox="0 0 '+w+' '+h+'">';
+  ['一','三','五'].forEach(function(t,i){svg+='<text x="0" y="'+(18+[1,3,5][i]*(cell+gap)+11)+'" font-size="9" fill="#8B94A3">'+t+'</text>';});
+  var mx=0;Object.keys(S.punch).forEach(function(k){if(S.punch[k]>mx)mx=S.punch[k];});
+  if(mx<60)mx=60;
+  for(var c=0;c<cols;c++){
+    for(var r=0;r<7;r++){
+      var d=new Date(start);d.setDate(d.getDate()+c*7+r);
+      var ds=fmt(d);if(d>end)continue;
+      var v=S.punch[ds]||0,lv=v===0?0:v<mx*.25?1:v<mx*.5?2:v<mx*.8?3:4;
+      var col=['#EDEFF2','#CBE5D8','#8ECBAB','#3F9E70','#137A4B'][lv];
+      svg+='<rect x="'+(20+c*(cell+gap))+'" y="'+(18+r*(cell+gap))+'" width="'+cell+'" height="'+cell+'" rx="3.5" fill="'+col+'" stroke="'+(ds===today()?'#B01F24':'none')+'" stroke-width="1.6" style="cursor:pointer" onclick="pickDay(\''+ds+'\')"><title>'+ds+'：'+v+' 分钟</title></rect>';
+    }
+  }
+  svg+='</svg>';
+  document.getElementById('heatBox').innerHTML=svg;
+  var st=0,d2=new Date(end);
+  while(S.punch[fmt(d2)]>0){st++;d2.setDate(d2.getDate()-1);}
+  var tot=Object.keys(S.punch).reduce(function(a,k){return a+S.punch[k];},0);
+  document.getElementById('streakTxt').textContent='连续 '+st+' 天 · 累计 '+Math.round(tot/60*10)/10+' 小时';
+}
+function pickDay(ds){
+  var cur=S.punch[ds]||0;
+  openM('<h3>'+ds+' 学习时长</h3><div class="fld"><label>分钟数（填 0 清除）</label><input type="number" id="pdM" value="'+cur+'" min="0" step="15"></div><div class="mact"><button class="btn g" onclick="closeM()">取消</button><button class="btn n" onclick="savePd(\''+ds+'\')">保存</button></div>');
+}
+function savePd(ds){
+  var m=parseInt(document.getElementById('pdM').value)||0;
+  if(m<=0)delete S.punch[ds];else S.punch[ds]=m;
+  save();closeM();renderHeat();
+}
+
+/* ============ 资讯 ============ */
+var NEWS={items:[]};
+try{NEWS=JSON.parse(document.getElementById('news-feed').textContent);}catch(e){}
+// C2：内联作为即时兜底，异步 fetch news.json 升级（更新资讯只改 news.json）；B3 时钟校准用于过期判断
+function staleDays(ua){ if(!ua) return -1; var d=Date.parse(ua); if(isNaN(d)) return -1; return Math.floor((wbNow()-d)/86400000); }
+function loadNewsRemote(){
+  if(typeof fetch!=='function') return;
+  fetch('news.json?_='+Date.now(),{cache:'no-store'}).then(function(r){ if(!r.ok) throw 0; return r.json(); }).then(function(j){
+    if(j&&j.items&&j.items.length){ NEWS=j; renderNews(); }
+  }).catch(function(){});
+}
+loadNewsRemote();
+function renderNews(){
+  var items=(NEWS.items||[]).slice();
+  var sd=staleDays(NEWS.updatedAt);
+  document.getElementById('newsUpd').textContent='更新于 '+(NEWS.updatedAt||'—')+(sd>7?'（已'+sd+'天未刷新，可能过期）':'');
+  var cats=['全部'];items.forEach(function(x){if(cats.indexOf(x.cat)<0)cats.push(x.cat);});
+  document.getElementById('newsFilt').innerHTML=cats.map(function(c){
+    var n=c==='全部'?items.length:items.filter(function(x){return x.cat===c;}).length;
+    return '<button class="sf'+(curCat===c?' on':'')+'" onclick="filtNews(\''+c+'\')">'+c+' '+n+'</button>';
+  }).join('')+'<button class="sf" onclick="readAll()">全标已读</button>';
+  var ls=curCat==='全部'?items:items.filter(function(x){return x.cat===curCat;});
+  document.getElementById('newsBox').innerHTML=ls.length?ls.map(function(x){
+    var un=!S.read[x.id];
+    return '<div class="ni'+(un?' unread':'')+'" onclick="markRead(\''+x.id+'\')">'+
+      '<div class="nb"><div class="nt">'+(un?'<span class="tag zk" style="margin-right:5px">NEW</span>':'')+esc(x.title)+'</div>'+
+      '<div class="nd">'+esc(x.desc||'')+'</div>'+
+      '<div class="nm"><span class="tag el">'+esc(x.cat||'其他')+'</span><span>'+esc(x.date||'')+'</span>'+
+      (x.url?'<a href="'+esc(x.url)+'" target="_blank" rel="noopener" onclick="event.stopPropagation()">查看原文 →</a>':'')+
+      '</div></div></div>';
+  }).join(''):'<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 11a9 9 0 0 1 9 9M4 4a16 16 0 0 1 16 16"/></svg>暂无资讯，定时任务会在明早自动填充</div>';
+}
+function filtNews(c){curCat=c;renderNews();}
+function markRead(id){if(!S.read[id]){S.read[id]=1;save();renderNews();renderToday();}}
+function readAll(){(NEWS.items||[]).forEach(function(x){S.read[x.id]=1;});save();renderNews();renderToday();}
+
+/* ============ 备份 ============ */
+function exportJSON(){
+  var blob=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='双线作战台备份_'+today()+'.json';
+  a.click();setTimeout(function(){URL.revokeObjectURL(a.href);},1000);
+  toast('已导出，建议存到网盘或发给自己');
+}
+function importJSON(inp){
+  var f=inp.files[0];if(!f)return;
+  var r=new FileReader();
+  r.onload=function(){
+    try{
+      var o=JSON.parse(r.result);
+      if(!o||!Array.isArray(o.tasks))throw 0;
+      openM('<h3>确认导入</h3><p>将用备份文件覆盖当前数据：任务 '+(o.tasks.length)+' 条、打卡 '+Object.keys(o.punch||{}).length+' 天。当前数据会被替换，确定吗？</p><div class="mact"><button class="btn g" onclick="closeM()">取消</button><button class="btn n" onclick="doImport()">确认导入</button></div>');
+      window._imp=o;
+    }catch(e){toast('文件格式不对，请选择本工作台导出的 JSON');}
+  };
+  r.readAsText(f);inp.value='';
+}
+function doImport(){
+  S=window._imp;
+  if(!Array.isArray(S.tasks))S.tasks=[];
+  S.tasks.forEach(function(t){if(typeof t!=='object'||!t)return;if(t.date===undefined)t.date=today();if(typeof t.done!=='boolean')t.done=!!t.done;if(typeof t.min!=='number')t.min=parseInt(t.min)||0;});
+  COURSES.forEach(function(x){if(!S.cs[x.c])S.cs[x.c]={st:'未开始',plan:false,score:''};});
+  if(!S.punch)S.punch={};if(!S.read)S.read={};
+  if(!S.set)S.set={zkDate:'2026-10-24',kyDate:'2027-12-18',isSci:true,goal:180};
+  save();closeM();renderAll();toast('导入完成');
+}
+function openSet(){
+  openM('<h3>设置</h3>'+
+   '<div class="fld"><label>下一次自考统考日期</label><input type="date" id="sZk" value="'+S.set.zkDate+'"></div>'+
+   '<div class="fld"><label>考研初试日期</label><input type="date" id="sKy" value="'+S.set.kyDate+'"></div>'+
+   '<div class="fld"><label>计算机二级考试日期（上海考区）</label><input type="date" id="sNcre" value="'+S.set.ncreDate+'"></div>'+
+   '<div class="fld"><label><input type="checkbox" id="sSci" '+(S.set.isSci?'checked':'')+' style="width:auto;min-height:auto;margin-right:6px">我是理工科（加考课免修，显示「理工免考」标记）</label></div>'+
+   '<div class="mact" style="margin-bottom:14px"><button class="btn g" onclick="closeM()">取消</button><button class="btn n" onclick="saveSet()">保存设置</button></div>'+
+   '<div style="border-top:1px solid var(--line);padding-top:13px">'+
+   '<p style="font-size:12.5px;color:var(--t2);margin-bottom:9px">危险操作区</p>'+
+   '<button class="btn" style="background:#EEF0F3;color:var(--red);width:100%" onclick="askReset()">清空全部数据 / 恢复示例</button></div>');
+}
+function saveSet(){
+  S.set.zkDate=document.getElementById('sZk').value||S.set.zkDate;
+  S.set.kyDate=document.getElementById('sKy').value||S.set.kyDate;
+  S.set.ncreDate=document.getElementById('sNcre').value||S.set.ncreDate;
+  S.set.isSci=document.getElementById('sSci').checked;
+  save();closeM();renderAll();toast('已保存');
+}
+function askReset(){
+  openM('<h3 style="color:var(--red)">确认清空全部数据？</h3><p>任务、自考状态、考研进度、打卡记录将<b>全部删除</b>并恢复为示例数据，此操作不可撤销。<br><br>强烈建议先点「导出备份」。</p><div class="mact"><button class="btn g" onclick="closeM()">我再想想</button><button class="btn g" onclick="exportJSON()">先导出</button><button class="btn" onclick="doReset()">确认清空</button></div>');
+}
+function doReset(){store.setLegacy(K,null);S=seed();save();store.setLegacy(RK,null);RS=loadRS();closeM();renderAll();toast('已重置为示例数据');}
+
+/* 外部资源 / 常用链接 */
+function renderRes(){
+  var ql=document.getElementById('quickLinks'), rl=document.getElementById('resLinks');
+  var qh='', rh='';
+  RESES.forEach(function(r){
+    var a='<a class="ql" href="'+esc(r.u)+'" target="_blank" rel="noopener noreferrer">'
+      +'<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 3h7v7M21 3l-9 9"/><path d="M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5"/></svg>'
+      +esc(r.n)+'</a>';
+    qh+=a;
+    if(r.ctx==='自考') rh+='<a class="rl" href="'+esc(r.u)+'" target="_blank" rel="noopener noreferrer">'
+      +'<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 3h7v7M21 3l-9 9"/><path d="M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5"/></svg>'
+      +esc(r.n)+'</a>';
+  });
+  if(ql){ ql.innerHTML=qh; ql.style.display=qh?'flex':'none'; }
+  if(rl) rl.innerHTML=rh;
+}
+
+/* AI 工具箱 */
+function renderAI(){
+  var box=document.getElementById('aiBox'); if(!box)return;
+  var groups=[{k:'chat',t:'对话与研究'},{k:'dev',t:'编程与智能体'}];
+  var html='';
+  groups.forEach(function(gp){
+    var items=AI_TOOLS.filter(function(x){return x.g===gp.k;});
+    html+='<div class="aigroup"><div class="aigh">'+gp.t+'</div><div class="aigrid">';
+    items.forEach(function(x){
+      html+='<a class="aitool" href="'+esc(x.u)+'" target="_blank" rel="noopener noreferrer" style="--ac:'+x.c+'">'
+        +'<span class="ailogo">'+x.t+'</span>'
+        +'<span class="ainfo"><span class="ain">'+x.n+'</span><span class="aid">'+x.d+'</span></span>'
+        +'<svg class="aig" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 17L17 7M17 7H9M17 7v8"/></svg>'
+        +'</a>';
+    });
+    html+='</div></div>';
+  });
+  box.innerHTML=html;
+}
+
+/* 学习网站导航 */
+function renderHotSites(){
+  var box=document.getElementById('hotBox'); if(!box)return;
+  var html='<div class="hotsites">';
+  HOT_SITES.forEach(function(x){
+    html+='<a class="hsite" href="'+esc(x.u)+'" target="_blank" rel="noopener noreferrer" style="--ac:'+x.c+'" title="'+esc(x.d||x.n)+'">'
+      +'<span class="hsava">'+esc(x.t)+'</span>'
+      +'<span class="hsn">'+esc(x.n)+'</span>'
+      +'</a>';
+  });
+  html+='</div>';
+  box.innerHTML=html;
+}
+var RK='wb_sjtu_research_v1';
+var RS=null;
+var RS_ST={
+  topic:['构思中','进行中','投稿中','已发表','搁置'],
+  paper:['待读','在读','已读'],
+  sub:['构思','撰写中','投稿中','已录用','已拒稿']
+};
+function loadRS(){
+  try{var o=store.getLegacy(RK);if(o&&typeof o==='object'&&!Array.isArray(o)){
+    o.topics=o.topics||[];o.papers=o.papers||[];o.subs=o.subs||[];
+    return o;}}catch(e){}
+  return {topics:[],papers:[],subs:[]};
+}
+function saveRS(){try{store.setLegacy(RK,RS);}catch(e){toast('科研数据保存失败：本地存储可能已满');}}
+function renderResearch(){
+  if(!document.getElementById('p6'))return;
+  var tN=RS.topics.length, tActive=RS.topics.filter(function(x){return x.st==='进行中';}).length;
+  var pRead=RS.papers.filter(function(x){return x.st==='已读';}).length;
+  var sActive=RS.subs.filter(function(x){return x.st==='投稿中';}).length;
+  document.getElementById('rsStat').innerHTML=
+    '<div class="st"><b>'+tN+'</b><span>课题总数</span></div>'+
+    '<div class="st"><b style="color:var(--green)">'+tActive+'</b><span>进行中</span></div>'+
+    '<div class="st"><b style="color:var(--navy)">'+pRead+'</b><span>已读论文</span></div>'+
+    '<div class="st"><b style="color:var(--amber)">'+sActive+'</b><span>投稿中</span></div>';
+
+  document.getElementById('topicBox').innerHTML = RS.topics.length ? RS.topics.map(function(x){
+    return '<div class="cs'+(x.st==='进行中'?' plan':'')+(x.st==='已发表'?' pass':'')+'">'+
+      '<div class="cn">'+esc(x.name)+'</div>'+
+      (x.dir?'<div class="cc">方向：'+esc(x.dir)+'</div>':'')+
+      '<div class="cr"><span class="tag '+(x.st==='进行中'?'k8':x.st==='已发表'?'ok':x.st==='搁置'?'el':'zk')+'">'+x.st+'</span></div>'+
+      '<select onchange="setTopicSt(\''+x.id+'\',this.value)">'+
+        RS_ST.topic.map(function(o){return '<option'+(x.st===o?' selected':'')+'>'+o+'</option>';}).join('')+
+      '</select>'+
+      '<div class="plink" style="justify-content:space-between"><span style="font-size:11px;color:var(--t3)">更新 '+esc(x.upd||'')+'</span>'+
+      '<button class="xbtn" onclick="delTopic(\''+x.id+'\')" aria-label="删除"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:15px;height:15px"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>'+
+    '</div>';
+  }).join('') : '<div class="empty">还没有课题，点「+ 新建课题」开始你的研究</div>';
+
+  var pn=RS.papers.length, pu=RS.papers.filter(function(x){return x.st!=='已读';}).length;
+  document.getElementById('paperStat').textContent='共 '+pn+' 篇 · 待读 '+pu;
+  document.getElementById('paperBox').innerHTML = RS.papers.length ? '<ul class="tl">'+RS.papers.map(function(x){
+    return '<li class="ti'+(x.st==='已读'?' dn':'')+'">'+
+      '<button class="ck'+(x.st==='已读'?' on':'')+'" onclick="togglePaper(\''+x.id+'\')" aria-label="标记已读"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></button>'+
+      '<div class="tb"><div class="tt">'+esc(x.title)+'</div>'+
+      '<div class="tm"><span class="tag '+(x.st==='已读'?'ok':x.st==='在读'?'k8':'el')+'">'+x.st+'</span>'+
+      (x.author?'<span>'+esc(x.author)+'</span>':'')+
+      (x.url?'<a href="'+esc(x.url)+'" target="_blank" rel="noopener" onclick="event.stopPropagation()">链接 →</a>':'')+
+      '<button class="btn g sm" style="padding:3px 9px;min-height:28px;font-size:11.5px" onclick="cyclePaper(\''+x.id+'\')">切换状态</button>'+
+      '<button class="xbtn" onclick="delPaper(\''+x.id+'\')" aria-label="删除"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:15px;height:15px"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div></div></li>';
+  }).join('')+'</ul>' : '<div class="empty">文献清单是空的，把要看的论文加进来</div>';
+
+  document.getElementById('subBox').innerHTML = RS.subs.length ? RS.subs.map(function(x){
+    var dl = x.due ? days(x.due) : null;
+    var dlTxt = (typeof dl==='number'&&!isNaN(dl)) ? (dl<0?'已截止':dl+' 天') : '无截止';
+    return '<div class="cs'+(x.st==='投稿中'?' plan':'')+(x.st==='已录用'?' pass':'')+'">'+
+      '<div class="cn">'+esc(x.name)+'</div>'+
+      (x.venue?'<div class="cc">'+esc(x.venue)+'</div>':'')+
+      '<div class="cr"><span class="tag '+(x.st==='投稿中'?'k8':x.st==='已录用'?'ok':x.st==='已拒稿'?'el':'zk')+'">'+x.st+'</span>'+
+      (x.due?'<span class="tag '+(dl<0?'od':' el')+'">'+dlTxt+'</span>':'')+'</div>'+
+      '<select onchange="setSubSt(\''+x.id+'\',this.value)">'+
+        RS_ST.sub.map(function(o){return '<option'+(x.st===o?' selected':'')+'>'+o+'</option>';}).join('')+
+      '</select>'+
+      (x.due?'<div class="plink"><span style="font-size:11px;color:var(--t3)">截止 '+esc(x.due)+'</span></div>':'')+
+      '<div class="plink" style="justify-content:flex-end"><button class="xbtn" onclick="delSub(\''+x.id+'\')" aria-label="删除"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:15px;height:15px"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>'+
+    '</div>';
+  }).join('') : '<div class="empty">还没有投稿 / 会议计划</div>';
+}
+function addTopic(){
+  openM('<h3>新建课题</h3>'+
+    '<div class="fld"><label>课题名称</label><input type="text" id="tName" placeholder="例：基于图神经网络的代码缺陷检测"></div>'+
+    '<div class="fld"><label>研究方向</label><input type="text" id="tDir" placeholder="例：软件工程 / AI4SE"></div>'+
+    '<div class="mact"><button class="btn g" onclick="closeM()">取消</button><button class="btn n" onclick="doAddTopic()">创建</button></div>');
+  setTimeout(function(){var e=document.getElementById('tName');if(e)e.focus();},50);
+}
+function doAddTopic(){
+  var n=document.getElementById('tName').value.trim();if(!n){toast('填个课题名');return;}
+  RS.topics.unshift({id:uid(),name:n,dir:document.getElementById('tDir').value.trim(),st:'构思中',upd:today()});
+  saveRS();closeM();renderResearch();toast('已添加课题');
+}
+function setTopicSt(id,v){var x=RS.topics.filter(function(t){return t.id===id;})[0];if(x){x.st=v;x.upd=today();saveRS();renderResearch();}}
+function delTopic(id){RS.topics=RS.topics.filter(function(t){return t.id!==id;});saveRS();renderResearch();}
+function addPaper(){
+  openM('<h3>加论文</h3>'+
+    '<div class="fld"><label>论文标题</label><input type="text" id="pTi" placeholder="例：Attention Is All You Need"></div>'+
+    '<div class="fld"><label>作者 / 来源</label><input type="text" id="pAu" placeholder="例：Vaswani et al. 2017"></div>'+
+    '<div class="fld"><label>链接（arXiv / 期刊页，可选）</label><input type="text" id="pUrl" placeholder="https://..."></div>'+
+    '<div class="mact"><button class="btn g" onclick="closeM()">取消</button><button class="btn n" onclick="doAddPaper()">添加</button></div>');
+  setTimeout(function(){var e=document.getElementById('pTi');if(e)e.focus();},50);
+}
+function doAddPaper(){
+  var t=document.getElementById('pTi').value.trim();if(!t){toast('填个标题');return;}
+  RS.papers.unshift({id:uid(),title:t,author:document.getElementById('pAu').value.trim(),url:document.getElementById('pUrl').value.trim(),st:'待读'});
+  saveRS();closeM();renderResearch();toast('已加入清单');
+}
+function togglePaper(id){var x=RS.papers.filter(function(p){return p.id===id;})[0];if(x){x.st=(x.st==='已读'?'待读':'已读');saveRS();renderResearch();}}
+function cyclePaper(id){var x=RS.papers.filter(function(p){return p.id===id;})[0];if(x){var i=RS_ST.paper.indexOf(x.st);x.st=RS_ST.paper[(i+1)%RS_ST.paper.length];saveRS();renderResearch();}}
+function delPaper(id){RS.papers=RS.papers.filter(function(p){return p.id!==id;});saveRS();renderResearch();}
+function addSub(){
+  openM('<h3>加投稿 / 会议</h3>'+
+    '<div class="fld"><label>名称</label><input type="text" id="sName" placeholder="例：ICSE 2027 投稿"></div>'+
+    '<div class="fld"><label>会议 / 期刊</label><input type="text" id="sVen" placeholder="例：ICSE / TSE"></div>'+
+    '<div class="fld"><label>截止日期（可选）</label><input type="date" id="sDue"></div>'+
+    '<div class="mact"><button class="btn g" onclick="closeM()">取消</button><button class="btn n" onclick="doAddSub()">添加</button></div>');
+  setTimeout(function(){var e=document.getElementById('sName');if(e)e.focus();},50);
+}
+function doAddSub(){
+  var n=document.getElementById('sName').value.trim();if(!n){toast('填个名称');return;}
+  RS.subs.unshift({id:uid(),name:n,venue:document.getElementById('sVen').value.trim(),due:document.getElementById('sDue').value||'',st:'构思'});
+  saveRS();closeM();renderResearch();toast('已添加');
+}
+function setSubSt(id,v){var x=RS.subs.filter(function(s){return s.id===id;})[0];if(x){x.st=v;saveRS();renderResearch();}}
+function delSub(id){RS.subs=RS.subs.filter(function(s){return s.id!==id;});saveRS();renderResearch();}
+function exportRS(){
+  var blob=new Blob([JSON.stringify(RS,null,2)],{type:'application/json'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='科研专区备份_'+today()+'.json';a.click();
+  setTimeout(function(){URL.revokeObjectURL(a.href);},1000);toast('科研数据已导出');
+}
+function importRS(inp){
+  var f=inp.files[0];if(!f)return;var r=new FileReader();
+  r.onload=function(){
+    try{var o=JSON.parse(r.result);if(!o||typeof o!=='object')throw 0;
+      o.topics=o.topics||[];o.papers=o.papers||[];o.subs=o.subs||[];
+      openM('<h3>确认导入科研数据</h3><p>将用备份覆盖当前科研数据：课题 '+o.topics.length+'、论文 '+o.papers.length+'、投稿 '+o.subs.length+'。当前科研数据会被替换，确定吗？</p><div class="mact"><button class="btn g" onclick="closeM()">取消</button><button class="btn n" onclick="doImportRS()">确认导入</button></div>');
+      window._impRS=o;
+    }catch(e){toast('文件格式不对，请选择本专区导出的 JSON');}
+  };
+  r.readAsText(f);inp.value='';
+}
+function doImportRS(){RS=window._impRS;saveRS();closeM();renderResearch();toast('科研数据导入完成');}
+
+/* ============ 技术 · 论文监控（GitHub Search + Crossref 公开接口，零后端） ============ */
+var MON_CACHE_KEY='wb_sjtu_mon_v1';
+var MON_CUR='gh', MON_IDX=0, MON_INITED=false;
+/* 监控关键词：围绕 AeroCAD 论文方向（CAD 解析 / BOM 清洗 / 智能报价 / 机器视觉 / 航空制造） */
+var MON_Q={
+  gh:[
+    {k:'OpenCASCADE / STEP 解析', q:'OpenCASCADE OR pythonocc OR STEP geometry parser'},
+    {k:'CAD 几何特征提取', q:'CAD geometry feature extraction'},
+    {k:'BOM 清洗与匹配', q:'BOM cleaning matching manufacturing'},
+    {k:'智能报价 / 成本估算', q:'cost estimation quotation manufacturing'},
+    {k:'SolidWorks / CATIA 二次开发', q:'SolidWorks API OR CATIA automation'},
+    {k:'图纸视觉识别', q:'CAD drawing recognition computer vision'},
+    {k:'航空零部件制造', q:'aerospace parts manufacturing digital twin'},
+    {k:'图神经网络 / VLM', q:'graph neural network CAD'}
+  ],
+  intl:[
+    {k:'CAD 几何解析', q:'OpenCASCADE CAD geometry extraction'},
+    {k:'BOM 数据治理', q:'BOM data cleaning manufacturing'},
+    {k:'智能报价', q:'cost estimation sheet metal'},
+    {k:'图纸视觉识别', q:'CAD drawing recognition vision'},
+    {k:'航空制造', q:'aerospace parts manufacturing'}
+  ],
+  cn:[
+    {k:'航空零部件报价', q:'航空零部件 报价 成本估算'},
+    {k:'CAD 几何特征', q:'CAD 几何特征提取'},
+    {k:'BOM 清洗', q:'BOM 数据清洗 制造'},
+    {k:'机器视觉图纸', q:'工程图纸 视觉识别'},
+    {k:'智能制造', q:'智能制造 航空 数字孪生'}
+  ],
+  ax:[
+    {k:'CAD 几何解析', q:'OpenCASCADE CAD geometry feature extraction'},
+    {k:'BOM 与制造数据', q:'BOM cleaning manufacturing data'},
+    {k:'智能报价 / 成本估算', q:'cost estimation manufacturing quotation'},
+    {k:'工程图纸视觉识别', q:'engineering drawing recognition computer vision'},
+    {k:'航空制造 / 数字孪生', q:'aerospace parts manufacturing digital twin'}
+  ]
+};
+function monCache(){try{return JSON.parse(localStorage.getItem(MON_CACHE_KEY)||'{}');}catch(e){return {};}}
+function monSet(k,data){var c=monCache();c[k]={ts:Date.now(),data:data};try{localStorage.setItem(MON_CACHE_KEY,JSON.stringify(c));}catch(e){}}
+function monGet(k,maxAge){var c=monCache();if(c[k]&&(Date.now()-c[k].ts)<maxAge)return c[k].data;return null;}
+function srcLabel(src){return src==='cache'?'（缓存数据）':'（实时）';}
+function monFetchGH(q){
+  var k='gh:'+q, cached=monGet(k,30*60*1000);
+  if(cached)return Promise.resolve({src:'cache',items:cached});
+  return fetch('https://api.github.com/search/repositories?q='+encodeURIComponent(q)+'&sort=updated&order=desc&per_page=8')
+    .then(function(r){if(r.status===403)throw new Error('rate');if(!r.ok)throw new Error('http'+r.status);return r.json();})
+    .then(function(j){var it=j.items||[];monSet(k,it);return {src:'live',items:it};})
+    .catch(function(e){var c=monCache()[k];if(c)return {src:'cache',items:c.data,err:true};throw e;});
+}
+function monFetchCR(q,cn){
+  var k='cr:'+(cn?'cn:':'')+q, cached=monGet(k,60*60*1000);
+  if(cached)return Promise.resolve({src:'cache',items:cached});
+  var url='https://api.crossref.org/works?query='+encodeURIComponent(q)+'&sort=published&order=desc&rows=10&select=DOI,title,author,container-title,issued,URL';
+  return fetch(url).then(function(r){if(!r.ok)throw new Error('http'+r.status);return r.json();})
+    .then(function(j){var it=(j.message&&j.message.items)||[];monSet(k,it);return {src:'live',items:it};})
+    .catch(function(e){var c=monCache()[k];if(c)return {src:'cache',items:c.data,err:true};throw e;});
+}
+function crYear(it){try{var d=(it.issued&&it.issued['date-parts']&&it.issued['date-parts'][0])||(it.published&&it.published['date-parts']&&it.published['date-parts'][0]);return d?d[0]:'';}catch(e){return '';}}
+function crAuthors(it){try{return (it.author||[]).slice(0,3).map(function(a){return (a.family||a.given||'').trim();}).filter(Boolean).join(', ')+((it.author||[]).length>3?' et al.':'');}catch(e){return '';}}
+function monRenderGH(res){
+  var box=document.getElementById('monBody');
+  var items=res.items||[];
+  if(!items.length){box.innerHTML='<div class="mon-err">没有找到相关仓库，换个关键词试试</div>';return;}
+  var h='<div class="mon-stat">GitHub · 按更新时间倒序 · '+srcLabel(res.src)+'</div>';
+  if(res.err)h+='<div class="mon-warn">GitHub 限流（未登录 10 次/分），已显示本地缓存，稍后再刷新</div>';
+  h+=items.map(function(r){
+    return '<a class="repo" href="'+esc(r.html_url)+'" target="_blank" rel="noopener noreferrer">'
+      +'<div class="rn">'+esc(r.full_name)+' <span class="star">★ '+(r.stargazers_count||0)+'</span></div>'
+      +(r.description?'<div class="rd">'+esc(r.description)+'</div>':'')
+      +'<div class="rm">'
+      +(r.language?'<span class="rlang"><i></i>'+esc(r.language)+'</span>':'')
+      +(r.updated_at?'<span>更新 '+esc(String(r.updated_at).slice(0,10))+'</span>':'')
+      +(r.owner&&r.owner.login?'<span>@'+esc(r.owner.login)+'</span>':'')
+      +'</div></a>';
+  }).join('');
+  box.innerHTML=h;
+}
+function monRenderCR(res,cn){
+  var box=document.getElementById('monBody');
+  var items=res.items||[];
+  if(!items.length){box.innerHTML='<div class="mon-err">没有检索到论文，换个关键词试试</div>';return;}
+  var h='<div class="mon-stat">Crossref · 按发表时间倒序 · '+srcLabel(res.src)+'</div>';
+  if(res.err)h+='<div class="mon-warn">接口异常，已显示本地缓存，稍后再刷新</div>';
+  h+=items.map(function(it){
+    var title=(it.title&&it.title[0])||'无标题';
+    var jn=(it['container-title']&&it['container-title'][0])||'';
+    var yr=crYear(it), au=crAuthors(it);
+    var url=it.URL||(it.DOI?('https://doi.org/'+it.DOI):'#');
+    return '<a class="pf" href="'+esc(url)+'" target="_blank" rel="noopener noreferrer">'
+      +'<div class="pt">'+esc(title)+'</div>'
+      +(au?'<div class="pm">'+esc(au)+'</div>':'')
+      +'<div class="pj">'+(jn?esc(jn)+' · ':'')+yr+(it.DOI?' · '+esc(it.DOI.slice(0,28)):'')+'</div></a>';
+  }).join('');
+  if(cn)h+='<div class="mon-stat" style="margin-top:12px">国内顶刊 / 数据库直达检索：</div><div class="cnkns">'
+    +'<a class="cnkn" href="https://kns.cnki.net/kns8s/search?kw='+encodeURIComponent(MON_Q.cn[MON_IDX].q)+'" target="_blank" rel="noopener">知网 CNKI</a>'
+    +'<a class="cnkn" href="https://www.wanfangdata.com.cn/search?q='+encodeURIComponent(MON_Q.cn[MON_IDX].q)+'" target="_blank" rel="noopener">万方</a>'
+    +'<a class="cnkn" href="https://www.cqvip.com/web/cqvip?key='+encodeURIComponent(MON_Q.cn[MON_IDX].q)+'" target="_blank" rel="noopener">维普</a>'
+    +'</div>';
+  box.innerHTML=h;
+}
+/* arXiv（arxiv_api.py 思路：调 export.arxiv.org API，解析 Atom XML）
+   注意：arXiv 不返回 CORS 头，浏览器直连会被拦，故走「直连 → allorigins 代理 → corsproxy 代理 → 缓存」兜底 */
+function parseArxiv(txt){
+  var doc=null;
+  try{doc=new DOMParser().parseFromString(txt,'application/xml');}catch(e){return [];}
+  var ents=doc.getElementsByTagName('entry'),items=[],i,a;
+  for(i=0;i<ents.length;i++){
+    var e=ents[i];
+    var gT=function(tag){var n=e.getElementsByTagName(tag)[0];return n?n.textContent:'';};
+    var authors=[],as=e.getElementsByTagName('author');
+    for(a=0;a<as.length;a++){var nm=as[a].getElementsByTagName('name')[0];if(nm)authors.push(nm.textContent.trim());}
+    var abs='',links=e.getElementsByTagName('link');
+    for(a=0;a<links.length;a++){if(links[a].getAttribute('rel')==='alternate'){abs=links[a].getAttribute('href');break;}}
+    if(!abs&&links[0])abs=links[0].getAttribute('href')||'';
+    items.push({title:gT('title').replace(/\s+/g,' ').trim(),summary:gT('summary').replace(/\s+/g,' ').trim(),published:gT('published').slice(0,10),authors:authors,url:abs});
+  }
+  return items;
+}
+function monFetchAX(q){
+  var k='ax:'+q, cached=monGet(k,60*60*1000);
+  if(cached)return Promise.resolve({src:'cache',items:cached});
+  var axUrl='https://export.arxiv.org/api/query?search_query=all:('+encodeURIComponent(q)+')&sortBy=submittedDate&sortOrder=descending&max_results=10';
+  function go(url){return fetch(url).then(function(r){if(!r.ok)throw new Error('http'+r.status);return r.text();}).then(function(txt){var it=parseArxiv(txt);monSet(k,it);return {src:'live',items:it};});}
+  return go(axUrl)
+    .catch(function(){return go('https://api.allorigins.win/raw?url='+encodeURIComponent(axUrl));})
+    .catch(function(){return go('https://corsproxy.io/?url='+encodeURIComponent(axUrl));})
+    .catch(function(){var c=monCache()[k];if(c)return {src:'cache',items:c.data,err:true};throw new Error('arxiv-fail');});
+}
+function monRenderAX(res){
+  var box=document.getElementById('monBody');
+  var items=res.items||[];
+  if(!items.length){box.innerHTML='<div class="mon-err">arXiv 没有检索到相关论文，换个关键词试试</div>';return;}
+  var h='<div class="mon-stat">arXiv · 按提交时间倒序 · '+srcLabel(res.src)+'</div>';
+  if(res.err)h+='<div class="mon-warn">arXiv 接口异常（直连/CORS 代理均失败），已显示本地缓存，稍后再刷新</div>';
+  h+=items.map(function(it){
+    var au=(it.authors||[]).slice(0,3).join(', ')+((it.authors||[]).length>3?' et al.':'');
+    var d=(it.summary||'');if(d.length>150)d=d.slice(0,150)+'…';
+    return '<a class="pf" href="'+esc(it.url||'#')+'" target="_blank" rel="noopener noreferrer">'
+      +'<div class="pt">'+esc(it.title)+'</div>'
+      +(au?'<div class="pm">'+esc(au)+'</div>':'')
+      +'<div class="pj">'+(it.published||'')+' · arXiv</div>'
+      +(d?'<div class="pdesc">'+esc(d)+'</div>':'')
+      +'</a>';
+  }).join('');
+  box.innerHTML=h;
+}
+function buildMonChips(){
+  var wrap=document.getElementById('monChips');
+  wrap.innerHTML=MON_Q[MON_CUR].map(function(c,i){return '<button class="mchip'+(i===0?' on':'')+'" onclick="clickMonChip('+i+')">'+esc(c.k)+'</button>';}).join('');
+}
+function initMon(){if(MON_INITED)return;MON_INITED=true;buildMonChips();clickMonChip(0);}
+function switchMon(tab){
+  MON_CUR=tab;MON_IDX=0;MON_INITED=true;
+  Array.prototype.forEach.call(document.querySelectorAll('.mtab'),function(b){b.classList.toggle('on',b.dataset.mt===tab);});
+  buildMonChips();clickMonChip(0);
+}
+function clickMonChip(i){
+  MON_IDX=i;
+  Array.prototype.forEach.call(document.getElementById('monChips').children,function(c,idx){c.classList.toggle('on',idx===i);});
+  var c=MON_Q[MON_CUR][i], box=document.getElementById('monBody');
+  box.innerHTML='<div class="mon-loading">正在检索「'+esc(c.k)+'」相关'+(MON_CUR==='gh'?'开源项目':'论文')+'…</div>';
+  if(MON_CUR==='gh'){
+    monFetchGH(c.q).then(monRenderGH).catch(function(){document.getElementById('monBody').innerHTML='<div class="mon-err">GitHub 请求失败（限流/网络问题），稍后再试</div>';});
+  } else if(MON_CUR==='ax'){
+    monFetchAX(c.q).then(monRenderAX).catch(function(){document.getElementById('monBody').innerHTML='<div class="mon-err">arXiv 请求失败（CORS/代理/网络问题），稍后再试</div>';});
+  } else {
+    monFetchCR(c.q, MON_CUR==='cn').then(function(res){monRenderCR(res, MON_CUR==='cn');}).catch(function(){document.getElementById('monBody').innerHTML='<div class="mon-err">Crossref 请求失败，稍后再试</div>';});
+  }
+}
+function monKeyPrefix(tab){
+  if(tab==='gh')return 'gh:';
+  if(tab==='ax')return 'ax:';
+  return 'cr:'+(tab==='cn'?'cn':'');
+}
+function refreshMon(){
+  if(!MON_Q[MON_CUR])return;
+  var c=MON_Q[MON_CUR][MON_IDX];if(!c)return;
+  var k=monKeyPrefix(MON_CUR)+c.q;
+  var cc=monCache();delete cc[k];try{localStorage.setItem(MON_CACHE_KEY,JSON.stringify(cc));}catch(e){}
+  clickMonChip(MON_IDX);toast('已强制刷新');
+}
+
+/* ============ 我的自动化技术栈（静态参考，与论文监控方向互证） ============ */
+var TECH_STACK=[
+  {key:'aerocad',icon:'cad',name:'AeroCAD · 航空零部件智能审查与报价',
+   mods:['规范与图纸审查','3D 几何与静默终端','BOM 数据流枢纽','报价自动化','历史档案库','内部迭代与规划'],
+   desc:'多源异构 CAD（PDF/CATIA/STEP）+ 业务 BOM 割裂形成数据孤岛；非标件报价依赖人工。落地为 Streamlit「研发中枢」六模块工作台（取自内部迭代规划快照）。',
+   stack:['PythonOCC','OpenCASCADE','C# COM / .NET','CATIA / SolidWorks','SQLAlchemy','FastAPI','WebSocket','xlwings','OpenCV'],
+   points:['CATIA COM 过期断连修复 + PartNumber 双路径探测 + 图号反查修正链','Eng-Spec 三列表格 cut_points 截断机制 + 德/法/英多语言噪声过滤','白色区域 floodFill 修复（修 Otsu 误判）+ SW 流水线 0% 停滞超时检测','SQLAlchemy 2.0 事务冲突修复 + 跨界物理冲突硬校验（42CrMo+阳极氧化等）','BOM 动作注册表 + 瀑布式仲裁智能报价（T1–T7 阶梯键）'],
+   metrics:[['图号识别率','96% → 100%'],['表处触发','覆盖 PASSIVATION']]},
+  {key:'ctrl',icon:'ctrl',name:'自动化中控引擎 · FSM + 时间轮',
+   desc:'基于《自动化中控系统架构方案》PPTX 的多端游戏自动化中控：调度中心毫秒级推送运行状态，视觉引擎剥离硬编码坐标，物理外挂级安全。',
+   stack:['FastAPI','WebSocket','OpenCV','asyncio 时间轮','FSM 状态机','Python 并发'],
+   points:['FastAPI + WebSocket 调度中心，日志/画面毫秒推送','OpenCV 动态模板匹配定位（去硬编码坐标）','FSM 状态机 + asyncio 时间轮，告别 while 死等','全局异常接管状态容错自愈']},
+  {key:'xls',icon:'xls',name:'Excel 自动化核算系统',
+   desc:'工业级 ERP 物料数据 → 单价核算工具，Python + xlwings 驱动 Excel。',
+   stack:['Python','xlwings (COM)','正则语义清洗','动态雷达扫描','pyinstaller 封装'],
+   points:['语义清洗：正则过滤中文修饰符，单价检索 100%','动态雷达扫描：时间权重优先最新总表','防崩溃外壳：健壮列名 + 加密文件解析','pyinstaller 封装独立 .exe（需正版 Excel）']},
+  {key:'ax',icon:'ax',name:'arXiv 论文检索 · arxiv_api.py',
+   desc:'调用 export.arxiv.org API 搜索/取元数据/下载 PDF，解析 Atom XML；科研专区论文监控的本地原型。',
+   stack:['arXiv API','Atom XML 解析','argparse','交互模式'],
+   points:['search_query 布尔检索 + 元数据抽取','Atom XML 解析 title/authors/abstract/PDF','支持关键词/分类/作者多种检索','已并入科研专区「arXiv 论文」监控标签页']}
+];
+var TECH_ICONS={
+  cad:'<path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>',
+  ctrl:'<rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9h.01M15 9h.01M9 15h6"/>',
+  xls:'<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/>',
+  ax:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h6"/>'
+};
+function renderTechStack(){
+  var box=document.getElementById('techStackBox');if(!box)return;
+  box.innerHTML=TECH_STACK.map(function(t){
+    return '<div class="tcard" data-k="'+esc(t.key)+'">'
+      +'<div class="th" onclick="toggleTech(this.parentNode)">'
+      +'<div class="tico"><svg viewBox="0 0 24 24" fill="none" stroke="var(--zk)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+(TECH_ICONS[t.icon]||TECH_ICONS.cad)+'</svg></div>'
+      +'<div class="tname">'+esc(t.name)+'</div>'
+      +'<div class="tcaret">▾</div></div>'
+      +(t.desc?'<div class="tdesc">'+esc(t.desc)+'</div>':'')
+      +(t.stack&&t.stack.length?'<div class="tstack">'+t.stack.map(function(s){return '<span class="tchip">'+esc(s)+'</span>';}).join('')+'</div>':'')
+      +(t.mods&&t.mods.length?'<div class="tlabel">研发中枢 · 六模块</div><div class="tmods">'+t.mods.map(function(m){return '<span class="tm">'+esc(m)+'</span>';}).join('')+'</div>':'')
+      +(t.metrics&&t.metrics.length?'<div class="tmetrics">'+t.metrics.map(function(mt){return '<span class="tmt">'+esc(mt[0])+' <b>'+esc(mt[1])+'</b></span>';}).join('')+'</div>':'')
+      +(t.points&&t.points.length?'<ul class="tpts">'+t.points.map(function(p){return '<li>'+esc(p)+'</li>';}).join('')+'</ul>':'')
+      +'</div>';
+  }).join('');
+}
+function toggleTech(card){if(card&&card.classList)card.classList.toggle('tc-collapsed');}
+function collapseAllTech(){var b=document.getElementById('techStackBox');if(!b)return;var c=b.querySelectorAll('.tcard');for(var i=0;i<c.length;i++)c[i].classList.add('tc-collapsed');}
+function expandAllTech(){var b=document.getElementById('techStackBox');if(!b)return;var c=b.querySelectorAll('.tcard');for(var i=0;i<c.length;i++)c[i].classList.remove('tc-collapsed');}
+function toggleTechSec(e){
+  if(e&&e.target&&(e.target.tagName==='BUTTON'||(e.target.closest&&e.target.closest('button'))))return;
+  var c=document.getElementById('techStackContent');
+  var caret=document.getElementById('techSecCaret');
+  if(!c)return;
+  var hidden=c.style.display==='none';
+  c.style.display=hidden?'':'none';
+  if(caret)caret.textContent=hidden?'\u25BE':'\u25B8';
+  try{store.setLegacy('wb_techsec_open',hidden?'1':'0');}catch(ex){}
+}
+
+/* 量化 Alpha 研究已归并至主工作台（index.html · 科研专区），避免双线作战台混入纯科研内容 */
+
+/* ============ 启动 ============ */
+function renderAll(){renderCd();renderToday();renderTasks();renderZK();renderKY();renderHeat();renderNews();renderRes();renderReg();renderKyCd();renderNcreCd();renderAI();renderHotSites();renderResearch();renderTechStack();}
+/* 跨标签同步：远端 store 变更后重载业务数据并整体重渲染 */
+window.__wbOnRemote=function(){try{S=load();RS=loadRS();renderAll();}catch(e){}};
+S=load();
+RS=loadRS();
+document.getElementById('tDate').value=today();
+renderAll();
+initVersion();
+save();
+/* 云端默认折叠「我的自动化技术栈」（仅显示标题），本地保持展开；用户手动展开后 localStorage 记忆 */
+(function(){
+  var isCloud=location.hostname.indexOf('github.io')>=0||location.hostname.indexOf('netlify')>=0;
+  if(!isCloud)return;
+  var saved;try{saved=store.getLegacy('wb_techsec_open');}catch(e){}
+  if(saved==='1')return;
+  var c=document.getElementById('techStackContent');
+  var caret=document.getElementById('techSecCaret');
+  if(c)c.style.display='none';
+  if(caret)caret.textContent='\u25B8';
+})();
+</script>
+
+<script>
+function openPaper(year, file, title){
+  if(location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.hostname === ''){
+    window.open('/research/papers/' + year + '/' + encodeURIComponent(file), '_blank');
+  } else {
+    alert('该论文 PDF 未上线托管（32 篇共约 250MB）。\n\n本地查阅路径：\nE:/Desktop/有用的一切/2019-2023论文.rar\n\n文件名：' + file + '\n\n提示：双击桌面「本地全量工作台」走 8080 本地版，点击条目可直接阅读。');
+  }
+}
+</script>
+</body>
+</html>

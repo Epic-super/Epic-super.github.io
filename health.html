@@ -1,0 +1,1184 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="app-version" content="1.0.0">
+<meta name="app-released" content="2026-08-21T00:00:00+08:00">
+<title>医疗健康 · 小待</title>
+<style>
+  :root{
+    --bg:#f6f8f5; --card:#ffffff; --primary:#0f9d77; --primary-soft:#e6f5ef;
+    --text:#1d2723; --muted:#6b7d76; --red:#e0564b; --green:#1a9e5c;
+    --amber:#d98a1a; --border:#e3e8e4; --ring-track:#eaf0ec; --input-bg:#ffffff;
+    --radius:16px; --shadow:0 1px 3px rgba(16,24,40,.06),0 1px 2px rgba(16,24,40,.04);
+  }
+  [data-theme="dark"]{
+    --bg:#0f1311; --card:#181d1a; --primary:#34d399; --primary-soft:#14352b;
+    --text:#e8efe9; --muted:#8b9b93; --red:#f0715f; --green:#46c07e;
+    --amber:#e0a04a; --border:#262d29; --ring-track:#222926; --input-bg:#0f1311;
+  }
+  [data-theme="dark"] body{color-scheme:dark;}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
+  html,body{margin:0;padding:0;overflow-x:clip;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg); color:var(--text); font-size:16px; line-height:1.5;
+    padding-bottom:calc(24px + env(safe-area-inset-bottom)); min-height:100vh;
+  }
+  .topbar{position:sticky;top:0;z-index:20;background:rgba(244,245,249,.85);backdrop-filter:blur(10px);
+    padding:12px 16px 10px;border-bottom:1px solid var(--border);}
+  [data-theme="dark"] .topbar{background:rgba(15,19,17,.82);border-color:var(--border);}
+  .topbar-row{display:flex;align-items:center;gap:10px;}
+  .topbar h1{font-size:18px;margin:0;display:flex;align-items:center;gap:8px;font-weight:700;letter-spacing:.3px;flex:1;}
+  .topbar h1 svg{width:20px;height:20px;color:var(--primary);}
+  .topbar .sub{font-size:11.5px;color:var(--muted);margin-top:2px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+  .btn{min-height:44px;padding:9px 14px;border-radius:12px;border:1px solid var(--border);
+    background:var(--card);color:var(--text);font-size:14px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;
+    font-family:inherit;transition:.15s;font-weight:600;}
+  .btn:hover{border-color:#c7cad1;}
+  .btn.primary{background:var(--primary);color:#fff;border-color:var(--primary);}
+  .btn.primary:hover{background:#0c7d5e;}
+  .btn.ghost{background:transparent;}
+  .btn.sm{min-height:36px;padding:6px 10px;font-size:13px;border-radius:10px;}
+  .btn.icon{min-width:44px;justify-content:center;padding:9px;}
+  .btn svg{width:18px;height:18px;flex:none;}
+  .btn.soft{background:var(--primary-soft);color:var(--primary);border-color:transparent;}
+  .btn.soft:hover{border-color:var(--primary);}
+  .btn.disabled{opacity:.45;pointer-events:none;}
+  .wrap{max-width:920px;margin:0 auto;padding:14px 16px 24px;}
+  section{margin-bottom:26px;}
+  .sec-head{display:flex;align-items:center;justify-content:space-between;margin:0 2px 12px;gap:8px;}
+  .sec-head h2{font-size:16px;margin:0;display:flex;align-items:center;gap:8px;font-weight:700;flex:1;min-width:0;}
+  .sec-head svg{width:20px;height:20px;color:var(--primary);flex:none;}
+  .sec-head .count{font-size:12.5px;color:var(--muted);font-weight:600;flex:none;}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+    padding:14px;box-shadow:var(--shadow);margin-bottom:12px;}
+  .tag{font-size:11px;padding:2px 8px;border-radius:999px;background:var(--primary-soft);color:var(--primary);font-weight:600;white-space:nowrap;}
+  .tag.amber{background:#fef3c7;color:var(--amber);}
+  .tag.red{background:#fee2e8;color:var(--red);}
+  .tag.gray{background:#f1f3f9;color:var(--muted);}
+  .muted{color:var(--muted);}
+  .note{background:var(--note-bg,#f3f7f4);border:1px solid var(--border);border-radius:12px;padding:10px 12px;font-size:12.5px;color:var(--muted);line-height:1.6;}
+  .divider{height:1px;background:var(--border);margin:12px 0;}
+
+  /* ===== 主导航（segmented）===== */
+  .seg{position:sticky;top:0;z-index:19;background:var(--bg);display:flex;gap:4px;padding:10px 12px 8px;
+    border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none;}
+  .seg::-webkit-scrollbar{display:none;}
+  .seg a{flex:none;text-decoration:none;color:var(--muted);font-size:13.5px;font-weight:600;padding:9px 16px;border-radius:999px;
+    display:inline-flex;align-items:center;gap:6px;transition:.15s;white-space:nowrap;}
+  .seg a svg{width:16px;height:16px;}
+  .seg a.active{background:var(--primary-soft);color:var(--primary);}
+
+  /* ===== 子导航（chips 横向滚动）===== */
+  .sub{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 10px;scrollbar-width:none;margin-bottom:2px;}
+  .sub::-webkit-scrollbar{display:none;}
+  .sub button{flex:none;min-height:34px;padding:6px 14px;border-radius:999px;border:1px solid var(--border);
+    background:var(--card);color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:.15s;}
+  .sub button.active{background:var(--primary);color:#fff;border-color:var(--primary);}
+
+  .view{display:none;}
+  .view.active{display:block;animation:fade .18s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+  /* ===== 概览 ===== */
+  .mood-today{background:linear-gradient(180deg,var(--primary-soft) 0%,var(--card) 72%);border:1px solid var(--primary-soft);}
+  .quick-moods{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:4px;}
+  .qm{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px 4px;text-align:center;cursor:pointer;transition:.15s;font-family:inherit;}
+  .qm:active{transform:scale(.95);}
+  .qm .e{font-size:26px;line-height:1;}
+  .qm .n{font-size:12px;color:var(--muted);margin-top:6px;font-weight:600;}
+  .qm.sel{border-color:var(--primary);background:var(--primary-soft);}
+  .qm.sel .n{color:var(--primary);}
+  .strength{display:flex;align-items:center;gap:10px;margin-top:10px;}
+  .strength input{flex:1;}
+  .strength .lab{font-size:12px;color:var(--muted);font-weight:600;flex:none;min-width:34px;text-align:center;}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+  .chip{font-size:12px;padding:6px 12px;border-radius:999px;border:1px solid var(--border);background:var(--card);color:var(--muted);cursor:pointer;font-family:inherit;font-weight:500;}
+  .chip.on{background:var(--primary-soft);border-color:var(--primary);color:var(--primary);font-weight:600;}
+  .field{margin-top:12px;}
+  .field label{font-size:12.5px;color:var(--muted);font-weight:600;display:block;margin-bottom:6px;}
+  .field input,.field textarea,.field select{width:100%;border:1px solid var(--border);border-radius:10px;padding:10px 12px;
+    font-size:14px;font-family:inherit;background:var(--input-bg);color:var(--text);}
+  .field textarea{resize:vertical;min-height:72px;}
+  .metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:12px;}
+  .metric{background:var(--primary-soft);border-radius:14px;padding:12px;text-align:center;}
+  .metric b{display:block;font-size:22px;font-weight:700;color:var(--primary);line-height:1.2;}
+  .metric span{font-size:11.5px;color:var(--muted);font-weight:600;}
+  .mini-chart{width:100%;height:90px;margin-top:8px;}
+  .alert-banner{border:1px solid #fde68a;background:#fffbeb;color:#92400e;border-radius:12px;padding:10px 12px;font-size:13px;
+    display:flex;gap:8px;align-items:center;margin-bottom:12px;}
+  [data-theme="dark"] .alert-banner{background:#2a2410;border-color:#5a4a14;color:#f0d488;}
+  .alert-banner svg{width:16px;height:16px;flex:none;color:var(--amber);}
+  .entry-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;}
+  .entry{display:block;text-decoration:none;color:var(--text);border:1px solid var(--border);border-radius:var(--radius);
+    padding:16px 14px;background:var(--card);box-shadow:var(--shadow);transition:.15s;}
+  .entry:active{transform:scale(.98);}
+  .entry .ic{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:10px;}
+  .entry .ic svg{width:20px;height:20px;}
+  .entry h3{font-size:15px;margin:0 0 4px;font-weight:700;display:flex;align-items:center;gap:6px;}
+  .entry p{font-size:12.5px;color:var(--muted);margin:0;line-height:1.55;}
+  .upcoming{border-style:dashed;opacity:.75;pointer-events:none;cursor:default;}
+
+  /* ===== 情绪记录 / 日记 ===== */
+  .timeline{position:relative;}
+  .tl-day{margin-bottom:16px;}
+  .tl-date{font-size:12.5px;font-weight:700;color:var(--muted);margin-bottom:8px;display:flex;align-items:center;gap:8px;}
+  .tl-date::after{content:"";flex:1;height:1px;background:var(--border);}
+  .tl-item{display:flex;gap:12px;padding:12px;border-radius:14px;border:1px solid var(--border);background:var(--card);margin-bottom:8px;}
+  .tl-item .e{font-size:26px;flex:none;line-height:1.2;}
+  .tl-item .body{flex:1;min-width:0;}
+  .tl-item .t{font-weight:600;font-size:14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .tl-item .d{font-size:12.5px;color:var(--muted);margin-top:4px;line-height:1.6;white-space:pre-wrap;word-break:break-word;}
+  .tl-item .meta{font-size:11px;color:var(--muted);margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
+  .tl-item .del{flex:none;width:32px;height:32px;border-radius:10px;border:1px solid var(--border);background:var(--card);
+    color:var(--muted);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;font-family:inherit;}
+  .tl-item .del:hover{color:var(--red);border-color:var(--red);}
+  .empty{text-align:center;padding:34px 16px;color:var(--muted);font-size:13.5px;}
+  .empty .big{font-size:40px;display:block;margin-bottom:8px;}
+
+  /* ===== 量表 ===== */
+  .scale-list{display:grid;gap:10px;}
+  .scale-item{display:flex;gap:12px;align-items:center;padding:14px;border:1px solid var(--border);border-radius:14px;background:var(--card);cursor:pointer;transition:.15s;}
+  .scale-item:active{transform:scale(.98);}
+  .scale-item .badge{flex:none;width:42px;height:42px;border-radius:12px;background:var(--primary-soft);color:var(--primary);
+    display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;}
+  .scale-item .info{flex:1;min-width:0;}
+  .scale-item .t{font-weight:700;font-size:14.5px;}
+  .scale-item .d{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.5;}
+  .scale-item .go{flex:none;color:var(--muted);font-size:12px;}
+  .qcard{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:10px;}
+  .qcard .q{font-weight:600;font-size:14px;margin-bottom:10px;display:flex;gap:8px;}
+  .qcard .q i{flex:none;width:20px;height:20px;border-radius:7px;background:var(--primary-soft);color:var(--primary);
+    font-style:normal;font-size:11.5px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:1px;}
+  .opt{display:flex;gap:8px;flex-wrap:wrap;}
+  .opt button{flex:1 1 150px;min-height:40px;border-radius:10px;border:1px solid var(--border);background:var(--card);
+    color:var(--text);font-size:13px;cursor:pointer;font-family:inherit;padding:8px 10px;transition:.15s;}
+  .opt button.on{background:var(--primary-soft);border-color:var(--primary);color:var(--primary);font-weight:600;}
+  .result-band{border-radius:14px;padding:14px;margin-bottom:12px;}
+  .result-band.lv0{background:var(--primary-soft);border:1px solid var(--primary);}
+  .result-band.lv1{background:#fff7e0;border:1px solid #fde68a;color:#92400e;}
+  .result-band.lv2{background:#fff1e6;border:1px solid #fed7aa;color:#9a3412;}
+  .result-band.lv3{background:#fee2e8;border:1px solid #fecdd3;color:var(--red);}
+  [data-theme="dark"] .result-band.lv1{background:#2a2410;border-color:#5a4a14;color:#f0d488;}
+  [data-theme="dark"] .result-band.lv2{background:#2b1f12;border-color:#7c4a1d;color:#fdba74;}
+  [data-theme="dark"] .result-band.lv3{background:#2a1518;border-color:#7f1d2d;color:#fda4af;}
+  .result-band b{font-size:15px;}
+  .result-band p{font-size:12.5px;margin:6px 0 0;line-height:1.6;}
+
+  /* ===== 冥想 ===== */
+  .breath-wrap{display:flex;flex-direction:column;align-items:center;padding:18px 0 6px;}
+  .breath-ring{width:190px;height:190px;border-radius:50%;border:3px solid var(--primary);position:relative;
+    display:flex;align-items:center;justify-content:center;transition:transform 4s ease-in-out;}
+  .breath-ring.in{transform:scale(1);}
+  .breath-ring.out{transform:scale(.72);}
+  .breath-ring::before{content:"";position:absolute;inset:16px;border-radius:50%;background:var(--primary-soft);opacity:.7;}
+  .breath-txt{position:relative;font-size:17px;font-weight:700;color:var(--primary);}
+  .breath-count{font-size:12px;color:var(--muted);margin-top:10px;font-weight:600;}
+  .breath-ctrl{display:flex;gap:10px;justify-content:center;margin-top:16px;flex-wrap:wrap;}
+  .med-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:10px;}
+  .med-card .t{font-weight:700;font-size:14.5px;display:flex;align-items:center;gap:8px;}
+  .med-card .d{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.7;white-space:pre-wrap;}
+  .med-card .dur{font-size:11.5px;color:var(--primary);font-weight:700;margin-top:8px;}
+
+  /* ===== 趋势 ===== */
+  .seg2{display:flex;gap:8px;margin-bottom:12px;}
+  .seg2 button{flex:none;min-height:34px;padding:6px 16px;border-radius:999px;border:1px solid var(--border);
+    background:var(--card);color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;}
+  .seg2 button.active{background:var(--primary);color:#fff;border-color:var(--primary);}
+  .chart-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:12px;}
+  .chart-card h3{font-size:13.5px;margin:0 0 10px;font-weight:700;color:var(--muted);display:flex;align-items:center;gap:6px;}
+  .chart-card svg{width:100%;height:auto;display:block;}
+  .dist-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+  .dist-row .name{flex:none;width:64px;font-size:12.5px;font-weight:600;white-space:nowrap;}
+  .dist-row .bar{flex:1;height:16px;border-radius:8px;background:var(--ring-track);overflow:hidden;}
+  .dist-row .bar i{display:block;height:100%;border-radius:8px;background:var(--primary);}
+  .dist-row .val{flex:none;width:34px;font-size:12.5px;color:var(--muted);text-align:right;font-weight:600;}
+
+  /* ===== 异常提醒 ===== */
+  .rule{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--border);border-radius:14px;background:var(--card);margin-bottom:8px;}
+  .rule .ic{flex:none;width:38px;height:38px;border-radius:11px;background:var(--primary-soft);color:var(--primary);
+    display:flex;align-items:center;justify-content:center;}
+  .rule .ic svg{width:18px;height:18px;}
+  .rule .info{flex:1;min-width:0;}
+  .rule .t{font-weight:600;font-size:14px;}
+  .rule .d{font-size:12px;color:var(--muted);margin-top:2px;}
+  .switch{flex:none;width:46px;height:26px;border-radius:999px;background:var(--ring-track);border:none;cursor:pointer;position:relative;transition:.2s;}
+  .switch::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.25);}
+  .switch.on{background:var(--primary);}
+  .switch.on::after{left:23px;}
+  .alert-list .tl-item .t{color:var(--red);}
+
+  /* ===== 身体知识 ===== */
+  .search-row{display:flex;gap:8px;margin-bottom:12px;}
+  .search-row input{flex:1;border:1px solid var(--border);border-radius:12px;padding:11px 14px;font-size:14px;
+    background:var(--input-bg);color:var(--text);font-family:inherit;min-width:0;}
+  .search-row input:focus{outline:none;border-color:var(--primary);}
+  .filters{display:flex;gap:8px;overflow-x:auto;padding-bottom:10px;scrollbar-width:none;}
+  .filters::-webkit-scrollbar{display:none;}
+  .filters button{flex:none;min-height:32px;padding:5px 13px;border-radius:999px;border:1px solid var(--border);
+    background:var(--card);color:var(--muted);font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;}
+  .filters button.active{background:var(--primary);color:#fff;border-color:var(--primary);}
+  .article{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:10px;cursor:pointer;transition:.15s;}
+  .article:active{transform:scale(.985);}
+  .article .t{font-weight:700;font-size:14.5px;display:flex;gap:8px;align-items:flex-start;}
+  .article .d{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.65;}
+  .article .meta{font-size:11.5px;color:var(--muted);margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+  .article.open{border-color:var(--primary);}
+  .article .body{display:none;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);
+    font-size:13.5px;line-height:1.8;white-space:pre-wrap;}
+  .article.open .body{display:block;}
+  .symp-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:10px;}
+  .symp-card .hd{display:flex;align-items:center;gap:10px;}
+  .symp-card .ic{flex:none;width:38px;height:38px;border-radius:11px;background:#fef3c7;color:var(--amber);
+    display:flex;align-items:center;justify-content:center;font-size:18px;}
+  .symp-card h3{flex:1;font-size:14.5px;margin:0;font-weight:700;}
+  .symp-card .hd .tag{flex:none;}
+  .symp-card .sec{margin-top:10px;font-size:12.5px;line-height:1.7;}
+  .symp-card .sec b{font-size:12px;color:var(--primary);display:block;margin-bottom:3px;}
+  .symp-card .sec.red b{color:var(--red);}
+  .symp-card .sec p{margin:0;}
+  .disclaimer{margin-top:14px;font-size:12px;color:var(--muted);line-height:1.7;border:1px dashed var(--border);border-radius:12px;padding:12px;}
+  .hotline{margin-top:10px;font-size:12.5px;background:var(--primary-soft);border-radius:12px;padding:10px 12px;color:var(--primary);font-weight:600;line-height:1.7;}
+
+  /* ===== 我的健康（预留）===== */
+  .placeholder{border:1.5px dashed var(--border);border-radius:var(--radius);padding:22px 16px;text-align:center;margin-bottom:12px;}
+  .placeholder .ic{width:48px;height:48px;border-radius:14px;background:var(--primary-soft);color:var(--primary);
+    display:flex;align-items:center;justify-content:center;margin:0 auto 10px;}
+  .placeholder .ic svg{width:24px;height:24px;}
+  .placeholder h3{font-size:15px;margin:0 0 6px;font-weight:700;}
+  .placeholder p{font-size:12.5px;color:var(--muted);margin:0 0 12px;line-height:1.65;}
+  .soon{display:inline-block;font-size:10.5px;font-weight:700;color:var(--amber);background:#fef3c7;border-radius:999px;padding:2px 8px;margin-left:6px;vertical-align:2px;}
+  .dev-note{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;background:var(--card);
+    border:1px solid var(--border);border-radius:12px;padding:12px;line-height:1.8;color:var(--muted);white-space:pre-wrap;}
+
+  @media(min-width:768px){
+    .quick-moods{grid-template-columns:repeat(8,1fr);}
+    .sub{flex-wrap:wrap;}
+  }
+</style>
+</head>
+<body data-theme="light">
+<header class="topbar">
+  <div class="topbar-row">
+    <h1>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/><path d="M12 8v8M8 12h8"/></svg>
+      医疗健康
+    </h1>
+    <a class="btn sm ghost" href="index.html" style="text-decoration:none">← 工作台</a>
+    <button class="btn sm ghost" onclick="toggleTheme()" title="切换主题">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+    </button>
+  </div>
+  <div class="sub">心情记录 · 心理自评 · 放松冥想 · 健康科普 · 症状自查</div>
+</header>
+
+<nav class="seg" id="mainNav">
+  <a href="#home" data-view="home" class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 12 3l9 6.5V21a1 1 0 0 1-1 1h-5v-7h-6v7H4a1 1 0 0 1-1-1z"/></svg>概览</a>
+  <a href="#mood" data-view="mood"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01"/></svg>情绪管理</a>
+  <a href="#body" data-view="body"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-4.6-9.5-9A5.5 5.5 0 0 1 12 6a5.5 5.5 0 0 1 9.5 6c-2.5 4.4-9.5 9-9.5 9z"/><path d="M12 8v8M8 12h8"/></svg>身体知识</a>
+  <a href="#mine" data-view="mine"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6 8-6s8 2 8 6"/></svg>我的健康</a>
+</nav>
+
+<div class="wrap" id="app">
+
+  <!-- ============ 概览 ============ -->
+  <section id="view-home" class="view active">
+    <div id="alertZone"></div>
+
+    <!-- 今日心情快速打卡 -->
+    <div class="card mood-today">
+      <div class="sec-head" style="margin-bottom:10px;">
+        <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4 4 0 0 1 4 4c0 1.5-.8 2.8-2 3.5.3 1 .3 2.2 0 3.5 1.2.7 2 2 2 3.5a4 4 0 0 1-8 0c0-1.5.8-2.8 2-3.5-.3-1.3-.3-2.5 0-3.5-1.2-.7-2-2-2-3.5a4 4 0 0 1 4-4z"/></svg>今日心情打卡</h2>
+        <span class="count" id="todayHint"></span>
+      </div>
+      <div class="quick-moods" id="quickMoods"></div>
+      <div class="strength">
+        <span class="lab">弱</span>
+        <input type="range" id="moodStrength" min="1" max="5" value="3">
+        <span class="lab" id="strengthLab">一般(3)</span>
+      </div>
+      <div class="chips" id="situChips"></div>
+      <div class="field"><textarea id="moodNote" placeholder="今天发生了什么？想对自己说点什么…（可选）"></textarea></div>
+      <button class="btn primary" style="width:100%;margin-top:12px;justify-content:center" onclick="saveQuickMood()">保存今日心情</button>
+    </div>
+
+    <!-- 概览统计 -->
+    <div class="metric-grid">
+      <div class="metric"><b id="mCont">0</b><span>连续打卡(天)</span></div>
+      <div class="metric"><b id="mAvg">--</b><span>近7天情绪均值</span></div>
+      <div class="metric"><b id="mTotal">0</b><span>累计记录</span></div>
+      <div class="metric"><b id="mPeak">--</b><span>最常出现情绪</span></div>
+    </div>
+
+    <!-- 7 天趋势迷你图 -->
+    <div class="card">
+      <div class="sec-head" style="margin-bottom:6px;">
+        <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 3 5-6"/></svg>近 7 天情绪走势</h2>
+        <a href="#mood-trend" style="font-size:12.5px;color:var(--primary);font-weight:600;text-decoration:none">详情 ↗</a>
+      </div>
+      <div id="miniChart" class="mini-chart"></div>
+    </div>
+
+    <!-- 功能入口 -->
+    <h2 class="sec-head" style="font-size:16px;margin-top:18px;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;color:var(--primary)"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+      功能入口
+    </h2>
+    <div class="entry-grid">
+      <a class="entry" href="#mood-record"><div class="ic" style="background:var(--primary-soft);color:var(--primary)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4 4 0 0 1 4 4c0 1.5-.8 2.8-2 3.5.3 1 .3 2.2 0 3.5 1.2.7 2 2 2 3.5a4 4 0 0 1-8 0c0-1.5.8-2.8 2-3.5-.3-1.3-.3-2.5 0-3.5-1.2-.7-2-2-2-3.5a4 4 0 0 1 4-4z"/></svg></div><h3>情绪记录</h3><p>打卡此刻心情，追踪情绪变化</p></a>
+      <a class="entry" href="#mood-journal"><div class="ic" style="background:var(--primary-soft);color:var(--primary)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></div><h3>情绪日记</h3><p>按日回顾心情与事件</p></a>
+      <a class="entry" href="#mood-scale"><div class="ic" style="background:var(--primary-soft);color:var(--primary)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M10 3v6L5 19a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1L14 9V3"/></svg></div><h3>心理自评量表</h3><p>PHQ-9 抑郁 / GAD-7 焦虑自评</p></a>
+      <a class="entry" href="#mood-meditate"><div class="ic" style="background:var(--primary-soft);color:var(--primary)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/></svg></div><h3>放松冥想</h3><p>4-7-8 呼吸法 · 正念引导</p></a>
+      <a class="entry" href="#mood-trend"><div class="ic" style="background:var(--primary-soft);color:var(--primary)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 3 5-6"/></svg></div><h3>情绪趋势分析</h3><p>7/30 天走势 · 情绪分布</p></a>
+      <a class="entry" href="#mood-alert"><div class="ic" style="background:var(--primary-soft);color:var(--primary)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></div><h3>异常提醒</h3><p>低情绪连续检测 · 量表预警</p></a>
+      <a class="entry" href="#body-articles"><div class="ic" style="background:#fef3c7;color:var(--amber)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V2H6.5A2.5 2.5 0 0 0 4 4.5zM4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5"/></svg></div><h3>健康科普</h3><p>睡眠 · 饮食 · 运动 · 久坐防护</p></a>
+      <a class="entry" href="#body-symptoms"><div class="ic" style="background:#fef3c7;color:var(--amber)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div><h3>症状自查</h3><p>常见不适 · 红旗信号 · 就医建议</p></a>
+      <a class="entry" href="#body-prevention"><div class="ic" style="background:#fef3c7;color:var(--amber)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-4.6-9.5-9A5.5 5.5 0 0 1 12 6a5.5 5.5 0 0 1 9.5 6c-2.5 4.4-9.5 9-9.5 9z"/><path d="M12 9v6M9 12h6"/></svg></div><h3>疾病预防</h3><p>体检 · 疫苗 · 慢病预防要点</p></a>
+      <a class="entry" href="#body-library"><div class="ic" style="background:#fef3c7;color:var(--amber)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></div><h3>分类知识库</h3><p>搜索 + 标签过滤全量内容</p></a>
+    </div>
+
+    <!-- 今日贴士 -->
+    <div class="card" style="border-color:var(--primary-soft);background:linear-gradient(180deg,var(--primary-soft) 0%,var(--card) 72%);margin-top:16px;">
+      <div class="sec-head" style="margin-bottom:8px;">
+        <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--amber)"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg>今日健康贴士</h2>
+      </div>
+      <p style="margin:0;font-size:13.5px;line-height:1.7" id="tipOfDay"></p>
+    </div>
+
+    <div class="disclaimer">本页面所有内容仅供健康科普与自我管理参考，不构成医疗诊断或治疗建议。如有持续不适，请及时前往正规医疗机构就诊。</div>
+  </section>
+
+  <!-- ============ 情绪管理 ============ -->
+  <section id="view-mood" class="view">
+    <nav class="sub" id="moodSub">
+      <button data-tab="record" class="active">今日记录</button>
+      <button data-tab="journal">情绪日记</button>
+      <button data-tab="scale">心理量表</button>
+      <button data-tab="meditate">放松冥想</button>
+      <button data-tab="trend">趋势分析</button>
+      <button data-tab="alert">异常提醒</button>
+    </nav>
+
+    <!-- 记录 -->
+    <div id="mood-record" class="tabpane">
+      <div class="card mood-today">
+        <div class="sec-head" style="margin-bottom:10px;">
+          <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4 4 0 0 1 4 4c0 1.5-.8 2.8-2 3.5.3 1 .3 2.2 0 3.5 1.2.7 2 2 2 3.5a4 4 0 0 1-8 0c0-1.5.8-2.8 2-3.5-.3-1.3-.3-2.5 0-3.5-1.2-.7-2-2-2-3.5a4 4 0 0 1 4-4z"/></svg>心情打卡</h2>
+          <span class="count" id="recordHint"></span>
+        </div>
+        <div class="quick-moods" id="recordMoods"></div>
+        <div class="strength">
+          <span class="lab">弱</span>
+          <input type="range" id="rStrength" min="1" max="5" value="3">
+          <span class="lab" id="rStrengthLab">一般(3)</span>
+        </div>
+        <div class="chips" id="rSitu"></div>
+        <div class="field"><textarea id="rNote" placeholder="今天发生了什么？想对自己说点什么…"></textarea></div>
+        <div class="btn primary" style="width:100%;margin-top:12px;justify-content:center" onclick="saveMoodRecord()">保存记录</div>
+      </div>
+      <div class="note">提示：同一时间段的重复打卡会更新原记录；点击右上角「情绪日记」可查看全部历史。</div>
+    </div>
+
+    <!-- 日记 -->
+    <div id="mood-journal" class="tabpane" style="display:none">
+      <div class="timeline" id="journalList"></div>
+    </div>
+
+    <!-- 量表 -->
+    <div id="mood-scale" class="tabpane" style="display:none">
+      <div id="scaleHome"></div>
+      <div id="scaleQuiz" style="display:none"></div>
+    </div>
+
+    <!-- 冥想 -->
+    <div id="mood-meditate" class="tabpane" style="display:none">
+      <div class="card">
+        <div class="sec-head"><h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/></svg>4-7-8 呼吸法</h2><span class="count">吸气 4s · 屏息 7s · 呼气 8s</span></div>
+        <div class="breath-wrap">
+          <div class="breath-ring" id="breathRing"><span class="breath-txt" id="breathTxt">准备</span></div>
+          <div class="breath-count" id="breathCount">循环 0 次</div>
+        </div>
+        <div class="breath-ctrl">
+          <button class="btn primary" id="breathStart" onclick="toggleBreath()">开始</button>
+          <button class="btn ghost" onclick="resetBreath()">重置</button>
+        </div>
+      </div>
+      <div class="med-card">
+        <div class="t"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;color:var(--primary)"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/></svg>正念呼吸引导</div>
+        <div class="dur">约 2 分钟</div>
+        <div class="d">找一个安静的位置坐下，轻轻闭上眼睛。把注意力放在呼吸上，感受空气从鼻腔进入、充满肺部、再从口鼻缓缓离开。当思绪飘走时，不要评判，温柔地把注意力带回呼吸。每次呼气时，默念"放松"。</div>
+      </div>
+      <div class="med-card">
+        <div class="t"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;color:var(--primary)"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/></svg>渐进式肌肉放松</div>
+        <div class="dur">约 5 分钟 · 建议睡前</div>
+        <div class="d">1. 从脚趾开始：用力绷紧 5 秒，感受紧张，然后突然放松 15 秒，感受松弛。\n2. 依次向上：小腿、大腿、腹部、双手、手臂、肩膀、颈部、面部。\n3. 每处肌肉完成一次"绷紧-放松"循环。\n4. 最后全身放松，深呼吸 5 次，感受身体沉入床垫/座椅。</div>
+      </div>
+      <div class="note">呼吸练习时如感头晕或不适，请立即停止，回到自然呼吸。冥想不能替代专业心理治疗。</div>
+    </div>
+
+    <!-- 趋势 -->
+    <div id="mood-trend" class="tabpane" style="display:none">
+      <div class="seg2">
+        <button data-range="7" class="active">近 7 天</button>
+        <button data-range="30">近 30 天</button>
+      </div>
+      <div class="chart-card">
+        <h3>情绪分数走势（1-5 分，越高越好）</h3>
+        <div id="trendChart"></div>
+      </div>
+      <div class="chart-card">
+        <h3>情绪分布</h3>
+        <div id="distChart"></div>
+      </div>
+      <div class="chart-card">
+        <h3>关键指标</h3>
+        <div class="metric-grid" style="margin-bottom:0">
+          <div class="metric"><b id="tAvg">--</b><span>平均分</span></div>
+          <div class="metric"><b id="tMin">--</b><span>最低分</span></div>
+          <div class="metric"><b id="tTop">--</b><span>高频情境</span></div>
+          <div class="metric"><b id="tLow">0</b><span>低情绪天数</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 提醒 -->
+    <div id="mood-alert" class="tabpane" style="display:none">
+      <div class="rule">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4 4 0 0 1 4 4c0 1.5-.8 2.8-2 3.5.3 1 .3 2.2 0 3.5 1.2.7 2 2 2 3.5a4 4 0 0 1-8 0c0-1.5.8-2.8 2-3.5-.3-1.3-.3-2.5 0-3.5-1.2-.7-2-2-2-3.5a4 4 0 0 1 4-4z"/></svg></div>
+        <div class="info"><div class="t">连续低情绪提醒</div><div class="d">连续 3 天情绪分数 ≤ 2 分时，在概览页给出关怀提醒</div></div>
+        <button class="switch on" id="swLow" onclick="toggleRule('low')"></button>
+      </div>
+      <div class="rule">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M10 3v6L5 19a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1L14 9V3"/></svg></div>
+        <div class="info"><div class="t">量表结果预警</div><div class="d">抑郁/焦虑自评达到中度及以上时，给出专业求助建议</div></div>
+        <button class="switch on" id="swScale" onclick="toggleRule('scale')"></button>
+      </div>
+      <div class="rule">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></div>
+        <div class="info"><div class="t">打卡断档提醒</div><div class="d">连续 2 天未记录情绪时，提醒继续保持打卡习惯</div></div>
+        <button class="switch on" id="swStreak" onclick="toggleRule('streak')"></button>
+      </div>
+      <div class="hotline">需要倾诉时：全国心理援助热线 12356 · 北京心理危机研究与干预中心 010-82951332（24 小时）</div>
+    </div>
+  </section>
+
+  <!-- ============ 身体知识 ============ -->
+  <section id="view-body" class="view">
+    <nav class="sub" id="bodySub">
+      <button data-tab="articles" class="active">健康科普</button>
+      <button data-tab="symptoms">症状自查</button>
+      <button data-tab="prevention">疾病预防</button>
+      <button data-tab="library">分类知识库</button>
+    </nav>
+
+    <div id="body-articles" class="tabpane">
+      <div id="articleList"></div>
+    </div>
+
+    <div id="body-symptoms" class="tabpane" style="display:none">
+      <div class="filters" id="sympFilters"></div>
+      <div id="sympList"></div>
+      <div class="disclaimer">自查指南仅帮助您初步了解常见症状的成因与就医时机，不能替代医生诊断。出现红旗信号请立即就医。</div>
+    </div>
+
+    <div id="body-prevention" class="tabpane" style="display:none">
+      <div id="prevList"></div>
+    </div>
+
+    <div id="body-library" class="tabpane" style="display:none">
+      <div class="search-row"><input id="libSearch" placeholder="搜索：失眠 / 三高 / 颈椎 / 体检…" oninput="renderLibrary()"></div>
+      <div class="filters" id="libFilters"></div>
+      <div id="libList"></div>
+    </div>
+  </section>
+
+  <!-- ============ 我的健康（预留）============ -->
+  <section id="view-mine" class="view">
+    <div class="placeholder">
+      <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-4.6-9.5-9A5.5 5.5 0 0 1 12 6a5.5 5.5 0 0 1 9.5 6c-2.5 4.4-9.5 9-9.5 9z"/><path d="M12 9v6M9 12h6"/></svg></div>
+      <h3>医生在线问诊 <span class="soon">即将上线</span></h3>
+      <p>图文 / 视频问诊、电子处方流转、复诊提醒，与专业医生一对一沟通</p>
+    </div>
+    <div class="placeholder">
+      <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
+      <h3>健康数据监测 <span class="soon">即将上线</span></h3>
+      <p>接入手环 / 手表：心率、睡眠、步数、体重趋势；异常指标自动预警并同步趋势分析</p>
+    </div>
+    <div class="placeholder">
+      <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg></div>
+      <h3>体检报告解读 <span class="soon">即将上线</span></h3>
+      <p>上传体检报告，异常指标逐项解读，生成复查 / 改善建议清单</p>
+    </div>
+    <div class="card">
+      <div class="sec-head"><h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z"/><path d="M4 9h16M9 9v11"/></svg>扩展设计说明</h2></div>
+      <div class="dev-note">// 数据层预留 · 所有记录统一 localStorage key 前缀 health.*
+// health.mood.records[] 情绪记录（时间戳/情绪/强度/情境/备注）
+// health.mood.journal[]  日记文字（可合并进 records）
+// health.scale.results[] 量表结果（量表ID/分数/时间）
+// health.settings        提醒规则开关
+// 未来扩展：接入 IndexedDB / 云同步 / 可穿戴设备，仅需替换 store.js
+// 问诊 & 监测入口：本页 placeholder 替换为真实模块即可，路由已预留 #mine</div>
+    </div>
+  </section>
+</div>
+
+<script>
+/* ==================== 错误兜底（团队鲁棒性标准：不白屏） ==================== */
+window.onerror = function(msg, src, line, col, err){
+  var box = document.createElement('div');
+  box.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:999;background:#fee2e8;color:#9a3412;font-size:12px;padding:10px 14px;border-bottom:1px solid #fecdd3;font-family:monospace;white-space:pre-wrap;';
+  box.textContent = '页面脚本错误：' + msg + ' @' + (line || '?') + ':' + (col || '?') + (err && err.stack ? '\n' + err.stack.split('\n').slice(0,4).join('\n') : '');
+  document.body.insertBefore(box, document.body.firstChild);
+};
+
+/* ==================== 数据层（localStorage · 预留迁移点） ==================== */
+function load(key, def){ try{ var v = localStorage.getItem(key); return v ? JSON.parse(v) : def; }catch(e){ return def; } }
+function save(key, val){ try{ localStorage.setItem(key, JSON.stringify(val)); }catch(e){} }
+function today(){ var d = new Date(); return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
+function now(){ var d = new Date(); return today() + ' ' + String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0'); }
+
+/* ==================== 静态数据 ==================== */
+var MOODS = [
+  {id:'happy',  e:'😄', n:'开心', s:5},
+  {id:'calm',   e:'😊', n:'平静', s:4},
+  {id:'ok',     e:'😐', n:'一般', s:3},
+  {id:'low',    e:'😔', n:'低落', s:2},
+  {id:'sad',    e:'😢', n:'难过', s:2},
+  {id:'angry',  e:'😠', n:'烦躁', s:1},
+  {id:'anxious',e:'😰', n:'焦虑', s:1},
+  {id:'tired',  e:'😴', n:'疲惫', s:2}
+];
+var SITUS = ['工作','学习','家庭','社交','睡眠','健康','天气','其他'];
+var state = {
+  rec: load('health.mood.records', []),   // {ts, date, mood, strength, situs[], note}
+  journal: load('health.mood.journal', {}), // {date: [text,...]}
+  scales: load('health.scale.results', []), // {id, score, level, date}
+  rules: load('health.settings', {low:true, scale:true, streak:true}),
+  selMood: null, rSelMood: null,
+  selSitus: [], rSelSitus: [],
+  trendRange: 7,
+  breathTimer: null, breathPhase: 0, breathCycle: 0, breathRunning: false
+};
+
+/* ==================== 通用渲染 ==================== */
+function $(id){ return document.getElementById(id); }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+
+function renderQuickMoods(containerId, selId, moodId, strengthId, noteId){
+  var box = $(containerId); box.innerHTML = '';
+  MOODS.forEach(function(m){
+    var b = document.createElement('button');
+    b.className = 'qm' + (state[selId] === m.id ? ' sel' : '');
+    b.innerHTML = '<span class="e">' + m.e + '</span><span class="n">' + m.n + '</span>';
+    b.onclick = function(){
+      state[selId] = m.id;
+      renderQuickMoods(containerId, selId, moodId, strengthId, noteId);
+      var s = $(strengthId); if(s){ s.value = m.s; updateStrengthLab(strengthId); }
+    };
+    box.appendChild(b);
+  });
+  renderSituChips(containerId === 'quickMoods' ? 'situChips' : 'rSitu', selId === 'selMood' ? 'selSitus' : 'rSelSitus');
+}
+function renderSituChips(boxId, stateKey){
+  var box = $(boxId); box.innerHTML = '';
+  SITUS.forEach(function(s){
+    var b = document.createElement('button');
+    b.className = 'chip' + (state[stateKey].indexOf(s) > -1 ? ' on' : '');
+    b.textContent = s;
+    b.onclick = function(){
+      var i = state[stateKey].indexOf(s);
+      if(i > -1) state[stateKey].splice(i,1); else state[stateKey].push(s);
+      renderSituChips(boxId, stateKey);
+    };
+    box.appendChild(b);
+  });
+}
+function updateStrengthLab(id){
+  var v = $(id).value;
+  var lab = id === 'moodStrength' ? 'strengthLab' : 'rStrengthLab';
+  var names = {1:'很弱',2:'较弱',3:'一般',4:'较强',5:'很强'};
+  $(lab).textContent = names[v] + '(' + v + ')';
+}
+$('moodStrength').addEventListener('input', function(){ updateStrengthLab('moodStrength'); });
+$('rStrength').addEventListener('input', function(){ updateStrengthLab('rStrength'); });
+
+/* ==================== 情绪记录 ==================== */
+function moodMeta(m){ for(var i=0;i<MOODS.length;i++) if(MOODS[i].id===m) return MOODS[i]; return {id:m,e:'🙂',n:m,s:3}; }
+
+function saveQuickMood(){
+  if(!state.selMood){ alert('请先选择一个心情'); return; }
+  saveMoodRecord(true);
+}
+function saveMoodRecord(quick){
+  var moodId = quick ? state.selMood : state.rSelMood;
+  if(!moodId){ alert('请先选择一个心情'); return; }
+  var strength = parseInt(quick ? $('moodStrength').value : $('rStrength').value, 10);
+  var situs = (quick ? state.selSitus : state.rSelSitus).slice();
+  var note = (quick ? $('moodNote').value : $('rNote').value).trim();
+  var d = today(), t = now();
+  var recs = state.rec;
+  // 同一天同一情绪视为更新（若同一天已有多条则允许追加：仅当当天首条为"打卡"时更新，否则追加）
+  var last = recs[recs.length - 1];
+  if(last && last.date === d && last.mood === moodId){
+    last.strength = strength; last.situs = situs; last.note = note; last.ts = t;
+  } else {
+    recs.push({ts:t, date:d, mood:moodId, strength:strength, situs:situs, note:note});
+  }
+  save('health.mood.records', recs);
+  if(quick){ $('moodNote').value=''; state.selSitus=[]; }
+  else { $('rNote').value=''; state.rSelSitus=[]; }
+  renderAll();
+  alert('已保存 · ' + t);
+}
+
+/* ==================== 情绪日记 ==================== */
+function renderJournal(){
+  var box = $('journalList');
+  var recs = state.rec.slice().reverse();
+  if(!recs.length){ box.innerHTML = '<div class="empty"><span class="big">📖</span>还没有日记记录\n先去「今日记录」打个卡吧</div>'; return; }
+  var byDay = {};
+  recs.forEach(function(r){ (byDay[r.date] = byDay[r.date] || []).push(r); });
+  var html = '';
+  Object.keys(byDay).forEach(function(d){
+    html += '<div class="tl-day"><div class="tl-date">' + d + ' · 共 ' + byDay[d].length + ' 条</div>';
+    byDay[d].forEach(function(r){
+      var m = moodMeta(r.mood);
+      html += '<div class="tl-item"><div class="e">' + m.e + '</div><div class="body">' +
+        '<div class="t">' + m.n + ' <span class="tag">强度 ' + r.strength + '/5</span>' + (r.situs&&r.situs.length?r.situs.map(function(s){return '<span class="tag gray">'+esc(s)+'</span>';}).join(''):'') + '</div>' +
+        (r.note ? '<div class="d">' + esc(r.note) + '</div>' : '') +
+        '<div class="meta">' + r.ts + '</div></div>' +
+        '<button class="del" onclick="delRecord(\'' + r.ts.replace(/'/g,"") + '\')">✕</button></div>';
+    });
+    html += '</div>';
+  });
+  box.innerHTML = html;
+}
+function delRecord(ts){
+  if(!confirm('删除这条记录？')) return;
+  state.rec = state.rec.filter(function(r){ return r.ts !== ts; });
+  save('health.mood.records', state.rec);
+  renderAll();
+}
+
+/* ==================== 心理量表 ==================== */
+var SCALES = {
+  phq9: {
+    name:'PHQ-9 抑郁自评量表', desc:'近两周内，以下情况对您的困扰程度', items:[
+      '做事时提不起劲或没有兴趣',
+      '感到心情低落、沮丧或绝望',
+      '入睡困难、睡不安稳或睡得过多',
+      '感觉疲倦或没有活力',
+      '食欲不振或吃太多',
+      '觉得自己很糟，或觉得自己很失败、让自己或家人失望',
+      '阅读或看电视时难以集中注意力',
+      '动作或说话速度缓慢到别人能察觉，或相反——烦躁不安、坐立不安',
+      '有不如死掉或用某种方式伤害自己的念头'
+    ],
+    opts:['完全不会(0)','几天(1)','一半以上天数(2)','几乎每天(3)'],
+    score: function(v){ var s=0; v.forEach(function(x){s+=x;}); return s; },
+    level: function(s){
+      if(s<=4)  return {lv:0, t:'正常范围', c:'整体状态尚可。建议保持规律作息与适度运动，持续关注情绪变化。'};
+      if(s<=9)  return {lv:1, t:'轻度', c:'可能存在轻度抑郁倾向。建议增加户外活动、保持社交，观察 2 周；若无改善可考虑咨询心理医生。'};
+      if(s<=14) return {lv:2, t:'中度', c:'存在中度抑郁倾向。建议尽快预约心理科 / 精神科门诊，或拨打心理援助热线 12356。'};
+      return {lv:3, t:'重度', c:'存在重度抑郁倾向。请务必尽快就医，并告知家人朋友；如有自伤想法，请立即拨打 120 或前往医院急诊。'};
+    }
+  },
+  gad7: {
+    name:'GAD-7 焦虑自评量表', desc:'近两周内，以下情况对您的困扰程度', items:[
+      '感到紧张、焦虑或急切',
+      '无法停止或控制担忧',
+      '对各种各样的事情担忧过多',
+      '很难放松下来',
+      '由于不安而无法静坐',
+      '变得容易烦恼或易怒',
+      '感到好像有可怕的事情会发生'
+    ],
+    opts:['完全没有(0)','几天(1)','一半以上天数(2)','几乎每天(3)'],
+    score: function(v){ var s=0; v.forEach(function(x){s+=x;}); return s; },
+    level: function(s){
+      if(s<=4)  return {lv:0, t:'正常范围', c:'焦虑水平在正常区间。练习深呼吸、正念冥想有助于维持放松状态。'};
+      if(s<=9)  return {lv:1, t:'轻度', c:'轻度焦虑。建议规律运动、减少咖啡因摄入，尝试 4-7-8 呼吸练习；若持续加重请就医。'};
+      if(s<=14) return {lv:2, t:'中度', c:'中度焦虑。建议预约心理门诊评估，同时学习放松技巧；必要时医生会评估是否需要药物辅助。'};
+      return {lv:3, t:'重度', c:'重度焦虑。请尽快就医（心理科 / 精神科），可拨打心理援助热线 12356 获得即时支持。'};
+    }
+  },
+  sleep: {
+    name:'睡眠质量快速自评', desc:'根据最近一周的实际情况作答', items:[
+      '入睡时间超过 30 分钟',
+      '夜间醒来或早醒，且难以再入睡',
+      '白天感到困倦、注意力不集中',
+      '总睡眠时间不足 7 小时'
+    ],
+    opts:['从不(0)','偶尔(1)','经常(2)','几乎每晚(3)'],
+    score: function(v){ var s=0; v.forEach(function(x){s+=x;}); return s; },
+    level: function(s){
+      if(s<=3)  return {lv:0, t:'睡眠状况良好', c:'继续保持规律的作息时间，睡前 1 小时远离屏幕。'};
+      if(s<=6)  return {lv:1, t:'轻度睡眠困扰', c:'尝试固定就寝时间、睡前放松（渐进式肌肉放松）、减少午睡时长与咖啡因。'};
+      if(s<=9)  return {lv:2, t:'中度睡眠困扰', c:'建议建立严格睡前程序，白天增加运动；若持续 1 个月以上请就诊睡眠门诊。'};
+      return {lv:3, t:'重度睡眠困扰', c:'长期失眠会影响身心健康，请尽快就诊（睡眠门诊 / 神经内科），并同步排查焦虑抑郁因素。'};
+    }
+  }
+};
+
+function renderScaleHome(){
+  var box = $('scaleHome');
+  var html = '<div class="scale-list">';
+  Object.keys(SCALES).forEach(function(k){
+    var s = SCALES[k];
+    var last = state.scales.filter(function(r){return r.id===k;}).pop();
+    html += '<div class="scale-item" onclick="startScale(\'' + k + '\')">' +
+      '<div class="badge">' + (k==='phq9'?'P':k==='gad7'?'A':'S') + '</div>' +
+      '<div class="info"><div class="t">' + s.name + '</div>' +
+      '<div class="d">' + s.items.length + ' 题 · 约 2 分钟' + (last ? ' · 上次 ' + last.date + ' 得分 ' + last.score : '') + '</div></div>' +
+      '<div class="go">开始 →</div></div>';
+  });
+  html += '</div><div class="disclaimer" style="margin-top:14px">量表结果为自我筛查参考，不构成医疗诊断。若自评达到中度及以上，或在最近两周内频繁出现"伤害自己"的念头，请务必尽快寻求专业帮助。</div>';
+  box.innerHTML = html;
+}
+function startScale(id){
+  var s = SCALES[id];
+  $('scaleHome').style.display = 'none';
+  $('scaleQuiz').style.display = '';
+  var ans = new Array(s.items.length).fill(-1);
+  var html = '<div class="sec-head"><h2>' + s.name + '</h2><span class="count">' + s.items.length + ' 题</span></div>' +
+    '<div class="note" style="margin-bottom:12px">' + s.desc + '</div>';
+  s.items.forEach(function(q, i){
+    html += '<div class="qcard"><div class="q"><i>' + (i+1) + '</i>' + q + '</div><div class="opt" id="opt-' + i + '">';
+    s.opts.forEach(function(o, j){
+      html += '<button data-i="' + i + '" data-j="' + j + '" onclick="pickOpt(this,' + i + ',' + j + ',\'' + id + '\')">' + o + '</button>';
+    });
+    html += '</div></div>';
+  });
+  html += '<button class="btn primary" style="width:100%;justify-content:center" onclick="submitScale(\'' + id + '\')">提交并查看结果</button>';
+  html += '<div style="margin-top:10px"><button class="btn ghost" style="width:100%;justify-content:center" onclick="cancelScale()">返回量表列表</button></div>';
+  $('scaleQuiz').innerHTML = html;
+  $('scaleQuiz').dataset.id = id;
+}
+function pickOpt(el, i, j, id){
+  var box = $('opt-' + i);
+  box.querySelectorAll('button').forEach(function(b){ b.classList.remove('on'); });
+  el.classList.add('on');
+  if(!$('scaleQuiz').dataset.ans) $('scaleQuiz').dataset.ans = '';
+  var parts = $('scaleQuiz').dataset.ans ? $('scaleQuiz').dataset.ans.split(',').map(Number) : new Array(SCALES[id].items.length).fill(-1);
+  parts[i] = j;
+  $('scaleQuiz').dataset.ans = parts.join(',');
+}
+function submitScale(id){
+  var s = SCALES[id];
+  var parts = $('scaleQuiz').dataset.ans ? $('scaleQuiz').dataset.ans.split(',').map(Number) : [];
+  if(parts.length < s.items.length || parts.indexOf(-1) > -1){ alert('请完成所有题目'); return; }
+  var score = s.score(parts);
+  var lv = s.level(score);
+  state.scales.push({id:id, score:score, level:lv.lv, date:today()});
+  save('health.scale.results', state.scales);
+  var colors = ['lv0','lv1','lv2','lv3'];
+  $('scaleQuiz').innerHTML =
+    '<div class="result-band ' + colors[lv.lv] + '"><b>' + s.name + ' · 得分 ' + score + ' / ' + (s.items.length*3) + '</b>' +
+    '<p>当前分级：<b>' + lv.t + '</b></p><p>' + lv.c + '</p></div>' +
+    '<div class="hotline">心理援助热线 12356（全国 24 小时）· 如感不适请及时就医</div>' +
+    '<div style="margin-top:12px"><button class="btn primary" style="width:100%;justify-content:center" onclick="renderScaleHome();cancelScale()">完成</button></div>';
+}
+function cancelScale(){
+  $('scaleHome').style.display = '';
+  $('scaleQuiz').style.display = 'none';
+  $('scaleQuiz').dataset.ans = '';
+  renderScaleHome();
+}
+
+/* ==================== 冥想 ==================== */
+function toggleBreath(){
+  if(state.breathRunning){ stopBreath(); return; }
+  state.breathRunning = true;
+  $('breathStart').textContent = '停止';
+  state.breathPhase = 0; state.breathCycle = 0;
+  breathStep();
+}
+function breathStep(){
+  if(!state.breathRunning) return;
+  var ring = $('breathRing'), txt = $('breathTxt'), cnt = $('breathCount');
+  var p = state.breathPhase; // 0 吸 4s, 1 屏 7s, 2 呼 8s
+  if(p === 0){ txt.textContent = '吸气'; ring.classList.remove('out'); ring.classList.add('in'); setTimeout(breathStep, 4000); }
+  else if(p === 1){ txt.textContent = '屏息'; setTimeout(breathStep, 7000); }
+  else {
+    txt.textContent = '呼气'; ring.classList.remove('in'); ring.classList.add('out');
+    state.breathCycle++;
+    cnt.textContent = '循环 ' + state.breathCycle + ' 次';
+    setTimeout(breathStep, 8000);
+  }
+  state.breathPhase = (p + 1) % 3;
+}
+function stopBreath(){
+  state.breathRunning = false;
+  $('breathStart').textContent = '继续';
+  $('breathTxt').textContent = '暂停';
+  if(state.breathTimer) clearTimeout(state.breathTimer);
+}
+function resetBreath(){
+  stopBreath();
+  state.breathCycle = 0;
+  $('breathCount').textContent = '循环 0 次';
+  $('breathTxt').textContent = '准备';
+  var ring = $('breathRing'); ring.classList.remove('in'); ring.classList.remove('out');
+}
+
+/* ==================== 趋势分析 ==================== */
+function dayRange(n){
+  var days = [], d = new Date();
+  for(var i=n-1;i>=0;i--){ var t = new Date(d); t.setDate(d.getDate()-i); days.push(t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0')); }
+  return days;
+}
+function buildSeries(days){
+  var byDay = {};
+  state.rec.forEach(function(r){ byDay[r.date] = r; });
+  return days.map(function(d){ return byDay[d] ? byDay[d] : null; });
+}
+function lineChart(container, series, days, mini){
+  var W = mini ? 660 : 660, H = mini ? 90 : 200, pad = 12;
+  var pts = [], valid = series.filter(Boolean);
+  if(!valid.length){ $(container).innerHTML = '<div class="empty"><span class="big">📊</span>暂无数据，先去记录几天心情吧</div>'; return; }
+  var minS = 0.5, maxS = 5.5;
+  series.forEach(function(r, i){
+    if(!r) return;
+    var x = pad + (W - pad*2) * i / (days.length - 1 || 1);
+    var y = pad + (H - pad*2) * (1 - (r.strength - minS) / (maxS - minS));
+    pts.push(x + ',' + y);
+  });
+  var gridY = [pad, H/2, H-pad];
+  var html = '<svg viewBox="0 0 ' + W + ' ' + H + '" style="width:100%;height:auto">';
+  gridY.forEach(function(y, i){
+    html += '<line x1="' + pad + '" y1="' + y + '" x2="' + (W-pad) + '" y2="' + y + '" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="3 3"/>';
+    html += '<text x="' + (W-pad+2) + '" y="' + (y+3) + '" font-size="10" fill="var(--muted)">' + [5,3,1][i] + '</text>';
+  });
+  html += '<polyline points="' + pts.join(' ') + '" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
+  series.forEach(function(r, i){
+    if(!r) return;
+    var x = pad + (W - pad*2) * i / (days.length - 1 || 1);
+    var y = pad + (H - pad*2) * (1 - (r.strength - minS) / (maxS - minS));
+    html += '<circle cx="' + x + '" cy="' + y + '" r="3.5" fill="var(--card)" stroke="var(--primary)" stroke-width="2"/>';
+    if(!mini && days.length <= 31){
+      html += '<text x="' + x + '" y="' + (H - 2) + '" font-size="10" fill="var(--muted)" text-anchor="middle">' + days[i].slice(5) + '</text>';
+    }
+  });
+  html += '</svg>';
+  $(container).innerHTML = html;
+}
+function distChart(container){
+  var counts = {}, total = 0;
+  state.rec.forEach(function(r){ counts[r.mood] = (counts[r.mood]||0) + 1; total++; });
+  var box = $(container);
+  if(!total){ box.innerHTML = '<div class="empty"><span class="big">🍀</span>暂无分布数据</div>'; return; }
+  var html = '';
+  MOODS.forEach(function(m){
+    if(!counts[m.id]) return;
+    var pct = Math.round(counts[m.id] / total * 100);
+    html += '<div class="dist-row"><span class="name">' + m.e + ' ' + m.n + '</span><div class="bar"><i style="width:' + pct + '%"></i></div><span class="val">' + pct + '%</span></div>';
+  });
+  box.innerHTML = html;
+}
+function renderTrend(){
+  var days = dayRange(state.trendRange);
+  var series = buildSeries(days);
+  lineChart('trendChart', series, days, false);
+  distChart('distChart');
+  var valid = series.filter(Boolean).map(function(r){ return r.strength; });
+  if(valid.length){
+    var sum = valid.reduce(function(a,b){return a+b;}, 0);
+    $('tAvg').textContent = (sum/valid.length).toFixed(1);
+    $('tMin').textContent = Math.min.apply(null, valid);
+    var sit = {};
+    state.rec.forEach(function(r){ (r.situs||[]).forEach(function(s){ sit[s]=(sit[s]||0)+1; }); });
+    var top = Object.keys(sit).sort(function(a,b){return sit[b]-sit[a];})[0];
+    $('tTop').textContent = top || '--';
+    $('tLow').textContent = valid.filter(function(v){ return v <= 2; }).length;
+  }
+}
+function renderMiniChart(){
+  var series = buildSeries(dayRange(7));
+  lineChart('miniChart', series, dayRange(7), true);
+}
+
+/* ==================== 异常提醒 ==================== */
+function renderAlertZone(){
+  var zone = $('alertZone');
+  var msgs = [];
+  var recs = state.rec.slice().sort(function(a,b){ return a.date < b.date ? -1 : 1; });
+  var lowStreak = 0, maxStreak = 0;
+  var cur = null;
+  recs.forEach(function(r){
+    if(cur === r.date){ if(r.strength <= 2) lowStreak++; else lowStreak = 0; }
+    else { lowStreak = (r.strength <= 2) ? 1 : 0; cur = r.date; }
+    if(r.strength <= 2 && lowStreak >= 3 && lowStreak > maxStreak) maxStreak = lowStreak;
+  });
+  if(state.rules.low && maxStreak >= 3) msgs.push('最近连续 ' + maxStreak + ' 天情绪偏低，记得照顾好自己 · 可以试试「放松冥想」或找人聊聊');
+  var lastScale = state.scales[state.scales.length - 1];
+  if(state.rules.scale && lastScale && lastScale.level >= 2) msgs.push('上次「' + SCALES[lastScale.id].name + '」结果达到' + (lastScale.level===2?'中度':'重度') + '，建议尽快预约心理科就诊');
+  var dates = state.rec.map(function(r){ return r.date; });
+  var lastDate = dates[dates.length-1];
+  if(state.rules.streak && lastDate){
+    var gap = Math.round((new Date(today()).getTime() - new Date(lastDate).getTime()) / 86400000);
+    if(gap >= 2) msgs.push('已有 ' + gap + ' 天未记录情绪，回来打个卡吧');
+  }
+  zone.innerHTML = msgs.map(function(m){
+    return '<div class="alert-banner"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>' + m + '</div>';
+  }).join('');
+}
+function toggleRule(k){
+  state.rules[k] = !state.rules[k];
+  save('health.settings', state.rules);
+  $('sw' + (k==='low'?'Low':k==='scale'?'Scale':'Streak')).classList.toggle('on', state.rules[k]);
+  renderAlertZone();
+}
+
+/* ==================== 身体知识数据 ==================== */
+var CATS = ['睡眠','饮食','运动','久坐防护','心理健康','常见疾病','急救常识','慢病管理','体检','养生'];
+var ARTICLES = [
+  {t:'成年人每晚该睡多久？', c:'睡眠', cat:['睡眠'], d:'不同年龄对睡眠时长的需求不同。一般成年人建议每晚 7-9 小时。评估睡眠质量不能只看时长，还要看第二天是否精力充沛、白天是否困倦。长期睡眠不足会增加高血压、糖尿病、肥胖与情绪问题风险。',
+   body:'1. 时长参考：18-64 岁建议 7-9 小时；65 岁以上 7-8 小时。\n2. 质量信号：入睡快（<30 分钟）、夜间少醒、晨起精神好。\n3. 改善建议：固定就寝与起床时间；睡前 1 小时远离手机屏幕；卧室保持黑暗、凉爽、安静；午后避免咖啡因；白天适度运动。\n4. 警惕：长期入睡困难或早醒，可能与焦虑抑郁相关，建议就医评估。'},
+  {t:'久坐族的颈椎与腰椎自救指南', c:'久坐防护', cat:['久坐防护','常见疾病'], d:'长时间低头看屏幕，颈椎承受的重量可达头部的数倍。每久坐 1 小时起身活动 3-5 分钟，能显著降低颈肩腰背不适与久坐相关代谢风险。',
+   body:'1. 屏幕高度：让视线平视屏幕上缘，避免长期低头。\n2. 坐姿：腰靠椅背、双脚落地，避免跷二郎腿。\n3. 微运动：每 40-50 分钟起身，做颈部前后左右拉伸、扩胸、耸肩。\n4. 预警信号：手麻、头晕、下肢放射痛，提示神经受压，需就医。\n5. 每日 30 分钟快走或游泳，是最被低估的"护脊运动"。'},
+  {t:'每天该喝多少水？怎么判断缺水', c:'饮食', cat:['饮食','养生'], d:'成年人一般建议每日饮水 1500-1700 ml（约 7-8 杯）。尿液颜色是简单可靠的判断指标：淡黄正常，深黄提示补水不足。',
+   body:'1. 参考量：根据气温、运动量、出汗情况调整，不必机械执行。\n2. 时机：晨起一杯、饭前半小时、运动前后各一杯、睡前少量。\n3. 提示：咖啡、浓茶有利尿作用，不能完全替代饮水；含糖饮料不推荐作为补水来源。\n4. 特殊人群：心肾功能不全者需遵医嘱控制饮水量。'},
+  {t:'饮食的「三减三健」是什么', c:'饮食', cat:['饮食','慢病管理'], d:'三减：减盐、减油、减糖；三健：健康口腔、健康体重、健康骨骼。这是预防高血压、糖尿病等慢病的基础饮食原则。',
+   body:'1. 减盐：每日食盐 <5g（一啤酒瓶盖），警惕酱油、腌制品、加工食品中的隐形盐。\n2. 减油：每日烹调油 25-30g，多用蒸煮炖凉拌。\n3. 减糖：每日添加糖 <25g，少喝含糖饮料与甜点。\n4. 健康体重：BMI 18.5-23.9 为适宜范围。\n5. 健康骨骼：每日充足钙与维生素 D，每周 2-3 次负重运动。'},
+  {t:'每周运动多少算达标？', c:'运动', cat:['运动'], d:'世界卫生组织建议成年人每周至少 150 分钟中等强度有氧运动，或 75 分钟高强度运动，并配合每周 2 天以上力量训练。',
+   body:'1. 中等强度：运动时微喘、能说话但不能唱歌（如快走、骑车）。\n2. 分次达标：每次 10 分钟以上即可累计，不必一次做完。\n3. 力量训练：深蹲、俯卧撑、哑铃等，每周 2 天，覆盖大肌群。\n4. 注意事项：久坐者从低强度开始逐步加量；有慢性病者运动前咨询医生。\n5. 提示：任何"动起来"都比不动好，别被数字吓到。'},
+  {t:'眼睛干涩、酸胀怎么办', c:'久坐防护', cat:['久坐防护','常见疾病'], d:'屏幕使用时间长是眼干、视疲劳的主要诱因。遵循「20-20-20」法则：每看屏幕 20 分钟，远眺 20 英尺（约 6 米）外 20 秒。',
+   body:'1. 20-20-20 法则：定时远眺放松睫状肌。\n2. 眨眼训练：专注屏幕时眨眼频率会下降，刻意多眨眼。\n3. 环境：屏幕亮度与环境光接近，避免强光直射与反光。\n4. 干眼缓解：人工泪液（无防腐剂优先）可临时缓解，需长期使用请咨询医生。\n5. 红旗信号：持续眼痛、视力下降、视野缺损，需尽快眼科就诊。'},
+  {t:'长期焦虑与压力的身体信号', c:'心理健康', cat:['心理健康'], d:'心理压力会以身体症状的形式表现出来：紧张性头痛、肩颈僵硬、胃部不适、心慌、呼吸急促、失眠等。识别这些信号是自我调节的第一步。',
+   body:'1. 常见躯体化信号：头痛、胃胀、胸闷、出汗、注意力下降。\n2. 应对：规律运动、保证睡眠、减少咖啡因、练习深呼吸（可参考本页「放松冥想」）。\n3. 人际支持：与信任的人倾诉，比独自硬扛更有效。\n4. 就医指征：躯体不适持续存在、影响工作生活，或情绪低落超过 2 周，建议心理科 / 精神科评估。\n5. 热线：心理援助热线 12356（全国 24 小时）。'},
+  {t:'高血压的日常自我管理', c:'慢病管理', cat:['慢病管理','常见疾病'], d:'我国成人高血压患病率约 27%。确诊后除遵医嘱用药外，限盐、减重、运动、戒烟限酒、规律监测血压是五大基石。',
+   body:'1. 家庭自测：晨起、睡前各测一次，安静休息 5 分钟后再测，记录数值。\n2. 饮食：每日盐 <5g，多吃蔬果、全谷物，少喝浓汤。\n3. 运动：每周 150 分钟中等强度有氧运动。\n4. 用药：降压药需规律服用，不可自行停药或调量。\n5. 红旗信号：血压突然显著升高伴剧烈头痛、胸痛、视物模糊，立即就医。'},
+  {t:'脂肪肝：减重就是最好的药', c:'慢病管理', cat:['慢病管理','饮食'], d:'非酒精性脂肪肝在体检中检出率很高。多数人处于单纯性脂肪肝阶段，通过减重 5-10% 即可显著改善，是可逆的。',
+   body:'1. 现状：我国成人脂肪肝患病率超 30%，肥胖与高糖饮食是主因。\n2. 干预：减重 5-10%（每周 0.5-1kg 为宜）、戒酒、减少精制糖与油炸食品。\n3. 运动：有氧 + 力量结合，每周 150 分钟以上。\n4. 复查：每 6-12 个月复查肝功能与肝脏 B 超。\n5. 警惕：转氨酶持续升高或进展为肝纤维化，需消化内科就诊。'},
+  {t:'体检报告上这些指标要盯紧', c:'体检', cat:['体检','慢病管理'], d:'每年一次基础体检，重点关注：血压、空腹血糖、血脂四项、肝肾功能、血常规、尿常规、胸片与腹部超声。异常指标连续复查对比更有意义。',
+   body:'1. 必查项目：身高体重血压、血常规、尿常规、肝肾功能、血糖血脂、心电图、胸片、腹部超声。\n2. 加查建议：40 岁后加查胃肠镜（每 5 年）、骨密度；女性加查乳腺、妇科超声；吸烟者加查低剂量肺 CT。\n3. 指标解读：单次轻度异常不必恐慌，需结合病史并定期复查趋势。\n4. 就诊指征：明显异常（如肿瘤标志物升高、血压 ≥160/100、血糖明显偏高）请及时专科就诊。\n5. 提示：体检是「找问题」，干预才是「解决问题」。'},
+  {t:'烫伤、扭伤等常见意外的正确处理', c:'急救常识', cat:['急救常识'], d:'烫伤后立刻用流动凉水冲 15-20 分钟；急性扭伤遵循 RICE 原则（休息、冰敷、加压、抬高）。错误处理比不处理更危险。',
+   body:'1. 烫伤：凉水持续冲洗 15-20 分钟 → 轻柔脱去衣物 → 覆盖干净敷料 → 就医。禁忌：不要涂牙膏、酱油、红药水，不要挑破水泡。\n2. 扭伤（48 小时内）：休息、冰敷（每次 15-20 分钟）、弹力绷带加压、抬高患肢。\n3. 鼻出血：身体前倾、捏住鼻翼 10 分钟，张口呼吸；仰头是错误做法。\n4. 严重情况：大出血、意识丧失、疑似骨折错位、头部撞击后呕吐嗜睡，立即 120。'},
+  {t:'换季过敏：识别与防护', c:'常见疾病', cat:['常见疾病','养生'], d:'打喷嚏、流清涕、鼻痒、眼痒在换季时出现，很可能是过敏性鼻炎而非感冒。两者区别：过敏一般无发热，症状持续超过 2 周。',
+   body:'1. 常见过敏原：尘螨、花粉、霉菌、宠物皮屑。\n2. 防护：过敏季减少开窗、外出戴口罩、回家及时洗脸换衣、定期清洗床品（55℃ 以上热水）。\n3. 缓解：生理盐水洗鼻、抗组胺药（遵医嘱）；反复发作可考虑脱敏治疗。\n4. 红旗信号：喘憋、气短、皮疹迅速蔓延，提示严重过敏，立即就医。'}
+];
+
+var SYMPTOMS = [
+  {t:'头痛', ic:'🤕', area:'头面部', causes:'紧张性头痛（压力、久坐）、偏头痛、睡眠不足、视疲劳、血压升高', home:'规律作息、热敷颈肩、适度饮水、减少屏幕时间；记录发作频率与诱因。',
+   red:'突发剧烈"雷击样"头痛；伴发热颈硬、呕吐；伴肢体无力、言语不清；持续加重；外伤后头痛。', when:'每周发作 ≥2 次，或严重影响工作睡眠，或伴红旗信号时就医。'},
+  {t:'发热', ic:'🌡️', area:'全身', causes:'病毒或细菌感染、疫苗接种后反应、中暑、甲亢等', home:'多饮水、充分休息、物理降温（温水擦浴）；体温 ≥38.5℃ 且不适明显可遵医嘱使用退热药。',
+   red:'体温 ≥39.5℃；持续发热超 3 天；伴意识模糊、抽搐、皮疹、呼吸困难、剧烈头痛。', when:'成人持续发热超 3 天，或伴红旗信号，或儿童发热超 24 小时，应及时就医。'},
+  {t:'失眠 / 入睡困难', ic:'😴', area:'睡眠', causes:'压力焦虑、作息紊乱、咖啡因、屏幕蓝光、环境嘈杂、抑郁', home:'固定作息、睡前 1 小时远离屏幕、卧室黑暗凉爽、白天运动、避免午睡过长。',
+   red:'每周 ≥3 晚失眠且持续 1 个月以上；伴情绪持续低落、心悸、白天极度困倦。', when:'持续 1 个月以上影响生活，建议就诊睡眠门诊或心理科。'},
+  {t:'腹痛', ic:'🤢', area:'腹部', causes:'饮食不当、胃肠炎、消化不良、痛经、便秘；右上腹需警惕胆囊，右下腹警惕阑尾炎', home:'清淡饮食、少量多餐、热敷腹部、注意饮食卫生；记录疼痛位置、性质与进食关系。',
+   red:'剧烈绞痛、持续加重；右下腹固定压痛；伴发热呕吐、便血黑便；妊娠期腹痛；外伤后腹痛。', when:'剧烈或持续腹痛、伴红旗信号，立即急诊。'},
+  {t:'胸闷 / 心慌', ic:'💓', area:'胸部', causes:'压力焦虑、咖啡因过量、运动后正常反应、心律失常；需警惕心脏与肺部问题', home:'停止活动、深呼吸放松、避免咖啡浓茶、规律作息；记录发作诱因与频率。',
+   red:'胸痛向肩背手臂放射；伴大汗、呼吸困难、濒死感；静息或劳累时反复发作；晕厥。', when:'有红旗信号，或既往有心脏疾病史者出现新发胸闷，立即急诊（胸痛优先打 120）。'},
+  {t:'乏力 / 疲劳', ic:'🥱', area:'全身', causes:'睡眠不足、压力、贫血、甲状腺功能减退、维生素 D 缺乏、慢性疲劳', home:'规律睡眠、均衡饮食、适度运动、减少咖啡因依赖；观察休息后是否恢复。',
+   red:'休息后仍极度疲劳；伴消瘦、发热、淋巴结肿大、皮肤苍白、气短。', when:'持续 2 周以上原因不明的乏力，建议就医查血常规、甲功等。'},
+  {t:'肩颈酸痛', ic:'🧎', area:'骨骼肌肉', causes:'久坐低头、姿势不良、枕头不合适、受凉、肩周炎', home:'每小时起身活动、颈肩拉伸、热敷、调整屏幕高度与坐姿、选合适枕头。',
+   red:'伴手麻无力、头晕恶心、下肢踩棉感；外伤后剧痛；夜间痛醒。', when:'休息调整 1 周无改善，或伴红旗信号，就诊骨科 / 康复科。'},
+  {t:'眼睛干涩', ic:'👁️', area:'头面部', causes:'屏幕时间过长、空调房干燥、隐形眼镜、视疲劳、干眼症', home:'20-20-20 法则、人工泪液、热敷眼睑、增加眨眼、调节屏幕亮度。',
+   red:'持续眼痛、明显视力下降、畏光流泪、视野缺损、异物感强烈。', when:'持续干涩伴视力变化，或角膜不适，尽快眼科就诊。'},
+  {t:'咳嗽', ic:'😮‍💨', area:'呼吸道', causes:'上呼吸道感染、过敏、烟雾刺激、胃食管反流、哮喘', home:'多饮温水、蜂蜜水缓解（1 岁以上）、避免烟酒刺激、保持空气湿润、注意休息。',
+   red:'咳血；高热不退；呼吸困难喘憋；胸痛；咳嗽超 3 周不愈；儿童伴吸气性喉鸣。', when:'咳嗽超 3 周，或伴红旗信号，就诊呼吸内科。'},
+  {t:'皮疹 / 皮肤瘙痒', ic:'🤚', area:'皮肤', causes:'过敏、湿疹、虫咬、真菌感染、荨麻疹、干燥', home:'避免抓挠、冷敷止痒、保湿、排查接触物与食物、穿宽松棉质衣物。',
+   red:'皮疹迅速蔓延伴发热；口腔或黏膜出现水疱；皮肤大片红肿热痛；伴呼吸困难（严重过敏）。', when:'伴红旗信号立即就医；反复发作 2 周以上就诊皮肤科。'}
+];
+
+var PREVENTIONS = [
+  {t:'年度体检怎么选', tag:'体检', body:'基础套餐人人做：血常规、尿常规、肝肾功能、血糖血脂、心电图、胸片、腹部超声。\n按风险加项：吸烟者 + 低剂量肺 CT；40 岁后 + 胃肠镜（5 年一次）、骨密度；女性 + 乳腺与妇科超声；有家族史者针对性筛查。\n要点：体检不是越多越好，围绕年龄、性别、家族史、生活方式选项目；结果异常要复查对比，别看完就丢。'},
+  {t:'疫苗：成年人也需要补种', tag:'疫苗', body:'不只是儿童需要疫苗：\n· 流感疫苗：每年接种，尤其老人、慢病患者、医务工作者。\n· 肺炎球菌疫苗：60 岁以上或高危人群。\n· 乙肝疫苗：抗体不足者补种。\n· 带状疱疹疫苗：50 岁以上建议接种。\n· HPV 疫苗：适龄人群（9-45 岁）接种可预防宫颈癌等。\n接种前咨询社区接种点，有禁忌症者遵医嘱。'},
+  {t:'「三高」预防：从 30 岁开始', tag:'慢病', body:'高血压、高血糖、高血脂常无早期症状，靠体检查出。\n· 血压：每年量一次，偏高者家中自测。\n· 血糖：40 岁后每年查空腹血糖 + 糖化血红蛋白。\n· 血脂：每年查血脂四项，关注 LDL-C。\n预防核心：限盐（<5g/天）、每周 150 分钟运动、BMI 控制在 18.5-23.9、戒烟限酒、睡眠充足。'},
+  {t:'脂肪肝：减重 5-10% 可逆转', tag:'慢病', body:'体检报告常见"脂肪肝"，多数属单纯性脂肪肝，可逆。\n· 减重：每周 0.5-1kg 匀速减，减重 5-10% 即显著改善。\n· 饮食：戒酒、减少精制糖与油炸食品、主食粗细搭配。\n· 运动：有氧 + 力量结合，每周 150 分钟以上。\n· 复查：每 6-12 个月复查肝功 + B 超；转氨酶持续升高需消化内科就诊。'},
+  {t:'骨质疏松：别等骨折才知道', tag:'慢病', body:'骨质疏松常被称为"寂静的疾病"，首次症状可能是骨折。\n· 高危人群：绝经后女性、50 岁以上、长期激素用药、缺乏日照与运动者。\n· 筛查：40 岁后关注骨密度（双能 X 线）；50 岁以上每年评估。\n· 预防：每日钙 1000-1200mg（奶制品、豆制品、绿叶菜），维生素 D 每日 400-800IU，每周 2-3 次负重运动（快走、爬楼、抗阻）。\n· 戒烟限酒、防跌倒（居家防滑、扶手）。'}
+];
+
+/* ==================== 身体知识渲染 ==================== */
+function renderArticles(){
+  var box = $('articleList'); var html = '';
+  ARTICLES.forEach(function(a){
+    html += '<div class="article" onclick="this.classList.toggle(\'open\')">' +
+      '<div class="t"><span class="tag">' + a.c + '</span>' + a.t + '</div>' +
+      '<div class="d">' + a.d + '</div>' +
+      '<div class="meta"><span>点击展开全文</span></div>' +
+      '<div class="body">' + esc(a.body) + '</div></div>';
+  });
+  box.innerHTML = html;
+}
+function renderSymptoms(){
+  var areas = [];
+  SYMPTOMS.forEach(function(s){ if(areas.indexOf(s.area)<0) areas.push(s.area); });
+  var filter = $('sympFilters').dataset.cur || '';
+  var fhtml = '<button data-a="" class="' + (!filter?'active':'') + '" onclick="setSympFilter(\'\', this)">全部</button>';
+  areas.forEach(function(a){
+    fhtml += '<button data-a="' + a + '" class="' + (filter===a?'active':'') + '" onclick="setSympFilter(\'' + a + '\', this)">' + a + '</button>';
+  });
+  $('sympFilters').innerHTML = fhtml;
+  var list = filter ? SYMPTOMS.filter(function(s){ return s.area === filter; }) : SYMPTOMS;
+  var html = '';
+  list.forEach(function(s){
+    html += '<div class="symp-card"><div class="hd"><div class="ic">' + s.ic + '</div><h3>' + s.t + '</h3><span class="tag amber">' + s.area + '</span></div>' +
+      '<div class="sec"><b>常见原因</b><p>' + s.causes + '</p></div>' +
+      '<div class="sec"><b>可先尝试</b><p>' + s.home + '</p></div>' +
+      '<div class="sec red"><b>红旗信号（需尽快就医）</b><p>' + s.red + '</p></div>' +
+      '<div class="sec"><b>何时就医</b><p>' + s.when + '</p></div></div>';
+  });
+  $('sympList').innerHTML = html;
+}
+function setSympFilter(a, el){
+  $('sympFilters').dataset.cur = a;
+  renderSymptoms();
+}
+function renderPreventions(){
+  var box = $('prevList'); var html = '';
+  PREVENTIONS.forEach(function(p){
+    html += '<div class="article open"><div class="t"><span class="tag">' + p.tag + '</span>' + p.t + '</div>' +
+      '<div class="body" style="display:block">' + esc(p.body) + '</div></div>';
+  });
+  box.innerHTML = html;
+}
+function renderLibrary(){
+  var kw = ($('libSearch').value || '').trim().toLowerCase();
+  var cat = $('libFilters').dataset.cur || '';
+  var chtml = '<button data-c="" class="' + (!cat?'active':'') + '" onclick="setLibCat(\'\', this)">全部</button>';
+  CATS.forEach(function(c){
+    chtml += '<button data-c="' + c + '" class="' + (cat===c?'active':'') + '" onclick="setLibCat(\'' + c + '\', this)">' + c + '</button>';
+  });
+  $('libFilters').innerHTML = chtml;
+  var items = ARTICLES.map(function(a){ return {t:a.t, c:a.c, cat:a.cat, d:a.d, body:a.body, kind:'科普'}; })
+    .concat(SYMPTOMS.map(function(s){ return {t:s.t + '（症状自查）', c:s.area, cat:[s.area], d:s.causes, body:'常见原因：' + s.causes + '\n' + s.red + '\n何时就医：' + s.when, kind:'自查'}; }))
+    .concat(PREVENTIONS.map(function(p){ return {t:p.t + '（预防）', c:p.tag, cat:[p.tag], d:p.body.slice(0,40) + '…', body:p.body, kind:'预防'}; }));
+  if(cat) items = items.filter(function(i){ return i.cat.indexOf(cat) > -1; });
+  if(kw) items = items.filter(function(i){ return (i.t + i.d + i.body).toLowerCase().indexOf(kw) > -1; });
+  var html = '<div class="muted" style="font-size:12.5px;margin-bottom:10px">共 ' + items.length + ' 条内容</div>';
+  items.forEach(function(i){
+    html += '<div class="article" onclick="this.classList.toggle(\'open\')">' +
+      '<div class="t"><span class="tag">' + i.kind + '</span><span class="tag amber">' + i.c + '</span>' + i.t + '</div>' +
+      '<div class="d">' + i.d + '</div>' +
+      '<div class="body">' + esc(i.body) + '</div></div>';
+  });
+  if(!items.length) html = '<div class="empty"><span class="big">🔍</span>没有匹配的内容，换个关键词试试</div>';
+  $('libList').innerHTML = html;
+}
+function setLibCat(c, el){
+  $('libFilters').dataset.cur = c;
+  renderLibrary();
+}
+
+/* ==================== 概览统计 ==================== */
+function renderOverview(){
+  // 连续打卡：从今天（或今天未打卡则从昨天）向前连续计数
+  var dates = {};
+  state.rec.forEach(function(r){ dates[r.date] = 1; });
+  var streak2 = 0; var dd = new Date();
+  var k0 = today();
+  if(!dates[k0]) dd.setDate(dd.getDate()-1);
+  for(var j=0;j<400;j++){
+    var k = dd.getFullYear() + '-' + String(dd.getMonth()+1).padStart(2,'0') + '-' + String(dd.getDate()).padStart(2,'0');
+    if(dates[k]){ streak2++; dd.setDate(dd.getDate()-1); } else break;
+  }
+  $('mCont').textContent = streak2;
+  $('mTotal').textContent = state.rec.length;
+  var recent = state.rec.slice(-7);
+  if(recent.length){
+    var sum = 0; recent.forEach(function(r){ sum += r.strength; });
+    $('mAvg').textContent = (sum/recent.length).toFixed(1);
+  }
+  var counts = {}; state.rec.forEach(function(r){ counts[r.mood] = (counts[r.mood]||0)+1; });
+  var top = null, topN = 0;
+  Object.keys(counts).forEach(function(k){ if(counts[k] > topN){ topN = counts[k]; top = k; } });
+  $('mPeak').textContent = top ? moodMeta(top).n : '--';
+  var doneToday = state.rec.some(function(r){ return r.date === today(); });
+  $('todayHint').textContent = doneToday ? '今日已打卡 ✓' : '今天还没打卡';
+  $('recordHint').textContent = doneToday ? '今日已打卡 ✓' : '今天还没打卡';
+  var tips = ARTICLES.map(function(a){ return {t:a.t, d:a.d}; });
+  var tip = tips[new Date().getDate() % tips.length];
+  $('tipOfDay').textContent = tip.t + ' —— ' + tip.d;
+  renderMiniChart();
+}
+
+/* ==================== 路由与渲染 ==================== */
+function route(){
+  var h = location.hash || '#home';
+  var view = h.slice(1).split('-')[0];
+  var known = ['home','mood','body','mine'];
+  if(known.indexOf(view) < 0) view = 'home';
+  document.querySelectorAll('#mainNav a').forEach(function(a){ a.classList.toggle('active', a.dataset.view === view); });
+  ['home','mood','body','mine'].forEach(function(v){
+    $('view-' + v).classList.toggle('active', v === view);
+  });
+  var sub = h.split('-')[1];
+  if(view === 'mood'){
+    var tabs = ['record','journal','scale','meditate','trend','alert'];
+    var t = tabs.indexOf(sub) > -1 ? sub : 'record';
+    document.querySelectorAll('#moodSub button').forEach(function(b){ b.classList.toggle('active', b.dataset.tab === t); });
+    ['record','journal','scale','meditate','trend','alert'].forEach(function(x){
+      var el = $('mood-' + x); if(el) el.style.display = x === t ? '' : 'none';
+    });
+    if(t === 'journal') renderJournal();
+    if(t === 'scale'){ renderScaleHome(); cancelScale(); }
+    if(t === 'trend') renderTrend();
+    if(t === 'meditate') resetBreath();
+  }
+  if(view === 'body'){
+    var btabs = ['articles','symptoms','prevention','library'];
+    var bt = btabs.indexOf(sub) > -1 ? sub : 'articles';
+    document.querySelectorAll('#bodySub button').forEach(function(b){ b.classList.toggle('active', b.dataset.tab === bt); });
+    ['articles','symptoms','prevention','library'].forEach(function(x){
+      var el = $('body-' + x); if(el) el.style.display = x === bt ? '' : 'none';
+    });
+    if(bt === 'articles') renderArticles();
+    if(bt === 'symptoms') renderSymptoms();
+    if(bt === 'prevention') renderPreventions();
+    if(bt === 'library') renderLibrary();
+  }
+  window.scrollTo(0, 0);
+}
+document.querySelectorAll('#moodSub button').forEach(function(b){
+  b.onclick = function(){ location.hash = 'mood-' + b.dataset.tab; };
+});
+document.querySelectorAll('#bodySub button').forEach(function(b){
+  b.onclick = function(){ location.hash = 'body-' + b.dataset.tab; };
+});
+document.querySelectorAll('#mainNav a').forEach(function(a){
+  a.onclick = function(){
+    var h = a.getAttribute('href');
+    if(h === '#mood' || h === '#body'){ location.hash = h + (h === '#mood' ? '-record' : '-articles'); return false; }
+  };
+});
+document.querySelectorAll('.seg2 button').forEach(function(b){
+  b.onclick = function(){
+    state.trendRange = parseInt(b.dataset.range, 10);
+    document.querySelectorAll('.seg2 button').forEach(function(x){ x.classList.remove('active'); });
+    b.classList.add('active');
+    renderTrend();
+  };
+});
+window.addEventListener('hashchange', route);
+
+/* ==================== 主题 ==================== */
+function applyTheme(t){
+  document.documentElement.setAttribute('data-theme', t);
+  try{ localStorage.setItem('health.theme', t); }catch(e){}
+}
+function toggleTheme(){
+  applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+}
+(function(){
+  var t = 'light';
+  try{ t = localStorage.getItem('health.theme') || 'light'; }catch(e){}
+  applyTheme(t);
+})();
+
+/* ==================== 初始化 ==================== */
+function renderAll(){
+  renderQuickMoods('quickMoods', 'selMood', 'moodStrength', 'moodStrength', 'moodNote');
+  renderQuickMoods('recordMoods', 'rSelMood', 'rStrength', 'rStrength', 'rNote');
+  renderOverview();
+  renderAlertZone();
+  renderJournal();
+  renderTrend();
+  route();
+}
+renderAll();
+</script>
+</body>
+</html>

@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="app-version" content="1.0.10">
+<meta name="app-released" content="2026-08-15T09:30:00+08:00">
+<title>黑客红客学习区 · 白帽安全 · 理论与实践双轨</title>
+<style>
+  :root{
+    --bg:#0a0e14; --panel:#121821; --panel2:#161f2c; --line:#222c3a;
+    --txt:#e6edf3; --muted:#8b9bb0; --accent:#39d98a; --accent2:#4cc9f0;
+    --warn:#ff6b6b; --amber:#ffb454; --radius:16px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;-webkit-font-smoothing:antialiased}
+  body{padding:0 16px 60px;max-width:960px;margin:0 auto;line-height:1.6}
+  a{color:var(--accent2);text-decoration:none}
+  a:hover{text-decoration:underline}
+
+  /* 返回主台 */
+  .topbar{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:10px;padding:12px 0;background:linear-gradient(var(--bg) 70%,transparent);margin-bottom:6px}
+  .back{display:inline-flex;align-items:center;gap:6px;padding:9px 14px;border-radius:999px;background:var(--panel2);border:1px solid var(--line);color:var(--txt);font-size:13px;font-weight:600}
+  .back svg{width:16px;height:16px}
+  .back:hover{text-decoration:none;border-color:var(--accent)}
+
+  header.hero{padding:18px 4px 8px}
+  .hero h1{font-size:26px;font-weight:800;letter-spacing:.5px;display:flex;align-items:center;gap:10px}
+  .hero h1 .dot{width:11px;height:11px;border-radius:50%;background:var(--accent);box-shadow:0 0 12px var(--accent)}
+  .hero p{color:var(--muted);font-size:14px;margin-top:6px}
+
+  /* 白帽声明 */
+  .warn-card{margin:18px 0;padding:16px 18px;border-radius:var(--radius);background:rgba(255,107,107,.08);border:1px solid rgba(255,107,107,.35);display:flex;gap:12px;align-items:flex-start}
+  .warn-card svg{width:22px;height:22px;flex:none;color:var(--warn);margin-top:2px}
+  .warn-card b{color:var(--warn)}
+  .warn-card p{font-size:13.5px;color:var(--txt)}
+  .warn-card ul{margin:8px 0 0 18px;font-size:13px;color:var(--muted)}
+  .warn-card li{margin:2px 0}
+
+  .sec-title{font-size:15px;font-weight:700;color:var(--muted);margin:26px 4px 12px;display:flex;align-items:center;gap:8px;text-transform:uppercase;letter-spacing:1px}
+  .sec-title::before{content:"";width:4px;height:16px;border-radius:2px;background:var(--accent)}
+
+  /* 方向卡网格 */
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+  .track{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px;display:flex;flex-direction:column;transition:border-color .2s,transform .2s}
+  .track:hover{border-color:var(--accent);transform:translateY(-2px)}
+  .track .th{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .track .ic{width:38px;height:38px;border-radius:10px;background:var(--panel2);display:flex;align-items:center;justify-content:center;flex:none}
+  .track .ic svg{width:22px;height:22px;color:var(--accent)}
+  .track h3{font-size:16px;font-weight:700}
+  .col{font-size:12.5px;margin-top:8px}
+  .col .lab{font-weight:700;color:var(--accent2);font-size:11px;letter-spacing:.5px;text-transform:uppercase;display:block;margin-bottom:4px}
+  .col ul{margin:0 0 0 16px;color:var(--muted)}
+  .col.practice ul{list-style:none;margin-left:0}
+  .col.practice li{margin:5px 0}
+  .col.practice a{display:inline-flex;align-items:center;gap:5px;font-size:13px}
+  .col.practice a::after{content:"↗";font-size:11px;opacity:.7}
+
+  /* 实践笔记 */
+  .note-box{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px}
+  .form{display:flex;flex-direction:column;gap:10px;margin-bottom:14px}
+  .form .row{display:flex;gap:10px;flex-wrap:wrap}
+  .form select,.form textarea,.form input{flex:1;min-width:160px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:11px 12px;font-size:15px;font-family:inherit;min-height:44px}
+  .form textarea{min-height:64px;resize:vertical}
+  .form select:focus,.form textarea:focus,.form input:focus{outline:none;border-color:var(--accent)}
+  .btn{background:var(--accent);color:#04210f;border:none;border-radius:10px;padding:11px 18px;font-size:14px;font-weight:700;cursor:pointer;min-height:44px;transition:filter .15s}
+  .btn:hover{filter:brightness(1.08)}
+  .btn.ghost{background:transparent;border:1px solid var(--line);color:var(--muted);font-weight:600}
+  .note-list{display:flex;flex-direction:column;gap:10px}
+  .note-item{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px 14px;position:relative}
+  .note-item .meta{font-size:11.5px;color:var(--muted);display:flex;gap:8px;align-items:center;margin-bottom:5px}
+  .note-item .tag{background:rgba(57,217,138,.15);color:var(--accent);padding:2px 8px;border-radius:999px;font-weight:700}
+  .note-item .body{font-size:14px;white-space:pre-wrap;word-break:break-word}
+  .note-item .del{position:absolute;top:10px;right:10px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:13px;padding:4px}
+  .note-item .del:hover{color:var(--warn)}
+  .empty{color:var(--muted);font-size:13px;text-align:center;padding:18px 0}
+
+  footer{margin-top:34px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:12px;text-align:center}
+
+  @media(max-width:640px){
+    .grid{grid-template-columns:1fr}
+    .hero h1{font-size:22px}
+  }
+  /* 安全区适配 */
+  .topbar{padding-top:calc(12px + env(safe-area-inset-top))}
+  body{padding-bottom:calc(60px + env(safe-area-inset-bottom))}
+</style>
+</head>
+<body>
+  <div class="topbar">
+    <a class="back" href="../index.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>返回主台
+    </a>
+  </div>
+
+  <header class="hero">
+    <h1><span class="dot"></span>黑客红客学习区</h1>
+    <p>白帽安全 · 理论扎实、实践为王 · 学一点、练一点、记一点</p>
+  </header>
+
+  <div class="warn-card">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg>
+    <div>
+      <b>白帽边界（务必遵守）</b>
+      <p>本区只研究「合法授权」的安全技术。所有动手实践必须在以下范围内：</p>
+      <ul>
+        <li>① 官方 / CTF 靶场（PortSwigger、HackTheBox、picoCTF 等）</li>
+        <li>② 你自己拥有或已获明确书面授权的系统</li>
+      </ul>
+      <p>严禁对任何未授权系统、他人账户或生产环境进行测试。技术向善，责任自负。</p>
+    </div>
+  </div>
+
+  <div class="sec-title">学习方向 · 理论 → 实践</div>
+  <div class="grid" id="trackGrid"></div>
+
+  <div class="sec-title">实践笔记 · 把练过的留下</div>
+  <div class="note-box">
+    <div class="form">
+      <div class="row">
+        <select id="noteTrack"></select>
+        <input id="noteTitle" type="text" placeholder="这次实践的主题，如：SQLi 基础练习" style="flex:2">
+      </div>
+      <textarea id="noteBody" placeholder="记一下：做了什么实验、用了什么工具/靶场、踩了什么坑、有什么收获……"></textarea>
+      <div class="row" style="justify-content:flex-end">
+        <button class="btn ghost" id="noteClear">清空</button>
+        <button class="btn" id="noteSave">保存实践记录</button>
+      </div>
+    </div>
+    <div class="note-list" id="noteList"></div>
+  </div>
+
+  <footer>本区为学习导航与本地笔记，所有外链均指向公开合法的靶场与 CTF 平台 · 仅作白帽自学用途</footer>
+
+<script>
+  var TRACKS = [
+    { id:'web', name:'Web 安全',
+      icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>',
+      theory:['OWASP Top 10 风险模型','SQL 注入 / XSS / CSRF 原理','同源策略、CORS 与 CSP'],
+      practice:[{t:'PortSwigger Academy',u:'https://portswigger.net/web-security'},{t:'DVWA 练习靶场',u:'https://github.com/digininja/DVWA'}] },
+    { id:'reverse', name:'逆向工程',
+      icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>',
+      theory:['x86/x64 汇编基础','PE / ELF 文件格式','反编译与脱壳思路'],
+      practice:[{t:'CTF 逆向题单',u:'https://ctftime.org/'},{t:'Ghidra 官方文档',u:'https://ghidra-sre.org/'}] },
+    { id:'crypto', name:'密码学',
+      icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
+      theory:['对称 / 非对称加密','哈希与消息认证','经典密码与现代分组 cipher'],
+      practice:[{t:'cryptopals 挑战',u:'https://cryptopals.com/'},{t:'CTF crypto 题',u:'https://ctftime.org/'}] },
+    { id:'ctf', name:'CTF 竞赛',
+      icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2h-2M6 14h12v8H6z"/></svg>',
+      theory:['CTF 常见赛制（Jeopardy/Attack-Defense）','题型分布与解题思路','团队协作与工具链'],
+      practice:[{t:'picoCTF（新手友好）',u:'https://picoctf.org/'},{t:'CTFtime 赛事日历',u:'https://ctftime.org/'}] },
+    { id:'binary', name:'二进制 / 漏洞',
+      icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6 3 12l5 6M16 6l5 6-5 6"/></svg>',
+      theory:['栈溢出与堆基础','ROP / 格式化字符串','内存安全与防护机制（ASLR/DEP/Canary）'],
+      practice:[{t:'pwnable.kr',u:'http://pwnable.kr/'},{t:'HackTheBox Pwn',u:'https://www.hackthebox.com/'}] },
+    { id:'osint', name:'OSINT 信息收集',
+      icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>',
+      theory:['开源情报的合法边界','搜索引擎高级语法（Dork）','元数据分析与社会工程防范'],
+      practice:[{t:'Google Hacking DB',u:'https://www.exploit-db.com/google-hacking-database'},{t:'CTF OSINT 题',u:'https://ctftime.org/'}] }
+  ];
+
+  var esc = function(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+
+  // 渲染方向卡
+  var grid = document.getElementById('trackGrid');
+  grid.innerHTML = TRACKS.map(function(t){
+    return '<div class="track">'+
+      '<div class="th"><div class="ic">'+t.icon+'</div><h3>'+esc(t.name)+'</h3></div>'+
+      '<div class="col theory"><span class="lab">理论要点</span><ul>'+t.theory.map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</ul></div>'+
+      '<div class="col practice"><span class="lab">实践入口</span><ul>'+t.practice.map(function(p){return '<li><a href="'+esc(p.u)+'" target="_blank" rel="noopener">'+esc(p.t)+'</a></li>';}).join('')+'</ul></div>'+
+    '</div>';
+  }).join('');
+
+  // 笔记下拉填充
+  var sel = document.getElementById('noteTrack');
+  sel.innerHTML = TRACKS.map(function(t){return '<option value="'+t.id+'">'+esc(t.name)+'</option>';}).join('');
+
+  // 本地实践笔记（localStorage）
+  var KEY = 'wb_hacker_notes_v1';
+  var load = function(){ try{return JSON.parse(localStorage.getItem(KEY))||[];}catch(e){return [];} };
+  var save = function(a){ localStorage.setItem(KEY, JSON.stringify(a)); };
+
+  function renderNotes(){
+    var list = document.getElementById('noteList');
+    var arr = load();
+    if(!arr.length){ list.innerHTML = '<div class="empty">还没有实践记录。学完一个方向，就去靶场练一下，回来记一笔 📌</div>'; return; }
+    list.innerHTML = arr.map(function(n,i){
+      var tname = (TRACKS.filter(function(t){return t.id===n.track;})[0]||{}).name || n.track;
+      return '<div class="note-item">'+
+        '<button class="del" data-i="'+i+'">删除</button>'+
+        '<div class="meta"><span class="tag">'+esc(tname)+'</span><span>'+esc(n.date)+'</span></div>'+
+        (n.title?'<div class="body" style="font-weight:600;margin-bottom:4px">'+esc(n.title)+'</div>':'')+
+        '<div class="body">'+esc(n.body)+'</div>'+
+      '</div>';
+    }).join('');
+  }
+
+  document.getElementById('noteSave').addEventListener('click', function(){
+    var title = document.getElementById('noteTitle').value.trim();
+    var body = document.getElementById('noteBody').value.trim();
+    if(!body && !title){ alert('先写点什么吧～'); return; }
+    var arr = load();
+    arr.unshift({ track:sel.value, title:title, body:body, date:new Date().toISOString().slice(0,10) });
+    save(arr);
+    document.getElementById('noteTitle').value='';
+    document.getElementById('noteBody').value='';
+    renderNotes();
+  });
+  document.getElementById('noteClear').addEventListener('click', function(){
+    if(load().length && !confirm('确定清空全部实践记录？此操作不可恢复。')) return;
+    save([]); renderNotes();
+  });
+  document.getElementById('noteList').addEventListener('click', function(e){
+    var b = e.target.closest('.del'); if(!b) return;
+    var i = +b.getAttribute('data-i');
+    var arr = load(); arr.splice(i,1); save(arr); renderNotes();
+  });
+
+  renderNotes();
+</script>
+</body>
+</html>

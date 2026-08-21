@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>奶酪书签 · 全网资源导航</title>
+<style>
+  :root{
+    --bg:#0f1115; --panel:#171a21; --panel2:#1e222b; --line:#2a2f3a;
+    --txt:#e6e9ef; --sub:#9aa3b2; --acc1:#FF6B6B; --acc2:#4ECDC4; --chip:#222733;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif}
+  .top{display:flex;align-items:center;gap:14px;padding:14px 18px;
+    background:linear-gradient(90deg,rgba(255,107,107,.12),rgba(78,205,196,.12));
+    border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10;backdrop-filter:blur(8px)}
+  .back{color:var(--acc2);text-decoration:none;font-size:14px;white-space:nowrap}
+  .title{font-size:18px;font-weight:700}
+  .title span{font-size:13px;color:var(--sub);font-weight:400;margin-left:6px}
+  .stat{margin-left:auto;font-size:13px;color:var(--sub);text-align:right}
+  .search{padding:12px 18px;border-bottom:1px solid var(--line)}
+  .search input{width:100%;padding:12px 16px;border-radius:12px;border:1px solid var(--line);
+    background:var(--panel);color:var(--txt);font-size:16px;outline:none}
+  .search input:focus{border-color:var(--acc2)}
+  .hot{padding:10px 18px 12px;border-bottom:1px solid var(--line);background:rgba(78,205,196,.05)}
+  .hot-label{font-size:12px;color:var(--sub);margin-bottom:8px}
+  .hot-label b{color:var(--acc2);font-weight:600}
+  .hot-chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:3px}
+  .hchip{flex:0 0 auto;padding:7px 13px;border-radius:20px;background:var(--chip);color:var(--txt);
+    font-size:13px;cursor:pointer;white-space:nowrap;border:1px solid transparent}
+  .hchip:hover{border-color:var(--acc2)}
+  .hchip.active{background:linear-gradient(90deg,var(--acc1),var(--acc2));color:#fff;font-weight:600}
+  .layout{display:flex;align-items:flex-start;min-height:calc(100vh - 200px)}
+  .cats{width:240px;flex:0 0 240px;max-height:calc(100vh - 200px);overflow:auto;padding:12px;border-right:1px solid var(--line)}
+  .cat{padding:9px 12px;border-radius:9px;font-size:14px;color:var(--sub);cursor:pointer;
+    margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .cat:hover{background:var(--panel2);color:var(--txt)}
+  .cat.active{background:linear-gradient(90deg,var(--acc1),var(--acc2));color:#fff;font-weight:600}
+  .links{flex:1;padding:14px 18px;display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+    gap:10px;align-content:start}
+  .bm{display:block;background:var(--panel);border:1px solid var(--line);border-radius:11px;
+    padding:11px 13px;text-decoration:none;color:var(--txt);transition:.15s;min-width:0}
+  .bm:hover{border-color:var(--acc2);transform:translateY(-1px)}
+  .bm.js{cursor:default}
+  .bt{display:block;font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .bu{display:block;font-size:12px;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:3px}
+  .bc{display:inline-block;font-size:11px;color:var(--acc2);background:rgba(78,205,196,.12);
+    padding:1px 7px;border-radius:6px;margin-top:6px}
+  .copy{display:inline-block;margin-top:6px;font-size:11px;color:var(--acc1);cursor:pointer;
+    border:1px solid var(--acc1);border-radius:6px;padding:1px 8px}
+  .copy:hover{background:rgba(255,107,107,.15)}
+  .hint{grid-column:1/-1;color:var(--sub);padding:24px;text-align:center;font-size:14px}
+  .hint b{color:var(--acc2)}
+  .matchcats{grid-column:1/-1;color:var(--sub);font-size:13px;padding:4px 2px 10px}
+  .matchcats .bc{cursor:pointer;margin-right:6px}
+  @media(max-width:768px){
+    .layout{flex-direction:column;min-height:calc(100vh - 230px)}
+    .cats{width:100%;flex:none;max-height:none;display:flex;overflow-x:auto;gap:6px;
+      border-right:none;border-bottom:1px solid var(--line);padding:10px}
+    .cat{margin-bottom:0;white-space:nowrap}
+    .links{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+  <header class="top">
+    <a class="back" href="../index.html">← 指挥台</a>
+    <div class="title">奶酪书签 <span>全网资源导航</span></div>
+    <div class="stat" id="stat"></div>
+  </header>
+  <div class="search">
+    <input id="q" type="search" placeholder="搜索网站名 / 网址 / 分类…（支持搜分类）" autocomplete="off">
+  </div>
+  <div class="hot">
+    <div class="hot-label">常用专区 · <b>为你精选的高频 / 强相关分类</b></div>
+    <div class="hot-chips" id="hot"></div>
+  </div>
+  <main class="layout">
+    <aside class="cats" id="cats"></aside>
+    <section class="links" id="links"></section>
+  </main>
+
+  <script src="bookmarks.js?v=20260815c"></script>
+  <script>
+    var B = window.BOOKMARKS || [];
+    // 常用专区：基于「前端开发 + 品牌设计 + 自考考研」身份精选的高频/强相关分类
+    var HOT = ['前端工具','网页设计','Logo 素材','配色方案²','Icon 素材','字体素材',
+               '开发手册','Firefox 开发','Chrome','设计规范','在线设计','图片工具',
+               '学术考研¹','英语资源','实用工具'];
+    var catMap = {};
+    B.forEach(function(it){ (catMap[it[2]] = catMap[it[2]] || []).push(it); });
+    var cats = Object.keys(catMap).sort(function(a,b){ return catMap[b].length - catMap[a].length; });
+    var curCat = null, q = '';
+
+    function esc(s){
+      return String(s).replace(/[&<>"]/g, function(m){
+        return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m];
+      });
+    }
+    function isJs(u){ return String(u).toLowerCase().indexOf('javascript:') === 0; }
+
+    function linkHtml(arr){
+      return arr.map(function(it){
+        var t = esc(it[0]), u = esc(it[1]), c = esc(it[2]);
+        if(isJs(it[1])){
+          return '<div class="bm js"><span class="bt">'+t+'</span>'
+            + '<span class="bu">javascript 脚本书签（点「复制脚本」后添加到浏览器书签栏）</span>'
+            + '<span class="bc">'+c+'</span>'
+            + '<span class="copy" data-js="'+u+'">复制脚本</span></div>';
+        }
+        return '<a class="bm" href="'+u+'" target="_blank" rel="noopener noreferrer">'
+          + '<span class="bt">'+t+'</span><span class="bu">'+u+'</span><span class="bc">'+c+'</span></a>';
+      }).join('');
+    }
+    function renderHot(){
+      var box = document.getElementById('hot');
+      var html = '<div class="hchip'+(!curCat && !q?' active':'')+'" data-c="">全部</div>';
+      HOT.forEach(function(c){
+        if(!catMap[c]) return;
+        html += '<div class="hchip'+(curCat===c?' active':'')+'" data-c="'+esc(c)+'">'+esc(c)+' ('+catMap[c].length+')</div>';
+      });
+      box.innerHTML = html;
+      box.querySelectorAll('.hchip').forEach(function(el){
+        el.onclick = function(){
+          curCat = el.getAttribute('data-c') || null; q=''; document.getElementById('q').value='';
+          renderHot(); renderCats(); renderLinks();
+        };
+      });
+    }
+    function renderCats(){
+      var box = document.getElementById('cats');
+      var html = '<div class="cat'+(!curCat && !q?' active':'')+'" data-c="">全部 ('+B.length+')</div>';
+      cats.forEach(function(c){
+        html += '<div class="cat'+(curCat===c?' active':'')+'" data-c="'+esc(c)+'">'+esc(c)+' ('+catMap[c].length+')</div>';
+      });
+      box.innerHTML = html;
+      box.querySelectorAll('.cat').forEach(function(el){
+        el.onclick = function(){
+          curCat = el.getAttribute('data-c') || null; q=''; document.getElementById('q').value='';
+          renderHot(); renderCats(); renderLinks();
+        };
+      });
+    }
+    function renderLinks(){
+      var box = document.getElementById('links');
+      if(!q && !curCat){ box.innerHTML = '<div class="hint">← 从「常用专区」或左侧选分类，或在顶部搜索关键词</div>'; return; }
+      var list, matchHead = '';
+      if(curCat){
+        list = catMap[curCat];
+      } else {
+        var t = q.toLowerCase();
+        var mCats = cats.filter(function(c){ return c.toLowerCase().indexOf(t) >= 0; });
+        list = B.filter(function(it){
+          if(mCats.indexOf(it[2]) >= 0) return true;
+          return (it[0]+' '+it[1]).toLowerCase().indexOf(t) >= 0;
+        });
+        if(mCats.length){
+          matchHead = '<div class="matchcats">匹配分类（点击直达）： '
+            + mCats.map(function(c){ return '<span class="bc" data-jump="'+esc(c)+'">'+esc(c)+' ('+catMap[c].length+')</span>'; }).join('')
+            + '</div>';
+        }
+      }
+      if(list.length === 0){ box.innerHTML = matchHead + '<div class="hint">没有匹配的书签</div>'; return; }
+      if(list.length > 400){
+        box.innerHTML = matchHead + '<div class="hint">匹配 '+list.length+' 条，仅显示前 400 条，请缩小关键词</div>' + linkHtml(list.slice(0,400));
+      } else {
+        box.innerHTML = matchHead + linkHtml(list);
+      }
+      box.querySelectorAll('[data-jump]').forEach(function(el){
+        el.onclick = function(){
+          curCat = el.getAttribute('data-jump'); q=''; document.getElementById('q').value='';
+          renderHot(); renderCats(); renderLinks();
+        };
+      });
+      box.querySelectorAll('.copy').forEach(function(el){
+        el.onclick = function(e){
+          e.stopPropagation();
+          var code = el.getAttribute('data-js');
+          if(navigator.clipboard && navigator.clipboard.writeText){
+            navigator.clipboard.writeText(code).then(function(){ flash(el,'已复制✓'); }, function(){ flash(el,'复制失败'); });
+          } else { flash(el,'复制失败'); }
+        };
+      });
+    }
+    function flash(el, txt){ var o=el.textContent; el.textContent=txt; setTimeout(function(){el.textContent=o;},1500); }
+    document.getElementById('q').addEventListener('input', function(){
+      q = this.value.trim(); curCat = null; renderHot(); renderCats(); renderLinks();
+    });
+    document.getElementById('stat').textContent = B.length + ' 条 · ' + cats.length + ' 分类';
+    renderHot(); renderCats(); renderLinks();
+  </script>
+</body>
+</html>

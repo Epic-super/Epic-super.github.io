@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>联系我 - 小待的个人藏宝库</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <main>
+        <section id="contact-form">
+            <h2>联系我</h2>
+            <p>如果你有任何问题、建议或合作意向，欢迎通过以下方式联系我，或者直接填写下面的表单。</p>
+
+            <div class="contact-info">
+                <p><strong>邮箱：</strong> <a href="mailto:3315874081@qq.com">3315874081@qq.com</a></p>
+                <p><strong>微信：</strong></p>
+                <p><img src="images/wechat_qr.png" alt="微信二维码" style="width:150px; height:150px;"></p>
+                <p><strong>GitHub：</strong> <a href="https://github.com/Epic-super" target="_blank" rel="noopener">github.com/Epic-super</a></p>
+                <p><strong>LinkedIn：</strong> <span class="todo-note">待补充 LinkedIn 主页链接与用户名</span> (可选)</p>
+                <!-- 在这里填写你的 GitHub / LinkedIn 等社交媒体链接 -->
+            </div>
+
+            <!-- 表单当前使用 mailto 方式提交(点击后打开邮件客户端)。
+                 如需接入后端或第三方表单服务(如 Formspree),把 action 替换为对应地址即可。 -->
+            <form action="mailto:3315874081@qq.com" method="post" enctype="text/plain">
+                <div>
+                    <label for="name">姓名：</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                <div>
+                    <label for="email">邮箱：</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div>
+                    <label for="subject">主题：</label>
+                    <input type="text" id="subject" name="subject" required>
+                </div>
+                <div>
+                    <label for="message">内容：</label>
+                    <textarea id="message" name="message" rows="5" required></textarea>
+                </div>
+                <button type="submit">发送消息</button>
+            </form>
+        </section>
+    </main>
+
+    <script src="js/script.js"></script>
+    <script src="js/components.js"></script>
+
+</body>
+</html>
