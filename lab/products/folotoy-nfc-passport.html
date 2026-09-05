@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FoloToy NFC 试验台</title>
+<style>
+  :root{--bg:#0f1115;--panel:#171a21;--panel2:#1f232c;--line:#2a2f3a;--txt:#e6e8ec;--sub:#9aa3b2;--accent:#7c5cff;--ok:#3ecf8e;--err:#ff6b6b}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);font:14px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;padding:24px;max-width:960px;margin:0 auto}
+  h1{font-size:22px;margin:0 0 2px}
+  .sub{color:var(--sub);font-size:13px;margin-bottom:18px}
+  .bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+  input[type=text]{flex:1;min-width:240px;background:var(--panel2);border:1px solid var(--line);color:var(--txt);border-radius:9px;padding:9px 12px;font-size:14px;outline:none}
+  input:focus{border-color:var(--accent)}
+  button{background:var(--accent);color:#fff;border:none;border-radius:9px;padding:9px 16px;font-size:14px;cursor:pointer;font-weight:600;white-space:nowrap}
+  button.sec{background:var(--panel2);color:var(--txt);border:1px solid var(--line)}
+  button.green{background:#1d9e75}
+  button:disabled{opacity:.5;cursor:not-allowed}
+  a{color:var(--accent)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
+  .card h2{font-size:14px;margin:0 0 10px}
+  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
+  .row label{font-size:12px;color:var(--sub);min-width:58px}
+  .row input{flex:1;min-width:120px;background:var(--panel2);border:1px solid var(--line);color:var(--txt);border-radius:8px;padding:7px 10px;font-size:13px;outline:none}
+  .out{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px;font:12px/1.5 ui-monospace,Consolas,monospace;color:#c8cdd6;white-space:pre-wrap;word-break:break-word;max-height:220px;overflow:auto;margin-top:8px;min-height:34px}
+  .status{font-size:12px;min-height:16px;margin-top:6px}
+  .ok{color:var(--ok)}.err{color:var(--err)}
+  pre{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:12px;overflow:auto;font:12px/1.6 ui-monospace,Consolas,monospace}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{border:1px solid var(--line);padding:6px 10px;text-align:left}
+  th{background:var(--panel2);font-weight:500}
+  code{background:var(--panel2);padding:1px 6px;border-radius:6px;font-size:12px}
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+  <h1>FoloToy NFC 试验台</h1>
+  <div class="sub">硬件软件试验台：FOLOTOY 八爪鱼 + NFC 打卡 / Token 发放 / 奖品兑换。后端本地运行（Node 或 Docker），本页直连其 API 在线实测。</div>
+
+  <div class="bar">
+    <input id="apiBase" type="text" placeholder="API 地址（默认 http://localhost:3000）" />
+    <button id="saveBase" class="sec">保存</button>
+    <button id="health">健康检查</button>
+    <a class="sec" href="#" id="adminLink" style="text-decoration:none;background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:8px 14px;color:var(--txt)">管理后台 ↗</a>
+  </div>
+  <div id="baseStatus" class="status"></div>
+
+  <div class="grid">
+    <div class="card">
+      <h2>① NFC 打卡</h2>
+      <div class="row"><label>设备</label><input id="ckDev" value="device-001" /></div>
+      <div class="row"><label>标签</label><input id="ckTag" value="04A224B33C01" /></div>
+      <div class="row"><button id="ckBtn">POST /api/nfc/checkin</button></div>
+      <div class="out" id="ckOut">—</div>
+    </div>
+
+    <div class="card">
+      <h2>② Token 余额</h2>
+      <div class="row"><label>设备</label><input id="balDev" value="device-001" /></div>
+      <div class="row"><button id="balBtn" class="sec">GET /api/token/balance</button></div>
+      <div class="out" id="balOut">—</div>
+    </div>
+
+    <div class="card">
+      <h2>③ 奖品列表</h2>
+      <div class="row"><button id="rwBtn" class="sec">GET /api/rewards</button></div>
+      <div class="out" id="rwOut">—</div>
+    </div>
+
+    <div class="card">
+      <h2>④ 奖品兑换</h2>
+      <div class="row"><label>设备</label><input id="rdDev" value="device-001" /></div>
+      <div class="row"><label>奖品ID</label><input id="rdId" value="1" /></div>
+      <div class="row"><button id="rdBtn">POST /api/rewards/redeem</button></div>
+      <div class="out" id="rdOut">—</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <h2>⑤ 一键演示（打卡 → 余额 → 奖品 → 兑换）</h2>
+    <div class="row"><button id="demoBtn" class="green">跑完整流程</button><span id="demoSt" class="status" style="margin:0"></span></div>
+    <div class="out" id="demoOut" style="max-height:300px">—</div>
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <h2>快速开始</h2>
+    <pre>cd backend
+npm install
+npm run init-db
+npm start          # → http://localhost:3000（后台 /web）</pre>
+    <p style="font-size:12px;color:var(--sub)">设备端模拟：<code>cd device && npm i ws && node server.js</code>（WS :8080）；NFC 实测：<code>device/nfc_test.py</code>（pyserial，COM3）。固件：<code>firmware/</code> ESP-IDF，build.cmd 构建。详细说明见 <a href="folotoy-nfc-passport/试验台说明.md">试验台说明.md</a>。</p>
+  </div>
+
+<script>
+(function(){
+  var LS='wb_folotoy_api';
+  var baseEl=document.getElementById('apiBase');
+  baseEl.value=localStorage.getItem(LS)||'http://localhost:3000';
+  function base(){return (baseEl.value||'http://localhost:3000').replace(/\/$/,'');}
+  document.getElementById('saveBase').onclick=function(){localStorage.setItem(LS,base());st('baseStatus','已保存: '+base(),'ok');};
+  var adminLink=document.getElementById('adminLink');
+  function updAdmin(){adminLink.href=base()+'/web';}
+  updAdmin(); baseEl.oninput=updAdmin;
+
+  function st(id,msg,kind){var e=document.getElementById(id);e.textContent=msg||'';e.className='status'+(kind?' '+kind:'');}
+  function out(id,obj){var e=document.getElementById(id);e.textContent=typeof obj==='string'?obj:JSON.stringify(obj,null,2);}
+  async function call(method,path,body){
+    var r=await fetch(base()+path,{method:method,headers:{'Content-Type':'application/json'},body:body?JSON.stringify(body):undefined});
+    var j;try{j=await r.json();}catch(e){j={raw:(await r.text()).slice(0,200)};}
+    return {status:r.status,json:j};
+  }
+  async function run(id,outId,method,path,body){
+    st(id,'请求中…');
+    try{var res=await call(method,path,body);out(outId,{http:res.status,resp:res.json});st(id,res.json.success?'✓ 成功':'✗ 失败',res.json.success?'ok':'err');}
+    catch(e){out(outId,'请求异常: '+e);st(id,'请求异常: '+e,'err');}
+  }
+
+  document.getElementById('health').onclick=async function(){st('baseStatus','检查中…');try{var r=await call('GET','/api/health');st('baseStatus',r.json.status==='ok'?'✓ 后端在线 ('+base()+')':'✗ 非预期响应','ok');}catch(e){st('baseStatus','✗ 无法连接: '+e,'err');}};
+  document.getElementById('ckBtn').onclick=function(){run('baseStatus','ckOut','POST','/api/nfc/checkin',{device_id:document.getElementById('ckDev').value,tag_uid:document.getElementById('ckTag').value});};
+  document.getElementById('balBtn').onclick=function(){run('baseStatus','balOut','GET','/api/token/balance/'+encodeURIComponent(document.getElementById('balDev').value));};
+  document.getElementById('rwBtn').onclick=function(){run('baseStatus','rwOut','GET','/api/rewards');};
+  document.getElementById('rdBtn').onclick=function(){run('baseStatus','rdOut','POST','/api/rewards/redeem',{device_id:document.getElementById('rdDev').value,reward_id:parseInt(document.getElementById('rdId').value,10)});};
+
+  document.getElementById('demoBtn').onclick=async function(){
+    var dev='device-demo-'+Date.now(), tag='04A2'+Math.random().toString(16).slice(2,10).toUpperCase();
+    var log=[];var e=document.getElementById('demoSt');
+    st('demoSt','运行中…');
+    try{
+      var r1=await call('POST','/api/nfc/checkin',{device_id:dev,tag_uid:tag});log.push('① 打卡: '+JSON.stringify(r1.json));
+      var r2=await call('GET','/api/token/balance/'+dev);log.push('② 余额: '+JSON.stringify(r2.json));
+      var r3=await call('GET','/api/rewards');var rws=r3.json.data||[];log.push('③ 奖品: '+rws.length+' 个');
+      var rid=rws[0]?rws[0].id:1;
+      var r4=await call('POST','/api/rewards/redeem',{device_id:dev,reward_id:rid});log.push('④ 兑换#'+rid+': '+JSON.stringify(r4.json));
+      var r5=await call('GET','/api/token/balance/'+dev);log.push('⑤ 兑换后余额: '+JSON.stringify(r5.json));
+      out('demoOut',log.join('\n'));st('demoSt','✓ 完整旅程跑通','ok');
+    }catch(err){out('demoOut',log.concat(['异常: '+err]).join('\n'));st('demoSt','✗ '+err,'err');}
+  };
+})();
+</script>
+</body>
+</html>

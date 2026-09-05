@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  nfc-api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+      - "8080:8080"
+    environment:
+      - NODE_ENV=production
+      - DB_PATH=./data/folotoy-nfc.db
+      - MQTT_BROKER=mqtt://mosquitto:1883
+      - MQTT_TOPIC_PREFIX=folotoy/nfc
+      - WS_PORT=8080
+      - ADMIN_API_KEY=${ADMIN_API_KEY:-change-me-in-production}
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      - mosquitto
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  mosquitto:
+    image: eclipse-mosquitto:2
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - ./mosquitto/config:/mosquitto/config
+      - ./mosquitto/data:/mosquitto/data
+      - ./mosquitto/log:/mosquitto/log
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./backend/src/public:/usr/share/nginx/html
+    depends_on:
+      - nfc-api
+    restart: unless-stopped
+
+volumes:
+  redis_data:

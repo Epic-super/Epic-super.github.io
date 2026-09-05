@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#171714">
+<title>习惯锻造台 · 小待</title>
+<style>
+:root{
+  --bg:#f6f4ee; --panel:#ffffff; --panel2:#faf8f2; --ink:#2b2a26; --muted:#98917f;
+  --line:#e6e2d6; --line2:#f0ece2; --acc1:#e08a3c; --acc1-soft:#fbeede; --acc1-ink:#b06a22;
+  --acc2:#4da58c; --acc2-soft:#e6f2ee; --green:#3f9e6f; --red:#cf5b4e; --gold:#c9a24b;
+  --shadow:0 1px 2px rgba(50,40,20,.06),0 8px 24px rgba(50,40,20,.07);
+  --radius:16px; --radius-s:11px;
+}
+[data-theme="dark"]{
+  --bg:#171714; --panel:#1f1f1a; --panel2:#23231d; --ink:#eceadf; --muted:#97917e;
+  --line:#2f2e26; --line2:#2a2921; --acc1:#f0a052; --acc1-soft:#3a2a18; --acc1-ink:#ffc079;
+  --acc2:#62bfa4; --acc2-soft:#1c2f29; --green:#5bb98c; --red:#e07a6e; --gold:#d8b25e;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased;}
+button{font-family:inherit;}
+::-webkit-scrollbar{width:0;height:0;}
+.shell{display:flex;min-height:100vh;}
+.sidebar{width:228px;flex:none;position:sticky;top:0;height:100vh;padding:22px 14px;border-right:1px solid var(--line);background:var(--panel2);display:flex;flex-direction:column;gap:4px;overflow-y:auto;}
+.brand{display:flex;align-items:center;gap:10px;padding:0 8px 18px;}
+.brand .logo{width:36px;height:36px;border-radius:11px;background:linear-gradient(135deg,var(--acc1),var(--acc2));display:flex;align-items:center;justify-content:center;color:#fff;flex:none;font-size:17px;}
+.brand b{font-size:16px;letter-spacing:.5px;display:block;line-height:1.2;}
+.brand small{display:block;color:var(--muted);font-size:11px;font-weight:400;}
+.nav-item{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:12px;cursor:pointer;color:var(--muted);font-weight:600;font-size:14.5px;transition:.15s;border:1px solid transparent;}
+.nav-item .ico{width:20px;height:20px;flex:none;display:flex;align-items:center;justify-content:center;font-size:15px;}
+.nav-item:hover{background:var(--panel);color:var(--ink);}
+.nav-item.active{background:var(--acc1-soft);color:var(--acc1-ink);border-color:var(--line);}
+.side-foot{margin-top:auto;padding:10px 8px 0;color:var(--muted);font-size:11px;line-height:1.7;}
+.side-foot .back{display:inline-block;margin-bottom:8px;color:var(--acc1-ink);text-decoration:none;font-weight:700;font-size:12px;}
+.main{flex:1;min-width:0;display:flex;flex-direction:column;}
+.topbar{position:sticky;top:0;z-index:15;background:color-mix(in srgb,var(--bg) 86%,transparent);backdrop-filter:blur(12px);padding:14px 22px 12px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.topbar h1{font-size:20px;margin:0;font-weight:800;letter-spacing:.3px;}
+.topbar .sub{color:var(--muted);font-size:12.5px;}
+.topbar .spacer{flex:1;}
+.icon-btn{width:38px;height:38px;border-radius:11px;border:1px solid var(--line);background:var(--panel);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink);font-size:15px;}
+.icon-btn:hover{border-color:var(--acc1);}
+.wrap{max-width:960px;width:100%;margin:0 auto;padding:20px 22px 120px;}
+.view-head{display:flex;align-items:baseline;gap:10px;margin:0 0 16px;flex-wrap:wrap;}
+.view-head h2{font-size:22px;margin:0;font-weight:800;}
+.view-head .desc{color:var(--muted);font-size:13px;}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);margin-bottom:16px;}
+.panel.tight{padding:14px;}
+.panel-title{display:flex;align-items:center;justify-content:space-between;margin:0 0 12px;gap:10px;flex-wrap:wrap;}
+.panel-title h3{font-size:15px;margin:0;font-weight:800;display:flex;align-items:center;gap:8px;}
+.panel-title .dim{color:var(--muted);font-size:12px;font-weight:400;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+@media(max-width:760px){.grid2,.grid3{grid-template-columns:1fr 1fr;}}
+@media(max-width:520px){.grid2,.grid3{grid-template-columns:1fr;}}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+.field{display:flex;flex-direction:column;gap:5px;min-width:0;}
+.field label{font-size:12px;color:var(--muted);font-weight:700;}
+input,select,textarea{font-family:inherit;font-size:14px;color:var(--ink);background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:9px 11px;outline:none;transition:.15s;width:100%;}
+input:focus,select:focus,textarea:focus{border-color:var(--acc1);background:var(--panel);}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:38px;padding:8px 14px;border-radius:11px;border:1px solid var(--line);background:var(--panel);color:var(--ink);font-size:13.5px;font-weight:700;cursor:pointer;transition:.15s;}
+.btn:hover{border-color:var(--acc1);}
+.btn.primary{background:var(--acc1);border-color:var(--acc1);color:#fff;}
+.btn.primary:hover{background:var(--acc1-ink);}
+.btn.ghost{background:transparent;}
+.btn.sm{min-height:32px;padding:5px 10px;font-size:12.5px;border-radius:9px;}
+.btn.danger{color:var(--red);}
+.btn.danger:hover{border-color:var(--red);}
+.tag{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11.5px;font-weight:700;background:var(--panel2);border:1px solid var(--line);color:var(--muted);}
+.tag.ok{color:var(--green);border-color:color-mix(in srgb,var(--green) 40%,var(--line));}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+@media(max-width:760px){.tiles{grid-template-columns:repeat(2,1fr);}}
+.tile{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:13px 14px;}
+.tile .k{font-size:12px;color:var(--muted);font-weight:700;}
+.tile .v{font-size:23px;font-weight:800;margin-top:4px;font-variant-numeric:tabular-nums;}
+.tile .v small{font-size:12px;color:var(--muted);font-weight:400;}
+.empty{color:var(--muted);text-align:center;padding:30px 10px;font-size:14px;}
+.mini{background:none;border:none;color:var(--muted);cursor:pointer;padding:4px 7px;border-radius:7px;font-size:12.5px;}
+.mini:hover{color:var(--red);background:var(--panel2);}
+#toast{position:fixed;left:50%;bottom:34px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--bg);padding:10px 20px;border-radius:12px;font-size:13.5px;font-weight:700;opacity:0;pointer-events:none;transition:.25s;z-index:99;box-shadow:0 8px 30px rgba(0,0,0,.3);max-width:88vw;}
+#toast.on{opacity:1;transform:translateX(-50%) translateY(0);}
+/* today */
+.hero{display:flex;gap:20px;align-items:center;flex-wrap:wrap;}
+.ring{width:132px;height:132px;flex:none;}
+.ring-num{font-size:30px;font-weight:800;fill:var(--ink);}
+.ring-cap{font-size:12px;font-weight:800;fill:var(--acc1);}
+.hero-info{flex:1;min-width:230px;}
+.hero-info .t{font-size:18px;font-weight:800;}
+.hero-info .d{color:var(--muted);font-size:13px;margin-top:3px;}
+.level-box{display:flex;align-items:center;gap:12px;margin-top:12px;flex-wrap:wrap;}
+.lv{display:inline-flex;align-items:center;gap:7px;padding:6px 14px;border-radius:20px;background:linear-gradient(135deg,var(--acc1),var(--acc2));color:#fff;font-weight:800;font-size:14px;}
+.lv-bar{flex:1;min-width:140px;height:10px;background:var(--line2);border-radius:6px;overflow:hidden;}
+.lv-bar i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,var(--acc1),var(--acc2));transition:width .4s;}
+.lv-txt{color:var(--muted);font-size:12px;font-weight:700;white-space:nowrap;}
+.habit-row{display:flex;align-items:center;gap:12px;padding:12px 2px;border-bottom:1px solid var(--line2);}
+.habit-row:last-child{border-bottom:none;}
+.habit-row .hic{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:19px;flex:none;background:var(--panel2);}
+.habit-row .hb{flex:1;min-width:0;}
+.habit-row .hb .hn{font-weight:800;font-size:15px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.habit-row .hb .hm{color:var(--muted);font-size:12px;margin-top:2px;}
+.check-btn{width:46px;height:46px;border-radius:14px;border:2px solid var(--line);background:var(--panel2);cursor:pointer;font-size:20px;display:flex;align-items:center;justify-content:center;transition:.15s;flex:none;color:transparent;}
+.check-btn:hover{border-color:var(--acc1);transform:scale(1.05);}
+.check-btn.done{background:var(--acc1);border-color:var(--acc1);color:#fff;}
+/* heatmap */
+.heat-wrap{overflow-x:auto;padding-bottom:6px;}
+.heat{display:inline-flex;gap:4px;}
+.heat-wk{display:flex;flex-direction:column;gap:4px;}
+.sq{width:14px;height:14px;border-radius:3px;background:var(--line2);cursor:pointer;border:none;padding:0;transition:.1s;}
+.sq:hover{transform:scale(1.25);box-shadow:0 0 0 2px var(--acc1);z-index:2;position:relative;}
+.sq.l1{background:color-mix(in srgb,var(--acc2) 26%,var(--line2));}
+.sq.l2{background:color-mix(in srgb,var(--acc2) 55%,var(--line2));}
+.sq.l3{background:var(--acc2);}
+.sq.l4{background:var(--acc1);}
+.sq.today{outline:2px solid var(--acc1);outline-offset:1px;}
+.heat-legend{display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--muted);justify-content:flex-end;margin-top:8px;}
+.heat-legend .sq{width:12px;height:12px;cursor:default;}
+.heat-legend .sq:hover{transform:none;box-shadow:none;}
+/* habits mgmt */
+.hmg{display:flex;align-items:center;gap:10px;padding:10px 2px;border-bottom:1px solid var(--line2);}
+.hmg:last-child{border-bottom:none;}
+.hmg .hic{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex:none;background:var(--panel2);}
+.hmg .hb{flex:1;min-width:0;}
+.hmg .hb .hn{font-weight:800;font-size:14px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.hmg .hb .hm{color:var(--muted);font-size:11.5px;margin-top:1px;}
+.hmg .acts{display:flex;gap:5px;flex:none;}
+.tpl{display:flex;align-items:center;gap:9px;border:1px solid var(--line);border-radius:11px;padding:9px 11px;cursor:pointer;transition:.15s;background:var(--panel2);}
+.tpl:hover{border-color:var(--acc1);}
+.tpl .hic{width:30px;height:30px;border-radius:9px;background:var(--panel);display:flex;align-items:center;justify-content:center;font-size:15px;flex:none;}
+.tpl .tn{font-size:13px;font-weight:800;}
+.tpl .td{font-size:11px;color:var(--muted);}
+.tpl .add{margin-left:auto;color:var(--acc1-ink);font-weight:800;font-size:15px;}
+/* stats */
+.stt-row{display:flex;gap:12px;align-items:center;padding:10px 2px;border-bottom:1px solid var(--line2);}
+.stt-row:last-child{border-bottom:none;}
+.stt-row .hic{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;flex:none;background:var(--panel2);}
+.stt-row .sb{flex:1;min-width:0;}
+.stt-row .sb .sn{font-weight:800;font-size:14px;}
+.stt-row .sb .bar{height:8px;background:var(--line2);border-radius:5px;overflow:hidden;margin-top:5px;}
+.stt-row .sb .bar i{display:block;height:100%;border-radius:5px;background:linear-gradient(90deg,var(--acc1),var(--acc2));}
+.stt-row .sv{flex:none;text-align:right;font-size:12.5px;color:var(--muted);font-weight:700;line-height:1.7;}
+/* achievements */
+.ach{display:flex;gap:12px;align-items:center;border:1px solid var(--line);border-radius:13px;padding:12px 14px;margin-bottom:10px;background:var(--panel2);}
+.ach .aic{width:44px;height:44px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:22px;flex:none;background:var(--panel);border:1px solid var(--line);filter:grayscale(1);opacity:.45;}
+.ach.unlocked .aic{filter:none;opacity:1;border-color:var(--gold);background:var(--acc1-soft);}
+.ach .ab{flex:1;min-width:0;}
+.ach .ab .an{font-weight:800;font-size:14.5px;}
+.ach .ab .ad{color:var(--muted);font-size:12.5px;margin-top:2px;line-height:1.5;}
+.ach .ast{flex:none;font-size:12px;font-weight:800;color:var(--muted);}
+.ach.unlocked .ast{color:var(--gold);}
+/* day modal */
+.mask{position:fixed;inset:0;background:rgba(10,10,8,.6);display:none;z-index:60;padding:20px;backdrop-filter:blur(3px);}
+.mask.on{display:flex;align-items:center;justify-content:center;}
+.modal{background:var(--panel);border:1px solid var(--line);border-radius:18px;width:100%;max-width:420px;max-height:82vh;overflow-y:auto;padding:20px;box-shadow:0 20px 60px rgba(0,0,0,.4);}
+.modal h3{margin:0 0 4px;font-size:17px;font-weight:800;}
+.modal .md{color:var(--muted);font-size:12.5px;margin-bottom:14px;}
+.modal .mclose{float:right;background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;}
+@media(max-width:760px){
+  .shell{flex-direction:column;}
+  .sidebar{width:100%;height:auto;position:static;flex-direction:row;flex-wrap:wrap;gap:6px;padding:10px 12px;border-right:none;border-bottom:1px solid var(--line);overflow-x:auto;}
+  .brand{display:none;}
+  .nav-item{padding:7px 11px;font-size:13.5px;white-space:nowrap;}
+  .side-foot{display:none;}
+  .wrap{padding:16px 14px 110px;}
+}
+/* ===== sleep ===== */
+.sleep-card{border:1px solid var(--line);border-radius:var(--radius);padding:18px;background:linear-gradient(135deg,color-mix(in srgb,var(--acc1) 8%,var(--panel)),var(--panel));box-shadow:var(--shadow);}
+.sleep-head{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:14px;}
+.sleep-ring{width:90px;height:90px;flex:none;}
+.sleep-ring text{fill:var(--ink);font-weight:800;font-size:22px;text-anchor:middle;}
+.sleep-ring .cap{fill:var(--muted);font-size:10px;}
+.sleep-status{flex:1;min-width:200px;}
+.sleep-status .t{font-size:18px;font-weight:800;}
+.sleep-status .d{color:var(--muted);font-size:13px;margin-top:4px;line-height:1.6;}
+.encouragement{background:var(--acc2-soft);border:1px solid color-mix(in srgb,var(--acc2) 30%,var(--line));color:var(--ink);border-radius:13px;padding:12px 14px;font-weight:700;font-size:14px;margin:12px 0 4px;}
+.encouragement.warn{background:var(--acc1-soft);border-color:color-mix(in srgb,var(--acc1) 30%,var(--line));}
+.sleep-form{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;align-items:end;}
+@media(max-width:520px){.sleep-form{grid-template-columns:1fr;}}
+.sleep-form input[type="time"]{text-align:center;letter-spacing:1px;}
+.sleep-result{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+.week-chart{display:flex;align-items:flex-end;gap:8px;height:140px;padding:10px 4px 4px;border:1px solid var(--line);border-radius:13px;background:var(--panel2);}
+.wcol{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;}
+.wbar{flex:1;width:100%;max-width:32px;border-radius:6px 6px 3px 3px;min-height:4px;transition:height .4s;background:var(--line2);position:relative;}
+.wbar::after{content:attr(data-h);position:absolute;top:-18px;left:50%;transform:translateX(-50%);font-size:10px;font-weight:800;color:var(--muted);white-space:nowrap;opacity:0;transition:.15s;}
+.wcol:hover .wbar::after{opacity:1;}
+.wlbl{font-size:11px;color:var(--muted);font-weight:700;}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;}
+.mc{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;border:1px solid var(--line);background:var(--panel);cursor:default;}
+.mc.blank{background:var(--panel2);color:var(--muted);border-color:var(--line);}
+.mc.good{background:var(--acc2-soft);color:color-mix(in srgb,var(--acc2) 70%,#000);border-color:color-mix(in srgb,var(--acc2) 50%,var(--line));}
+.mc.bad{background:var(--acc1-soft);color:color-mix(in srgb,var(--acc1) 80%,#000);border-color:color-mix(in srgb,var(--acc1) 50%,var(--line));}
+.mc.empty{visibility:hidden;}
+.share-card{background:linear-gradient(135deg,#1a1822 0%,#2d2640 100%);color:#fff;border-radius:18px;padding:22px;position:relative;overflow:hidden;}
+.share-card::before{content:"";position:absolute;top:-40px;right:-40px;width:140px;height:140px;border-radius:50%;background:rgba(255,255,255,.06);}
+.share-card .tt{font-size:20px;font-weight:800;margin-bottom:4px;}
+.share-card .st{font-size:12px;opacity:.75;margin-bottom:18px;}
+.share-card .big{display:flex;gap:18px;margin-bottom:18px;}
+.share-card .big .item{flex:1;text-align:center;}
+.share-card .big .num{font-size:34px;font-weight:800;line-height:1;}
+.share-card .big .lab{font-size:11px;opacity:.7;margin-top:6px;}
+.share-card .quote{font-size:14px;line-height:1.6;opacity:.9;border-left:3px solid var(--acc1);padding-left:12px;}
+.share-card .foot{display:flex;justify-content:space-between;align-items:center;margin-top:18px;font-size:11px;opacity:.6;}
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand"><div class="logo">⚒️</div><div><b>习惯锻造台</b><small>Habit Forge</small></div></div>
+    <div class="nav-item active" data-v="today"><span class="ico">☀️</span>今日</div>
+    <div class="nav-item" data-v="habits"><span class="ico">📋</span>习惯管理</div>
+    <div class="nav-item" data-v="heat"><span class="ico">🔥</span>热力图</div>
+    <div class="nav-item" data-v="stats"><span class="ico">📈</span>统计</div>
+    <div class="nav-item" data-v="ach"><span class="ico">🏆</span>成就</div>
+    <div class="nav-item" data-v="sleep"><span class="ico">🌙</span>睡眠</div>
+    <div class="nav-item" data-v="data"><span class="ico">🗄️</span>数据</div>
+    <div class="side-foot">
+      <a class="back" href="../index.html">← 返回实验室</a><br>
+      <a class="back" href="../../index.html#sec-tools">← 返回指挥台</a><br>
+      数据本地存储 · 灵感来自 Loop / Habitica
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <h1 id="tbTitle">今日打卡</h1><div class="sub" id="tbSub"></div>
+      <div class="spacer"></div>
+      <button class="icon-btn" id="btnTheme" title="切换主题">🌓</button>
+    </div>
+    <div class="wrap">
+
+      <section class="view" id="v-today">
+        <div class="view-head"><h2>今日打卡</h2><span class="desc" id="todayDate"></span></div>
+        <div class="panel">
+          <div class="hero">
+            <svg class="ring" viewBox="0 0 120 120">
+              <circle cx="60" cy="60" r="52" fill="none" stroke="var(--line2)" stroke-width="12"/>
+              <circle id="ringArc" cx="60" cy="60" r="52" fill="none" stroke="var(--acc1)" stroke-width="12" stroke-linecap="round" stroke-dasharray="326.7" stroke-dashoffset="326.7" transform="rotate(-90 60 60)"/>
+              <text class="ring-num" x="60" y="57" text-anchor="middle" id="ringNum">0%</text>
+              <text class="ring-cap" x="60" y="74" text-anchor="middle">今日完成</text>
+            </svg>
+            <div class="hero-info">
+              <div class="t" id="heroMsg">早上好，小待 ☀️</div>
+              <div class="d" id="heroHint">按时起床、把生活与学习环境收拾整齐，都是值得坚持的微小行动。完成今天的打卡，积累经验升级吧。</div>
+              <div class="level-box">
+                <span class="lv" id="lvBox">Lv.1</span>
+                <div class="lv-bar"><i id="lvFill" style="width:0%"></i></div>
+                <span class="lv-txt" id="lvTxt">0 / 120 XP</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-title"><h3>☀️ 今天的习惯</h3><span class="dim" id="dueHint"></span></div>
+          <div id="todayList"></div>
+          <div class="row" style="margin-top:12px;justify-content:flex-end"><button class="btn sm" onclick="go('habits')">管理习惯 →</button></div>
+        </div>
+        <div class="panel">
+          <div class="panel-title"><h3>⏳ 顺手一做的习惯</h3><span class="dim">今天不在计划日，做了也算数</span></div>
+          <div id="todayExtra"></div>
+        </div>
+      </section>
+
+      <section class="view" id="v-habits" style="display:none">
+        <div class="view-head"><h2>习惯管理</h2><span class="desc">从模板一键添加，或自定义你的节奏</span></div>
+        <div class="panel">
+          <div class="panel-title"><h3>🧰 预置模板</h3><span class="dim">早起 · 整洁 · 学习 · 健康，点 + 即添加</span></div>
+          <div class="grid3" id="tplGrid"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-title"><h3>➕ 自定义习惯</h3></div>
+          <div class="grid3">
+            <div class="field"><label>名称</label><input id="nName" placeholder="例如：睡前整理书桌"></div>
+            <div class="field"><label>图标（emoji）</label><input id="nIcon" placeholder="🧹" maxlength="4"></div>
+            <div class="field"><label>颜色</label><select id="nColor"><option value="#e08a3c">琥珀</option><option value="#4da58c">青绿</option><option value="#5b8de0">蓝</option><option value="#c76bb3">紫粉</option><option value="#cf5b4e">红</option><option value="#8b6fd8">紫</option><option value="#3f9e6f">绿</option><option value="#c9a24b">金</option></select></div>
+            <div class="field"><label>频率</label><select id="nFreq"><option value="daily">每天</option><option value="wk3">每周 3 天</option><option value="wk5">每周 5 天</option><option value="wk1">每周 1 天</option></select></div>
+            <div class="field"><label>分类</label><select id="nKind"><option value="clean">🧹 环境整洁</option><option value="health">💪 健康作息</option><option value="study">📚 学习成长</option><option value="mind">🧠 心灵自律</option><option value="other">📦 其它</option></select></div>
+            <div class="field"><label>计划日（每周频率时生效，多选）</label><select id="nDays" multiple size="3" style="min-height:74px"><option value="1" selected>周一</option><option value="2" selected>周二</option><option value="3" selected>周三</option><option value="4" selected>周四</option><option value="5" selected>周五</option><option value="6">周六</option><option value="0">周日</option></select></div>
+          </div>
+          <div class="row" style="margin-top:12px;justify-content:flex-end"><button class="btn primary" onclick="addCustom()">添加习惯 ➕</button></div>
+        </div>
+        <div class="panel">
+          <div class="panel-title"><h3>我的习惯</h3><span class="dim" id="habitCount"></span></div>
+          <div id="habitList"></div>
+        </div>
+      </section>
+
+      <section class="view" id="v-heat" style="display:none">
+        <div class="view-head"><h2>全年热力图</h2><span class="desc">颜色越深完成越多 · 点击任意一天查看 / 补卡</span></div>
+        <div class="panel">
+          <div class="heat-wrap" id="heatWrap"></div>
+          <div class="heat-legend"><span>少</span><span class="sq"></span><span class="sq l1"></span><span class="sq l2"></span><span class="sq l3"></span><span class="sq l4"></span><span>多</span></div>
+        </div>
+        <div class="panel"><div class="panel-title"><h3>📅 本月概览</h3></div><div id="monthStat"></div></div>
+      </section>
+
+      <section class="view" id="v-stats" style="display:none">
+        <div class="view-head"><h2>统计</h2><span class="desc">连续天数 · 完成率 · 最佳记录，数据会说话</span></div>
+        <div class="tiles">
+          <div class="tile"><div class="k">🔥 总打卡</div><div class="v" id="sTotal">0<small> 次</small></div></div>
+          <div class="tile"><div class="k">📆 累计活跃天数</div><div class="v" id="sDays">0<small> 天</small></div></div>
+          <div class="tile"><div class="k">⭐ 当前最长连击</div><div class="v" id="sBest">0<small> 天</small></div></div>
+          <div class="tile"><div class="k">🏆 成就</div><div class="v" id="sAch">0<small> / 9</small></div></div>
+        </div>
+        <div class="panel" style="margin-top:16px"><div class="panel-title"><h3>📊 习惯明细</h3></div><div id="statList"></div></div>
+      </section>
+
+      <section class="view" id="v-ach" style="display:none">
+        <div class="view-head"><h2>成就徽章</h2><span class="desc">解锁成就获得额外经验 · 持续坚持，勋章自然来</span></div>
+        <div class="panel">
+          <div class="tiles">
+            <div class="tile"><div class="k">⭐ 当前等级</div><div class="v" id="aLv">1</div></div>
+            <div class="tile"><div class="k">✨ 累计经验</div><div class="v" id="aXp">0</div></div>
+            <div class="tile"><div class="k">🏆 已解锁</div><div class="v" id="aGot">0<small> / 9</small></div></div>
+          </div>
+        </div>
+        <div id="achList"></div>
+      </section>
+
+      <section class="view" id="v-data" style="display:none">
+        <div class="view-head"><h2>数据管理</h2><span class="desc">打卡数据都在本地，随时备份 / 恢复 / 迁移</span></div>
+        <div class="grid2">
+          <div class="panel">
+            <div class="panel-title"><h3>💾 备份与恢复</h3></div>
+            <div class="row">
+              <button class="btn" onclick="exportData()">⬇️ 导出备份 JSON</button>
+              <button class="btn" onclick="document.getElementById('impFile').click()">⬆️ 导入恢复</button>
+              <input type="file" id="impFile" accept=".json" style="display:none" onchange="importData(this)">
+            </div>
+            <div class="dim" style="font-size:12px;margin-top:10px;color:var(--muted)">备份包含全部习惯、睡眠记录、打卡记录、经验等级与成就。可在任意浏览器恢复。</div>
+          </div>
+          <div class="panel">
+            <div class="panel-title"><h3>⚙️ 设置</h3></div>
+            <div class="field" style="margin-bottom:12px"><label>界面主题</label><select id="selTheme" onchange="setTheme(this.value)"><option value="dark">深色（默认）</option><option value="light">浅色</option></select></div>
+            <div class="field"><label>危险操作</label><button class="btn danger sm" onclick="resetAll()">清空全部数据（不可恢复）</button></div>
+            <div class="dim" style="font-size:12px;margin-top:10px;color:var(--muted);line-height:1.7">积分规则：每次习惯打卡 +10 XP，连续坚持额外 +1~10 XP；早睡达标 +15 XP；每级所需经验 = 等级 × 120。</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====== 睡眠 ====== -->
+      <section class="view" id="v-sleep" style="display:none">
+        <div class="view-head"><h2>🌙 睡眠管理</h2><span class="desc">按时睡觉 · 正向反馈 · 过程可视可分享</span><a class="btn sm" href="chat.html" style="margin-left:auto">💬 和鼓励你的人聊聊</a></div>
+
+        <div class="panel sleep-card">
+          <div class="sleep-head">
+            <svg class="sleep-ring" viewBox="0 0 100 100">
+              <circle cx="50" cy="50" r="42" fill="none" stroke="var(--line2)" stroke-width="10"/>
+              <circle id="sleepRing" cx="50" cy="50" r="42" fill="none" stroke="var(--acc2)" stroke-width="10" stroke-linecap="round" stroke-dasharray="264" stroke-dashoffset="264" transform="rotate(-90 50 50)"/>
+              <text id="sleepRingNum" x="50" y="49">--</text>
+              <text class="cap" x="50" y="65">早睡率</text>
+            </svg>
+            <div class="sleep-status">
+              <div class="t" id="sleepTitle">今晚还没打卡</div>
+              <div class="d" id="sleepHint">设定目标就寝时间，到点提醒自己去睡觉。早睡不是惩罚，是给明天的自己充电。</div>
+              <div class="encouragement" id="sleepEnc">💡 开始记录第一晚，就能看到进步。</div>
+            </div>
+          </div>
+
+          <div class="panel-title" style="margin-top:6px"><h3>📝 今晚记录</h3><span class="dim" id="sleepDate"></span></div>
+          <div class="sleep-form">
+            <div class="field"><label>目标就寝</label><input type="time" id="spTarget" value="23:30" onchange="setSleepTarget()"></div>
+            <div class="field"><label>实际就寝</label><input type="time" id="spBed" placeholder="--:--"></div>
+            <div class="field"><label>起床时间</label><input type="time" id="spWake" placeholder="--:--"></div>
+          </div>
+          <div class="row" style="margin-top:12px;justify-content:flex-end;gap:8px">
+            <button class="btn" onclick="fillSleepNow()">📍 我现在就睡</button>
+            <button class="btn primary" onclick="saveSleep()">保存记录 ✓</button>
+          </div>
+          <div class="sleep-result" id="sleepResult"></div>
+        </div>
+
+        <div class="grid2">
+          <div class="panel">
+            <div class="panel-title"><h3>📊 本周睡眠</h3><span class="dim">柱状高度 = 睡眠时长，绿色 = 达标</span></div>
+            <div class="week-chart" id="spWeek"></div>
+          </div>
+          <div class="panel">
+            <div class="panel-title"><h3>📅 本月日历</h3><span class="dim">绿色达标 · 红色超时 · 灰色未记录</span></div>
+            <div id="spMonth"></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-title"><h3>📤 睡眠周报告卡</h3><span class="dim">截图即可发朋友圈 / 短视频</span></div>
+          <div id="spShareCard">
+            <div class="share-card">
+              <div class="tt">🌙 我的睡眠周报</div>
+              <div class="st">坚持早睡，给生活充电</div>
+              <div class="big">
+                <div class="item"><div class="num" id="scDays">0</div><div class="lab">早睡天数</div></div>
+                <div class="item"><div class="num" id="scAvg">0</div><div class="lab">平均睡眠 h</div></div>
+                <div class="item"><div class="num" id="scStreak">0</div><div class="lab">连续早睡</div></div>
+              </div>
+              <div class="quote" id="scQuote">把睡眠放在第一位，效率、情绪、关系都会跟着变好。</div>
+              <div class="foot"><span>习惯锻造台 · 小待</span><span id="scWeek">2026</span></div>
+            </div>
+          </div>
+          <div class="row" style="margin-top:12px;justify-content:flex-end"><button class="btn" onclick="copyShareText()">📋 复制文案</button></div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+<div class="mask" id="dayMask" onclick="if(event.target===this)closeDay()">
+  <div class="modal">
+    <button class="mclose" onclick="closeDay()">✕</button>
+    <h3 id="dmTitle"></h3>
+    <div class="md" id="dmSub"></div>
+    <div id="dmList"></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+(function(){
+'use strict';
+/* ========== 工具 ========== */
+function $(id){return document.getElementById(id);}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function uid(){return 'h'+Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
+function iso(d){var m=d.getMonth()+1,dd=d.getDate();return d.getFullYear()+'-'+(m<10?'0'+m:m)+'-'+(dd<10?'0'+dd:dd);}
+function today(){return iso(new Date());}
+var toastTimer=null;
+function toast(msg){var t=$('toast');t.textContent=msg;t.classList.add('on');clearTimeout(toastTimer);toastTimer=setTimeout(function(){t.classList.remove('on');},2400);}
+
+/* ========== 数据 ========== */
+var KEY='wb_habits_v1';
+var KIND_N={'clean':'环境整洁','health':'健康作息','study':'学习成长','mind':'心灵自律','other':'其它'};
+var FREQ_N={'daily':'每天','wk1':'每周 1 天','wk3':'每周 3 天','wk5':'每周 5 天'};
+var TEMPLATES=[
+  {name:'早起（7:00 前）',icon:'🌅',kind:'health',freq:'daily',color:'#e08a3c'},
+  {name:'整理床铺',icon:'🛏️',kind:'clean',freq:'daily',color:'#4da58c'},
+  {name:'学习区整洁',icon:'📚',kind:'clean',freq:'daily',color:'#5b8de0'},
+  {name:'房间清扫',icon:'🧹',kind:'clean',freq:'wk3',color:'#c76bb3'},
+  {name:'衣物当天处理',icon:'🧺',kind:'clean',freq:'wk3',color:'#8b6fd8'},
+  {name:'垃圾及时清理',icon:'🚮',kind:'clean',freq:'wk3',color:'#3f9e6f'},
+  {name:'喝水 1.5L',icon:'💧',kind:'health',freq:'daily',color:'#5b8de0'},
+  {name:'运动 20 分钟',icon:'🏃',kind:'health',freq:'wk3',color:'#cf5b4e'},
+  {name:'阅读 20 分钟',icon:'📖',kind:'study',freq:'daily',color:'#c9a24b'},
+  {name:'23:30 前睡觉',icon:'🌙',kind:'health',freq:'daily',color:'#8b6fd8'},
+  {name:'日记 / 复盘',icon:'🧠',kind:'mind',freq:'daily',color:'#4da58c'},
+  {name:'记账',icon:'💰',kind:'mind',freq:'daily',color:'#e08a3c'}
+];
+var SLEEP_STREAK=0;
+var ACH=[
+  {id:'first',ico:'🌱',name:'初来乍到',desc:'完成第 1 次打卡',xp:20,check:function(s){return s.total>=1;}},
+  {id:'s7',ico:'🔥',name:'七日连击',desc:'任一习惯连续 7 天',xp:50,check:function(s){return s.maxStreak>=7;}},
+  {id:'s21',ico:'⚡',name:'三周坚持',desc:'任一习惯连续 21 天',xp:100,check:function(s){return s.maxStreak>=21;}},
+  {id:'s100',ico:'💪',name:'百日筑基',desc:'任一习惯累计完成 100 次',xp:200,check:function(s){return s.maxCount>=100;}},
+  {id:'early',ico:'🌅',name:'早起达人',desc:'「健康作息」类累计 30 次',xp:80,check:function(s){return (s.kindCount.health||0)>=30;}},
+  {id:'clean',ico:'✨',name:'整洁标兵',desc:'「环境整洁」类累计 50 次',xp:80,check:function(s){return (s.kindCount.clean||0)>=50;}},
+  {id:'study',ico:'📚',name:'学习之星',desc:'「学习成长」类累计 30 次',xp:80,check:function(s){return (s.kindCount.study||0)>=30;}},
+  {id:'sleep',ico:'🌙',name:'早睡星人',desc:'连续早睡（达标）7 天',xp:80,check:function(){return SLEEP_STREAK>=7;}},
+  {id:'multi7',ico:'🏅',name:'全能选手',desc:'3 个习惯同时连续 7 天',xp:150,check:function(s){return s.multiStreak>=3;}},
+  {id:'master',ico:'💎',name:'习惯大师',desc:'5 个习惯各累计 30 次',xp:200,check:function(s){return s.masterCount>=5;}}
+];
+function defData(){return {habits:[],logs:{},xp:0,achievements:[],settings:{theme:'dark'},sleep:{records:{},target:'23:30'}};}
+function load(){
+  try{var o=JSON.parse(localStorage.getItem(KEY));
+    if(o&&typeof o==='object'){
+      o.habits=Array.isArray(o.habits)?o.habits:[];o.logs=o.logs&&typeof o.logs==='object'?o.logs:{};
+      o.xp=o.xp||0;o.achievements=Array.isArray(o.achievements)?o.achievements:[];o.settings=o.settings||{};
+      o.settings.theme=o.settings.theme||'dark';
+      o.sleep=o.sleep||{records:{},target:'23:30'};
+      o.sleep.records=o.sleep.records||{};o.sleep.target=o.sleep.target||'23:30';
+      return o;
+    }
+  }catch(e){}
+  return defData();
+}
+var D=load();
+function save(){try{localStorage.setItem(KEY,JSON.stringify(D));}catch(e){toast('保存失败：本地存储可能已满');}}
+function activeHabits(){return D.habits.filter(function(h){return !h.archived;});}
+function freqDays(h){
+  if(h.freq==='daily')return [0,1,2,3,4,5,6];
+  var n={wk1:1,wk3:3,wk5:5}[h.freq]||3;
+  var base=h.days&&h.days.length?h.days.slice():[1,2,3,4,5,6,0];
+  return base.slice(0,n);
+}
+function dueOn(h,ds){return freqDays(h).indexOf(new Date(ds+'T00:00:00').getDay())>=0;}
+function doneOn(h,ds){var l=D.logs[ds];return !!(l&&l[h.id]);}
+function countDone(h){var c=0;for(var ds in D.logs)if(D.logs[ds][h.id])c++;return c;}
+function streak(h,ds){
+  var d=new Date(ds+'T00:00:00'),n=0,first=true;
+  for(var i=0;i<370;i++){
+    var s2=iso(d);
+    if(dueOn(h,s2)){
+      if(doneOn(h,s2))n++;
+      else{if(first){}else{break;}}
+    }
+    d.setDate(d.getDate()-1);first=false;
+  }
+  return n;
+}
+function allStats(){
+  var total=0,maxStreak=0,maxCount=0,multiStreak=0,masterCount=0,kindCount={},daySet={};
+  activeHabits().forEach(function(h){
+    var c=countDone(h);total+=c;
+    kindCount[h.kind]=(kindCount[h.kind]||0)+c;
+    var s=streak(h,today());
+    if(s>maxStreak)maxStreak=s;
+    if(c>maxCount)maxCount=c;
+    if(s>=7)multiStreak++;
+    if(c>=30)masterCount++;
+  });
+  for(var ds in D.logs)for(var hid in D.logs[ds])if(D.logs[ds][hid]){daySet[ds]=1;break;}
+  return {total:total,days:Object.keys(daySet).length,maxStreak:maxStreak,maxCount:maxCount,multiStreak:multiStreak,masterCount:masterCount,kindCount:kindCount};
+}
+
+/* ========== XP / 成就 ========== */
+function lvInfo(xp){
+  var lv=1,acc=0;
+  while(xp>=acc+lv*120){acc+=lv*120;lv++;}
+  var cur=xp-acc,next=lv*120;
+  return {lv:lv,cur:cur,next:next,pct:Math.min(100,Math.round(cur/next*100))};
+}
+function checkAch(notify){
+  var s=allStats(),newly=[];
+  ACH.forEach(function(a){if(D.achievements.indexOf(a.id)<0&&a.check(s)){D.achievements.push(a.id);D.xp+=a.xp;newly.push(a);}});
+  if(newly.length&&notify)toast('🏆 解锁成就：'+newly.map(function(a){return a.name;}).join('、')+'（+'+newly.reduce(function(t,a){return t+a.xp;},0)+' XP）');
+  save();
+}
+
+/* ========== 打卡 ========== */
+function getH(id){for(var i=0;i<D.habits.length;i++)if(D.habits[i].id===id)return D.habits[i];return null;}
+function toggleCheck(hid,ds){
+  ds=ds||today();
+  var h=getH(hid);if(!h)return;
+  if(!D.logs[ds])D.logs[ds]={};
+  var was=!!D.logs[ds][hid];
+  if(was){delete D.logs[ds][hid];D.xp=Math.max(0,D.xp-10);}
+  else{
+    D.logs[ds][hid]=true;
+    var s=streak(h,ds);
+    D.xp+=10+Math.min(Math.max(s-1,0),10);
+  }
+  checkAch(!was);
+  renderAll();
+  if(ds!==today())toast(was?'已取消该日打卡':'已补卡成功');
+}
+window.toggleCheck=toggleCheck;
+
+/* ========== 主题 ========== */
+function applyTheme(th){document.documentElement.setAttribute('data-theme',th);var sel=$('selTheme');if(sel)sel.value=th;}
+function setTheme(th){D.settings.theme=th;save();applyTheme(th);toast(th==='dark'?'已切换深色':'已切换浅色');}
+window.setTheme=setTheme;
+$('btnTheme').addEventListener('click',function(){setTheme(D.settings.theme==='dark'?'light':'dark');});
+
+/* ========== 导航 ========== */
+var VIEWS=['today','habits','heat','stats','ach','sleep','data'];
+function go(v){
+  VIEWS.forEach(function(x){var el=$('v-'+x);if(el)el.style.display=(x===v)?'block':'none';});
+  document.querySelectorAll('.nav-item[data-v]').forEach(function(n){n.classList.toggle('active',n.getAttribute('data-v')===v);});
+  $('tbTitle').textContent={'today':'今日打卡','habits':'习惯管理','heat':'全年热力图','stats':'统计','ach':'成就徽章','sleep':'睡眠管理','data':'数据管理'}[v];
+  $('tbSub').textContent='';
+  if(v==='sleep')renderSleep();
+  window.scrollTo(0,0);
+}
+window.go=go;
+document.querySelectorAll('.nav-item[data-v]').forEach(function(n){n.addEventListener('click',function(){go(n.getAttribute('data-v'));});});
+
+/* ========== 今日 ========== */
+function renderToday(){
+  var t=today(),d=new Date();
+  var wd=['日','一','二','三','四','五','六'][d.getDay()];
+  $('todayDate').textContent=t+' 星期'+wd;
+  var hs=activeHabits();
+  var due=hs.filter(function(h){return dueOn(h,t);});
+  var extra=hs.filter(function(h){return !dueOn(h,t);});
+  var done=due.filter(function(h){return doneOn(h,t);}).length;
+  var pct=due.length?Math.round(done/due.length*100):0;
+  var arc=$('ringArc');
+  arc.style.transition='stroke-dashoffset .5s ease';
+  arc.setAttribute('stroke-dashoffset',326.7*(1-(due.length?done/due.length:0)));
+  $('ringNum').textContent=due.length?(pct+'%'):'--';
+  $('dueHint').textContent='今日应打卡 '+due.length+' 项 · 已完成 '+done+' 项';
+  var hh=d.getHours();
+  var msg=hh<6?'夜深了，小待 🌙':hh<11?'早上好，小待 ☀️':hh<14?'中午好，小待 🍚':hh<19?'下午好，小待 🍵':'晚上好，小待 🌆';
+  $('heroMsg').textContent=msg;
+  var lv=lvInfo(D.xp);
+  $('lvBox').textContent='Lv.'+lv.lv;
+  $('lvFill').style.width=lv.pct+'%';
+  $('lvTxt').textContent=lv.cur+' / '+lv.next+' XP';
+  function rowHtml(h,isDue){
+    var dn=doneOn(h,t),st=streak(h,t);
+    return '<div class="habit-row">'
+      +'<div class="hic" style="background:color-mix(in srgb,'+h.color+' 18%,var(--panel2))">'+esc(h.icon||'○')+'</div>'
+      +'<div class="hb"><div class="hn">'+esc(h.name)+(dn?'<span class="tag ok">已完成</span>':'')+'</div>'
+      +'<div class="hm">'+(FREQ_N[h.freq]||'')+' · 连续 '+st+' 天'+(h.kind?' · '+KIND_N[h.kind]:'')+'</div></div>'
+      +'<button class="check-btn '+(dn?'done':'')+'" onclick="toggleCheck(\''+h.id+'\')">✓</button>'
+      +'</div>';
+  }
+  $('todayList').innerHTML=due.length?due.map(function(h){return rowHtml(h,true);}).join(''):'<div class="empty">今天没有计划打卡项，休息或去「习惯管理」添加习惯</div>';
+  $('todayExtra').innerHTML=extra.length?extra.map(function(h){return rowHtml(h,false);}).join(''):'<div class="empty">所有习惯都安排在今天了</div>';
+}
+
+/* ========== 习惯管理 ========== */
+function renderHabits(){
+  var exists={};
+  D.habits.forEach(function(h){exists[h.name]=1;});
+  $('tplGrid').innerHTML=TEMPLATES.map(function(tp,i){
+    var added=exists[tp.name];
+    return '<div class="tpl" onclick="addTpl('+i+')">'
+      +'<div class="hic" style="background:color-mix(in srgb,'+tp.color+' 20%,var(--panel))">'+tp.icon+'</div>'
+      +'<div><div class="tn">'+esc(tp.name)+'</div><div class="td">'+FREQ_N[tp.freq]+' · '+KIND_N[tp.kind]+'</div></div>'
+      +'<span class="add">'+(added?'✓':'+')+'</span></div>';
+  }).join('');
+  $('habitCount').textContent=activeHabits().length+' 个习惯';
+  $('habitList').innerHTML=D.habits.length?D.habits.map(function(h,i){
+    return '<div class="hmg">'
+      +'<div class="hic" style="background:color-mix(in srgb,'+h.color+' 18%,var(--panel2))">'+esc(h.icon||'○')+'</div>'
+      +'<div class="hb"><div class="hn">'+esc(h.name)+'<span class="tag">'+KIND_N[h.kind]+'</span>'+(h.archived?'<span class="tag">已归档</span>':'')+'</div>'
+      +'<div class="hm">'+FREQ_N[h.freq]+' · 累计 '+countDone(h)+' 次 · 当前连续 '+streak(h,today())+' 天</div></div>'
+      +'<div class="acts">'
+      +'<select class="btn sm" style="min-height:32px;padding:3px 6px;width:auto" onchange="chFreq(\''+h.id+'\',this.value)" title="频率">'
+      +Object.keys(FREQ_N).map(function(f){return '<option value="'+f+'"'+(h.freq===f?' selected':'')+'>'+FREQ_N[f]+'</option>';}).join('')
+      +'</select>'
+      +'<button class="btn sm ghost" onclick="archiveHabit(\''+h.id+'\')">'+(h.archived?'↩':'⤓')+'</button>'
+      +'<button class="btn sm ghost danger" onclick="delHabit(\''+h.id+'\')">✕</button>'
+      +'</div></div>';
+  }).join(''):'<div class="empty">还没有习惯，点上方模板或自定义添加</div>';
+}
+window.addTpl=function(i){
+  var tp=TEMPLATES[i];
+  if(D.habits.some(function(h){return h.name===tp.name;})){toast('该模板已添加');return;}
+  D.habits.push({id:uid(),name:tp.name,icon:tp.icon,kind:tp.kind,freq:tp.freq,color:tp.color,days:null,archived:false,created:today()});
+  save();renderHabits();toast('已添加：'+tp.name);
+};
+window.chFreq=function(id,v){var h=getH(id);if(h){h.freq=v;save();renderHabits();renderToday();}};
+window.archiveHabit=function(id){var h=getH(id);if(h){h.archived=!h.archived;save();renderAll();}};
+window.delHabit=function(id){
+  var h=getH(id);if(!h)return;
+  if(!confirm('删除习惯「'+h.name+'」？其打卡记录将一并清除'))return;
+  D.habits=D.habits.filter(function(x){return x.id!==id;});
+  save();renderAll();
+};
+window.addCustom=function(){
+  var name=$('nName').value.trim();
+  if(!name){toast('请输入习惯名称');return;}
+  var days=[].slice.call($('nDays').selectedOptions).map(function(o){return parseInt(o.value,10);});
+  D.habits.push({id:uid(),name:name,icon:$('nIcon').value.trim()||'○',kind:$('nKind').value,freq:$('nFreq').value,color:$('nColor').value,days:days,archived:false,created:today()});
+  $('nName').value='';$('nIcon').value='';
+  save();renderHabits();renderToday();toast('习惯已添加');
+};
+
+/* ========== 热力图 ========== */
+function heatLevel(count){
+  if(count<=0)return '';
+  if(count===1)return ' l1';
+  if(count<=3)return ' l2';
+  if(count<=5)return ' l3';
+  return ' l4';
+}
+function renderHeat(){
+  var now=new Date();
+  var end=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+  var start=new Date(end);start.setDate(start.getDate()-363);
+  start.setDate(start.getDate()-start.getDay()); // 对齐到周日
+  var weeks=[],cur=start;
+  while(cur<=end){weeks.push(new Date(cur));cur.setDate(cur.getDate()+7);}
+  var daysCount={};
+  for(var ds in D.logs){var c=0;for(var hid in D.logs[ds])if(D.logs[ds][hid])c++;if(c)daysCount[ds]=c;}
+  var ts=today();
+  var html='<div class="heat">';
+  var dows=['日','一','二','三','四','五','六'];
+  for(var w=0;w<weeks.length;w++){
+    var cells='';
+    for(var i=0;i<7;i++){
+      var d=new Date(weeks[w]);d.setDate(d.getDate()+i);
+      var ds=iso(d);
+      if(d<start||d>end){cells+='<span class="sq" style="visibility:hidden"></span>';continue;}
+      var c=daysCount[ds]||0;
+      cells+='<button class="sq'+heatLevel(c)+(ds===ts?' today':'')+'" title="'+ds+' · '+c+' 次" onclick="openDay(\''+ds+'\')"></button>';
+    }
+    html+='<div class="heat-wk">'+cells+'</div>';
+  }
+  html+='</div>';
+  $('heatWrap').innerHTML=html;
+  // 本月概览
+  var y=now.getFullYear(),m=now.getMonth();
+  var first=new Date(y,m,1),last=new Date(y,m+1,0);
+  var totalDue=0,totalDone=0,activeDays=0,daySet={};
+  var hs=activeHabits();
+  for(var d2=new Date(first);d2<=last;d2.setDate(d2.getDate()+1)){
+    var ds2=iso(d2);
+    var due2=hs.filter(function(h){return dueOn(h,ds2);}).length;
+    var dn2=0;hs.forEach(function(h){if(doneOn(h,ds2))dn2++;});
+    if(due2)totalDue+=due2;
+    totalDone+=dn2;
+    if(dn2>0){activeDays++;daySet[ds2]=1;}
+  }
+  $('monthStat').innerHTML='<div class="tiles">'
+    +'<div class="tile"><div class="k">本月应打卡</div><div class="v">'+totalDue+'<small> 次</small></div></div>'
+    +'<div class="tile"><div class="k">本月已完成</div><div class="v">'+totalDone+'<small> 次</small></div></div>'
+    +'<div class="tile"><div class="k">月完成率</div><div class="v">'+Math.round(totalDone/Math.max(totalDue,1)*100)+'<small>%</small></div></div>'
+    +'<div class="tile"><div class="k">有打卡天数</div><div class="v">'+activeDays+'<small> 天</small></div></div>'
+    +'</div>';
+}
+window.openDay=function(ds){
+  $('dmTitle').textContent=ds;
+  var hs=activeHabits();
+  $('dmSub').textContent=hs.length+' 个习惯 · 点击可补卡/取消';
+  $('dmList').innerHTML=hs.length?hs.map(function(h){
+    var dn=doneOn(h,ds);
+    return '<div class="habit-row" style="padding:9px 2px">'
+      +'<div class="hic" style="width:34px;height:34px;font-size:16px;background:color-mix(in srgb,'+h.color+' 18%,var(--panel2))">'+esc(h.icon||'○')+'</div>'
+      +'<div class="hb"><div class="hn" style="font-size:14px">'+esc(h.name)+'</div>'
+      +'<div class="hm">'+FREQ_N[h.freq]+(dueOn(h,ds)?'':' · 非计划日')+'</div></div>'
+      +'<button class="check-btn '+(dn?'done':'')+'" style="width:40px;height:40px;font-size:17px" onclick="toggleCheck(\''+h.id+'\',\''+ds+'\');openDay(\''+ds+'\')">✓</button>'
+      +'</div>';
+  }).join(''):'<div class="empty">还没有习惯</div>';
+  $('dayMask').classList.add('on');
+};
+window.closeDay=function(){$('dayMask').classList.remove('on');};
+
+/* ========== 统计 ========== */
+function renderStats(){
+  var s=allStats();
+  $('sTotal').textContent=s.total;
+  $('sDays').textContent=s.days;
+  $('sBest').textContent=s.maxStreak;
+  $('sAch').textContent=D.achievements.length;
+  $('statList').innerHTML=activeHabits().length?activeHabits().map(function(h){
+    var c=countDone(h),st=streak(h,today());
+    var since=(h.created?h.created:today());
+    var days=new Date(today().replace(/-/g,'/'))-new Date(since.replace(/-/g,'/'));
+    var totalDays=Math.max(1,Math.round(days/86400000)+1);
+    var rate=Math.round(c/totalDays*100);
+    return '<div class="stt-row">'
+      +'<div class="hic" style="background:color-mix(in srgb,'+h.color+' 18%,var(--panel2))">'+esc(h.icon||'○')+'</div>'
+      +'<div class="sb"><div class="sn">'+esc(h.name)+'</div>'
+      +'<div class="bar"><i style="width:'+Math.min(100,rate)+'%"></i></div></div>'
+      +'<div class="sv">累计 '+c+'<br>连续 '+st+' 天<br>保持率 '+rate+'%</div>'
+      +'</div>';
+  }).join(''):'<div class="empty">添加习惯后这里会出现详细统计</div>';
+}
+
+/* ========== 成就 ========== */
+function renderAch(){
+  var lv=lvInfo(D.xp);
+  $('aLv').textContent=lv.lv;
+  $('aXp').textContent=D.xp;
+  $('aGot').textContent=D.achievements.length;
+  $('achList').innerHTML=ACH.map(function(a){
+    var got=D.achievements.indexOf(a.id)>=0;
+    return '<div class="ach '+(got?'unlocked':'locked')+'">'
+      +'<div class="aic">'+a.ico+'</div>'
+      +'<div class="ab"><div class="an">'+esc(a.name)+'</div><div class="ad">'+esc(a.desc)+'</div></div>'
+      +'<div class="ast">'+(got?'✓ +'+a.xp+' XP':'+'+a.xp+' XP')+'</div>'
+      +'</div>';
+  }).join('');
+}
+
+/* ========== 数据 ========== */
+function exportData(){
+  var blob=new Blob([JSON.stringify({app:'habit-forge',data:D,exportedAt:new Date().toISOString()},null,2)],{type:'application/json'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='习惯锻造台备份.json';
+  document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},500);
+  toast('备份已导出');
+}
+window.exportData=exportData;
+function importData(inp){
+  var f=inp.files[0];if(!f)return;
+  var r=new FileReader();
+  r.onload=function(){
+    try{
+      var o=JSON.parse(r.result);
+      var d=o.data||o;
+      if(!Array.isArray(d.habits))throw 0;
+      D=d;
+      D.habits=D.habits||[];D.logs=D.logs||{};D.xp=D.xp||0;D.achievements=D.achievements||[];D.settings=D.settings||{theme:'dark'};
+      save();applyTheme(D.settings.theme);renderAll();toast('导入成功');
+    }catch(e){toast('导入失败：文件格式不正确');}
+  };
+  r.readAsText(f);inp.value='';
+}
+window.importData=importData;
+function resetAll(){
+  if(!confirm('确认清空全部习惯数据？此操作不可恢复！'))return;
+  if(!confirm('再次确认：所有打卡记录、经验、成就都会被删除。'))return;
+  D=defData();save();applyTheme('dark');renderAll();toast('已清空');
+}
+window.resetAll=resetAll;
+
+/* ========== 睡眠模块 ========== */
+function toMin(t){if(!t)return 0;var p=t.split(':');return (+p[0])*60+(+p[1]);}
+function durHours(bed,wake){if(!bed||!wake)return null;var b=toMin(bed),w=toMin(wake);var d=w-b;if(d<=0)d+=1440;return +(d/60).toFixed(2);}
+function sleepRec(ds){return D.sleep.records[ds];}
+function sleepOnTime(rec){return !!(rec&&rec.bed&&rec.bed<=D.sleep.target);}
+function sleepStreakCalc(){
+  var d=new Date(),n=0;
+  for(var i=0;i<400;i++){
+    var ds=iso(d);
+    var r=sleepRec(ds);
+    if(r&&r.bed&&sleepOnTime(r))n++;
+    else if(ds===today()){}
+    else break;
+    d.setDate(d.getDate()-1);
+  }
+  SLEEP_STREAK=n;return n;
+}
+function sleepEncourage(streak,onTime,rate){
+  if(streak>=7)return '🌟 你已经连续 '+streak+' 天早睡，这是自律带来的复利，短视频素材又有了！';
+  if(streak>=3)return '✨ 连续 '+streak+' 天！睡眠节律越来越稳，白天的专注力也会回来。';
+  if(streak>0)return '🔥 连续 '+streak+' 天早睡，Momentum 正在形成，继续保持！';
+  if(rate>=80)return '🚀 近两周达标率 '+rate+'%，你在认真对待自己的身体。';
+  if(!onTime)return '💡 今晚试试比平时早睡 15 分钟，身体会记住这份舒适。';
+  return '💪 把睡眠放在第一位，效率、情绪、关系都会跟着变好。';
+}
+function renderSleep(){
+  var ds=today();
+  var r=sleepRec(ds);
+  var streakN=sleepStreakCalc();
+  var on=r&&sleepOnTime(r);
+  var dh=durHours(r?r.bed:null,r?r.wake:null);
+  if($('sleepDate'))$('sleepDate').textContent=ds;
+  if(r){if($('spBed'))$('spBed').value=r.bed||'';if($('spWake'))$('spWake').value=r.wake||'';}
+  else{if($('spBed'))$('spBed').value='';if($('spWake'))$('spWake').value='';}
+  if($('spTarget'))$('spTarget').value=D.sleep.target;
+  var arr=[];var d14=new Date();
+  for(var i=0;i<14;i++){var s2=iso(d14);var rr=sleepRec(s2);if(rr&&rr.bed)arr.push(rr);d14.setDate(d14.getDate()-1);}
+  var onN=arr.filter(function(x){return sleepOnTime(x);}).length;
+  var rate=arr.length?Math.round(onN/arr.length*100):0;
+  var ring=$('sleepRing');if(ring){ring.style.transition='stroke-dashoffset .5s ease';ring.setAttribute('stroke-dashoffset',264*(1-rate/100));$('sleepRingNum').textContent=rate+'%';}
+  if($('sleepTitle'))$('sleepTitle').textContent=(r&&r.bed)?(on?'🌙 今晚早睡达标':'⏰ 今晚超过目标'):'今晚还没打卡';
+  if($('sleepHint'))$('sleepHint').textContent=(r&&r.bed)?('就寝 '+r.bed+(r.wake?' · 起床 '+r.wake+(dh?' · 睡眠 '+dh.toFixed(1)+' 小时':''):'')):'设定目标就寝时间，到点提醒自己去睡觉。早睡不是惩罚，是给明天的自己充电。';
+  if($('sleepEnc')){$('sleepEnc').textContent=sleepEncourage(streakN,on,rate);$('sleepEnc').className='encouragement'+((on||streakN>0)?'':' warn');}
+  if($('sleepResult'))$('sleepResult').innerHTML=(r&&r.bed)?('<span class="tag '+(on?'ok':'warn')+'">'+(on?'🌙 早睡达标':'⏰ 超时')+'</span>'+(dh?'<span class="tag">😴 睡眠 '+dh.toFixed(1)+'h</span>':'')+(r.wake?'<span class="tag">☀️ 起床 '+r.wake+'</span>':'')):'';
+  var durs=arr.map(function(x){return durHours(x.bed,x.wake);}).filter(function(v){return v!=null;});
+  var avg=durs.length?(durs.reduce(function(a,b){return a+b;},0)/durs.length):0;
+  var wk=[];var d3=new Date();
+  for(var i=0;i<7;i++){var s3=iso(d3);wk.unshift({ds:s3,r:sleepRec(s3),dow:d3.getDay()});d3.setDate(d3.getDate()-1);}
+  var maxH=12;
+  if($('spWeek'))$('spWeek').innerHTML=wk.map(function(o){
+    var dh2=o.r&&o.r.bed?durHours(o.r.bed,o.r.wake):null;
+    var on2=o.r&&o.r.bed?sleepOnTime(o.r):false;
+    var h=dh2!=null?Math.max(6,Math.min(100,dh2/maxH*100)):4;
+    var col=dh2==null?'var(--line2)':(on2?'var(--acc2)':'var(--red)');
+    return '<div class="wcol" title="'+(o.ds)+(dh2!=null?(' · '+dh2.toFixed(1)+'h'+(on2?' · 达标':'')):' · 未记录')+'"><div class="wbar" data-h="'+(dh2!=null?dh2.toFixed(1)+'h':'-')+'" style="height:'+h+'%;background:'+col+'"></div><div class="wlbl">'+['日','一','二','三','四','五','六'][o.dow]+'</div></div>';
+  }).join('');
+  if($('spMonth')){
+    var now=new Date(),y=now.getFullYear(),m=now.getMonth();
+    var first=new Date(y,m,1),last=new Date(y,m+1,0),cells='';
+    for(var i=0;i<first.getDay();i++)cells+='<span class="mc empty"></span>';
+    for(var day=1;day<=last.getDate();day++){
+      var ds4=iso(new Date(y,m,day));
+      var rr4=sleepRec(ds4);
+      var cls='mc'+(rr4&&rr4.bed?(sleepOnTime(rr4)?' good':' bad'):' blank');
+      cells+='<span class="'+cls+'" title="'+ds4+(rr4&&rr4.bed?(' · 就寝 '+rr4.bed):' · 未记录')+'">'+day+'</span>';
+    }
+    $('spMonth').innerHTML='<div class="cal">'+cells+'</div><div class="heat-legend" style="justify-content:flex-start;gap:8px;margin-top:10px"><span class="mc good" style="width:14px;height:14px"></span><span>达标</span><span class="mc bad" style="width:14px;height:14px"></span><span>超时</span><span class="mc blank" style="width:14px;height:14px"></span><span>未记录</span></div>';
+  }
+  if($('scDays'))$('scDays').textContent=onN;
+  if($('scAvg'))$('scAvg').textContent=avg.toFixed(1);
+  if($('scStreak'))$('scStreak').textContent=streakN;
+  if($('scQuote'))$('scQuote').textContent=sleepEncourage(streakN,on,rate).replace(/^[^ ]+ /,'');
+  if($('scWeek'))$('scWeek').textContent=wk[0].ds+' ~ '+wk[wk.length-1].ds;
+}
+function fillSleepNow(){if($('spBed'))$('spBed').value=new Date().toTimeString().slice(0,5);toast('已填入当前时间');}
+function setSleepTarget(){var v=$('spTarget').value;if(!v)return;D.sleep.target=v;save();renderSleep();toast('目标就寝时间已设为 '+v);}
+function saveSleep(){
+  var ds=today();
+  var bed=$('spBed').value,wake=$('spWake').value;
+  if(!bed){toast('请填写实际就寝时间');return;}
+  var prev=sleepRec(ds);
+  var wasOn=prev&&sleepOnTime(prev);
+  D.sleep.records[ds]={bed:bed,wake:wake||'',note:'',ts:Date.now()};
+  var nowOn=sleepOnTime(D.sleep.records[ds]);
+  if(nowOn && !wasOn)D.xp+=15;
+  else if(!nowOn && !(prev&&prev.bed))D.xp+=5;
+  sleepStreakCalc();save();checkAch(true);renderAll();
+  toast(nowOn?'🌙 早睡达标 +15 XP，继续保持！':'已记录，今晚再接再厉');
+}
+function copyShareText(){
+  var txt='🌙 我的睡眠周报\n早睡天数：'+$('scDays').textContent+'\n平均睡眠：'+$('scAvg').textContent+'h\n连续早睡：'+$('scStreak').textContent+' 天\n\n'+$('scQuote').textContent+'\n\n来自：习惯锻造台 · 小待';
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt).then(function(){toast('文案已复制，可直接发短视频/朋友圈');},function(){toast('复制失败');});
+  }else{toast('当前环境不支持复制');}
+}
+window.saveSleep=saveSleep;window.setSleepTarget=setSleepTarget;window.fillSleepNow=fillSleepNow;window.copyShareText=copyShareText;
+
+/* ========== 渲染入口 ========== */
+function renderAll(){renderToday();renderHabits();renderHeat();renderStats();renderAch();renderSleep();}
+applyTheme(D.settings.theme);
+renderAll();
+})();
+</script>
+</body>
+</html>

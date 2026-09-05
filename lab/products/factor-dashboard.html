@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>因子提交决策看板</title>
+<style>
+  :root{
+    --bg:#0a0e1a; --panel:#111827; --panel2:#1a2332; --border:#1e293b;
+    --text:#f1f5f9; --muted:#94a3b8; --dim:#64748b;
+    --green:#10b981; --red:#ef4444; --orange:#f59e0b; --blue:#3b82f6; --violet:#8b5cf6; --teal:#14b8a6;
+    --glow-green:rgba(16,185,129,.35); --glow-red:rgba(239,68,68,.35); --glow-orange:rgba(245,158,11,.35); --glow-blue:rgba(59,130,246,.35);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--text);font-family:-apple-system,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;min-height:100vh;overflow-x:hidden}
+
+  /* 动态背景 */
+  .bg-scene{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+  .bg-scene .orb{position:absolute;border-radius:50%;filter:blur(90px);opacity:.18;animation:orbFloat 14s ease-in-out infinite}
+  .bg-scene .orb.o1{width:600px;height:600px;background:radial-gradient(circle,var(--blue),transparent 70%);top:-180px;left:-120px;animation-delay:0s}
+  .bg-scene .orb.o2{width:500px;height:500px;background:radial-gradient(circle,var(--violet),transparent 70%);bottom:-160px;right:-100px;animation-delay:-5s}
+  .bg-scene .orb.o3{width:420px;height:420px;background:radial-gradient(circle,var(--teal),transparent 70%);top:40%;left:50%;animation-delay:-9s}
+  .bg-scene .grid{position:absolute;inset:0;background-image:
+    linear-gradient(rgba(59,130,246,.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(59,130,246,.04) 1px,transparent 1px);
+    background-size:60px 60px;mask-image:radial-gradient(ellipse at center,black 30%,transparent 70%);-webkit-mask-image:radial-gradient(ellipse at center,black 30%,transparent 70%)}
+  @keyframes orbFloat{0%,100%{transform:translate(0,0) scale(1)}25%{transform:translate(40px,-30px) scale(1.06)}50%{transform:translate(-20px,30px) scale(.94)}75%{transform:translate(-35px,-15px) scale(1.04)}}
+
+  /* 进场动画 */
+  @keyframes riseIn{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  @keyframes scaleIn{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:none}}
+  @keyframes slideLeft{from{opacity:0;transform:translateX(-18px)}to{opacity:1;transform:none}}
+  @keyframes glowPulse{0%,100%{box-shadow:0 0 0 0 var(--glow-blue)}50%{box-shadow:0 0 28px 4px var(--glow-blue)}}
+  @keyframes barGrow{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+  @keyframes countUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .anim{animation:riseIn .7s cubic-bezier(.22,.72,0,1) both}
+  .d1{animation-delay:.05s}.d2{animation-delay:.12s}.d3{animation-delay:.19s}.d4{animation-delay:.26s}.d5{animation-delay:.33s}.d6{animation-delay:.4s}.d7{animation-delay:.47s}.d8{animation-delay:.54s}
+
+  .wrap{position:relative;z-index:1;max-width:1120px;margin:0 auto;padding:28px 20px 60px}
+
+  /* 英雄区 */
+  .hero{position:relative;border-radius:24px;padding:28px 26px 24px;margin-bottom:22px;color:#fff;overflow:hidden;
+    background:linear-gradient(135deg,#0f172a 0%,#1e293b 50%,#0f172a 100%);border:1px solid var(--border);
+    box-shadow:0 24px 60px -20px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.06)}
+  .hero::before{content:"";position:absolute;top:-60px;right:-60px;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle,rgba(59,130,246,.22),transparent 70%);pointer-events:none}
+  .hero::after{content:"";position:absolute;bottom:-80px;left:-40px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(139,92,246,.18),transparent 70%);pointer-events:none}
+  .hero-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;background:rgba(59,130,246,.15);border:1px solid rgba(59,130,246,.3);color:#93c5fd;font-size:12px;font-weight:600;margin-bottom:14px;animation:glowPulse 3s ease-in-out infinite}
+  .hero-badge .dot{width:7px;height:7px;border-radius:50%;background:#60a5fa;box-shadow:0 0 8px #60a5fa;animation:dotPulse 2s ease-in-out infinite}
+  @keyframes dotPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.7)}}
+  .hero h1{font-size:26px;font-weight:800;letter-spacing:-.01em;line-height:1.25;position:relative;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .hero h1 .ico{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--blue),var(--violet));display:flex;align-items:center;justify-content:center;box-shadow:0 8px 20px -6px rgba(59,130,246,.5)}
+  .hero h1 .ico svg{width:18px;height:18px;color:#fff}
+  .hero .sub{color:#cbd5e1;font-size:13.5px;margin-top:6px;position:relative;opacity:.9;line-height:1.55;max-width:760px}
+  .hero-meta{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;position:relative}
+  .hero-chip{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:10px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);font-size:12px;color:#e2e8f0;font-weight:500;backdrop-filter:blur(10px)}
+
+  /* 结论条 */
+  .verdict{position:relative;border-radius:16px;padding:16px 18px;margin-bottom:20px;font-size:13.5px;line-height:1.65;border:1px solid var(--border);overflow:hidden;
+    background:linear-gradient(135deg,rgba(245,158,11,.08),rgba(30,41,59,.6));backdrop-filter:blur(10px)}
+  .verdict::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:linear-gradient(180deg,var(--orange),rgba(245,158,11,.3));border-radius:4px 0 0 4px}
+  .verdict .v-head{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+  .verdict .v-icon{width:22px;height:22px;border-radius:6px;background:rgba(245,158,11,.15);color:var(--orange);display:flex;align-items:center;justify-content:center}
+  .verdict .v-icon svg{width:13px;height:13px}
+  .verdict b{color:var(--orange);font-weight:700}
+  .verdict .v-body{color:#cbd5e1;font-size:13px}
+
+  /* 指标卡 */
+  .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+  .card{position:relative;background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:16px;overflow:hidden;transition:transform .2s,box-shadow .2s,border-color .2s}
+  .card:hover{transform:translateY(-3px);box-shadow:0 12px 30px -10px rgba(0,0,0,.35);border-color:rgba(148,163,184,.18)}
+  .card::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--accent,var(--blue));opacity:.7;border-radius:14px 14px 0 0}
+  .card .k{font-size:11.5px;color:var(--muted);font-weight:600;letter-spacing:.2px;display:flex;align-items:center;gap:6px}
+  .card .k .dot{width:6px;height:6px;border-radius:50%;background:var(--accent,var(--blue))}
+  .card .v{font-size:26px;font-weight:800;margin-top:8px;letter-spacing:-.02em;font-variant-numeric:tabular-nums;background:linear-gradient(135deg,var(--text),var(--muted));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .card .trend{font-size:11.5px;margin-top:6px;font-weight:600;display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:6px}
+  .card .trend.up{background:rgba(16,185,129,.12);color:var(--green)}
+  .card .trend.down{background:rgba(239,68,68,.12);color:var(--red)}
+  .card .trend.flat{background:rgba(100,116,139,.12);color:var(--dim)}
+
+  /* 图表面板 */
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+  .panel{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:16px;position:relative;overflow:hidden;transition:border-color .2s,box-shadow .2s}
+  .panel:hover{border-color:rgba(148,163,184,.18);box-shadow:0 10px 30px -12px rgba(0,0,0,.35)}
+  .panel h3{font-size:13px;font-weight:700;color:#e2e8f0;margin-bottom:4px;display:flex;align-items:center;gap:7px}
+  .panel h3 .p-ico{width:18px;height:18px;border-radius:5px;background:rgba(59,130,246,.12);color:var(--blue);display:flex;align-items:center;justify-content:center}
+  .panel h3 .p-ico svg{width:10px;height:10px}
+  .panel .p-sub{font-size:11.5px;color:var(--dim);margin-bottom:10px}
+  .panel svg text{fill:var(--text);font-size:10px}
+  .panel svg{display:block;width:100%;height:auto}
+
+  /* 表格 */
+  .tbl-wrap{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:16px;margin-top:16px;overflow:hidden}
+  .tbl-wrap h3{font-size:13px;font-weight:700;color:#e2e8f0;margin-bottom:10px;display:flex;align-items:center;gap:7px}
+  .tbl-wrap h3 .p-ico{width:18px;height:18px;border-radius:5px;background:rgba(139,92,246,.12);color:var(--violet);display:flex;align-items:center;justify-content:center}
+  .tbl-wrap h3 .p-ico svg{width:10px;height:10px}
+  .tbl-scroll{overflow-x:auto;margin:0 -16px;padding:0 16px}
+  .tbl-scroll table{width:100%;border-collapse:collapse;font-size:12px;min-width:640px}
+  .tbl-scroll th,.tbl-scroll td{padding:8px 10px;text-align:center;border-bottom:1px solid var(--border);white-space:nowrap}
+  .tbl-scroll th{color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.3px}
+  .tbl-scroll tr:last-child td{border-bottom:none}
+  .tbl-scroll tr:hover td{background:rgba(59,130,246,.04)}
+  .tbl-scroll .pos{color:var(--green)} .tbl-scroll .neg{color:var(--red)}
+  .tbl-scroll .tag{display:inline-block;padding:2px 8px;border-radius:8px;font-size:11px;font-weight:600}
+  .tbl-scroll .t-fail{background:rgba(239,68,68,.12);color:var(--red)}
+  .tbl-scroll .t-pass{background:rgba(16,185,129,.12);color:var(--green)}
+  .tbl-scroll .t-decay{background:rgba(245,158,11,.12);color:var(--orange)}
+
+  /* 滚动条 */
+  ::-webkit-scrollbar{width:6px;height:6px}
+  ::-webkit-scrollbar-track{background:transparent}
+  ::-webkit-scrollbar-thumb{background:#334155;border-radius:3px}
+  ::-webkit-scrollbar-thumb:hover{background:#475569}
+
+  @media(max-width:760px){
+    .cards{grid-template-columns:repeat(2,1fr)}
+    .grid{grid-template-columns:1fr}
+    .hero h1{font-size:21px}
+    .hero .sub{font-size:12.5px}
+    .wrap{padding:18px 14px 40px}
+  }
+  @media(max-width:420px){.cards{grid-template-columns:1fr 1fr}.hero h1{font-size:19px}}
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+  <div class="bg-scene" aria-hidden="true">
+    <div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div>
+    <div class="grid"></div>
+  </div>
+
+<div class="wrap">
+  <!-- 英雄区 -->
+  <div class="hero anim d1">
+    <div class="hero-badge"><span class="dot"></span>WorldQuant Alpha · 实时决策</div>
+    <h1><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l3-4 3 3 4-6"/></svg></span>因子提交决策看板</h1>
+    <div class="sub">逐年指标拆解 · 全周期均值 vs 分年稳定性 · 一键决策</div>
+    <div class="hero-meta">
+      <span class="hero-chip">📅 2019 — 2023</span>
+      <span class="hero-chip">📊 9 项核心指标</span>
+      <span class="hero-chip">🎯 门槛 Fitness = 1.0</span>
+    </div>
+  </div>
+
+  <!-- 结论条 -->
+  <div class="verdict anim d2">
+    <div class="v-head"><span class="v-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.29 3.86 1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg></span><b>决策结论：可提交，定位为 regime 补充型 alpha</b></div>
+    <div class="v-body">全周期 Fitness <b>1.02</b> 过线，但 3/5 年不达标（2019 / 2020 / 2023），呈双峰分布；2020 崩盘（Sharpe <b style="color:var(--red)">-2.35</b>）、2023 衰减（Fitness <b style="color:var(--orange)">0.77</b>）。提交前先查与现有 alpha 相关性，低相关才提。</div>
+  </div>
+
+  <!-- 指标卡 -->
+  <div class="cards anim d3" id="cards"></div>
+
+  <!-- 图表 -->
+  <div class="grid anim d4">
+    <div class="panel">
+      <h3><span class="p-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l3-4 3 3 4-6"/></svg></span>Fitness 逐年</h3>
+      <div class="p-sub">基准线 = 1.0 提交门槛</div>
+      <div id="c-fitness"></div>
+    </div>
+    <div class="panel">
+      <h3><span class="p-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l3-4 3 3 4-6"/></svg></span>Sharpe 逐年</h3>
+      <div class="p-sub">风险调整后收益，零轴参考</div>
+      <div id="c-sharpe"></div>
+    </div>
+    <div class="panel">
+      <h3><span class="p-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l3-4 3 3 4-6"/></svg></span>Returns 逐年</h3>
+      <div class="p-sub">年化收益率（%），零轴参考</div>
+      <div id="c-returns"></div>
+    </div>
+    <div class="panel">
+      <h3><span class="p-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l3-4 3 3 4-6"/></svg></span>Drawdown 逐年</h3>
+      <div class="p-sub">最大回撤（%），越低越稳</div>
+      <div id="c-dd"></div>
+    </div>
+  </div>
+
+  <!-- 表格 -->
+  <div class="tbl-wrap anim d5">
+    <h3><span class="p-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l3-4 3 3 4-6"/></svg></span>完整指标表</h3>
+    <div class="tbl-scroll"><table id="tbl"></table></div>
+  </div>
+</div>
+
+<script>window.addEventListener('error',function(e){try{var v=document.getElementById('app')||document.getElementById('view')||document.body;if(!v||v.dataset.err)return;v.dataset.err='1';var s=(e.error&&e.error.stack)||e.message||'';var b=document.createElement('div');b.style.cssText='padding:16px;margin:14px;font-family:ui-monospace,monospace;font-size:13px;color:#a33;background:#fdeceb;border:1px solid #f5c6cb;border-radius:12px;line-height:1.5';b.innerHTML='<b>⚠ 页面出错了</b><br><span style="color:#555">'+(e.message||'')+'</span><pre style="white-space:pre-wrap;margin-top:8px;font-size:11px">'+(s||'').slice(0,1000)+'</pre><small style="color:#666">建议 Ctrl+Shift+R 强刷；F12 → Application → Local Storage 清本页缓存后刷新。</small>';v.insertBefore(b,v.firstChild);}catch(_){}});
+const data=[
+ {y:2019,sharpe:1.05,turnover:4.80,fitness:0.58,returns:3.83,dd:3.75,margin:15.95,lon:1520,sho:1516},
+ {y:2020,sharpe:-2.35,turnover:4.98,fitness:-2.06,returns:-9.65,dd:11.34,margin:-38.78,lon:1518,sho:1516},
+ {y:2021,sharpe:2.84,turnover:5.07,fitness:3.16,returns:15.50,dd:4.32,margin:61.15,lon:1553,sho:1535},
+ {y:2022,sharpe:2.99,turnover:4.53,fitness:3.48,returns:16.91,dd:3.45,margin:74.69,lon:1566,sho:1524},
+ {y:2023,sharpe:1.09,turnover:4.58,fitness:0.77,returns:6.28,dd:4.59,margin:27.42,lon:1561,sho:1544},
+];
+const C={green:'#10b981',red:'#ef4444',orange:'#f59e0b',gray:'#64748b',blue:'#3b82f6',muted:'#94a3b8',text:'#f1f5f9',border:'#1e293b'};
+function colFor(d){if(d.y===2020)return C.red;if(d.y===2023)return C.orange;if(d.fitness>=1.0)return C.green;return C.gray;}
+
+function barChart(elId,key,opts){
+  opts=opts||{};
+  const W=480,H=220,padL=44,padR=16,padT=14,padB=34;
+  const vals=data.map(d=>d[key]);
+  let min=Math.min(...vals),max=Math.max(...vals);
+  if(opts.benchmark!==undefined){min=Math.min(min,opts.benchmark);max=Math.max(max,opts.benchmark);}
+  if(opts.zero) min=Math.min(min,0);
+  const range=max-min||1; min-=range*0.14; max+=range*0.14;
+  const plotW=W-padL-padR, plotH=H-padT-padB;
+  const gap=plotW/data.length, bw=gap*0.52;
+  let svg=`<svg viewBox="0 0 ${W} ${H}" width="100%" style="overflow:visible">`;
+  const ticks=4;
+  for(let i=0;i<=ticks;i++){
+    const v=min+(max-min)*i/ticks;
+    const y=padT+plotH*(1-(v-min)/(max-min));
+    svg+=`<line x1="${padL}" y1="${y.toFixed(1)}" x2="${W-padR}" y2="${y.toFixed(1)}" stroke="${C.border}" stroke-width="1" opacity=".6"/>`;
+    svg+=`<text x="${padL-7}" y="${(y+3).toFixed(1)}" text-anchor="end" fill="${C.muted}" font-size="10">${v.toFixed(1)}</text>`;
+  }
+  if(opts.benchmark!==undefined){
+    const yb=padT+plotH*(1-(opts.benchmark-min)/(max-min));
+    svg+=`<line x1="${padL}" y1="${yb.toFixed(1)}" x2="${W-padR}" y2="${yb.toFixed(1)}" stroke="${C.blue}" stroke-width="1.5" stroke-dasharray="5 4" opacity=".8"/>`;
+    svg+=`<text x="${W-padR}" y="${(yb-5).toFixed(1)}" text-anchor="end" fill="${C.blue}" font-size="10" font-weight="600">${opts.benchmarkLabel||'基准 '+opts.benchmark}</text>`;
+  }
+  if(opts.zero && min<0 && max>0){
+    const yz=padT+plotH*(1-(0-min)/(max-min));
+    svg+=`<line x1="${padL}" y1="${yz.toFixed(1)}" x2="${W-padR}" y2="${yz.toFixed(1)}" stroke="${C.muted}" stroke-width="1" opacity=".4"/>`;
+  }
+  data.forEach((d,i)=>{
+    const v=d[key];
+    const cx=padL+gap*i+gap/2;
+    const y0=padT+plotH*(1-(0-min)/(max-min));
+    const yv=padT+plotH*(1-(v-min)/(max-min));
+    const top=Math.min(y0,yv), h=Math.abs(yv-y0);
+    const col=colFor(d);
+    svg+=`<rect x="${(cx-bw/2).toFixed(1)}" y="${top.toFixed(1)}" width="${bw.toFixed(1)}" height="${Math.max(h,0.5).toFixed(1)}" fill="${col}" rx="4" opacity=".9">
+      <animate attributeName="height" from="0" to="${Math.max(h,0.5).toFixed(1)}" dur=".7s" fill="freeze" calcMode="spline" keySplines="0.22 0.72 0 1"/>
+      <animate attributeName="y" from="${yv.toFixed(1)}" to="${top.toFixed(1)}" dur=".7s" fill="freeze" calcMode="spline" keySplines="0.22 0.72 0 1"/>
+    </rect>`;
+    svg+=`<text x="${cx.toFixed(1)}" y="${(yv+(v>=0?-7:16)).toFixed(1)}" text-anchor="middle" fill="${C.text}" font-weight="700" font-size="11">${v.toFixed(2)}</text>`;
+    svg+=`<text x="${cx.toFixed(1)}" y="${H-padB+20}" text-anchor="middle" fill="${C.muted}" font-size="10">${d.y}</text>`;
+  });
+  svg+=`</svg>`;
+  document.getElementById(elId).innerHTML=svg;
+}
+
+barChart('c-fitness','fitness',{benchmark:1.0,benchmarkLabel:'门槛 1.0'});
+barChart('c-sharpe','sharpe',{zero:true});
+barChart('c-returns','returns',{zero:true});
+barChart('c-dd','dd',{});
+
+const passYears=data.filter(d=>d.fitness>=1.0).length;
+const cards=[
+ {k:'全周期 Fitness',v:'1.02',c:C.orange,trend:'neutral',trendLabel:'—'},
+ {k:'达标年数',v:passYears+' / 5',c:C.gray,trend:'neutral',trendLabel:'2/5 达标'},
+ {k:'最差年 Sharpe',v:'-2.35',c:C.red,trend:'down',trendLabel:'2020 崩盘'},
+ {k:'最新年 Fitness',v:'0.77',c:C.orange,trend:'down',trendLabel:'2023 衰减'},
+];
+document.getElementById('cards').innerHTML=cards.map((c,i)=>`<div class="card" style="--accent:${c.c};animation-delay:${.2+i*.08}s">
+  <div class="k"><span class="dot"></span>${c.k}</div>
+  <div class="v" style="color:${c.c}">${c.v}</div>
+  <span class="trend ${c.trend}">${c.trendLabel}</span>
+</div>`).join('');
+
+const cols=[['年','y'],['Sharpe','sharpe'],['Turnover','turnover'],['Fitness','fitness'],['Returns%','returns'],['DD%','dd'],['Margin‱','margin'],['Long','lon'],['Short','sho']];
+let html='<tr>'+cols.map(c=>`<th>${c[0]}</th>`).join('')+'<th>状态</th></tr>';
+data.forEach(d=>{
+  let st='';
+  if(d.y===2020) st='<span class="tag t-fail">崩盘</span>';
+  else if(d.y===2023) st='<span class="tag t-decay">衰减</span>';
+  else if(d.fitness>=1.0) st='<span class="tag t-pass">达标</span>';
+  else st='<span class="tag t-fail">不达标</span>';
+  html+='<tr>'+cols.map(c=>{
+    const raw=d[c[1]];
+    let disp=raw;
+    if(c[1]==='turnover') disp=raw.toFixed(2)+'%';
+    else if(c[1]==='returns'||c[1]==='dd'||c[1]==='margin') disp=raw.toFixed(2);
+    const signed=['sharpe','fitness','returns','margin'].includes(c[1]);
+    const cls=(signed&&raw<0)?'neg':(signed&&raw>0?'pos':'');
+    return `<td class="${cls}">${disp}</td>`;
+  }).join('')+`<td>${st}</td></tr>`;
+});
+document.getElementById('tbl').innerHTML=html;
+</script>
+</body>
+</html>

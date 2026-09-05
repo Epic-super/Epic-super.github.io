@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>如果不用打卡，你还会自律学习吗 · 小待的学习角落</title>
+<meta name="description" content="一个关于自律与内在动机的互动模块：投票表态、留下你的观点、生成可分享的「学习宣言」卡片。">
+<!-- 主题早期脚本：防止深色模式闪烁 -->
+<script>
+(function(){
+  try{
+    var t = localStorage.getItem('noclock_theme');
+    if(!t){ t = (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light'; }
+    document.documentElement.setAttribute('data-theme', t);
+  }catch(e){}
+})();
+</script>
+<style>
+  :root{
+    /* 复用 index.html「晨林绿」主色体系，保证视觉一致 */
+    --bg:#f6f8f5; --card:#ffffff; --primary:#0f9d77; --primary-soft:#e6f5ef;
+    --zk:#B01F24; --zk-soft:rgba(176,31,36,.09);
+    --text:#1d2723; --muted:#6b7d76; --border:#e3e8e4; --ring-track:#eaf0ec;
+    --note-bg:#f3f7f4; --input-bg:#ffffff; --radius:16px;
+    --shadow:0 1px 3px rgba(16,24,40,.06),0 1px 2px rgba(16,24,40,.04);
+    --green:#1a9e5c; --amber:#d98a1a; --slate:#5b6b73;
+  }
+  [data-theme="dark"]{
+    --bg:#0f1311; --card:#181d1a; --primary:#34d399; --primary-soft:#14352b;
+    --zk:#E86A6E; --zk-soft:rgba(232,106,110,.16);
+    --text:#e8efe9; --muted:#8b9b93; --border:#262d29; --ring-track:#222926;
+    --note-bg:#1c2220; --input-bg:#0f1311;
+    --green:#46c07e; --amber:#e0a04a; --slate:#9aa8a2;
+    color-scheme:dark;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg); color:var(--text); font-size:16px; line-height:1.6;
+    min-height:100vh; padding-bottom:calc(28px + env(safe-area-inset-bottom));
+  }
+  .wrap{max-width:760px;margin:0 auto;padding:14px 16px 8px;}
+
+  /* 顶部栏 */
+  .topbar{position:sticky;top:0;z-index:30;display:flex;align-items:center;justify-content:space-between;gap:10px;
+    padding:10px 4px;margin-bottom:6px;background:color-mix(in srgb,var(--bg) 86%,transparent);backdrop-filter:blur(10px);}
+  .brand{display:flex;align-items:center;gap:9px;font-weight:700;font-size:15px;}
+  .brand .dot{width:26px;height:26px;border-radius:8px;background:linear-gradient(135deg,var(--primary),#0b6b54);
+    color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:15px;}
+  .top-actions{display:flex;gap:8px;align-items:center;}
+  .iconbtn{min-width:40px;height:40px;border-radius:11px;border:1px solid var(--border);background:var(--card);
+    color:var(--text);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:.15s;}
+  .iconbtn:hover{border-color:var(--primary);}
+  .iconbtn svg{width:19px;height:19px;}
+  .embed-tag{font-size:11px;color:var(--muted);border:1px solid var(--border);border-radius:999px;padding:4px 10px;}
+
+  /* 通用卡片 */
+  .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);margin-bottom:16px;}
+  .sec-title{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:700;margin:0 0 12px;}
+  .sec-title .bar{width:4px;height:16px;border-radius:3px;background:var(--primary);}
+
+  /* Hero */
+  .hero{text-align:center;padding:26px 14px 22px;}
+  .hero .q{font-size:clamp(22px,6.4vw,30px);font-weight:800;line-height:1.35;letter-spacing:.2px;margin:0 0 12px;}
+  .hero .q b{color:var(--primary);}
+  .hero .sub{color:var(--muted);font-size:14px;max-width:520px;margin:0 auto;}
+
+  /* 投票 */
+  .opts{display:flex;flex-direction:column;gap:10px;margin-bottom:4px;}
+  .opt{display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:1.5px solid var(--border);
+    background:var(--card);border-radius:13px;padding:14px 15px;cursor:pointer;font-family:inherit;font-size:15px;
+    color:var(--text);transition:.18s;position:relative;}
+  .opt:hover{border-color:var(--primary);}
+  .opt .mark{width:22px;height:22px;border-radius:50%;border:2px solid var(--border);flex:none;display:flex;align-items:center;justify-content:center;transition:.18s;}
+  .opt .txt{flex:1;font-weight:600;}
+  .opt .hint{font-size:12px;color:var(--muted);font-weight:400;}
+  .opt.chosen{border-color:var(--primary);background:var(--primary-soft);}
+  .opt.chosen .mark{border-color:var(--primary);background:var(--primary);}
+  .opt.chosen .mark::after{content:"";width:9px;height:9px;border-radius:50%;background:#fff;}
+
+  .dist{margin-top:16px;display:none;}
+  .dist.show{display:block;animation:fade .35s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .drow{margin-bottom:12px;}
+  .drow .dl{display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px;}
+  .drow .dl .name{font-weight:600;}
+  .drow .dl .val{color:var(--muted);}
+  .drow .dl .val b{color:var(--text);}
+  .track{height:10px;border-radius:999px;background:var(--ring-track);overflow:hidden;}
+  .track .fill{height:100%;border-radius:999px;width:0;transition:width .7s cubic-bezier(.22,1,.36,1);}
+  .fill.hui{background:linear-gradient(90deg,#0f9d77,#34d399);}
+  .fill.buhui{background:linear-gradient(90deg,#c0392b,#e0564b);}
+  .fill.kan{background:linear-gradient(90deg,#b58900,#e0a04a);}
+  .dist .total{font-size:12px;color:var(--muted);text-align:center;margin-top:4px;}
+  .src{margin-top:14px;border:1px solid var(--border);border-radius:12px;background:var(--note-bg);overflow:hidden;}
+  .src summary{cursor:pointer;padding:11px 14px;font-size:12.5px;font-weight:600;color:var(--muted);list-style:none;}
+  .src summary::-webkit-details-marker{display:none;}
+  .src summary:hover{color:var(--primary);}
+  .src-body{padding:0 14px 14px;font-size:12.5px;line-height:1.7;color:var(--text);}
+  .src-body p{margin:0 0 10px;}
+  .src-body p:last-child{margin-bottom:0;}
+  .src-quote{color:var(--primary);font-weight:600;background:var(--primary-soft);padding:9px 11px;border-radius:9px;}
+
+  /* 观点墙 */
+  .composer{display:flex;flex-direction:column;gap:10px;margin-bottom:16px;}
+  .composer .row{display:flex;gap:10px;}
+  .composer input,.composer textarea{font-family:inherit;font-size:14.5px;border:1px solid var(--border);
+    border-radius:11px;padding:11px 13px;background:var(--input-bg);color:var(--text);width:100%;resize:none;}
+  .composer input:focus,.composer textarea:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-soft);}
+  .composer .name{width:140px;flex:none;}
+  .composer textarea{min-height:64px;}
+  .composer .foot{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+  .composer .count{font-size:12px;color:var(--muted);}
+  .btn{height:42px;padding:0 18px;border-radius:12px;border:1px solid var(--border);background:var(--card);
+    color:var(--text);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:.15s;display:inline-flex;align-items:center;gap:7px;justify-content:center;}
+  .btn:hover{border-color:var(--primary);}
+  .btn.primary{background:var(--primary);color:#fff;border-color:var(--primary);}
+  .btn.primary:hover{filter:brightness(.95);}
+  .btn:disabled{opacity:.5;cursor:not-allowed;}
+  .btn svg{width:17px;height:17px;}
+
+  .wall{display:flex;flex-direction:column;gap:11px;}
+  .msg{background:var(--note-bg);border:1px solid var(--border);border-radius:13px;padding:13px 14px;animation:fade .3s ease;}
+  .msg .mh{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+  .msg .av{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--primary),#0b6b54);color:#fff;
+    display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex:none;}
+  .msg .nm{font-size:13px;font-weight:700;}
+  .msg .tag{font-size:11px;padding:2px 8px;border-radius:999px;font-weight:600;margin-left:auto;}
+  .tag.hui{background:var(--primary-soft);color:var(--primary);}
+  .tag.buhui{background:var(--zk-soft);color:var(--zk);}
+  .tag.kan{background:rgba(217,138,26,.14);color:var(--amber);}
+  .msg .mt{font-size:14px;line-height:1.55;word-break:break-word;white-space:pre-wrap;}
+  .msg .mt.empty{color:var(--muted);font-style:italic;}
+  .wall-empty{text-align:center;color:var(--muted);font-size:13.5px;padding:18px 0;}
+
+  /* 分享卡片 */
+  .share-preview{display:flex;flex-direction:column;align-items:center;gap:12px;}
+  .card-stage{width:100%;max-width:320px;border-radius:18px;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,.18);}
+  .card-stage canvas{display:block;width:100%;height:auto;}
+  .share-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;}
+  .hint-box{font-size:12.5px;color:var(--muted);background:var(--note-bg);border:1px dashed var(--border);
+    border-radius:11px;padding:10px 12px;margin-top:6px;line-height:1.6;}
+
+  /* 嵌入说明 */
+  details.embed{margin-top:6px;border:1px solid var(--border);border-radius:14px;background:var(--card);overflow:hidden;}
+  details.embed summary{cursor:pointer;padding:14px 16px;font-weight:700;font-size:14.5px;list-style:none;display:flex;align-items:center;gap:8px;}
+  details.embed summary::-webkit-details-marker{display:none;}
+  details.embed .body{padding:0 16px 16px;}
+  details.embed pre{background:var(--note-bg);border:1px solid var(--border);border-radius:10px;padding:12px;
+    overflow:auto;font-size:12.5px;line-height:1.5;color:var(--text);}
+  details.embed code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;}
+
+  footer{text-align:center;color:var(--muted);font-size:12px;padding:18px 0 4px;}
+
+  /* 轻提示 toast */
+  .toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);background:var(--text);color:var(--bg);
+    padding:10px 18px;border-radius:999px;font-size:13.5px;font-weight:600;opacity:0;pointer-events:none;transition:.25s;z-index:60;box-shadow:0 6px 20px rgba(0,0,0,.2);}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <div class="brand"><span class="dot">学</span><span>不打卡，也想学</span></div>
+    <div class="top-actions">
+      <span class="embed-tag">可嵌入模块</span>
+      <button class="iconbtn" id="themeBtn" title="切换深色 / 浅色" aria-label="切换主题"></button>
+    </div>
+  </div>
+
+  <!-- Hero 命题 -->
+  <section class="card hero">
+    <h1 class="q">如果不用打卡，<br>你还会<b>自律学习</b>吗？</h1>
+    <p class="sub">打卡是外力，动机是内力。这道题没有标准答案——先投出你的态度，再把你的理由留在墙上。</p>
+  </section>
+
+  <!-- 投票 -->
+  <section class="card">
+    <h2 class="sec-title"><span class="bar"></span>先投一票</h2>
+    <div class="opts" id="opts">
+      <button class="opt" data-key="hui">
+        <span class="mark"></span>
+        <span class="txt">会，因为我本就想学<span class="hint">　内在动机驱动</span></span>
+      </button>
+      <button class="opt" data-key="buhui">
+        <span class="mark"></span>
+        <span class="txt">不会，我靠外部推力<span class="hint">　离了打卡就摆烂</span></span>
+      </button>
+      <button class="opt" data-key="kan">
+        <span class="mark"></span>
+        <span class="txt">看情况，看有没有目标<span class="hint">　有目标才自律</span></span>
+      </button>
+    </div>
+
+    <div class="dist" id="dist">
+      <div class="drow" data-key="hui">
+        <div class="dl"><span class="name">会，因为我本就想学</span><span class="val"><b class="pct">0%</b> · <span class="num">0</span> 票</span></div>
+        <div class="track"><div class="fill hui"></div></div>
+      </div>
+      <div class="drow" data-key="buhui">
+        <div class="dl"><span class="name">不会，我靠外部推力</span><span class="val"><b class="pct">0%</b> · <span class="num">0</span> 票</span></div>
+        <div class="track"><div class="fill buhui"></div></div>
+      </div>
+      <div class="drow" data-key="kan">
+        <div class="dl"><span class="name">看情况，看有没有目标</span><span class="val"><b class="pct">0%</b> · <span class="num">0</span> 票</span></div>
+        <div class="track"><div class="fill kan"></div></div>
+      </div>
+      <div class="total" id="totalLine"></div>
+      <div class="src">
+        <details>
+          <summary>初始比例参考了哪些公开数据？</summary>
+          <div class="src-body">
+            <p><b>① 行为层（本模块初始分布来源）</b><br>中国青年报社社会调查中心 × 问卷网，1000 名受访者（2024）关于「付费自律打卡」：<br>曾参与 <b>42.6%</b> · 考虑中 <b>33.9%</b> · 从不参与 <b>23.5%</b><br>→ 映射为：不会（靠外力）/ 看情况 / 会（内驱）</p>
+            <p><b>② 认知层</b><br>新浪看点 × 中青报：<b>87.6%</b> 受访青年认为提高行动力根本在于激发内驱力（00 后 91.2%）。</p>
+            <p class="src-quote">认知上都信「内驱」，行为上多数还在靠「外力」——这正是这道题想戳的点。</p>
+          </div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- 观点墙 -->
+  <section class="card">
+    <h2 class="sec-title"><span class="bar"></span>观点墙 · 你为什么这么选</h2>
+    <div class="composer">
+      <div class="row">
+        <input class="name" id="nameInput" maxlength="16" placeholder="昵称（可不填）">
+      </div>
+      <textarea id="textInput" maxlength="140" placeholder="说一句你的真实想法，比如：打卡停了那天，我才发现其实一直在为自己学……"></textarea>
+      <div class="foot">
+        <span class="count"><span id="charCount">0</span>/140</span>
+        <button class="btn primary" id="postBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          留在墙上
+        </button>
+      </div>
+    </div>
+    <div class="wall" id="wall"></div>
+  </section>
+
+  <!-- 分享卡片 -->
+  <section class="card">
+    <h2 class="sec-title"><span class="bar"></span>生成你的「学习宣言」</h2>
+    <div class="share-preview">
+      <div class="card-stage"><canvas id="cardCanvas" width="1080" height="1350"></canvas></div>
+      <div class="share-actions">
+        <button class="btn primary" id="genBtn">生成 / 刷新卡片</button>
+        <button class="btn" id="downBtn">下载图片</button>
+      </div>
+      <div class="hint-box" id="shareHint">先投一票（或留一句观点），卡片会自动带上你的态度与宣言。</div>
+    </div>
+  </section>
+
+  <!-- 嵌入说明 -->
+  <details class="embed">
+    <summary><span class="bar" style="width:4px;height:16px;border-radius:3px;background:var(--primary);display:inline-block"></span>如何把这块嵌进别的页面？</summary>
+    <div class="body">
+      <p style="font-size:13px;color:var(--muted);margin:4px 0 10px;line-height:1.6">
+        本页是<b>自包含单文件</b>，不依赖任何外部资源。两种集成方式：
+      </p>
+      <p style="font-size:13px;margin:0 0 6px;font-weight:600">① 直接 iframe 嵌入（推荐，自动高度自适应 + 主题同步）</p>
+      <pre><code>&lt;iframe src="noclock.html" id="noclockFrame"
+  style="width:100%;border:0;background:transparent"&gt;&lt;/iframe&gt;
+&lt;script&gt;
+  // 父页监听：自动撑高 iframe
+  window.addEventListener('message', e=&gt;{
+    if(e.data &amp;&amp; e.data.type==='noclock-resize'){
+      document.getElementById('noclockFrame').style.height = e.data.height + 'px';
+    }
+  });
+  // 可选：向模块同步主题（'light' | 'dark'）
+  // frame.contentWindow.postMessage({type:'noclock-theme',theme:'dark'}, '*');
+&lt;/script&gt;</code></pre>
+      <p style="font-size:13px;margin:12px 0 6px;font-weight:600">② 复制区块嵌入</p>
+      <pre><code>把 noclock.html 的内容整体拷进目标页，
+或直接 &lt;link&gt;/&lt;style&gt; + &lt;script&gt; 拆分引用。
+模块通过 postMessage 与父页通信，无需额外配置。</code></pre>
+    </div>
+  </details>
+
+  <footer>不打卡，也想学 · 一个关于自律与动机的小模块 · 数据仅存于本地浏览器</footer>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------- 存储键值 ---------- */
+  var K = {
+    votes:   'noclock_votes_v1',
+    wall:    'noclock_wall_v1',
+    mychoice:'noclock_mychoice_v1',
+    theme:   'noclock_theme'
+  };
+  // 初始分布参考公开调研：中国青年报社社会调查中心 × 问卷网《付费自律打卡》千人调研(2024)
+  // 曾参与 42.6% / 考虑中 33.9% / 从不参与 23.5% → 映射为 不会(外力)/看情况/会(内驱)
+  var SEED_VOTES = { hui:1412, buhui:2558, kan:2035 };
+  var SEED_WALL = [
+    { name:'中青报调研', key:'hui', text:'87.6% 的受访青年认为，提高行动力根本在于激发内驱力——但行为上，多数人还在靠打卡。', ts:Date.now()-1000*60*60*30 },
+    { name:'小待',   key:'hui',   text:'打卡只是仪式，真正推着我的是「想搞清楚这件事」的渴望。', ts:Date.now()-1000*60*60*26 },
+    { name:'阿May',  key:'buhui', text:'不会。没了外部 deadline，我的执行力直接归零 😂', ts:Date.now()-1000*60*60*20 },
+    { name:'考研人', key:'kan',   text:'有人盯着就自律，独处就摆烂，正在治。', ts:Date.now()-1000*60*60*14 },
+    { name:'夜读客', key:'hui',   text:'我把学习当成和自己对话，不需要别人来证明。', ts:Date.now()-1000*60*60*9 },
+    { name:'老周',   key:'buhui', text:'自律是反人性的，承认这点反而轻松了。', ts:Date.now()-1000*60*60*5 },
+    { name:'林深',   key:'kan',   text:'有目标的时候根本不需要打卡，没目标打卡也白打。', ts:Date.now()-1000*60*42 },
+    { name:'Zoe',    key:'hui',   text:'打卡停了那天我发现，我其实一直在为自己学。', ts:Date.now()-1000*60*18 },
+    { name:'匿名',   key:'buhui', text:'我需要的是节奏感，不是被点名。', ts:Date.now()-1000*60*7 }
+  ];
+  var KEY_LABEL = { hui:'会', buhui:'不会', kan:'看情况' };
+
+  function lsGet(k, def){
+    try{ var v = localStorage.getItem(k); return v==null ? def : JSON.parse(v); }catch(e){ return def; }
+  }
+  function lsSet(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+
+  /* ---------- 状态 ---------- */
+  var votes = lsGet(K.votes, null) || Object.assign({}, SEED_VOTES);
+  var wall  = lsGet(K.wall, null)  || SEED_WALL.slice();
+  var myChoice = lsGet(K.mychoice, null);
+
+  /* ---------- DOM ---------- */
+  var $ = function(s,r){ return (r||document).querySelector(s); };
+  var optsEl = $('#opts'), distEl = $('#dist'), wallEl = $('#wall');
+  var nameInput = $('#nameInput'), textInput = $('#textInput'), charCount = $('#charCount');
+  var postBtn = $('#postBtn'), genBtn = $('#genBtn'), downBtn = $('#downBtn');
+  var shareHint = $('#shareHint'), toastEl = $('#toast');
+
+  function toast(msg){
+    toastEl.textContent = msg; toastEl.classList.add('show');
+    clearTimeout(toast._t); toast._t = setTimeout(function(){ toastEl.classList.remove('show'); }, 1800);
+  }
+
+  /* ---------- 投票渲染 ---------- */
+  function totalVotes(){ return votes.hui + votes.buhui + votes.kan; }
+
+  function renderVotes(){
+    var total = totalVotes();
+    ['hui','buhui','kan'].forEach(function(key){
+      var row = distEl.querySelector('.drow[data-key="'+key+'"]');
+      var n = votes[key];
+      var pct = total ? Math.round(n/total*100) : 0;
+      row.querySelector('.num').textContent = n.toLocaleString();
+      row.querySelector('.pct').textContent = pct + '%';
+      row.querySelector('.fill').style.width = pct + '%';
+    });
+    $('#totalLine').textContent = '初始比例参考公开调研 · 当前共 ' + total.toLocaleString() + ' 票（含你本机新增）';
+    // 高亮已选
+    Array.prototype.forEach.call(optsEl.querySelectorAll('.opt'), function(b){
+      b.classList.toggle('chosen', b.getAttribute('data-key') === myChoice);
+    });
+  }
+
+  optsEl.addEventListener('click', function(e){
+    var btn = e.target.closest('.opt'); if(!btn) return;
+    var key = btn.getAttribute('data-key');
+    if(myChoice === key){ // 取消
+      votes[key] = Math.max(0, votes[key]-1); myChoice = null;
+    } else {
+      if(myChoice){ votes[myChoice] = Math.max(0, votes[myChoice]-1); }
+      votes[key] += 1; myChoice = key;
+    }
+    lsSet(K.votes, votes); lsSet(K.mychoice, myChoice);
+    distEl.classList.add('show');
+    renderVotes();
+    refreshShare();
+    toast(myChoice ? ('已记录你的态度：'+KEY_LABEL[key]) : '已取消选择');
+  });
+
+  /* ---------- 观点墙渲染 ---------- */
+  function relTime(ts){
+    var d = (Date.now()-ts)/1000;
+    if(d < 60) return '刚刚';
+    if(d < 3600) return Math.floor(d/60)+' 分钟前';
+    if(d < 86400) return Math.floor(d/3600)+' 小时前';
+    return Math.floor(d/86400)+' 天前';
+  }
+  function escFirst(s){ return (s||'匿名').trim().charAt(0).toUpperCase() || '匿'; }
+
+  function renderWall(){
+    wallEl.innerHTML = '';
+    if(!wall.length){
+      var e = document.createElement('div'); e.className='wall-empty'; e.textContent='还没有人留言，来当第一个。'; wallEl.appendChild(e); return;
+    }
+    wall.forEach(function(m){
+      var el = document.createElement('div'); el.className='msg';
+      var h = document.createElement('div'); h.className='mh';
+      var av = document.createElement('span'); av.className='av'; av.textContent = escFirst(m.name);
+      var nm = document.createElement('span'); nm.className='nm'; nm.textContent = m.name || '匿名';
+      var tag = document.createElement('span'); tag.className='tag '+m.key; tag.textContent = KEY_LABEL[m.key]||'';
+      h.appendChild(av); h.appendChild(nm); h.appendChild(tag);
+      var t = document.createElement('div'); t.className='mt'+(m.text?'':' empty');
+      t.textContent = m.text || '（只投了票，没留话）';
+      el.appendChild(h); el.appendChild(t);
+      wallEl.appendChild(el);
+    });
+  }
+
+  textInput.addEventListener('input', function(){ charCount.textContent = textInput.value.length; });
+
+  postBtn.addEventListener('click', function(){
+    var text = textInput.value.trim();
+    if(!text && !myChoice){ toast('写点什么，或先投一票吧'); return; }
+    if(!text){ toast('说一句你的想法～'); textInput.focus(); return; }
+    var name = nameInput.value.trim() || '匿名';
+    var msg = { name:name, key:myChoice||'kan', text:text, ts:Date.now() };
+    wall.unshift(msg);
+    if(wall.length > 200) wall = wall.slice(0,200);
+    lsSet(K.wall, wall);
+    textInput.value=''; charCount.textContent='0';
+    renderWall();
+    refreshShare(msg);
+    toast('已留在墙上 🌿');
+  });
+
+  /* ---------- 分享卡片（Canvas） ---------- */
+  var canvas = $('#cardCanvas'), ctx = canvas.getContext('2d');
+  var W = 1080, H = 1350;
+
+  function wrapText(c, text, x, y, maxW, lh){
+    var chars = (text||'').split('');
+    var line = '', lines = [];
+    for(var i=0;i<chars.length;i++){
+      var test = line + chars[i];
+      if(c.measureText(test).width > maxW && line){ lines.push(line); line = chars[i]; }
+      else { line = test; }
+    }
+    if(line) lines.push(line);
+    lines.forEach(function(ln,idx){ c.fillText(ln, x, y + idx*lh); });
+    return lines.length;
+  }
+
+  function drawCard(){
+    canvas.width = W; canvas.height = H;
+    // 背景渐变
+    var g = ctx.createLinearGradient(0,0,0,H);
+    g.addColorStop(0,'#0f9d77'); g.addColorStop(1,'#0b6b54');
+    ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
+    // 装饰圆
+    ctx.globalAlpha = .12; ctx.fillStyle = '#ffffff';
+    ctx.beginPath(); ctx.arc(W-120,160,220,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(120,H-160,260,0,Math.PI*2); ctx.fill();
+    ctx.globalAlpha = 1;
+
+    ctx.textBaseline = 'top';
+    // 顶部品牌
+    ctx.fillStyle = 'rgba(255,255,255,.85)';
+    ctx.font = '600 30px -apple-system,"PingFang SC","Microsoft YaHei",sans-serif';
+    ctx.fillText('不打卡，也想学', 80, 78);
+
+    // 命题
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '800 58px -apple-system,"PingFang SC","Microsoft YaHei",sans-serif';
+    wrapText(ctx, '如果不用打卡，\n你还会自律学习吗？'.replace('\n',''), 80, 180, W-160, 78, 3);
+    // 手动两行更可控
+    ctx.fillText('如果不用打卡，', 80, 180);
+    ctx.fillText('你还会自律学习吗？', 80, 258);
+
+    // 态度徽章
+    var label = myChoice ? KEY_LABEL[myChoice] : '还没投';
+    var sub = myChoice ? ({hui:'内在动机驱动',buhui:'靠外部推力',kan:'看目标而定'})[myChoice] : '先投一票看看';
+    var badgeY = 400;
+    ctx.fillStyle = 'rgba(255,255,255,.16)';
+    roundRect(ctx, 80, badgeY, 520, 96, 24); ctx.fill();
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '800 46px -apple-system,"PingFang SC","Microsoft YaHei",sans-serif';
+    ctx.fillText('我的态度：'+label, 110, badgeY+26);
+
+    // 宣言区
+    var declY = 560;
+    ctx.fillStyle = 'rgba(255,255,255,.9)';
+    ctx.font = '600 30px -apple-system,"PingFang SC","Microsoft YaHei",sans-serif';
+    ctx.fillText('我的学习宣言', 80, declY);
+    // 白卡片
+    var cardY = declY + 56;
+    ctx.fillStyle = 'rgba(255,255,255,.96)';
+    roundRect(ctx, 80, cardY, W-160, 560, 28); ctx.fill();
+    var decl = (currentOverride && currentOverride.text) ? currentOverride.text : '';
+    ctx.fillStyle = '#16302a';
+    ctx.font = '500 38px -apple-system,"PingFang SC","Microsoft YaHei",sans-serif';
+    if(decl){
+      wrapText(ctx, decl, 120, cardY+50, W-220, 56);
+    } else {
+      ctx.fillStyle = '#5b6b73';
+      ctx.font = 'italic 34px -apple-system,"PingFang SC","Microsoft YaHei",sans-serif';
+      ctx.fillText('（留一句观点，就会出现在卡片上）', 120, cardY+60);
+    }
+
+    // 页脚
+    ctx.fillStyle = 'rgba(255,255,255,.8)';
+    ctx.font = '500 28px -apple-system,"PingFang SC","Microsoft YaHei",sans-serif';
+    var who = (currentOverride && currentOverride.name) ? currentOverride.name : (myChoice ? '来自一位「'+KEY_LABEL[myChoice]+'」的学习者' : '来自小待的学习角落');
+    ctx.fillText('— '+who, 80, H-110);
+    ctx.font = '400 24px -apple-system,"PingFang SC","Microsoft YaHei",sans-serif';
+    ctx.fillStyle = 'rgba(255,255,255,.6)';
+    ctx.fillText('扫码或访问 noclock.html 投出你的态度', 80, H-66);
+  }
+
+  function roundRect(c,x,y,w,h,r){
+    c.beginPath();
+    c.moveTo(x+r,y); c.arcTo(x+w,y,x+w,y+h,r); c.arcTo(x+w,y+h,x,y+h,r);
+    c.arcTo(x,y+h,x,y,r); c.arcTo(x,y,x+w,y,r); c.closePath();
+  }
+
+  function refreshShare(overrideMsg){
+    if(overrideMsg) currentOverride = overrideMsg;
+    if(myChoice || (currentOverride && currentOverride.text)){ shareHint.style.display='none'; }
+    else { shareHint.style.display=''; }
+    drawCard();
+  }
+
+  genBtn.addEventListener('click', function(){ refreshShare(); toast('卡片已刷新'); });
+  downBtn.addEventListener('click', function(){
+    try{
+      canvas.toBlob(function(blob){
+        var a=document.createElement('a');
+        a.href=URL.createObjectURL(blob); a.download='我的学习宣言.png';
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1000);
+        toast('已下载图片');
+      });
+    }catch(e){ toast('当前环境不支持下载'); }
+  });
+
+  /* ---------- 主题 ---------- */
+  var themeBtn = $('#themeBtn');
+  var SUN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
+  var MOON= '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg>';
+  function paintTheme(){
+    var t = document.documentElement.getAttribute('data-theme');
+    themeBtn.innerHTML = (t==='dark') ? SUN : MOON;
+  }
+  themeBtn.addEventListener('click', function(){
+    var t = document.documentElement.getAttribute('data-theme')==='dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', t);
+    lsSet(K.theme, t); paintTheme();
+    drawCard();
+    if(window.parent !== window){ parent.postMessage({type:'noclock-theme',theme:t},'*'); }
+  });
+  // 初始化主题（优先 localStorage，其次早期脚本已设的系统值）
+  var savedTheme = lsGet(K.theme, null);
+  if(savedTheme){ document.documentElement.setAttribute('data-theme', savedTheme); }
+  paintTheme();
+
+  /* ---------- 集成：高度自适应 + 主题同步 ---------- */
+  var currentOverride = null;
+  function postHeight(){
+    if(window.parent !== window){
+      parent.postMessage({ type:'noclock-resize', height: Math.ceil(document.body.scrollHeight) }, '*');
+    }
+  }
+  window.addEventListener('load', postHeight);
+  if(window.ResizeObserver){ new ResizeObserver(postHeight).observe(document.body); }
+  window.addEventListener('resize', postHeight);
+  window.addEventListener('message', function(e){
+    var d = e.data; if(!d) return;
+    if(d.type === 'noclock-theme' && (d.theme==='light'||d.theme==='dark')){
+      document.documentElement.setAttribute('data-theme', d.theme); lsSet(K.theme, d.theme); paintTheme(); drawCard();
+    }
+  });
+
+  // 记录最近一次生成的 override（用于主题切换时重绘）
+  postBtn.addEventListener('click', function(){ /* override 在 refreshShare 内处理 */ });
+
+  /* ---------- 初次渲染 ---------- */
+  renderVotes();
+  if(myChoice){ distEl.classList.add('show'); }
+  renderWall();
+  currentOverride = null;
+  refreshShare();
+  postHeight();
+
+})();
+</script>
+</body>
+</html>

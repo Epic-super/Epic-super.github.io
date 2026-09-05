@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>今天吃什么 · 帮你想好饭</title>
+<style>
+  :root {
+    --bg1: #ff9a9e;
+    --bg2: #fad0c4;
+    --bg3: #fbc2eb;
+    --accent: #ff6b6b;
+    --accent2: #ff8e53;
+    --ink: #3d2c2c;
+    --card: rgba(255, 255, 255, 0.78);
+    --shadow: 0 18px 50px rgba(216, 110, 110, 0.28);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+    color: var(--ink);
+    background: linear-gradient(135deg, var(--bg1), var(--bg2) 45%, var(--bg3));
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 28px 16px 40px;
+    overflow-x: hidden;
+  }
+  .wrap { width: 100%; max-width: 520px; display: flex; flex-direction: column; align-items: center; gap: 22px; }
+
+  header { text-align: center; }
+  header h1 {
+    font-size: 30px; letter-spacing: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  header p { margin-top: 6px; font-size: 14px; opacity: 0.72; }
+
+  .filters { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+  .chip {
+    border: none; cursor: pointer; font-size: 13px; padding: 7px 14px;
+    border-radius: 999px; background: var(--card); color: var(--ink);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06); transition: transform .15s, background .2s;
+  }
+  .chip:hover { transform: translateY(-2px); }
+  .chip.active { background: linear-gradient(90deg, var(--accent), var(--accent2)); color: #fff; }
+
+  .wheel-area { position: relative; width: 280px; height: 280px; }
+  .pointer {
+    position: absolute; top: -6px; left: 50%; transform: translateX(-50%);
+    width: 0; height: 0; border-left: 14px solid transparent; border-right: 14px solid transparent;
+    border-top: 26px solid #fff; z-index: 5; filter: drop-shadow(0 3px 4px rgba(0,0,0,.2));
+  }
+  .wheel {
+    width: 100%; height: 100%; border-radius: 50%;
+    border: 8px solid #fff; box-shadow: var(--shadow);
+    transition: transform 4.2s cubic-bezier(0.17, 0.67, 0.18, 1);
+    background: #eee;
+  }
+
+  .result {
+    min-height: 56px; text-align: center;
+  }
+  .result .label { font-size: 13px; opacity: .6; }
+  .result .food {
+    font-size: 38px; font-weight: 700; margin-top: 4px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    transition: transform .2s;
+  }
+  .result .food.pop { animation: pop .5s ease; }
+  @keyframes pop { 0%{transform:scale(.6)} 60%{transform:scale(1.12)} 100%{transform:scale(1)} }
+
+  .btn {
+    border: none; cursor: pointer; font-size: 18px; font-weight: 600;
+    padding: 15px 46px; border-radius: 999px; color: #fff;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    box-shadow: 0 12px 28px rgba(255, 107, 107, .45);
+    transition: transform .15s, filter .2s;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn:active { transform: scale(.96); }
+  .btn:disabled { filter: grayscale(.4) opacity(.6); cursor: not-allowed; }
+
+  .btn-shake { font-size: 15px; padding: 12px 34px; opacity: .96; }
+  .shake-tip { font-size: 12px; opacity: .6; margin-top: -10px; text-align: center; line-height: 1.4; }
+  .shake-tip.warn { opacity: .9; color: var(--accent); }
+
+  .history { width: 100%; background: var(--card); border-radius: 18px; padding: 16px 18px; box-shadow: var(--shadow); }
+  .history h3 { font-size: 15px; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .history ul { list-style: none; display: flex; flex-wrap: wrap; gap: 8px; }
+  .history li {
+    font-size: 13px; padding: 6px 12px; border-radius: 999px;
+    background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,.06);
+  }
+  .history .empty { font-size: 13px; opacity: .5; }
+  .clear { margin-left: auto; font-size: 12px; color: var(--accent); background: none; border: none; cursor: pointer; }
+
+  footer { font-size: 12px; opacity: .55; margin-top: 6px; }
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>今天吃什么</h1>
+      <p>选择分类，点一下，让命运决定你的下一餐 🍜</p>
+    </header>
+
+    <div class="filters" id="filters"></div>
+
+    <div class="wheel-area">
+      <div class="pointer"></div>
+      <div class="wheel" id="wheel"></div>
+    </div>
+
+    <div class="result">
+      <div class="label">本餐推荐</div>
+      <div class="food" id="food">？？？</div>
+    </div>
+
+    <button class="btn" id="spin">帮我选！</button>
+
+    <button class="btn btn-shake" id="shakeBtn">📱 摇一摇</button>
+    <p class="shake-tip" id="shakeTip">手机摇一摇也能选，或点上方按钮 😋</p>
+
+    <div class="history">
+      <h3>📜 近期选择 <button class="clear" id="clear">清空</button></h3>
+      <ul id="historyList"><li class="empty">还没有记录，快选一餐吧～</li></ul>
+    </div>
+
+    <footer>edgeone-makers-whattoeat · 静态站点 Demo</footer>
+  </div>
+
+<script>
+  const MENU = {
+    "全部": ["红烧牛肉面","黄焖鸡米饭","麻辣香锅","螺蛳粉","日式咖喱饭","汉堡薯条","披萨","轻食沙拉","小笼包","煲仔饭","兰州拉面","麻辣烫","韩式拌饭","寿喜锅","寿司拼盘","炸鸡","酸菜鱼","葱油拌面","肠粉","煎饼果子","关东煮","砂锅粥","意大利面","墨西哥卷饼"],
+    "中餐": ["红烧牛肉面","黄焖鸡米饭","小笼包","煲仔饭","兰州拉面","麻辣烫","酸菜鱼","葱油拌面","肠粉","煎饼果子","砂锅粥"],
+    "西餐": ["汉堡薯条","披萨","意大利面","墨西哥卷饼","轻食沙拉","芝士焗饭"],
+    "快餐": ["汉堡薯条","披萨","炸鸡","日式咖喱饭","韩式拌饭","墨西哥卷饼"],
+    "面食": ["红烧牛肉面","兰州拉面","葱油拌面","意大利面","螺蛳粉","麻辣烫"],
+    "火锅": ["麻辣香锅","寿喜锅","关东煮","酸菜鱼","麻辣烫"],
+    "日料": ["日式咖喱饭","寿司拼盘","寿喜锅","关东煮","拉面"],
+    "甜点": ["轻食沙拉","芒果班戟","双皮奶","提拉米苏","草莓大福"],
+    "饮品": ["珍珠奶茶","柠檬茶","美式咖啡","鲜榨橙汁","抹茶拿铁"]
+  };
+
+  const palette = ["#ff9a9e","#fad0c4","#fbc2eb","#a18cd1","#ffd3a5","#fd9bb3","#c2e9fb","#ffecd2","#ffb6c1","#d4a5ff"];
+  const wheel = document.getElementById('wheel');
+  const foodEl = document.getElementById('food');
+  const spinBtn = document.getElementById('spin');
+  const filtersEl = document.getElementById('filters');
+  const historyList = document.getElementById('historyList');
+  const clearBtn = document.getElementById('clear');
+
+  let currentCat = "全部";
+  let rotation = 0;
+  let history = [];
+
+  // 构建分类筛选
+  Object.keys(MENU).forEach((cat, i) => {
+    const b = document.createElement('button');
+    b.className = 'chip' + (i === 0 ? ' active' : '');
+    b.textContent = cat;
+    b.onclick = () => {
+      document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+      b.classList.add('active');
+      currentCat = cat;
+      renderWheel();
+      foodEl.textContent = "？？？";
+    };
+    filtersEl.appendChild(b);
+  });
+
+  function renderWheel() {
+    const items = MENU[currentCat];
+    const n = items.length;
+    const slice = 360 / n;
+    let stops = [];
+    for (let i = 0; i < n; i++) {
+      const c = palette[i % palette.length];
+      stops.push(`${c} ${i * slice}deg ${(i + 1) * slice}deg`);
+    }
+    wheel.style.background = `conic-gradient(${stops.join(',')})`;
+    wheel.dataset.n = n;
+  }
+
+  function renderHistory() {
+    historyList.innerHTML = '';
+    if (history.length === 0) {
+      historyList.innerHTML = '<li class="empty">还没有记录，快选一餐吧～</li>';
+      return;
+    }
+    history.slice().reverse().forEach(item => {
+      const li = document.createElement('li');
+      li.textContent = item;
+      historyList.appendChild(li);
+    });
+  }
+
+  function spin() {
+    const items = MENU[currentCat];
+    const n = items.length;
+    const slice = 360 / n;
+    const idx = Math.floor(Math.random() * n);
+    // 指针在顶部(0deg)，让第 idx 个扇区中心转到顶部
+    const target = 360 * 5 + (360 - (idx * slice + slice / 2));
+    rotation = target;
+    wheel.style.transform = `rotate(${rotation}deg)`;
+    spinBtn.disabled = true;
+    foodEl.textContent = "转动中…";
+
+    setTimeout(() => {
+      const pick = items[idx];
+      foodEl.textContent = pick;
+      foodEl.classList.remove('pop'); void foodEl.offsetWidth; foodEl.classList.add('pop');
+      history.push(pick);
+      if (history.length > 12) history.shift();
+      renderHistory();
+      spinBtn.disabled = false;
+    }, 4300);
+  }
+
+  spinBtn.onclick = spin;
+  clearBtn.onclick = () => { history = []; renderHistory(); };
+
+  // ===== 摇一摇功能 =====
+  const shakeBtn = document.getElementById('shakeBtn');
+  const shakeTip = document.getElementById('shakeTip');
+  let shakeListening = false;
+  let lastAcc = null;
+  let shakeCooldown = false;
+  let motionProbeTimer = null;
+  const SHAKE_THRESHOLD = 16;   // 偏差绝对值之和阈值
+  const SHAKE_COOLDOWN = 1800;  // 冷却期(ms)，避免连续触发
+
+  function onMotion(e) {
+    const acc = e.accelerationIncludingGravity;
+    if (!acc) return;
+    // 收到首个 motion 事件 → 设备支持，取消“不支持”探测
+    if (motionProbeTimer) { clearTimeout(motionProbeTimer); motionProbeTimer = null; }
+
+    const x = acc.x || 0, y = acc.y || 0, z = acc.z || 0;
+    if (lastAcc) {
+      const dx = x - lastAcc.x, dy = y - lastAcc.y, dz = z - lastAcc.z;
+      const delta = Math.abs(dx) + Math.abs(dy) + Math.abs(dz);
+      // 触发条件：超过阈值 + 不在冷却 + 当前没有正在转动(利用 spin 的 disabled)
+      if (delta > SHAKE_THRESHOLD && !shakeCooldown && !spinBtn.disabled) {
+        shakeCooldown = true;
+        spin();
+        setTimeout(() => { shakeCooldown = false; }, SHAKE_COOLDOWN);
+      }
+    }
+    lastAcc = { x, y, z };
+  }
+
+  function startShake() {
+    if (shakeListening) return;
+    window.addEventListener('devicemotion', onMotion);
+    shakeListening = true;
+    shakeBtn.textContent = '摇一摇已开启 ✓';
+    shakeBtn.disabled = true;
+    shakeTip.textContent = '已开启，摇一摇手机试试吧 📱';
+    shakeTip.classList.remove('warn');
+    // 探测：1.5 秒内未收到任何 motion 事件 → 视为不支持
+    motionProbeTimer = setTimeout(() => {
+      motionProbeTimer = null;
+      shakeTip.textContent = '当前设备不支持摇一摇，直接点上方按钮即可';
+      shakeTip.classList.add('warn');
+    }, 1500);
+  }
+
+  shakeBtn.onclick = async () => {
+    if (shakeListening) return;
+    // iOS 13+ 必须在用户手势内申请权限
+    if (typeof DeviceMotionEvent !== 'undefined' &&
+        typeof DeviceMotionEvent.requestPermission === 'function') {
+      try {
+        const res = await DeviceMotionEvent.requestPermission();
+        if (res === 'granted') {
+          startShake();
+        } else {
+          shakeTip.textContent = '未授权加速度计权限，无法使用摇一摇，点上方按钮即可';
+          shakeTip.classList.add('warn');
+        }
+      } catch (err) {
+        shakeTip.textContent = '无法开启摇一摇，请直接点上方按钮选餐';
+        shakeTip.classList.add('warn');
+      }
+    } else {
+      startShake();
+    }
+  };
+
+  renderWheel();
+  renderHistory();
+</script>
+</body>
+</html>

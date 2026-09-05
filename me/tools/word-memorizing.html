@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>六级单词速记 - 小待的个人藏宝库</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .container {
+            background-color: var(--color-surface);
+            padding: 30px;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-md);
+            text-align: center;
+            width: 90%;
+            max-width: 500px;
+            margin: 40px auto;
+        }
+        h1 {
+            color: var(--color-success);
+            margin-bottom: 20px;
+        }
+        .word-display {
+            margin-bottom: 25px;
+            min-height: 100px; /* Ensure space even when meaning is hidden */
+        }
+        .word {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: var(--color-text);
+            margin-bottom: 5px;
+        }
+        .phonetic {
+            font-size: 1.2em;
+            color: var(--color-text-muted);
+            margin-bottom: 10px;
+        }
+        .meaning {
+            font-size: 1.2em;
+            color: var(--color-text);
+            background-color: var(--color-surface-alt);
+            padding: 10px;
+            border-radius: var(--radius-sm);
+        }
+        .controls button {
+            background-color: var(--color-success);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 1em;
+            margin: 5px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+        .controls button:hover {
+            background-color: var(--color-primary-light);
+        }
+        .controls button.secondary {
+            background-color: var(--color-info);
+        }
+        .controls button.secondary:hover {
+            background-color: var(--color-primary);
+        }
+        .controls button.danger {
+            background-color: var(--color-danger);
+        }
+        .controls button.danger:hover {
+            background-color: #da190b;
+        }
+        .hidden {
+            display: none;
+        }
+        .progress {
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: var(--color-text-muted);
+        }
+        .check-in-section {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid var(--color-divider);
+        }
+        .check-in-section button {
+            background-color: #ff9800;
+            color: white;
+            padding: 10px 18px;
+        }
+        .check-in-section button:hover {
+            background-color: #f57c00;
+        }
+        .check-in-info {
+            font-size: 0.9em;
+            color: var(--color-text-muted);
+            margin-top: 10px;
+        }
+    </style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+    <div class="container">
+        <h1>六级单词速记</h1>
+        <div class="word-display">
+            <div id="word" class="word">加载中...</div>
+            <div id="phonetic" class="phonetic"></div>
+            <div id="meaning" class="meaning hidden"></div>
+        </div>
+        <div class="controls">
+            <button id="toggleMeaningBtn">显示/隐藏释义</button>
+            <button id="knownBtn" class="secondary">我认识</button>
+            <button id="unknownBtn" class="danger">不认识</button>
+            <button id="nextBtn">下一个</button>
+        </div>
+        <div class="progress">
+            <p>当前单词: <span id="currentIndexDisplay">0</span> / <span id="totalWordsDisplay">0</span> (基于当前学习列表)</p>
+            <p>总词库词数: <span id="totalVocabularySize">0</span></p>
+            <p>已认识: <span id="knownCount">0</span> | 剩余待学: <span id="learningCount">0</span></p>
+        </div>
+
+        <div class="check-in-section">
+            <button id="checkInBtn">今日打卡</button>
+            <div class="check-in-info">
+                <p>上次打卡: <span id="lastCheckInDate">从未</span></p>
+                <p>连续打卡: <span id="consecutiveCheckInDays">0</span> 天</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const cet6Vocabulary = [
+            { word: "abandon", phonetic: "/əˈbændən/", meaning: "v.放弃；遗弃" },
+            { word: "abide", phonetic: "/əˈbaɪd/", meaning: "v.遵守；忍受" },
+            { word: "abolish", phonetic: "/əˈbɒlɪʃ/", meaning: "v.废除，取消" },
+            { word: "absorb", phonetic: "/əbˈsɔːb/", meaning: "v.吸收；吸引" },
+            { word: "abstract", phonetic: "/ˈæbstrækt/", meaning: "adj.抽象的 n.摘要" },
+            { word: "absurd", phonetic: "/əbˈsɜːd/", meaning: "adj.荒谬的，可笑的" },
+            { word: "abundant", phonetic: "/əˈbʌndənt/", meaning: "adj.丰富的，充裕的" },
+            { word: "abuse", phonetic: "/əˈbjuːs/", meaning: "v./n.滥用；虐待" },
+            { word: "academic", phonetic: "/ˌækəˈdemɪk/", meaning: "adj.学术的；学院的 n.大学教师" },
+            { word: "accelerate", phonetic: "/əkˈseləreɪt/", meaning: "v.加速；促进" },
+            { word: "access", phonetic: "/ˈækses/", meaning: "n.通道；接近 v.接近；使用" },
+            { word: "accommodate", phonetic: "/əˈkɒmədeɪt/", meaning: "v.容纳；使适应；向...提供" },
+            { word: "accompany", phonetic: "/əˈkʌmpəni/", meaning: "v.陪伴，伴随；伴奏" },
+            { word: "accomplish", phonetic: "/əˈkʌmplɪʃ/", meaning: "v.完成，达到，实现" },
+            { word: "account", phonetic: "/əˈkaʊnt/", meaning: "n.账目；解释 v.说明；认为" },
+            // 新增高频词汇
+            { word: "accumulate", phonetic: "/əˈkjuːmjəleɪt/", meaning: "v.积累，积聚" },
+            { word: "accurate", phonetic: "/ˈækjərət/", meaning: "adj.精确的，准确的" },
+            { word: "accuse", phonetic: "/əˈkjuːz/", meaning: "v.指控，控告" },
+            { word: "achieve", phonetic: "/əˈtʃiːv/", meaning: "v.达到，取得，实现" },
+            { word: "acknowledge", phonetic: "/əkˈnɒlɪdʒ/", meaning: "v.承认；告知收到；致谢" },
+            { word: "acquire", phonetic: "/əˈkwaɪə(r)/", meaning: "v.取得，获得；学到" },
+            { word: "adapt", phonetic: "/əˈdæpt/", meaning: "v.使适应；改编" },
+            { word: "adequate", phonetic: "/ˈædɪkwət/", meaning: "adj.足够的；适当的，胜任的" },
+            { word: "adjust", phonetic: "/əˈdʒʌst/", meaning: "v.调整，调节；适应" },
+            { word: "administration", phonetic: "/ədˌmɪnɪˈstreɪʃn/", meaning: "n.管理，行政；政府" },
+            { word: "admire", phonetic: "/ədˈmaɪə(r)/", meaning: "v.钦佩，羡慕；赞赏" },
+            { word: "admit", phonetic: "/ədˈmɪt/", meaning: "v.承认；准许进入" },
+            { word: "adolescent", phonetic: "/ˌædəˈlesnt/", meaning: "adj.青春期的 n.青少年" },
+            { word: "adopt", phonetic: "/əˈdɒpt/", meaning: "v.采用，采纳；收养" },
+            { word: "advance", phonetic: "/ədˈvɑːns/", meaning: "v./n.前进，发展；预付" },
+            { word: "advantage", phonetic: "/ədˈvɑːntɪdʒ/", meaning: "n.优点，优势；利益" },
+            { word: "adventure", phonetic: "/ədˈventʃə(r)/", meaning: "n.冒险，奇遇" },
+            { word: "advertise", phonetic: "/ˈædvətaɪz/", meaning: "v.为...做广告；通知" },
+            { word: "advocate", phonetic: "/ˈædvəkeɪt/", meaning: "v.提倡，主张 n.辩护者" },
+            { word: "affect", phonetic: "/əˈfekt/", meaning: "v.影响；感动" },
+            { word: "afford", phonetic: "/əˈfɔːd/", meaning: "v.负担得起；提供" },
+            { word: "agency", phonetic: "/ˈeɪdʒənsi/", meaning: "n.代理处，经销处；机构" },
+            { word: "aggressive", phonetic: "/əˈɡresɪv/", meaning: "adj.侵略性的；有进取心的" },
+            { word: "agriculture", phonetic: "/ˈæɡrɪkʌltʃə(r)/", meaning: "n.农业，农学" },
+            { word: "alter", phonetic: "/ˈɔːltə(r)/", meaning: "v.改变，更改" },
+            { word: "alternative", phonetic: "/ɔːlˈtɜːnətɪv/", meaning: "adj.两者择一的 n.替换物" },
+            { word: "ambition", phonetic: "/æmˈbɪʃn/", meaning: "n.雄心，抱负；野心" },
+            { word: "analyze", phonetic: "/ˈænəlaɪz/", meaning: "v.分析，分解" },
+            { word: "ancestor", phonetic: "/ˈænsestə(r)/", meaning: "n.祖先，祖宗" },
+            { word: "annual", phonetic: "/ˈænjuəl/", meaning: "adj.每年的，年度的 n.年刊" },
+            { word: "anticipate", phonetic: "/ænˈtɪsɪpeɪt/", meaning: "v.预期，期望；先于...行动" },
+            { word: "anxiety", phonetic: "/æŋˈzaɪəti/", meaning: "n.焦虑，忧虑；渴望" },
+            { word: "apparent", phonetic: "/əˈpærənt/", meaning: "adj.显然的，表面上的" },
+            { word: "appeal", phonetic: "/əˈpiːl/", meaning: "v./n.呼吁，恳求；吸引力；上诉" },
+            { word: "appoint", phonetic: "/əˈpɔɪnt/", meaning: "v.任命，委派；约定" },
+            { word: "appreciate", phonetic: "/əˈpriːʃieɪt/", meaning: "v.感激；欣赏；领会" },
+            { word: "approach", phonetic: "/əˈprəʊtʃ/", meaning: "v.接近，靠近 n.方法，途径" },
+            { word: "appropriate", phonetic: "/əˈprəʊpriət/", meaning: "adj.适当的，恰当的" },
+            { word: "approve", phonetic: "/əˈpruːv/", meaning: "v.批准，赞成；证实" },
+            { word: "arise", phonetic: "/əˈraɪz/", meaning: "v.出现，发生；起床" },
+            { word: "artificial", phonetic: "/ˌɑːtɪˈfɪʃl/", meaning: "adj.人工的，人造的；虚假的" },
+            { word: "ashamed", phonetic: "/əˈʃeɪmd/", meaning: "adj.惭愧的，羞耻的" },
+            { word: "aspect", phonetic: "/ˈæspekt/", meaning: "n.方面；面貌，外观" },
+            { word: "assemble", phonetic: "/əˈsembl/", meaning: "v.集合，聚集；装配" },
+            { word: "assess", phonetic: "/əˈses/", meaning: "v.评估，评定（性质、质量）" },
+            { word: "assign", phonetic: "/əˈsaɪn/", meaning: "v.分配，指派；指定" },
+            { word: "assist", phonetic: "/əˈsɪst/", meaning: "v.协助，帮助" },
+            { word: "associate", phonetic: "/əˈsəʊʃieɪt/", meaning: "v.联想；交往 n.伙伴 adj.副的" },
+            { word: "assume", phonetic: "/əˈsjuːm/", meaning: "v.假定，设想；承担" },
+            { word: "assure", phonetic: "/əˈʃʊə(r)/", meaning: "v.使确信，向...保证" },
+            { word: "atmosphere", phonetic: "/ˈætməsfɪə(r)/", meaning: "n.大气，空气；气氛" },
+            { word: "attach", phonetic: "/əˈtætʃ/", meaning: "v.缚，系，贴；附加" },
+            { word: "attain", phonetic: "/əˈteɪn/", meaning: "v.达到，获得" },
+            { word: "attempt", phonetic: "/əˈtempt/", meaning: "v./n.尝试，企图" },
+            { word: "attitude", phonetic: "/ˈætɪtjuːd/", meaning: "n.态度，看法；姿势" },
+            { word: "attribute", phonetic: "/əˈtrɪbjuːt/", meaning: "v.把…归因于 n.属性，特质" },
+            { word: "audience", phonetic: "/ˈɔːdiəns/", meaning: "n.听众，观众；读者" },
+            { word: "authority", phonetic: "/ɔːˈθɒrəti/", meaning: "n.权威；权力；当局" },
+            { word: "available", phonetic: "/əˈveɪləbl/", meaning: "adj.可利用的；可见到的；可获得的" },
+            { word: "average", phonetic: "/ˈævərɪdʒ/", meaning: "n.平均数 adj.平均的 v.平均" },
+            { word: "avoid", phonetic: "/əˈvɔɪd/", meaning: "v.避免，躲开，逃避" },
+            { word: "award", phonetic: "/əˈwɔːd/", meaning: "n.奖品，奖金 v.授予，判给" },
+            { word: "aware", phonetic: "/əˈweə(r)/", meaning: "adj.意识到的，知道的" },
+            { word: "awful", phonetic: "/ˈɔːfl/", meaning: "adj.极坏的；威严的；可怕的" },
+            { word: "background", phonetic: "/ˈbækɡraʊnd/", meaning: "n.背景，经历；底色" },
+            { word: "balance", phonetic: "/ˈbæləns/", meaning: "n.平衡；天平；余额 v.使平衡" },
+            { word: "ban", phonetic: "/bæn/", meaning: "v.禁止 n.禁令" },
+            { word: "band", phonetic: "/bænd/", meaning: "n.乐队；带；一群 v.联合" },
+            { word: "barrier", phonetic: "/ˈbæriə(r)/", meaning: "n.障碍物，屏障；界线" },
+            { word: "base", phonetic: "/beɪs/", meaning: "n.基础；基地 v.以...为基础" },
+            { word: "basic", phonetic: "/ˈbeɪsɪk/", meaning: "adj.基本的，基础的" },
+            { word: "battle", phonetic: "/ˈbætl/", meaning: "n.战役；斗争 v.作战" },
+            { word: "bear", phonetic: "/beə(r)/", meaning: "v.忍受；承担；生育；携带 n.熊" },
+            { word: "behavior", phonetic: "/bɪˈheɪvjə(r)/", meaning: "n.行为，举止；态度" },
+            { word: "belief", phonetic: "/bɪˈliːf/", meaning: "n.信任，信心；信仰" },
+            { word: "belong", phonetic: "/bɪˈlɒŋ/", meaning: "v.属于，附属" },
+            { word: "benefit", phonetic: "/ˈbenɪfɪt/", meaning: "n.利益，好处 v.有益于；得益" },
+            { word: "besides", phonetic: "/bɪˈsaɪdz/", meaning: "prep.除...以外 adv.而且" },
+            { word: "beyond", phonetic: "/bɪˈjɒnd/", meaning: "prep.在...那边；超出 adv.在更远处" },
+            { word: "blame", phonetic: "/bleɪm/", meaning: "v.责备，把...归咎于 n.过失" },
+            { word: "bond", phonetic: "/bɒnd/", meaning: "n.联结；公债；契约 v.使结合" },
+            { word: "border", phonetic: "/ˈbɔːdə(r)/", meaning: "n.边界；边缘 v.毗邻" },
+            { word: "bother", phonetic: "/ˈbɒðə(r)/", meaning: "v.烦扰，打扰 n.麻烦" },
+            { word: "branch", phonetic: "/brɑːntʃ/", meaning: "n.树枝；分支；分店 v.分支" },
+            { word: "brand", phonetic: "/brænd/", meaning: "n.商标；烙印 v.打烙印于" },
+            { word: "brief", phonetic: "/briːf/", meaning: "adj.简短的 n.摘要 v.简报" },
+            { word: "budget", phonetic: "/ˈbʌdʒɪt/", meaning: "n.预算 v.做预算 adj.低廉的" },
+            { word: "burden", phonetic: "/ˈbɜːdn/", meaning: "n.担子，负担 v.使负重" },
+            { word: "campaign", phonetic: "/kæmˈpeɪn/", meaning: "n.战役；运动 v.参加运动" },
+            { word: "cancel", phonetic: "/ˈkænsl/", meaning: "v.取消，撤销；删去" },
+            { word: "candidate", phonetic: "/ˈkændɪdət/", meaning: "n.候选人；投考者" },
+            { word: "capacity", phonetic: "/kəˈpæsəti/", meaning: "n.容量；能力；资格" },
+            { word: "capture", phonetic: "/ˈkæptʃə(r)/", meaning: "v.捕获；占领 n.捕获；战利品" },
+            { word: "career", phonetic: "/kəˈrɪə(r)/", meaning: "n.生涯，职业" },
+            { word: "cast", phonetic: "/kɑːst/", meaning: "v.投，扔；铸造 n.演员表；铸件" },
+            { word: "category", phonetic: "/ˈkætəɡəri/", meaning: "n.种类，范畴；类别" },
+            { word: "cease", phonetic: "/siːs/", meaning: "v.停止，终止" },
+            { word: "challenge", phonetic: "/ˈtʃælɪndʒ/", meaning: "n.挑战；怀疑 v.向...挑战" },
+            { word: "channel", phonetic: "/ˈtʃænl/", meaning: "n.海峡；渠道；频道 v.引导" },
+            { word: "chapter", phonetic: "/ˈtʃæptə(r)/", meaning: "n.章，回；分会" },
+            { word: "character", phonetic: "/ˈkærəktə(r)/", meaning: "n.性格；特性；角色；符号" },
+            { word: "charge", phonetic: "/tʃɑːdʒ/", meaning: "v.索价；控告；充电 n.费用；掌管" },
+            { word: "chart", phonetic: "/tʃɑːt/", meaning: "n.图表；航海图 v.制图" },
+            { word: "chase", phonetic: "/tʃeɪs/", meaning: "v./n.追逐，追赶；追求" },
+            { word: "chief", phonetic: "/tʃiːf/", meaning: "adj.主要的；首要的 n.首领" },
+            { word: "circumstance", phonetic: "/ˈsɜːkəmstəns/", meaning: "n.环境，情况；事件" },
+            { word: "cite", phonetic: "/saɪt/", meaning: "v.引用，引证；传讯" },
+            { word: "civilian", phonetic: "/səˈvɪliən/", meaning: "n.平民 adj.平民的" },
+            { word: "claim", phonetic: "/kleɪm/", meaning: "v.要求；声称 n.要求；断言" },
+            { word: "clarify", phonetic: "/ˈklærɪfaɪ/", meaning: "v.澄清，阐明" },
+            { word: "classic", phonetic: "/ˈklæsɪk/", meaning: "adj.经典的；第一流的 n.杰作" },
+            { word: "client", phonetic: "/ˈklaɪənt/", meaning: "n.顾客；委托人，当事人" },
+            { word: "climate", phonetic: "/ˈklaɪmət/", meaning: "n.气候；风气，思潮" },
+            { word: "cling", phonetic: "/klɪŋ/", meaning: "v.粘紧；依附；坚持" },
+            { word: "collapse", phonetic: "/kəˈlæps/", meaning: "v./n.倒塌；崩溃；暴跌" },
+            { word: "colleague", phonetic: "/ˈkɒliːɡ/", meaning: "n.同事，同僚" },
+            { word: "combine", phonetic: "/kəmˈbaɪn/", meaning: "v.结合，联合；化合" },
+            { word: "comment", phonetic: "/ˈkɒment/", meaning: "n.评论；意见 v.评论" },
+            { word: "commercial", phonetic: "/kəˈmɜːʃl/", meaning: "adj.商业的 n.商业广告" },
+            { word: "commission", phonetic: "/kəˈmɪʃn/", meaning: "n.委员会；委任；佣金 v.委任" },
+            { word: "commit", phonetic: "/kəˈmɪt/", meaning: "v.犯(罪)；承诺；把...交托给" },
+            { word: "committee", phonetic: "/kəˈmɪti/", meaning: "n.委员会，全体委员" },
+            { word: "communicate", phonetic: "/kəˈmjuːnɪkeɪt/", meaning: "v.通讯；传达；连接" },
+            { word: "community", phonetic: "/kəˈmjuːnəti/", meaning: "n.社区；社会；共同体" },
+            { word: "compare", phonetic: "/kəmˈpeə(r)/", meaning: "v.比较，对照；比作" },
+            { word: "compel", phonetic: "/kəmˈpel/", meaning: "v.强迫，迫使" },
+            { word: "compensate", phonetic: "/ˈkɒmpenseɪt/", meaning: "v.补偿，赔偿；酬报" },
+            { word: "compete", phonetic: "/kəmˈpiːt/", meaning: "v.竞争，比赛" },
+            { word: "competent", phonetic: "/ˈkɒmpɪtənt/", meaning: "adj.有能力的，胜任的" },
+            { word: "complain", phonetic: "/kəmˈpleɪn/", meaning: "v.抱怨，诉苦；控告" },
+            { word: "complex", phonetic: "/ˈkɒmpleks/", meaning: "adj.复杂的 n.综合体" },
+            { word: "component", phonetic: "/kəmˈpəʊnənt/", meaning: "n.组成部分 adj.组成的" },
+            { word: "compose", phonetic: "/kəmˈpəʊz/", meaning: "v.组成；创作；使平静" },
+            { word: "compound", phonetic: "/ˈkɒmpaʊnd/", meaning: "n.化合物 adj.复合的 v.混合" },
+            { word: "comprehensive", phonetic: "/ˌkɒmprɪˈhensɪv/", meaning: "adj.广泛的；综合的；理解的" },
+            { word: "comprise", phonetic: "/kəmˈpraɪz/", meaning: "v.包含，由...组成" },
+            { word: "compromise", phonetic: "/ˈkɒmprəmaɪz/", meaning: "n./v.妥协，折衷；危及" },
+            { word: "concentrate", phonetic: "/ˈkɒnsntreɪt/", meaning: "v.集中；浓缩 n.浓缩物" },
+            { word: "concept", phonetic: "/ˈkɒnsept/", meaning: "n.概念，观念，思想" },
+            { word: "concern", phonetic: "/kənˈsɜːn/", meaning: "v.涉及；关心 n.关心；关系" },
+            { word: "conclude", phonetic: "/kənˈkluːd/", meaning: "v.推断出；结束；缔结" },
+            { word: "conduct", phonetic: "/kənˈdʌkt/", meaning: "v.引导；进行 n.行为；管理" },
+            { word: "confer", phonetic: "/kənˈfɜː(r)/", meaning: "v.商讨；授予，赋予" },
+            { word: "conference", phonetic: "/ˈkɒnfərəns/", meaning: "n.会议，讨论会" },
+            { word: "confess", phonetic: "/kənˈfes/", meaning: "v.承认，坦白；忏悔" },
+            { word: "confidence", phonetic: "/ˈkɒnfɪdəns/", meaning: "n.信任；信心；秘密" },
+            { word: "confine", phonetic: "/kənˈfaɪn/", meaning: "v.限制；禁闭 n.界限" },
+            { word: "confirm", phonetic: "/kənˈfɜːm/", meaning: "v.证实，肯定；批准" },
+            { word: "conflict", phonetic: "/ˈkɒnflɪkt/", meaning: "n.冲突，矛盾 v./kənˈflɪkt/ 抵触" },
+            { word: "confront", phonetic: "/kənˈfrʌnt/", meaning: "v.面临；对抗，遭遇" },
+            { word: "confuse", phonetic: "/kənˈfjuːz/", meaning: "v.使混乱，混淆" },
+            { word: "congress", phonetic: "/ˈkɒŋɡres/", meaning: "n.代表大会；(美国)国会" },
+            { word: "connect", phonetic: "/kəˈnekt/", meaning: "v.连接；联系；接通电话" },
+            { word: "conscience", phonetic: "/ˈkɒnʃəns/", meaning: "n.良心，良知" },
+            { word: "conscious", phonetic: "/ˈkɒnʃəs/", meaning: "adj.意识到的；神志清醒的" },
+            { word: "consequence", phonetic: "/ˈkɒnsɪkwəns/", meaning: "n.结果，后果；重要性" },
+            { word: "conservative", phonetic: "/kənˈsɜːvətɪv/", meaning: "adj.保守的 n.保守派" },
+            { word: "considerable", phonetic: "/kənˈsɪdərəbl/", meaning: "adj.相当大的；重要的" },
+            { word: "consistent", phonetic: "/kənˈsɪstənt/", meaning: "adj.一致的；稳固的；调和的" },
+            { word: "constant", phonetic: "/ˈkɒnstənt/", meaning: "adj.不变的；持续的 n.常数" },
+            { word: "constitute", phonetic: "/ˈkɒnstɪtjuːt/", meaning: "v.组成，构成；设立" },
+            { word: "construct", phonetic: "/kənˈstrʌkt/", meaning: "v.建造，构造 n.构想" },
+            { word: "consult", phonetic: "/kənˈsʌlt/", meaning: "v.请教，查阅；商议" },
+            { word: "consume", phonetic: "/kənˈsjuːm/", meaning: "v.消耗，消费；吃光" },
+            { word: "contact", phonetic: "/ˈkɒntækt/", meaning: "n./v.接触，联系，交往" },
+            { word: "contain", phonetic: "/kənˈteɪn/", meaning: "v.包含；容纳；控制" },
+            { word: "contemporary", phonetic: "/kənˈtempərəri/", meaning: "adj.当代的；同时代的 n.同代人" },
+            { word: "content", phonetic: "/ˈkɒntent/", meaning: "n.内容；满意 adj./kənˈtent/ 满意的" },
+            { word: "contest", phonetic: "/ˈkɒntest/", meaning: "n.竞赛 v./kənˈtest/ 争夺" },
+            { word: "context", phonetic: "/ˈkɒntekst/", meaning: "n.上下文；背景，环境" },
+            { word: "contract", phonetic: "/ˈkɒntrækt/", meaning: "n.合同 v./kənˈtrækt/ 订合同；收缩" },
+            { word: "contrary", phonetic: "/ˈkɒntrəri/", meaning: "adj.相反的 n.相反" },
+            { word: "contrast", phonetic: "/ˈkɒntrɑːst/", meaning: "n.对比 v./kənˈtrɑːst/ 使对比" },
+            { word: "contribute", phonetic: "/kənˈtrɪbjuːt/", meaning: "v.贡献；捐助；投稿" },
+            { word: "controversy", phonetic: "/ˈkɒntrəvɜːsi/", meaning: "n.争论，辩论" },
+            { word: "convenient", phonetic: "/kənˈviːniənt/", meaning: "adj.方便的；近处的" },
+            { word: "convention", phonetic: "/kənˈvenʃn/", meaning: "n.大会；惯例；公约" },
+            { word: "convert", phonetic: "/kənˈvɜːt/", meaning: "v.转换；皈依 n.皈依者" },
+            { word: "convince", phonetic: "/kənˈvɪns/", meaning: "v.使确信，说服" },
+            { word: "cooperate", phonetic: "/kəʊˈɒpəreɪt/", meaning: "v.合作，协作" },
+            { word: "coordinate", phonetic: "/kəʊˈɔːdɪneɪt/", meaning: "v.协调 adj.同等的 n.坐标" },
+            { word: "core", phonetic: "/kɔː(r)/", meaning: "n.核心 adj.核心的" },
+            { word: "corporate", phonetic: "/ˈkɔːpərət/", meaning: "adj.公司的；法人的；共同的" },
+            { word: "correspond", phonetic: "/ˌkɒrəˈspɒnd/", meaning: "v.相符合；通信" },
+            { word: "council", phonetic: "/ˈkaʊnsl/", meaning: "n.理事会，委员会" },
+            { word: "counsel", phonetic: "/ˈkaʊnsl/", meaning: "n.商议；忠告；律师 v.劝告" },
+            { word: "counter", phonetic: "/ˈkaʊntə(r)/", meaning: "n.柜台 adv./adj.相反的 v.反驳" },
+            { word: "county", phonetic: "/ˈkaʊnti/", meaning: "n.县，郡" },
+            { word: "couple", phonetic: "/ˈkʌpl/", meaning: "n.一对；夫妇 v.连接" },
+            { word: "crack", phonetic: "/kræk/", meaning: "v.破裂；发出爆裂声 n.裂缝" },
+            { word: "craft", phonetic: "/krɑːft/", meaning: "n.工艺；船；航空器 v.精制" },
+            { word: "crash", phonetic: "/kræʃ/", meaning: "v./n.碰撞；坠毁；破产" },
+            { word: "create", phonetic: "/kriˈeɪt/", meaning: "v.创造，创作；引起" },
+            { word: "credit", phonetic: "/ˈkredɪt/", meaning: "n.信用；学分；赞扬 v.相信" },
+            { word: "crew", phonetic: "/kruː/", meaning: "n.全体船员；一组工作人员" },
+            { word: "crisis", phonetic: "/ˈkraɪsɪs/", meaning: "n.危机，紧要关头" },
+            { word: "criterion", phonetic: "/kraɪˈtɪəriən/", meaning: "n.标准，准则 (pl. criteria)" },
+            { word: "critical", phonetic: "/ˈkrɪtɪkl/", meaning: "adj.批评的；危急的；重要的" },
+            { word: "criticism", phonetic: "/ˈkrɪtɪsɪzəm/", meaning: "n.批评，评论；指责" },
+            { word: "criticize", phonetic: "/ˈkrɪtɪsaɪz/", meaning: "v.批评；评论；非难" },
+            { word: "crop", phonetic: "/krɒp/", meaning: "n.作物；收成 v.种植；修剪" },
+            { word: "crucial", phonetic: "/ˈkruːʃl/", meaning: "adj.至关重要的，决定性的" },
+            { word: "crude", phonetic: "/kruːd/", meaning: "adj.天然的；粗糙的 n.原油" },
+            { word: "cruise", phonetic: "/kruːz/", meaning: "v./n.巡航；航游" },
+            { word: "cue", phonetic: "/kjuː/", meaning: "n.提示，暗示；线索 v.给...提示" },
+            { word: "cultivate", phonetic: "/ˈkʌltɪveɪt/", meaning: "v.耕作；培养；建立" },
+            { word: "cure", phonetic: "/kjʊə(r)/", meaning: "v.治愈；消除 n.疗法；对策" },
+            { word: "curiosity", phonetic: "/ˌkjʊəriˈɒsəti/", meaning: "n.好奇心；奇物" },
+            { word: "current", phonetic: "/ˈkʌrənt/", meaning: "adj.当前的；通用的 n.水流；电流" },
+            { word: "curriculum", phonetic: "/kəˈrɪkjələm/", meaning: "n.课程 (pl. curricula)" },
+            { word: "custom", phonetic: "/ˈkʌstəm/", meaning: "n.习惯；海关 adj.定做的" },
+            { word: "cycle", phonetic: "/ˈsaɪkl/", meaning: "n.周期；循环；自行车 v.骑自行车" },
+            { word: "damage", phonetic: "/ˈdæmɪdʒ/", meaning: "v./n.损害，毁坏" },
+            { word: "debate", phonetic: "/dɪˈbeɪt/", meaning: "n./v.争论，辩论" },
+            { word: "debt", phonetic: "/det/", meaning: "n.债，债务" },
+            { word: "decade", phonetic: "/ˈdekeɪd/", meaning: "n.十年，十年期" },
+            { word: "decent", phonetic: "/ˈdiːsnt/", meaning: "adj.体面的；适当的；正派的" },
+            { word: "declare", phonetic: "/dɪˈkleə(r)/", meaning: "v.宣布，声明；申报" },
+            { word: "decline", phonetic: "/dɪˈklaɪn/", meaning: "v.下降；谢绝 n.下降" },
+            { word: "decrease", phonetic: "/dɪˈkriːs/", meaning: "v./n.减少，减小" },
+            { word: "dedicate", phonetic: "/ˈdedɪkeɪt/", meaning: "v.致力于；奉献" },
+            { word: "deduce", phonetic: "/dɪˈdjuːs/", meaning: "v.演绎，推断" },
+            { word: "deem", phonetic: "/diːm/", meaning: "v.认为，视为" },
+            { word: "defeat", phonetic: "/dɪˈfiːt/", meaning: "v.击败 n.失败" },
+            { word: "defect", phonetic: "/ˈdiːfekt/", meaning: "n.缺点，缺陷 v./dɪˈfekt/ 背叛" },
+            { word: "defend", phonetic: "/dɪˈfend/", meaning: "v.保卫；辩护" },
+            { word: "define", phonetic: "/dɪˈfaɪn/", meaning: "v.给...下定义；限定" },
+            { word: "definite", phonetic: "/ˈdefɪnət/", meaning: "adj.明确的，一定的" },
+            { word: "delay", phonetic: "/dɪˈleɪ/", meaning: "v./n.耽搁，延迟" },
+            { word: "delegate", phonetic: "/ˈdelɪɡət/", meaning: "n.代表 v.委派...为代表" },
+            { word: "deliberate", phonetic: "/dɪˈlɪbərət/", meaning: "adj.故意的；从容的 v.仔细考虑" },
+            { word: "delicate", phonetic: "/ˈdelɪkət/", meaning: "adj.纤细的；微妙的；易碎的" },
+            { word: "deliver", phonetic: "/dɪˈlɪvə(r)/", meaning: "v.递送；发表；接生" },
+            { word: "demand", phonetic: "/dɪˈmɑːnd/", meaning: "n./v.要求；需要" },
+            { word: "democracy", phonetic: "/dɪˈmɒkrəsi/", meaning: "n.民主，民主制；民主国家" },
+            { word: "demonstrate", phonetic: "/ˈdemənstreɪt/", meaning: "v.论证；演示；表露" },
+            { word: "dense", phonetic: "/dens/", meaning: "adj.密集的；浓厚的；愚钝的" },
+            { word: "deny", phonetic: "/dɪˈnaɪ/", meaning: "v.否认；拒绝给予" },
+            { word: "depart", phonetic: "/dɪˈpɑːt/", meaning: "v.离开，出发；背离" },
+            { word: "department", phonetic: "/dɪˈpɑːtmənt/", meaning: "n.部，司，局，处，系" },
+            { word: "depend", phonetic: "/dɪˈpend/", meaning: "v.依赖，依靠；取决于" },
+            { word: "deposit", phonetic: "/dɪˈpɒzɪt/", meaning: "v.存放；使沉淀 n.存款；押金" },
+            { word: "depress", phonetic: "/dɪˈpres/", meaning: "v.使沮丧；使萧条；压下" },
+            { word: "deprive", phonetic: "/dɪˈpraɪv/", meaning: "v.剥夺，使丧失" },
+            { word: "derive", phonetic: "/dɪˈraɪv/", meaning: "v.取得；起源于" },
+            { word: "descend", phonetic: "/dɪˈsend/", meaning: "v.下来，下降；遗传" },
+            { word: "describe", phonetic: "/dɪˈskraɪb/", meaning: "v.描写，叙述；画(图形等)" },
+            { word: "desert", phonetic: "/ˈdezət/", meaning: "n.沙漠 adj.沙漠的 v./dɪˈzɜːt/ 抛弃" },
+            { word: "deserve", phonetic: "/dɪˈzɜːv/", meaning: "v.应受，值得" },
+            { word: "design", phonetic: "/dɪˈzaɪn/", meaning: "v.设计 n.设计；图案" },
+            { word: "desire", phonetic: "/dɪˈzaɪə(r)/", meaning: "n./v.愿望，渴望；要求" },
+            { word: "desperate", phonetic: "/ˈdespərət/", meaning: "adj.绝望的；不顾一切的" },
+            { word: "despite", phonetic: "/dɪˈspaɪt/", meaning: "prep.尽管，不论" },
+            { word: "destroy", phonetic: "/dɪˈstrɔɪ/", meaning: "v.破坏，毁灭；消灭" },
+            { word: "detail", phonetic: "/ˈdiːteɪl/", meaning: "n.细节 v.详述" },
+            { word: "detect", phonetic: "/dɪˈtekt/", meaning: "v.察觉，发现；侦查" },
+            { word: "determine", phonetic: "/dɪˈtɜːmɪn/", meaning: "v.决定；测定；使下决心" },
+            { word: "device", phonetic: "/dɪˈvaɪs/", meaning: "n.装置，设备；手段" },
+            { word: "devote", phonetic: "/dɪˈvəʊt/", meaning: "v.将...奉献给；致力于" },
+            { word: "diagnose", phonetic: "/ˈdaɪəɡnəʊz/", meaning: "v.诊断" },
+            { word: "dictate", phonetic: "/dɪkˈteɪt/", meaning: "v.口授；命令 n.命令" },
+            { word: "differ", phonetic: "/ˈdɪfə(r)/", meaning: "v.不同，相异" },
+            { word: "diffuse", phonetic: "/dɪˈfjuːs/", meaning: "v.扩散；传播 adj./dɪˈfjuːs/ 弥漫的" },
+            { word: "dignity", phonetic: "/ˈdɪɡnəti/", meaning: "n.尊严，高贵" },
+            { word: "dilemma", phonetic: "/dɪˈlemə/", meaning: "n.困境，进退两难" },
+            { word: "dimension", phonetic: "/daɪˈmenʃn/", meaning: "n.尺寸；方面；维" },
+            { word: "diminish", phonetic: "/dɪˈmɪnɪʃ/", meaning: "v.减少；削弱" },
+            { word: "discard", phonetic: "/dɪˈskɑːd/", meaning: "v.丢弃，抛弃" },
+            { word: "discern", phonetic: "/dɪˈsɜːn/", meaning: "v.识别，察觉出" },
+            { word: "disclose", phonetic: "/dɪsˈkləʊz/", meaning: "v.揭露，泄露" },
+            { word: "discount", phonetic: "/ˈdɪskaʊnt/", meaning: "n.折扣 v.打折扣；不全信" },
+            { word: "discourage", phonetic: "/dɪsˈkʌrɪdʒ/", meaning: "v.使气馁；阻碍" },
+            { word: "discriminate", phonetic: "/dɪˈskrɪmɪneɪt/", meaning: "v.区别；歧视" },
+            { word: "dismiss", phonetic: "/dɪsˈmɪs/", meaning: "v.解散；解雇；驳回" },
+            { word: "disorder", phonetic: "/dɪsˈɔːdə(r)/", meaning: "n.混乱；失调" },
+            { word: "displace", phonetic: "/dɪsˈpleɪs/", meaning: "v.取代；移置" },
+            { word: "display", phonetic: "/dɪsˈpleɪ/", meaning: "v./n.陈列，展示；显示" },
+            { word: "dispose", phonetic: "/dɪsˈpəʊz/", meaning: "v.处理，布置；使倾向于" },
+            { word: "dispute", phonetic: "/dɪˈspjuːt/", meaning: "n./v.争论，辩论；怀疑" },
+            { word: "disrupt", phonetic: "/dɪsˈrʌpt/", meaning: "v.使中断；扰乱" },
+            { word: "distinct", phonetic: "/dɪˈstɪŋkt/", meaning: "adj.有区别的；明显的" },
+            { word: "distinguish", phonetic: "/dɪˈstɪŋɡwɪʃ/", meaning: "v.区别，辨别；使杰出" },
+            { word: "distort", phonetic: "/dɪˈstɔːt/", meaning: "v.歪曲，扭曲" },
+            { word: "distract", phonetic: "/dɪˈstrækt/", meaning: "v.分散(注意力)；使苦恼" },
+            { word: "distribute", phonetic: "/dɪˈstrɪbjuːt/", meaning: "v.分配；散布" },
+            { word: "diverse", phonetic: "/daɪˈvɜːs/", meaning: "adj.不同的；多种多样的" },
+            { word: "divert", phonetic: "/daɪˈvɜːt/", meaning: "v.使转向；转移；使娱乐" },
+            { word: "divorce", phonetic: "/dɪˈvɔːs/", meaning: "n./v.离婚；分离" },
+            { word: "document", phonetic: "/ˈdɒkjumənt/", meaning: "n.文件 v.记录" },
+            { word: "domain", phonetic: "/dəʊˈmeɪn/", meaning: "n.领域；领地；域名" },
+            { word: "domestic", phonetic: "/dəˈmestɪk/", meaning: "adj.国内的；家庭的；驯养的" },
+            { word: "dominant", phonetic: "/ˈdɒmɪnənt/", meaning: "adj.占优势的；统治的" },
+            { word: "dominate", phonetic: "/ˈdɒmɪneɪt/", meaning: "v.支配，统治；占优势" },
+            { word: "donate", phonetic: "/dəʊˈneɪt/", meaning: "v.捐赠，赠送" },
+            { word: "draft", phonetic: "/drɑːft/", meaning: "n.草稿；汇票；征兵 v.起草" },
+            { word: "dramatic", phonetic: "/drəˈmætɪk/", meaning: "adj.戏剧性的；引人注目的" },
+            { word: "drastic", phonetic: "/ˈdræstɪk/", meaning: "adj.激烈的，严厉的" },
+            { word: "drawback", phonetic: "/ˈdrɔːbæk/", meaning: "n.缺点，不利条件" },
+            { word: "drift", phonetic: "/drɪft/", meaning: "v./n.漂流；趋势" },
+            { word: "dubious", phonetic: "/ˈdjuːbiəs/", meaning: "adj.可疑的；不确定的" },
+            { word: "due", phonetic: "/djuː/", meaning: "adj.预期的；应支付的；到期的 n.应付款" },
+            { word: "dump", phonetic: "/dʌmp/", meaning: "v.倾倒；抛弃 n.垃圾场" },
+            { word: "duplicate", phonetic: "/ˈdjuːplɪkeɪt/", meaning: "n.复制品 adj.复制的 v.复制" },
+            { word: "durable", phonetic: "/ˈdjʊərəbl/", meaning: "adj.耐用的，持久的" },
+            { word: "dynamic", phonetic: "/daɪˈnæmɪk/", meaning: "adj.动态的；有活力的 n.动力学" }
+        ];
+
+        let wordsToLearn = [];
+        let knownWords = [];
+        let currentWordData = null;
+        let currentWordLearnIndex = -1; // 在 wordsToLearn 中的索引
+
+        const wordEl = document.getElementById('word');
+        const phoneticEl = document.getElementById('phonetic');
+        const meaningEl = document.getElementById('meaning');
+        const toggleMeaningBtn = document.getElementById('toggleMeaningBtn');
+        const knownBtn = document.getElementById('knownBtn');
+        const unknownBtn = document.getElementById('unknownBtn');
+        const nextBtn = document.getElementById('nextBtn');
+
+        const currentIndexDisplayEl = document.getElementById('currentIndexDisplay');
+        const totalWordsDisplayEl = document.getElementById('totalWordsDisplay');
+        const totalVocabularySizeEl = document.getElementById('totalVocabularySize');
+        const knownCountEl = document.getElementById('knownCount');
+        const learningCountEl = document.getElementById('learningCount');
+
+        // 打卡功能 DOM 元素
+        const checkInBtn = document.getElementById('checkInBtn');
+        const lastCheckInDateEl = document.getElementById('lastCheckInDate');
+        const consecutiveCheckInDaysEl = document.getElementById('consecutiveCheckInDays');
+
+        let lastCheckInDate = null;
+        let consecutiveCheckInDays = 0;
+
+        function loadCheckInData() {
+            const storedLastCheckIn = localStorage.getItem('wordMemLastCheckIn');
+            const storedConsecutiveDays = localStorage.getItem('wordMemConsecutiveDays');
+
+            if (storedLastCheckIn) {
+                lastCheckInDate = storedLastCheckIn;
+                lastCheckInDateEl.textContent = lastCheckInDate;
+            } else {
+                lastCheckInDateEl.textContent = "从未";
+            }
+
+            if (storedConsecutiveDays) {
+                consecutiveCheckInDays = parseInt(storedConsecutiveDays, 10);
+                consecutiveCheckInDaysEl.textContent = consecutiveCheckInDays;
+            } else {
+                consecutiveCheckInDaysEl.textContent = "0";
+            }
+            updateCheckInButtonState();
+        }
+
+        function updateCheckInButtonState() {
+            const today = new Date().toLocaleDateString('zh-CN');
+            if (lastCheckInDate === today) {
+                checkInBtn.textContent = "今日已打卡";
+                checkInBtn.disabled = true;
+            } else {
+                checkInBtn.textContent = "今日打卡";
+                checkInBtn.disabled = false;
+            }
+        }
+
+        function handleCheckIn() {
+            const today = new Date();
+            const todayStr = today.toLocaleDateString('zh-CN');
+
+            if (lastCheckInDate === todayStr) {
+                // 防止重复打卡 (理论上按钮已禁用，但作为双重保险)
+                return;
+            }
+
+            const yesterday = new Date(today);
+            yesterday.setDate(today.getDate() - 1);
+            const yesterdayStr = yesterday.toLocaleDateString('zh-CN');
+
+            if (lastCheckInDate === yesterdayStr) {
+                consecutiveCheckInDays++;
+            } else {
+                // 如果不是昨天打的卡，或者从未打卡，则连续天数重置为1
+                consecutiveCheckInDays = 1;
+            }
+
+            lastCheckInDate = todayStr;
+
+            localStorage.setItem('wordMemLastCheckIn', lastCheckInDate);
+            localStorage.setItem('wordMemConsecutiveDays', consecutiveCheckInDays.toString());
+
+            lastCheckInDateEl.textContent = lastCheckInDate;
+            consecutiveCheckInDaysEl.textContent = consecutiveCheckInDays;
+            updateCheckInButtonState();
+        }
+
+        checkInBtn.addEventListener('click', handleCheckIn);
+
+        function updateProgress() {
+            currentIndexDisplayEl.textContent = wordsToLearn.length > 0 ? currentWordLearnIndex + 1 : 0;
+            totalWordsDisplayEl.textContent = wordsToLearn.length;
+            totalVocabularySizeEl.textContent = cet6Vocabulary.length;
+            knownCountEl.textContent = knownWords.length;
+            learningCountEl.textContent = wordsToLearn.length - (currentWordLearnIndex + 1) >=0 ? wordsToLearn.length - (currentWordLearnIndex + 1) : 0 ;
+             if (wordsToLearn.length === 0 && cet6Vocabulary.length > 0) { // 所有单词都学完了
+                learningCountEl.textContent = 0;
+            }
+        }
+
+        function loadNextWord() {
+            if (wordsToLearn.length === 0) {
+                wordEl.textContent = "太棒了！";
+                phoneticEl.textContent = "当前列表的单词已学习完毕！";
+                meaningEl.classList.add('hidden');
+                meaningEl.textContent = "可以尝试刷新页面重新学习，或等待更高级的复习功能。";
+                currentWordData = null;
+                disableButtons(true);
+                updateProgress();
+                return;
+            }
+
+            disableButtons(false);
+            // 简单随机选择一个待学习的单词
+            currentWordLearnIndex = Math.floor(Math.random() * wordsToLearn.length);
+            currentWordData = wordsToLearn[currentWordLearnIndex];
+
+            wordEl.textContent = currentWordData.word;
+            phoneticEl.textContent = currentWordData.phonetic || "";
+            meaningEl.textContent = currentWordData.meaning;
+            meaningEl.classList.add('hidden');
+            updateProgress();
+        }
+        
+        function disableButtons(disabled) {
+            toggleMeaningBtn.disabled = disabled;
+            knownBtn.disabled = disabled;
+            unknownBtn.disabled = disabled;
+            nextBtn.disabled = disabled;
+        }
+
+        toggleMeaningBtn.addEventListener('click', () => {
+            if (currentWordData) {
+                meaningEl.classList.toggle('hidden');
+            }
+        });
+
+        knownBtn.addEventListener('click', () => {
+            if (currentWordData) {
+                if (!knownWords.find(w => w.word === currentWordData.word)) {
+                    knownWords.push(currentWordData);
+                }
+                // 从待学习列表中移除
+                wordsToLearn.splice(currentWordLearnIndex, 1);
+                currentWordLearnIndex--; // 调整索引，因为splice会改变数组
+                loadNextWord();
+            }
+        });
+
+        unknownBtn.addEventListener('click', () => {
+            // 不认识，则简单进入下一个，该词仍在待学习列表
+            if (currentWordData) {
+                 // 确保不从空数组中选择
+                if (wordsToLearn.length > 1) {
+                     // 重新随机选择一个，避免连续出现同一个不认识的词
+                    let nextIndex = currentWordLearnIndex;
+                    while(nextIndex === currentWordLearnIndex && wordsToLearn.length > 1) { // 防止只有一个词时死循环
+                        nextIndex = Math.floor(Math.random() * wordsToLearn.length);
+                    }
+                    currentWordLearnIndex = nextIndex;
+                    currentWordData = wordsToLearn[currentWordLearnIndex];
+
+                    wordEl.textContent = currentWordData.word;
+                    phoneticEl.textContent = currentWordData.phonetic || "";
+                    meaningEl.textContent = currentWordData.meaning;
+                    meaningEl.classList.add('hidden');
+                } else if (wordsToLearn.length === 1) {
+                    // 如果只剩一个词，还是显示它
+                     currentWordLearnIndex = 0;
+                     currentWordData = wordsToLearn[currentWordLearnIndex];
+                     wordEl.textContent = currentWordData.word;
+                     phoneticEl.textContent = currentWordData.phonetic || "";
+                     meaningEl.textContent = currentWordData.meaning;
+                     meaningEl.classList.add('hidden');
+                } else { // wordsToLearn.length === 0
+                    loadNextWord(); // 会显示完成信息
+                }
+                updateProgress();
+            }
+        });
+
+        nextBtn.addEventListener('click', () => {
+            // “下一个”按钮简单地加载列表中的另一个随机词（如果还有的话）
+            // 如果希望“下一个”跳过当前词并将其保留在学习列表中，则此逻辑适用
+            loadNextWord();
+        });
+        
+        function initialize() {
+            wordsToLearn = [...cet6Vocabulary]; 
+            knownWords = [];
+            currentWordData = null;
+            currentWordLearnIndex = -1;
+            loadNextWord();
+            loadCheckInData(); // 初始化时加载打卡数据
+        }
+
+        initialize();
+    </script>
+    <script src="../js/components.js"></script>
+</body>
+</html>

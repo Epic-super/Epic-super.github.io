@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="app-version" content="1.0.151">
+<meta name="app-released" content="2026-09-02T22:28:00+08:00">
+<title>塔台 Tower · 个人指挥台</title>
+<link rel="stylesheet" href="assets/css/main.css">
+<link rel="stylesheet" href="assets/css/views.css">
+  <script src="lib/store.js"></script>
+  <script src="lib/sync.js"></script>
+  <script src="lib/idb-backup.js"></script>
+  <script src="lib/clock.js"></script>
+  <script src="lib/errorlog.js"></script>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+
+<!-- 每日资讯数据块：由定时任务每天自动改写 -->
+<script type="application/json" id="news-feed">
+{"updatedAt":"2026-08-13","items":[
+ {"id":"20260812-01","cat":"自考公告","title":"交大继教院发布 10 月自考日程：报名 9/1-9/6","desc":"交大继续教育学院已公布 10 月考期计算机科学与技术(080901)安排：理论课 10/24(六)、10/25(日) 全天四场，实践考 6 门暂定 10/31-11/1；报名窗口 9 月 1 日 9:00 至 9 月 6 日。现在对照课表锁科目、9 月初准时抢报。","url":"https://ce.sjtu.edu.cn/","date":"2026-08-12"},
+ {"id":"20260813-01","cat":"AI前沿","title":"DeepSeek V4 Pro 正式版上线，Agent 能力飙升","desc":"8/13 凌晨 DeepSeek 推出 V4 Pro 正式版：1M 上下文、原生支持 ResponsesAPI 与 Codex 接入，Agent/编程能力飙升。定价约为 GPT-5.6 的 1/57，对 AI Agent 方向是现成利器，写码科研优先试。","url":"https://cj.sina.com.cn/article/norm_detail?url=https%3A%2F%2Ffinance.sina.com.cn%2Froll%2F2026-08-13%2Fdoc-inineqhh4661264.shtml&finpagefr=w_110","date":"2026-08-13"},
+ {"id":"20260813-02","cat":"AI前沿","title":"阿里开源 Qwen3.8-2.4T 权重（2.4T MoE）","desc":"8/12 深夜阿里经魔搭开放 Qwen3.8-2.4T 权重：总参 2.4T、激活 95B、支持 26 万→100 万上下文，是 Qwen 首个开放权重的 Max 级模型。BF16 约 4.9TB 本地难跑；但开放底座让私有化二次开发成为可能，是 AI 方向生态利好。","url":"https://www.163.com/dy/article/L46522NE0511C4AA.html","date":"2026-08-12"},
+ {"id":"20260812-02","cat":"交大研招","title":"2027 硕士目录预计 9 月底发布，先用 2026 目录备考","desc":"交大 2027 硕士招生专业目录（含 531 人工智能学院 081200/085400）尚未公布，按往年节奏预计 9 月底在研招网发布，届时核对名额与科目有无调整。现在可沿用 2026 目录备考：初试 101+201+301+408 不变，重点关注统考名额与推免占比。","url":"https://yzb.sjtu.edu.cn/","date":"2026-08-12"},
+ {"id":"20260812-03","cat":"408备考","title":"清华等多校 2027 全面改考 408，统考版图再扩张","desc":"清华三大院系、北邮、西电、华科等 2027 级计算机类相继宣布改考 408 统考，采用 408 的院校已超 200 所。交大本就考 408，赛道更卷但复习资料更透明、调剂更友好。408 考纲本身基本稳定，仅计网“TCP/IP 模型”表述规范为“参考模型”，无需慌。","url":"https://blog.csdn.net/qiwsir/article/details/162522066","date":"2026-08-12"},
+ {"id":"20260812-04","cat":"AI前沿","title":"Meta 开源 30B Agent 模型 Muse Glimmer","desc":"8 月 10 日 Meta 实验室开源 30B 多模态 Agent 模型 Muse Glimmer（Apache 2.0，可本地运行），主打本地智能体，发布即获 llama.cpp/Ollama 等 day-0 支持。对 AI 学院「智能 Agent」方向是直接可玩的开源底座。","url":"https://so.html5.qq.com/page/real/search_news?docid=70000021_8976a7bcf5077152","date":"2026-08-12"},
+ {"id":"20260812-05","cat":"AI前沿","title":"中国大模型 8 周连发 5 款，性价比冲击全球","desc":"近 8 周中国连发 Qwen3.8-Max、Kimi K3、Seedance 2.5、DeepSeek V4 Flash、GLM-5.2 五款模型，复杂 Agent 任务成本仅为硅谷旗舰约 1/100，OpenRouter 周榜中国模型包揽前四。对瞄准 AI 学院你是鲜活样本。","url":"https://weibo.com/1095666564/5331043437250576","date":"2026-08-12"},
+ {"id":"seed-1","cat":"自考公告","title":"2026年10月上海自考考期为 10/24、10/25、10/31","desc":"上海市教育考试院已印发《2026年10月上海市高等教育自学考试各专业课程考试日程安排表》。交大 080901 计算机科学与技术共 5 个理论场次（10/24-25），同场次课程不可兼报；实践考 6 门暂定 10/31-11/1。报名窗口 9/1-9/6，务必盯紧上海招考热线。","url":"https://www.shmeea.edu.cn/","date":"2026-08-11"},
+ {"id":"seed-2","cat":"交大研招","title":"交大人工智能学院 2026 硕士招生：总计划 45 人，推免占 25","desc":"531 人工智能学院，081200 计算机科学与技术（学硕，01 人工智能）与 085400 电子信息（专硕，01 人工智能）初试科目一致：101 政治 + 201 英语一 + 301 数学一 + 408 计算机学科专业基础。统考名额约 20 人，专硕推免占比更需留意。","url":"https://yzb.sjtu.edu.cn/","date":"2026-08-11"}
+]}
+</script>
+
+<div class="topbar">
+  <h1>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22" style="color:var(--primary)"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+    塔台 Tower
+  </h1>
+  <div class="sub">个人指挥台 · 自研项目 + 外部工具，一个入口统管 · 本地存储不丢失</div>
+  <div class="backup-row">
+    <button class="btn sm" id="btnExport">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+      导出备份
+    </button>
+    <button class="btn sm" id="btnImport">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="m7 8 5-5 5 5"/><path d="M5 21h14"/></svg>
+      导入恢复
+    </button>
+    <button class="btn sm ghost" id="btnClearSample">清空示例</button>
+    <button class="btn sm icon" id="btnTheme" title="切换深色/浅色" aria-label="切换主题"></button>
+    <button class="btn sm ver-badge" id="btnVer" title="版本信息">v1.0.0</button>
+    <input type="file" id="fileInput" accept="application/json" style="display:none">
+  </div>
+</div>
+
+<div class="backup-tip" id="backupTip"></div>
+
+<div class="wrap">
+
+  <!-- 今日要处理（置顶，跨视图常驻） -->
+  <section id="sec-today" class="view active">
+    <!-- 激励英雄区 -->
+    <div class="hero" id="hero">
+      <div class="hero-top">
+        <div class="hero-greet" id="heroGreet">你好 👋</div>
+        <div class="streak" id="streak" title="每天来打卡，连续天数不停">🔥 连续 0 天</div>
+      </div>
+      <div class="hero-line" id="heroLine">每一次打开，都是离目标更近的一步。</div>
+      <div class="countdowns">
+        <a class="cd" id="cdKy" href="#sec-dual">
+          <div class="cd-label">考研初试倒计时</div>
+          <div class="cd-num" id="cdKyNum">--</div>
+          <div class="cd-unit">天</div>
+          <div class="cd-date" id="cdKyDate"></div>
+        </a>
+        <a class="cd" id="cdZk" href="#sec-dual">
+          <div class="cd-label">自考考期倒计时</div>
+          <div class="cd-num" id="cdZkNum">--</div>
+          <div class="cd-unit">天</div>
+          <div class="cd-date" id="cdZkDate"></div>
+        </a>
+        <a class="cd" id="cdC2" href="c2.html">
+          <div class="cd-label">计算机二级考试倒计时</div>
+          <div class="cd-num" id="cdC2Num">--</div>
+          <div class="cd-unit">天</div>
+          <div class="cd-date" id="cdC2Date"></div>
+        </a>
+        <a class="cd" id="cdReg" href="https://www.shmeea.edu.cn/" target="_blank" rel="noopener">
+          <div class="cd-label">自考报名截止</div>
+          <div class="cd-num" id="cdRegNum">--</div>
+          <div class="cd-unit">天</div>
+          <div class="cd-date" id="cdRegDate"></div>
+        </a>
+      </div>
+      <div class="focus" id="focusBox">
+        <div class="focus-label">🎯 今日专注</div>
+        <div class="focus-task" id="focusTask">暂无紧急事项</div>
+        <button class="focus-btn" id="focusBtn">去处理 ↗</button>
+      </div>
+    </div>
+    <!-- 个人项目展示页入口（醒目位：首屏 hero 下方） -->
+    <div class="card" style="border-color:var(--primary-soft);background:linear-gradient(180deg,var(--primary-soft) 0%,var(--card) 72%);margin-top:14px;">
+      <div class="proj">
+        <div class="ic" style="width:44px;height:44px;border-radius:12px;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;flex:none;">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg>
+        </div>
+        <div class="info">
+          <div class="pname">个人项目
+            <span class="tag" style="vertical-align:2px">作品 · 巨大目标</span>
+          </div>
+          <div class="pmetric">项目库（名称/简介/技术栈/亮点/进展）· 长期愿景与里程碑规划</div>
+        </div>
+        <button class="btn primary" style="flex:none" onclick="location.href='projects.html'">进入 ↗</button>
+      </div>
+    </div>
+    <!-- 分享集成台入口 -->
+    <div class="card" style="border-color:var(--primary-soft);background:linear-gradient(180deg,var(--primary-soft) 0%,var(--card) 72%);margin-top:14px;">
+      <div class="proj">
+        <div class="ic" style="width:44px;height:44px;border-radius:12px;background:var(--grad);color:#16181f;display:flex;align-items:center;justify-content:center;flex:none;">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#16181f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 4 0 0 1 16 0"/><path d="M4 12v4a8 4 0 0 0 16 0v-4"/><circle cx="12" cy="12" r="2.4" fill="#16181f" stroke="none"/></svg>
+        </div>
+        <div class="info">
+          <div class="pname">分享集成台
+            <span class="tag" style="vertical-align:2px">AI经验 · 心理状态</span>
+          </div>
+          <div class="pmetric">双主题统一归档：AI 应用经验 + 心理状态分享，分别录入、合并输出</div>
+        </div>
+        <button class="btn primary" style="flex:none" onclick="location.href='share-hub.html'">进入 ↗</button>
+      </div>
+    </div>
+    <div class="card today">
+      <div class="sec-head" style="margin-bottom:10px;">
+        <h2>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+          今日要处理
+        </h2>
+        <span class="count" id="todayCount">0 项</span>
+      </div>
+      <div id="todayList"></div>
+      <button class="btn sm primary" id="btnAddTodo" style="margin-top:10px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        添加待办
+      </button>
+    </div>
+  </section>
+
+  <!-- 我的项目 -->
+  <section id="sec-projects" class="view">
+    <div class="sec-head">
+      <h2>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        我的项目
+      </h2>
+      <button class="btn sm" id="btnAddProj">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        添加
+      </button>
+    </div>
+    <div id="projList"></div>
+  </section>
+
+  <!-- 工具与账号 -->
+  <section id="sec-tools" class="view">
+    <div class="sec-head">
+      <h2>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>
+        工具与账号
+      </h2>
+      <button class="btn sm" id="btnAddTool">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        添加
+      </button>
+    </div>
+    <div class="tools-grid" id="toolsGrid"></div>
+
+    <!-- AI 工具箱 -->
+    <div class="card" style="border-color:var(--primary-soft);background:linear-gradient(180deg,var(--primary-soft) 0%,var(--card) 72%);margin-top:14px;">
+      <div class="sec-head" style="margin-bottom:12px;">
+        <h2>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4 4 0 0 1 4 4c0 1.5-.8 2.8-2 3.5.3 1 .3 2.2 0 3.5 1.2.7 2 2 2 3.5a4 4 0 0 1-8 0c0-1.5.8-2.8 2-3.5-.3-1.3-.3-2.5 0-3.5-1.2-.7-2-2-2-3.5a4 4 0 0 1 4-4z"/><circle cx="12" cy="7.5" r="1.3" fill="currentColor"/><circle cx="12" cy="16.5" r="1.3" fill="currentColor"/></svg>
+          AI 工具箱
+        </h2>
+        <span class="count" style="color:var(--primary);font-weight:700">10 个平台 · 一站直达</span>
+      </div>
+      <div id="aiBox"></div>
+    </div>
+
+    <!-- 医疗健康（情绪管理 · 身体知识） -->
+    <div class="card" style="border-color:var(--primary-soft);background:linear-gradient(180deg,var(--primary-soft) 0%,var(--card) 72%);margin-top:14px;">
+      <div class="proj">
+        <div class="ic" style="width:44px;height:44px;border-radius:12px;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;flex:none;">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/><path d="M12 8v8M8 12h8"/></svg>
+        </div>
+        <div class="info">
+          <div class="pname">医疗健康
+            <span class="tag" style="vertical-align:2px">情绪管理 · 身体知识</span>
+          </div>
+          <div class="pmetric">心情记录 / 心理自评 / 冥想放松 / 趋势提醒 · 健康科普 / 症状自查 / 疾病预防 / 分类知识库</div>
+        </div>
+        <button class="btn primary" style="flex:none" onclick="window.open('health.html','_blank')">进入 ↗</button>
+      </div>
+    </div>
+
+    <!-- AI 破局俱乐部官网入口（inline SVG 图标，不依赖外网 favicon，图标稳定显示） -->
+    <div class="card hscard" style="margin-top:14px;border-color:var(--primary-soft);background:linear-gradient(180deg,var(--primary-soft) 0%,var(--card) 72%);">
+      <div class="sec-head" style="margin-bottom:12px;">
+        <h2>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#ff6a00"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          AI 破局俱乐部
+        </h2>
+        <span class="count" style="color:#ff6a00;font-weight:700">官网直达 · 3 个入口</span>
+      </div>
+      <div class="hotsites">
+        <a class="hsite" href="https://aipoju.com/action" target="_blank" rel="noopener noreferrer" style="--ac:#ff6a00" title="破局行动 · 官网主入口（aipoju.com/action）">
+          <span class="hsava"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span>
+          <span class="hsn">破局行动</span>
+        </a>
+        <a class="hsite" href="https://hks.aipoju.com" target="_blank" rel="noopener noreferrer" style="--ac:#ff8a3d" title="AI 破局俱乐部 · 香港站（hks.aipoju.com）">
+          <span class="hsava"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span>
+          <span class="hsn">破局·香港站</span>
+        </a>
+        <a class="hsite" href="https://breakout.wenwen-ai.com/" target="_blank" rel="noopener noreferrer" style="--ac:#ff5e3a" title="破局突破营 · 训练营官网（breakout.wenwen-ai.com）">
+          <span class="hsava"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span>
+          <span class="hsn">突破营 Breakout</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- 热门网站（首页直达，不用进双线台） -->
+    <div class="card hscard" style="margin-top:14px;">
+      <div class="sec-head" style="margin-bottom:12px;">
+        <h2>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--amber)"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>
+          热门网站
+        </h2>
+        <span class="count" style="color:var(--amber);font-weight:700" id="hsCount">全量站点 · 点开即用</span>
+      </div>
+    <!-- 实验室 / 作品集成 -->
+    <div class="card" style="margin-top:14px;border-color:var(--primary-soft);background:linear-gradient(180deg,var(--primary-soft) 0%,var(--card) 72%);">
+      <div class="sec-head" style="margin-bottom:8px;">
+        <h2>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--primary)"><path d="M9.5 2.5l-2 5h-4l3.2 2.4L4.3 15l4.2-3 4.2 3-2.4-5.1L13.5 7.5h-4zM14 13l-1.6 4h-3.2l2.6 2 1-2.1 1 2.1 2.6-2h-3.2z"/></svg>
+          实验室 · Lab
+        </h2>
+        <a class="btn sm" href="lab/" target="_blank" rel="noopener" style="text-decoration:none">进入 ↗</a>
+      </div>
+      <p style="color:var(--muted);font-size:13px;line-height:1.6;margin:0 2px 2px">WorkBuddy 对话产物的精选集成：配色库、编程闯关台、报告与知识库，共 23 件交付物 + 知识库。</p>
+    </div>
+
+      <div id="hotSitesBox"></div>
+    </div>
+
+    <!-- 画廊 Gallery：图片艺术展示墙（独立页面 gallery.html，拖拽粘贴即上墙） -->
+    <div class="card" style="margin-top:14px;border-color:var(--primary-soft);background:linear-gradient(180deg,var(--primary-soft) 0%,var(--card) 72%);">
+      <div class="proj">
+        <div class="ic" style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#ff9500 0%,#ff5e3a 50%,#af52de 100%);color:#fff;display:flex;align-items:center;justify-content:center;flex:none;">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="8.5" cy="9.5" r="1.6"/><path d="M21 16l-5-5L7 19"/></svg>
+        </div>
+        <div class="info">
+          <div class="pname">画廊 Gallery
+            <span class="tag" style="vertical-align:2px">图片艺术墙</span>
+          </div>
+          <div class="pmetric">拖拽 / 粘贴即上墙 · 标签分色 · 星级评分 · 合集 · 纯享 / 放映沉浸浏览</div>
+        </div>
+        <button class="btn primary" style="flex:none" onclick="window.open('gallery.html','_blank')">进入 ↗</button>
+      </div>
+    </div>
+
+    <!-- 苍穹降临：三维空中交通秩序推演沙盒（cangqiong.html，Trae 创造力大赛复刻） -->
+    <div class="card" style="margin-top:14px;border-color:var(--primary-soft);background:linear-gradient(180deg,var(--primary-soft) 0%,var(--card) 72%);">
+      <div class="proj">
+        <div class="ic" style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#36d1dc 0%,#5b6cff 100%);color:#fff;display:flex;align-items:center;justify-content:center;flex:none;">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22 11 13 2 9 22 2z"/></svg>
+        </div>
+        <div class="info">
+          <div class="pname">苍穹降临
+            <span class="tag" style="vertical-align:2px">UAM 空中交通推演</span>
+          </div>
+          <div class="pmetric">300 架 3D 推演 · 混沌↔苍穹调度 · 实时风险率 / 碰撞统计</div>
+        </div>
+        <button class="btn primary" style="flex:none" onclick="window.open('cangqiong.html','_blank')">进入 ↗</button>
+      </div>
+    </div>
+
+    <!-- 自考·考研习题入口 -->
+    <div class="card" style="margin-top:14px">
+      <div class="proj">
+        <div style="font-size:26px">📝</div>
+        <div class="info">
+          <div class="pname">自考 · 考研习题练习</div>
+          <div class="pmetric"><b>9 科</b> · 考研4科 + 408四门 + 自考高数/线代 &nbsp; 72 题（单选/多选/填空/简答/计算/代码 · 基础/拔高/创新/真题风格）</div>
+        </div>
+        <button class="btn primary" style="flex:none" onclick="window.open('zk-ky.html','_blank')">开始练习 ↗</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 速记板 -->
+  <section id="sec-notes" class="view">
+    <div class="sec-head">
+      <h2>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+        速记板
+      </h2>
+    </div>
+    <div class="note-add">
+      <input id="noteInput" placeholder="随手记一句，回车保存…" />
+      <button class="btn primary" id="btnAddNote">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+      </button>
+    </div>
+    <div id="noteList"></div>
+  </section>
+
+  <!-- 自考资讯 -->
+  <section id="sec-news" class="view">
+    <div class="sec-head">
+      <h2>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16M4 12h16M4 19h10"/></svg>
+        考研资讯
+      </h2>
+      <span class="count" id="newsDate"></span>
+    </div>
+    <div id="newsStale" style="display:none;margin:6px 0 8px;padding:6px 10px;border-radius:8px;background:#fff7e6;color:#a35b00;font-size:13px;"></div>
+    <div class="news-chips" id="newsChips">
+      <button class="news-chip active" data-f="ky">考研</button>
+      <button class="news-chip" data-f="all">全部</button>
+      <button class="news-chip" data-f="zk">自考</button>
+      <button class="news-chip" data-f="ai">AI前沿</button>
+    </div>
+    <div style="margin:4px 0 2px"><a class="zsxq-open" href="zsxq.html" target="_blank" rel="noopener">知识星球 · AI星球 ↗</a></div>
+    <div id="newsList"></div>
+  </section>
+
+  <!-- 双线作战台：自考看板 + 考研进度 + 打卡热力图（集成自双线平台） -->
+  <section id="sec-dual" class="view dual">
+    <div class="sec-head" id="dual-overview">
+      <h2>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        双线作战台 · 自考 × 考研
+      </h2>
+      <span class="count" style="color:var(--zk);font-weight:700">交大 080901 · 531 人工智能学院</span>
+    </div>
+
+    <div class="dual-nav" id="dualNav" aria-label="双线子模块导航">
+      <a href="#dual-overview" data-dual="overview">概览</a>
+      <a href="#dual-zk" data-dual="zk">自考看板</a>
+      <a href="#dual-ky" data-dual="ky">考研进度</a>
+      <a href="#dual-heat" data-dual="heat">打卡</a>
+      <a href="#dual-info" data-dual="info">目标</a>
+    </div>
+
+    <!-- 自考看板 -->
+    <div class="card" id="dual-zk" data-fold="zk">
+      <div class="sec-head" style="margin-bottom:12px" onclick="dualToggleFold('zk')">
+        <h2>学分进度 · 自考看板</h2>
+        <span class="count" style="color:var(--zk)">毕业要求 74 学分</span>
+        <button class="fold-btn" type="button" onclick="event.stopPropagation();dualToggleFold('zk')" aria-label="折叠/展开自考看板">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+      </div>
+      <div class="card-body">
+        <div class="ring">
+          <svg width="88" height="88" viewBox="0 0 88 88" style="flex:none">
+            <circle cx="44" cy="44" r="37" fill="none" stroke="#EDEFF2" stroke-width="10"/>
+            <circle id="ringArc" cx="44" cy="44" r="37" fill="none" stroke="#e0564b" stroke-width="10" stroke-linecap="round" stroke-dasharray="232.5" stroke-dashoffset="232.5" transform="rotate(-90 44 44)"/>
+            <text id="ringTxt" x="44" y="49" text-anchor="middle" font-size="19" font-weight="700" fill="#1d2723">0%</text>
+          </svg>
+          <div class="info">
+            <b id="crTxt">已获 0 / 74 学分</b>
+            <p id="crSub">还差 74 学分，按每期报满约需 4 个考期</p>
+            <p style="margin-top:6px;color:var(--zk);font-size:12px" id="deadlineTip"></p>
+          </div>
+        </div>
+        <div class="stat">
+          <div class="st"><b id="s1" style="color:var(--green)">0</b><span>已通过</span></div>
+          <div class="st"><b id="s2" style="color:var(--zk)">0</b><span>复习中</span></div>
+          <div class="st"><b id="s3" style="color:var(--amber)">0</b><span>本期报考</span></div>
+          <div class="st"><b id="s4" style="color:var(--muted)">0</b><span>未开始</span></div>
+        </div>
+        <div id="confBox"></div>
+        <div class="warn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 9v4M12 17h.01"/><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+          <span>课表依据 2026 年起实施的新计划（交大继续教育学院公布，74 学分）。带 <b class="tag k8">408</b> 的课与考研专业课重叠，优先安排、一鱼两吃。加考课仅非理工类专科生需要。</span>
+        </div>
+        <div class="slotbar" id="slotBar"></div>
+        <div class="grid" id="csBox"></div>
+      </div>
+    </div>
+
+    <!-- 考研进度 -->
+    <div class="card" id="dual-ky" data-fold="ky">
+      <div class="sec-head" style="margin-bottom:12px" onclick="dualToggleFold('ky')">
+        <h2>四科复习进度</h2>
+        <span class="count" style="color:var(--zk)">目标：交大 531 人工智能学院</span>
+        <button class="fold-btn" type="button" onclick="event.stopPropagation();dualToggleFold('ky')" aria-label="折叠/展开考研进度">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+      </div>
+      <div class="card-body">
+        <div class="kyg" id="kyBox"></div>
+      </div>
+    </div>
+
+    <!-- 打卡热力图 -->
+    <div class="card" id="dual-heat" data-fold="heat">
+      <div class="sec-head" style="margin-bottom:12px" onclick="dualToggleFold('heat')">
+        <h2>每日学习打卡</h2>
+        <span class="count" style="color:var(--zk)">点格子记录当天时长</span>
+        <button class="fold-btn" type="button" onclick="event.stopPropagation();dualToggleFold('heat')" aria-label="折叠/展开打卡">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+      </div>
+      <div class="card-body">
+        <div class="form" style="margin-bottom:12px">
+          <input type="number" id="hMin" placeholder="今天学了多少分钟" min="0" step="15" style="flex:1;min-width:150px">
+          <button class="btn primary" onclick="dualPunch()">打卡</button>
+        </div>
+        <div class="heat" id="heatBox"></div>
+        <div class="lg">少 <i style="background:#EDEFF2"></i><i style="background:#CBE5D8"></i><i style="background:#8ECBAB"></i><i style="background:#3F9E70"></i><i style="background:#137A4B"></i> 多
+          <span style="margin-left:auto" id="streakTxt"></span></div>
+      </div>
+    </div>
+
+    <!-- 目标信息卡 -->
+    <div class="card" id="dual-info" data-fold="info">
+      <div class="sec-head" style="margin-bottom:10px" onclick="dualToggleFold('info')">
+        <h2>目标信息卡</h2>
+        <button class="fold-btn" type="button" onclick="event.stopPropagation();dualToggleFold('info')" aria-label="折叠/展开目标信息">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+      </div>
+      <div class="card-body">
+        <div style="font-size:13.5px;line-height:1.9;color:var(--muted)">
+          <div><b style="color:var(--text)">院系</b>　531 人工智能学院（2026 总招 45：学硕 15 / 专硕 30，含推免 25）</div>
+          <div><b style="color:var(--text)">学硕</b>　081200 计算机科学与技术 · 01 人工智能</div>
+          <div><b style="color:var(--text)">专硕</b>　085400 电子信息 · 01 人工智能（复试含上机 + 面试）</div>
+          <div><b style="color:var(--text)">初试</b>　101 思想政治理论 + 201 英语一 + 301 数学一 + 408 计算机学科专业基础</div>
+          <div><b style="color:var(--text)">备选</b>　033 计算机学院 085400 电子信息 · 人工智能（清源研究院），初试科目完全一致</div>
+          <div class="note" style="margin-top:10px;font-size:12.5px;color:var(--muted);background:var(--note-bg);padding:10px 12px;border-radius:10px">数据来源：上海交大研究生招生网 2026 年硕士招生专业目录。每年 9 月底发布新目录，届时以官方为准。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 人际·恋爱台：iframe 嵌入，独立子应用（数据走自身 localStorage，与指挥台互不干扰） -->
+  <section id="sec-renji" class="view">
+    <div class="sec-head">
+      <h2>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        人际 · 恋爱
+      </h2>
+      <span class="count" style="font-size:12px;color:var(--muted)">社会学 × 心理学视角</span>
+    </div>
+    <iframe class="renji-frame" id="renjiFrame" data-src="renji.html" src="about:blank" title="人际·恋爱台"></iframe>
+  </section>
+
+  <!-- 职业规划平台：iframe 子应用（独立作用域，数据走 lib/store.js 统一数据层 career.* 命名空间，可扩展子系统） -->
+  <section id="sec-career" class="view">
+    <div class="sec-head">
+      <h2>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--main)"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 12 0v1"/><path d="M18 21v-1a6 6 0 0 0-4-5.65"/></svg>
+        职业规划
+      </h2>
+      <span class="hint">能力画像 · 目标路径 · 成长计划 · 求职追踪（可扩展子系统）</span>
+    </div>
+    <iframe class="career-frame" id="careerFrame" data-src="career.html" src="about:blank" title="职业规划平台" style="width:100%;border:0;display:block;min-height:1200px;background:transparent"></iframe>
+  </section>
+
+  </div>
+
+
+<div id="toast"></div>
+<div class="heat-tip" id="heatTip"></div>
+
+<!-- 底部 Tab -->
+<!-- 科研专区（从双线作战台归并的纯科研内容 + 科研管理，数据与双线 zk-ky.html 同 key 实时互通） -->
+<section id="sec-research" class="view">
+  <div class="sec-head"><h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--zk)"><path d="M9 3h6M10 3v6L5 19a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1L14 9V3"/></svg>科研专区</h2><span class="hint">课题 · 文献 · 投稿 · 量化（与双线数据互通）</span></div>
+  <div class="dual rsec">
+    <div class="card" style="border-color:var(--zk);background:linear-gradient(135deg,var(--primary-soft) 0%,var(--card) 70%);">
+      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+        <div style="width:46px;height:46px;border-radius:13px;background:linear-gradient(135deg,var(--zk),#22b8c8);color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;flex:none;">🔬</div>
+        <div style="flex:1;min-width:200px">
+          <div style="font-weight:800;font-size:16px;display:flex;align-items:center;gap:8px">科研智能体<span class="tag" style="vertical-align:2px">NEW · 全流程</span></div>
+          <div style="color:var(--muted);font-size:12.5px;margin-top:2px">目标 → 文献 → 方法 → 实验 → 写作 → 投稿 全流水线 · 文献实时检索 · AI 提示词工作台（与本站课题/文献数据互通）</div>
+        </div>
+        <a class="btn primary sm" style="text-decoration:none;flex:none" href="lab/products/research-agent.html">进入 ↗</a>
+      </div>
+    </div>
+    <div class="card">
+      <div class="sec-head" style="margin-bottom:12px"><h2>📊 科研总览</h2><span class="tbar"><button class="btn sm" onclick="exportRS()">导出备份</button><button class="btn sm" onclick="document.getElementById('rsImpHub').click()">导入恢复</button></span></div>
+      <input type="file" id="rsImpHub" accept=".json" style="display:none" onchange="importRS(this)">
+      <div class="stat" id="rsStatHub"></div>
+    </div>
+    <div class="card">
+      <div class="sec-head" style="margin-bottom:12px"><h2>研究课题</h2><button class="btn sm" onclick="addTopic()">+ 新建课题</button></div>
+      <div class="grid" id="topicBoxHub"></div>
+    </div>
+    <div class="card">
+      <div class="sec-head" style="margin-bottom:12px"><h2>文献阅读清单</h2><span class="hint" id="paperStatHub"></span><button class="btn sm" onclick="addPaper()">+ 加论文</button></div>
+      <div id="paperBoxHub"></div>
+    </div>
+    <div class="card">
+      <div class="sec-head" style="margin-bottom:12px"><h2>投稿 · 会议追踪</h2><button class="btn sm" onclick="addSub()">+ 加投稿</button></div>
+      <div class="grid" id="subBoxHub"></div>
+    </div>
+    <div class="card">
+      <div class="sec-head" style="margin-bottom:12px"><h2>量化 Alpha 研究 · WorldQuant Brain</h2><span class="tbar"><span id="quantLockBadge" style="display:none;font-size:11px;color:#fff;background:#94a3b8;padding:2px 9px;border-radius:999px;font-weight:600;letter-spacing:.3px">🔒 云端已锁定</span><span class="hint">因子挖掘 · Alpha 仿真 · 云保活</span><button class="btn sm" id="quantCollapseBtn" onclick="collapseAllQuant()">⊟ 全部收起</button><button class="btn sm" id="quantExpandBtn" onclick="expandAllQuant()">⊞ 全部展开</button></span></div>
+      <div id="quantContent">
+        <div id="quantBox"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="sec-soul" class="view">
+  <div class="soul">
+    <div class="soul-intro card" id="soulIntro">
+      <div class="soul-intro-head">
+        <div class="soul-ava">?</div>
+        <div>
+          <h2 style="margin:0;font-size:17px">灵魂拷问</h2>
+          <div class="soul-sub">苏格拉底式自我诘问 · 四段连问</div>
+        </div>
+      </div>
+      <p class="soul-lead">一件事、一个想法、一段关系，都经不起四连问：<b>为什么做 → 打算怎么做 → 要付出什么 → 达到什么目的</b>。我会照着你的回答往下咬，直到你说出真的那个答案。</p>
+      <ul class="soul-questions">
+        <li><b>① 为什么做</b> —— 动机里有没有借来的方向盘</li>
+        <li><b>② 打算怎么做</b> —— 下一步明天就能验证吗</li>
+        <li><b>③ 要付出什么</b> —— 时间 / 钱 / 关系 / 面子 / 别的路</li>
+        <li><b>④ 达到什么目的</b> —— 给一个能被证伪的标准</li>
+      </ul>
+      <div class="soul-actions">
+        <button class="btn primary" id="soulStart">开始拷问</button>
+        <button class="btn ghost" id="soulResume" style="display:none">继续上次的对话</button>
+      </div>
+      <p class="soul-note">全程本地运行：不上传、不联网、不外泄，对话只存在你自己的浏览器里。</p>
+    </div>
+    <div class="soul-chat" id="soulChat" style="display:none">
+      <div class="soul-top">
+        <div class="soul-stage" id="soulStageLabel">准备中…</div>
+        <div class="soul-dots" id="soulDots"></div>
+        <button class="btn ghost sm" id="soulReset">清空重来</button>
+      </div>
+      <div class="soul-log" id="soulLog" role="log" aria-live="polite"></div>
+      <div class="soul-chips" id="soulChips"></div>
+      <div class="soul-input">
+        <textarea id="soulInput" rows="1" placeholder="说出真的那个答案…（Enter 发送 / Shift+Enter 换行）"></textarea>
+        <button class="btn primary icon" id="soulSend" aria-label="发送">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7z"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="soul-summary card" id="soulSummary" style="display:none">
+      <div class="sec-head"><h2>复盘摘要</h2><span class="hint">你的四段答案 + 拷问者看到的张力</span></div>
+      <div id="soulSummaryBody" class="soul-md"></div>
+      <div class="soul-actions">
+        <button class="btn primary" id="soulCopy">复制</button>
+        <button class="btn" id="soulDownload">下载 .md</button>
+        <button class="btn ghost" id="soulAgain">再走一遍</button>
+      </div>
+    </div>
+    <div class="soul-toast" id="soulToast"></div>
+  </div>
+</section>
+<script src="soul.js"></script>
+
+<nav class="tabbar" id="tabbar">
+  <a href="#sec-today" class="active" data-view="sec-today">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+    今日
+  </a>
+  <a href="#sec-projects" data-view="sec-projects">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+    项目
+  </a>
+  <!-- 个人项目展示页（独立页面，非本 SPA 视图，跳转 projects.html） -->
+  <a href="projects.html" title="个人项目 · 作品与巨大目标">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg>
+    个人项目
+  </a>
+  <a href="#sec-tools" data-view="sec-tools">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>
+    工具
+  </a>
+  <a href="#sec-notes" data-view="sec-notes">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+    速记
+  </a>
+  <a href="#sec-subs" data-view="sec-subs" title="子系统总入口">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 12h18M12 3v18"/></svg>
+    子系统
+  </a>
+  <a id="navPet" role="button" tabindex="0" title="桌宠 · 观察你的表情陪你">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="13" r="6"/><path d="M11 7v2M8.5 13h5M11 13v3"/><path d="M5 4l14 14"/></svg>
+    桌宠
+  </a>
+</nav>
+
+<!-- 弹层：动态（科研管理表单等，openM/closeM 兼容） -->
+<div class="modal-mask" id="modalDyn">
+  <div class="modal" id="modalDynBody"></div>
+</div>
+
+<!-- 弹层：待办 -->
+<div class="modal-mask" id="modalTodo">
+  <div class="modal">
+    <h3>添加待办</h3>
+    <div class="field"><label>事项</label><input id="tTitle" placeholder="例如：记账App 7月账单对账"></div>
+    <div class="field"><label>来源 / 平台</label><input id="tSource" placeholder="例如：自动记账App / 邮箱"></div>
+    <div class="field"><label>类型</label>
+      <select id="tType"><option>财务</option><option>开发</option><option>发布</option><option>沟通</option><option>协作</option><option>其他</option></select>
+    </div>
+    <div class="field"><label>截止日期</label><input id="tDue" type="date"></div>
+    <div class="modal-actions">
+      <button class="btn ghost" data-close>取消</button>
+      <button class="btn primary" id="tSave">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- 弹层：项目 -->
+<div class="modal-mask" id="modalProj">
+  <div class="modal">
+    <h3>添加项目</h3>
+    <div class="field"><label>项目名称</label><input id="pName" placeholder="例如：自由剧场"></div>
+    <div class="field"><label>关键指标</label><input id="pMetric" placeholder="例如：v1.1 已发布 / 本月支出 ¥3,280"></div>
+    <div class="field"><label>进度（0-100）</label><input id="pProg" type="number" min="0" max="100" placeholder="80"></div>
+    <div class="field"><label>最近更新</label><input id="pUpdate" type="date"></div>
+    <div class="field"><label>跳转链接（可选）</label><input id="pLink" placeholder="https://…"></div>
+    <div class="modal-actions">
+      <button class="btn ghost" data-close>取消</button>
+      <button class="btn primary" id="pSave">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- 弹层：工具 -->
+<div class="modal-mask" id="modalTool">
+  <div class="modal">
+    <h3>添加工具 / 账号</h3>
+    <div class="field"><label>名称</label><input id="oName" placeholder="例如：邮箱 / GitHub"></div>
+    <div class="field"><label>链接</label><input id="oLink" placeholder="https://…"></div>
+    <div class="field"><label>未读 / 待处理数</label><input id="oUnread" type="number" min="0" placeholder="0"></div>
+    <div class="field"><label>备注</label><input id="oNote" placeholder="例如：3封客户邮件待回"></div>
+    <div class="modal-actions">
+      <button class="btn ghost" data-close>取消</button>
+      <button class="btn primary" id="oSave">保存</button>
+    </div>
+  </div>
+</div>
+
+  <!-- 游戏架：暂时不玩的游戏收纳 + 一键启动 -->
+  <section id="sec-games" class="view">
+    <div class="sec-head">
+      <h2>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 11h4M8 9v4M15 12h.01M18 10h.01"/><path d="M17.32 5H6.68a4 4 0 0 0-3.978 3.59c-.006.05-.01.101-.017.152C2.604 9.416 2 14.456 2 16a3 3 0 0 0 3 3c1 0 1.5-.5 2-1l1.414-1.414A2 2 0 0 1 9.828 16h4.344a2 2 0 0 1 1.414.586L17 18c.5.5 1 1 2 1a3 3 0 0 0 3-3c0-1.544-.604-6.584-.685-7.258-.007-.051-.011-.102-.017-.152A4 4 0 0 0 17.32 5z"/></svg>
+        游戏架
+      </h2>
+      <button class="btn sm" id="btnAddGame">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        添加游戏
+      </button>
+      <button class="btn sm" id="btnImportLib">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"/></svg>
+        导入本机游戏库
+      </button>
+    </div>
+    <div class="games-filters" id="gameFilters">
+      <span class="chip active" data-f="all">全部</span>
+      <span class="chip" data-f="playing">在玩</span>
+      <span class="chip" data-f="pause">暂停</span>
+      <span class="chip" data-f="backlog">待回归</span>
+      <span class="chip" data-f="abandoned">弃坑</span>
+    </div>
+    <div class="games-grid" id="gameList"></div>
+  </section>
+
+  <section id="sec-world" class="view">
+    <div class="sec-head">
+      <h2>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--primary)"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        3D 小世界
+      </h2>
+      <a class="btn sm primary" href="world/index.html" target="_blank" rel="noopener" style="text-decoration:none">进入漫游 ↗</a>
+    </div>
+    <div class="card" style="border-color:var(--primary-soft);background:linear-gradient(180deg,var(--primary-soft) 0%,var(--card) 72%);">
+      <p style="margin:0 0 10px;color:var(--muted);font-size:14px;line-height:1.6">一个可以走进去漫游的 3D 小世界（Three.js · 程序化生成）。WASD 移动、鼠标转视角，找到发光传送门就能跳进学习区。</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <span class="tag">WASD 移动</span><span class="tag">鼠标视角</span><span class="tag">Shift 加速</span><span class="tag">E 进传送门</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="sec-noclock" class="view">
+    <div class="sec-head">
+      <h2>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--primary)"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        学习角 · 如果不用打卡
+      </h2>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <iframe id="noclockFrame" src="noclock.html" title="如果不用打卡，你还会自律学习吗" style="width:100%;border:0;display:block;min-height:900px;background:transparent"></iframe>
+    </div>
+    <p style="font-size:12px;color:var(--muted);text-align:center;margin-top:8px">模块为独立单文件（noclock.html），数据仅存于本机浏览器 · 高度自适应</p>
+  </section>
+
+  <!-- 子系统总入口：hub 卡片墙（原「更多▾」折叠组全部入口收敛于此，点卡片经全局锚点拦截器切视图，iframe 子应用自动懒加载） -->
+  <section id="sec-subs" class="view">
+    <div class="sec-head">
+      <h2>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 12h18M12 3v18"/></svg>
+        子系统
+      </h2>
+      <span class="hint">14 个板块入口 · 点卡片直达</span>
+    </div>
+    <div class="grid" id="subGrid">
+      <a class="card sub-card" href="#sec-news">
+        <span class="sub-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16M4 12h16M4 19h10"/></svg></span>
+        <span class="sub-txt"><b>资讯</b><i>科技 · AI 动态聚合</i></span>
+        <span class="sub-go">→</span>
+      </a>
+      <a class="card sub-card" href="#sec-dual">
+        <span class="sub-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 8l10 5 10-5-10-5z"/><path d="M6 10.5V16c0 1 3 3 6 3s6-2 6-3v-5.5"/></svg></span>
+        <span class="sub-txt"><b>双线作战</b><i>备考 × 科研双线推进</i></span>
+        <span class="sub-go">→</span>
+      </a>
+      <a class="card sub-card" href="#sec-renji">
+        <span class="sub-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+        <span class="sub-txt"><b>人际 · 恋爱</b><i>社会学 × 心理学视角</i></span>
+        <span class="sub-go">→</span>
+      </a>
+      <a class="card sub-card" href="#sec-research">
+        <span class="sub-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--zk)"><path d="M9 3h6M10 3v6L5 19a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1L14 9V3"/></svg></span>
+        <span class="sub-txt"><b>科研专区</b><i>课题 · 文献 · 投稿 · 量化</i></span>
+        <span class="sub-go">→</span>
+      </a>
+      <a class="card sub-card" href="#sec-career">
+        <span class="sub-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--main)"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 12 0v1"/><path d="M18 21v-1a6 6 0 0 0-4-5.65"/></svg></span>
+        <span class="sub-txt"><b>职业规划</b><i>能力画像 · 目标路径 · 求职追踪</i></span>
+        <span class="sub-go">→</span>
+      </a>
+      <a class="card sub-card" href="#sec-games">
+        <span class="sub-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 11h4M8 9v4M15 12h.01M18 10h.01"/><path d="M17.32 5H6.68a4 4 0 0 0-3.978 3.59c-.006.05-.01.101-.017.152C2.604 9.416 2 14.456 2 16a3 3 0 0 0 3 3c1 0 1.5-.5 2-1l1.414-1.414A2 2 0 0 1 9.828 16h4.344a2 2 0 0 1 1.414.586L17 18c.5.5 1 1 2 1a3 3 0 0 0 3-3c0-1.544-.604-6.584-.685-7.258-.007-.051-.011-.102-.017-.152A4 4 0 0 0 17.32 5z"/></svg></span>
+        <span class="sub-txt"><b>游戏架</b><i>本机游戏库 · 36 款</i></span>
+        <span class="sub-go">→</span>
+      </a>
+      <a class="card sub-card" href="#sec-world">
+        <span class="sub-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></span>
+        <span class="sub-txt"><b>3D 世界</b><i>三维展示 · 交互模型</i></span>
+        <span class="sub-go">→</span>
+      </a>
+      <a class="card sub-card" href="#sec-noclock">
+        <span class="sub-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span>
+        <span class="sub-txt"><b>学习角</b><i>如果不用打卡，你还会自律学习吗</i></span>
+        <span class="sub-go">→</span>
+      </a>
+      <a class="card sub-card" href="#sec-soul">
+        <span class="sub-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></span>
+        <span class="sub-txt"><b>灵魂拷问</b><i>苏格拉底式自我诘问 · 四段连问</i></span>
+        <span class="sub-go">→</span>
+      </a>
+      <a class="card sub-card" href="#sec-eat">
+        <span class="sub-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h0a2 2 0 0 0 2-2V2"/><path d="M5 2v20"/><path d="M17 2v7a2 2 0 0 0 2 2 2 2 0 0 0 2-2V2"/><path d="M19 2v20"/></svg></span>
+        <span class="sub-txt"><b>今天吃什么</b><i>分类转盘 · 摇一摇 · 选择历史</i></span>
+        <span class="sub-go">→</span>
+      </a>
+      <a class="card sub-card" href="#sec-health">
+        <span class="sub-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 17a9 9 0 1 1 17 0"/><path d="M12 14l4-4"/><circle cx="12" cy="14" r="1.4" fill="currentColor" stroke="none"/></svg></span>
+        <span class="sub-txt"><b>完善度</b><i>工作台开发 · 完善程度自评</i></span>
+        <span class="sub-go">→</span>
+      </a>
+      <a class="card sub-card" href="#sec-practice">
+        <span class="sub-ico" style="color:var(--py,#ffd43b)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c1.5 0 2.7 1.2 2.7 2.7 0 1.5-1.2 2.7-2.7 2.7S9.3 6.2 9.3 4.7C9.3 3.2 10.5 2 12 2z"/><path d="M5 9.5c0-2 2.5-3 7-3s7 1 7 3v2c0 2-2.5 3-7 3s-7-1-7-3v-2z"/><circle cx="8" cy="9" r=".7" fill="currentColor"/><circle cx="16" cy="9" r=".7" fill="currentColor"/><path d="M9.5 15.5L8 22M14.5 15.5L16 22"/></svg></span>
+        <span class="sub-txt"><b>Python 小尝试</b><i>词云练习角 · jieba × wordcloud × rich</i></span>
+        <span class="sub-go">→</span>
+      </a>
+      <a class="card sub-card" href="#sec-peki" data-private>
+        <span class="sub-ico" style="color:var(--green,#34d399)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18M6 20V9M12 20V4M18 20v-6"/><path d="M15.5 5.5L19 2l1.6 1.6L17 7.2z" fill="currentColor" stroke="none"/></svg></span>
+        <span class="sub-txt"><b>PEKI 作业看板</b><i>高班翻译作业监控 · 批改状态 · 沉淀库速览</i></span>
+        <span class="sub-go">→</span>
+      </a>
+      <a class="card sub-card" href="#sec-explore">
+        <span class="sub-ico" style="color:var(--violet,#a78bfa)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg></span>
+        <span class="sub-txt"><b>探索 · AI 视频工作流</b><i>MoneyPrinterTurbo 本地集成 · 开源方案入口</i></span>
+        <span class="sub-go">→</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- PEKI 作业看板：iframe 嵌入，独立子应用（数据源 peki/data/peki-status.js，本地私有页不入公开站） -->
+  <!-- data-private：sanitize 构建期注入的 CSS 会让它在公开站自动隐藏，避免入口可见但 iframe 404 -->
+  <section id="sec-peki" class="view" data-private>
+    <div class="sec-head">
+      <h2>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--green,#34d399)"><path d="M3 20h18M6 20V9M12 20V4M18 20v-6"/><path d="M15.5 5.5L19 2l1.6 1.6L17 7.2z" fill="currentColor" stroke="none"/></svg>
+        PEKI 作业看板
+      </h2>
+      <span class="count" style="font-size:12px;color:var(--muted)">高班翻译作业监控 · 每周三/六 18:00 自动刷新（本地私有数据）</span>
+    </div>
+    <iframe class="peki-frame" id="pekiFrame" data-src="peki.html" src="about:blank" title="PEKI 作业看板" style="width:100%;border:0;display:block;min-height:1200px;background:transparent"></iframe>
+  </section>
+
+  <!-- 探索 · AI 视频工作流：iframe 嵌入，独立子应用（MoneyPrinterTurbo 本地服务探测 + WebUI 嵌入 + 开源方案便携入口，公开页无私有数据） -->
+  <section id="sec-explore" class="view">
+    <div class="sec-head">
+      <h2>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--violet,#a78bfa)"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+        探索 · AI 视频工作流
+      </h2>
+      <span class="count" style="font-size:12px;color:var(--muted)">MoneyPrinterTurbo 本地最大集成 · 其余开源方案便携入口（探测/嵌入需本地打开）</span>
+    </div>
+    <iframe class="explore-frame" id="exploreFrame" data-src="explore.html" src="about:blank" title="探索 · AI 视频工作流" style="width:100%;border:0;display:block;min-height:1200px;background:transparent"></iframe>
+  </section>
+
+  <!-- Python 小尝试：词云练习角（iframe 嵌入，独立子应用，数据走自身 localStorage） -->
+  <section id="sec-practice" class="view">
+    <div class="sec-head">
+      <h2>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--py,#ffd43b)"><path d="M12 2c1.5 0 2.7 1.2 2.7 2.7 0 1.5-1.2 2.7-2.7 2.7S9.3 6.2 9.3 4.7C9.3 3.2 10.5 2 12 2z"/><path d="M5 9.5c0-2 2.5-3 7-3s7 1 7 3v2c0 2-2.5 3-7 3s-7-1-7-3v-2z"/><circle cx="8" cy="9" r=".7" fill="currentColor"/><circle cx="16" cy="9" r=".7" fill="currentColor"/><path d="M9.5 15.5L8 22M14.5 15.5L16 22"/></svg>
+        Python 小尝试
+      </h2>
+      <span class="count" style="font-size:12px;color:var(--muted)">词云练习角 · jieba × wordcloud × rich（个人练习沉淀）</span>
+    </div>
+    <iframe class="practice-frame" id="practiceFrame" data-src="practice.html" src="about:blank" title="Python 小尝试 · 词云练习角" style="width:100%;border:0;display:block;min-height:1400px;background:transparent"></iframe>
+  </section>
+
+  <!-- 今天吃什么：iframe 嵌入，独立子应用（数据走自身 localStorage，与指挥台互不干扰） -->
+  <section id="sec-eat" class="view">
+    <div class="sec-head">
+      <h2>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h0a2 2 0 0 0 2-2V2"/><path d="M5 2v20"/><path d="M17 2v7a2 2 0 0 0 2 2 2 2 0 0 0 2-2V2"/><path d="M19 2v20"/></svg>
+        今天吃什么
+      </h2>
+      <span class="count" style="font-size:12px;color:var(--muted)">分类转盘 · 摇一摇 · 选择历史</span>
+    </div>
+    <iframe class="eat-frame" id="eatFrame" data-src="whattoeat.html" src="about:blank" title="今天吃什么" style="width:100%;border:0;display:block;min-height:820px;background:transparent"></iframe>
+  </section>
+
+  <section id="sec-health" class="view">
+    <div class="sec-head">
+      <h2>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 17a9 9 0 1 1 17 0"/><path d="M12 14l4-4"/><circle cx="12" cy="14" r="1.4" fill="currentColor" stroke="none"/></svg>
+        工作台完善度
+      </h2>
+      <span class="wh-badge" id="whOverall">综合 ≈ 92%</span>
+    </div>
+    <p class="wh-sub">「个人网站 1」即塔台 Tower 个人指挥台自身。以下为其<strong>开发程度</strong>与<strong>完善程度</strong>的自评可视化，数据取自真实版本沿革（version.json：<span id="whCntNotes">105</span> 条变更 / 至 v<span id="whCntVer">1.0.129</span>）与代码结构（<span id="whCntMod">10</span> 个主视图模块、<span id="whCntSub">13</span> 个子系统 / 独立页面、零占位 stub）。评分均为自评，调整脚本内 RADAR / MODULES / SUBS 数据即可。</p>
+
+    <div class="wh-stats">
+      <div class="wh-stat wh-pop" style="--d:.05s"><b id="whCntRel" data-n="129">0</b><span>发布版本</span></div>
+      <div class="wh-stat wh-pop" style="--d:.1s"><b id="whCntChg" data-n="105">0</b><span>功能变更记录</span></div>
+      <div class="wh-stat wh-pop" style="--d:.15s"><b data-n="10">0</b><span>主视图模块</span></div>
+      <div class="wh-stat wh-pop" style="--d:.2s"><b data-n="13">0</b><span>子系统 / 页面</span></div>
+      <div class="wh-stat wh-pop" style="--d:.25s"><b data-n="9172">0</b><span>书签</span></div>
+      <div class="wh-stat wh-pop" style="--d:.3s"><b data-n="1409">0</b><span>题库题目</span></div>
+      <div class="wh-stat wh-pop" style="--d:.35s"><b data-n="36">0</b><span>本机游戏</span></div>
+      <div class="wh-stat wh-pop" style="--d:.4s"><b data-n="6">0</b><span>项目卡</span></div>
+    </div>
+
+    <div class="wh-grid2">
+      <div class="wh-card wh-pop" style="--d:.18s">
+        <div class="wh-card-title">六大维度完善度（自评）</div>
+        <div id="whRadar" class="wh-radar"></div>
+      </div>
+      <div class="wh-card wh-pop" style="--d:.24s">
+        <div class="wh-card-title">维度明细</div>
+        <div id="whDims"></div>
+      </div>
+    </div>
+
+    <div class="wh-card wh-pop" style="--d:.3s">
+      <div class="wh-card-title">主视图模块完成度（自评）</div>
+      <div id="whModules"></div>
+    </div>
+
+    <div class="wh-card wh-pop" style="--d:.36s">
+      <div class="wh-card-title">子系统 / 独立页面</div>
+      <div id="whSubs" class="wh-subs"></div>
+    </div>
+
+    <div class="wh-card wh-pop" style="--d:.42s">
+      <div class="wh-card-title">开发程度 · 关键里程碑（取自版本沿革）</div>
+      <div id="whMiles" class="wh-milestones"></div>
+      <p class="wh-foot">开发程度：版本号 1.0.0 → <span id="whFootVer">1.0.130</span>，累计 <span id="whFootNotes">106</span> 条功能变更，集中迭代于 2026-08（约一个月高密度开发）。每次改动均执行版本号 bump（version.json + 页面 app-version meta 三处一致），三端（本地 / 私有仓 / 公开站）持续同步。</p>
+    </div>
+
+        <script type="module" src="src/main.js"></script>
+
+  </section>
+
+<script src="sites.js"></script>
+<script src="src/state.js"></script>
+<script src="src/app-main.js"></script>
+
+<script src="games-library.js"></script>
+<!-- 游戏架模块：独立于主 IIFE，复用 #modalDyn 弹层与全局 data-close 关闭逻辑 -->
+
+<link rel="stylesheet" href="pet/pet.css">
+<!-- face-api（≈1.3MB）改为按需懒加载：仅在用户主动开启摄像头时由 pet-core.js 动态注入（P2-7） -->
+<script src="pet/pet-lines.js"></script>
+<script src="pet/pet-core.js"></script>
+</body>
+</html>

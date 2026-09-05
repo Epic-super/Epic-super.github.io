@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>标准件（紧固件）分类与应用 — 高工教学版</title>
+<style>
+  :root {
+    --bg: #0d1117; --surface: #161b22; --border: #30363d;
+    --text: #e6edf3; --text2: #8b949e; --accent: #58a6ff;
+    --green: #3fb950; --red: #f85149; --yellow: #d29922;
+    --purple: #bc8cff; --teal: #39c5cf;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; background: var(--bg); color: var(--text); line-height:1.8; font-size:15px; }
+  .container { max-width:960px; margin:0 auto; padding:40px 24px 80px; }
+
+  /* Header */
+  .hero { text-align:center; padding:48px 0 36px; border-bottom:2px solid var(--border); margin-bottom:36px; }
+  .hero h1 { font-size:32px; letter-spacing:2px; background:linear-gradient(135deg, var(--accent), var(--teal)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+  .hero .subtitle { color:var(--text2); margin-top:8px; font-size:14px; }
+  .badge-row { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:16px; }
+  .badge { display:inline-block; padding:4px 12px; border-radius:20px; font-size:12px; border:1px solid var(--border); color:var(--text2); }
+  .badge.highlight { border-color:var(--accent); color:var(--accent); }
+
+  /* Sections */
+  h2 { font-size:22px; margin:44px 0 18px; padding-left:14px; border-left:4px solid var(--accent); }
+  h3 { font-size:17px; margin:28px 0 12px; color:var(--teal); }
+  h4 { font-size:15px; margin:18px 0 8px; color:var(--purple); }
+
+  p { margin:8px 0; }
+  ul, ol { padding-left:22px; margin:8px 0; }
+  li { margin:4px 0; }
+
+  /* Cards */
+  .card { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:24px; margin:16px 0; }
+  .card-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:16px; }
+
+  /* Table */
+  table { width:100%; border-collapse:collapse; margin:14px 0; font-size:14px; }
+  th { background:#21262d; color:var(--accent); padding:10px 12px; text-align:left; border:1px solid var(--border); white-space:nowrap; }
+  td { padding:9px 12px; border:1px solid var(--border); vertical-align:top; }
+  tr:hover td { background:#1c2128; }
+
+  /* Highlight boxes */
+  .tip { background:rgba(88,166,255,.08); border-left:3px solid var(--accent); padding:12px 16px; border-radius:0 8px 8px 0; margin:12px 0; font-size:14px; }
+  .warn { background:rgba(248,81,73,.08); border-left:3px solid var(--red); padding:12px 16px; border-radius:0 8px 8px 0; margin:12px 0; font-size:14px; }
+  .ok { background:rgba(63,185,80,.08); border-left:3px solid var(--green); padding:12px 16px; border-radius:0 8px 8px 0; margin:12px 0; font-size:14px; }
+
+  /* Tags */
+  .tag { display:inline-block; padding:2px 8px; border-radius:4px; font-size:12px; font-weight:600; }
+  .tag-blue { background:rgba(88,166,255,.15); color:var(--accent); }
+  .tag-green { background:rgba(63,185,80,.15); color:var(--green); }
+  .tag-red { background:rgba(248,81,73,.15); color:var(--red); }
+  .tag-yellow { background:rgba(210,153,34,.15); color:var(--yellow); }
+  .tag-purple { background:rgba(188,140,255,.15); color:var(--purple); }
+
+  /* Decision tree */
+  .tree { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:24px; margin:16px 0; overflow-x:auto; }
+  .tree-node { display:inline-flex; align-items:center; gap:6px; margin:4px 0; }
+  .tree-box { padding:8px 14px; border-radius:6px; font-size:13px; font-weight:600; white-space:nowrap; }
+  .tree-arrow { color:var(--text2); font-size:18px; }
+
+  /* Grade bar */
+  .grade-bar { display:flex; height:32px; border-radius:6px; overflow:hidden; margin:12px 0; }
+  .grade-seg { display:flex; align-items:center; justify-content:center; color:#fff; font-size:12px; font-weight:600; }
+
+  /* Quiz */
+  .quiz-item { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:20px; margin:14px 0; }
+  .quiz-q { font-weight:700; margin-bottom:10px; color:var(--teal); }
+  .quiz-a { display:none; margin-top:10px; padding:12px; background:#0d1117; border-radius:6px; border:1px dashed var(--border); }
+  .quiz-item:hover .quiz-a { display:block; }
+
+  /* TOC */
+  .toc { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:20px 28px; margin:20px 0; }
+  .toc a { color:var(--accent); text-decoration:none; font-size:14px; }
+  .toc a:hover { text-decoration:underline; }
+  .toc ol { padding-left:18px; }
+  .toc li { margin:5px 0; }
+
+  /* Footer */
+  footer { text-align:center; color:var(--text2); font-size:12px; padding:30px 0; border-top:1px solid var(--border); margin-top:50px; }
+
+  code { background:#21262d; padding:2px 6px; border-radius:4px; font-size:13px; color:var(--teal); }
+  strong { color:var(--text); }
+
+  @media print {
+    body { background:#fff; color:#000; }
+    .quiz-a { display:block!important; }
+  }
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+
+<div class="container">
+
+<!-- ==================== HERO ==================== -->
+<div class="hero">
+  <h1>⚙️ 标准件（紧固件）分类与应用</h1>
+  <div class="subtitle">高工教学版 · 从入门到选型实战</div>
+  <div class="badge-row">
+    <span class="badge highlight">面向：机械/结构设计学员</span>
+    <span class="badge">难度：中级</span>
+    <span class="badge">时长：约45分钟</span>
+    <span class="badge">版本：V1.0</span>
+  </div>
+</div>
+
+<!-- ==================== 学习目标 ==================== -->
+<h2>📌 学习目标</h2>
+<div class="card-grid">
+  <div class="card">
+    <h4>① 概念层</h4>
+    <p>理解"标准件"的定义、核心价值，以及为什么工业界要标准化。</p>
+  </div>
+  <div class="card">
+    <h4>② 分类层</h4>
+    <p>掌握 8 大类紧固件的名称、外形特征、典型应用场景。</p>
+  </div>
+  <div class="card">
+    <h4>③ 选型层</h4>
+    <p>学会根据工况选择头部类型、性能等级、材料。</p>
+  </div>
+  <div class="card">
+    <h4>④ 实战层</h4>
+    <p>能识别常见设计陷阱，对照 GB/T 标准正确标注。</p>
+  </div>
+</div>
+
+<!-- ==================== 目录 ==================== -->
+<nav class="toc">
+  <strong style="color:var(--text)">目录</strong>
+  <ol>
+    <li><a href="#s1">一、标准件是什么？——从"造一个"到"买一个"</a></li>
+    <li><a href="#s2">二、8 大紧固件家族全景图</a></li>
+    <li><a href="#s3">三、性能等级：数字背后的力学含义</a></li>
+    <li><a href="#s4">四、材料选择：碳钢 vs 不锈钢 vs 合金钢</a></li>
+    <li><a href="#s5">五、选型决策树——手把手教你选</a></li>
+    <li><a href="#s6">六、GB/T 常用标准速查表</a></li>
+    <li><a href="#s7">七、新手常犯的 7 个错误</a></li>
+    <li><a href="#s8">八、课后思考题</a></li>
+  </ol>
+</nav>
+
+<!-- ==================== S1 ==================== -->
+<h2 id="s1">一、标准件是什么？——从"造一个"到"买一个"</h2>
+
+<h3>1.1 定义</h3>
+<p><strong>标准件</strong>是指<strong>结构、尺寸、画法、标记等各个方面都已完全标准化</strong>，并由专业厂家批量生产的通用零部件。常见的包括：</p>
+<ul>
+  <li>螺纹紧固件（螺栓、螺柱、螺钉、螺母）</li>
+  <li>连接件（垫圈、销、挡圈）</li>
+  <li>传动件（滚动轴承、键等）</li>
+</ul>
+
+<h3>1.2 为什么要标准化？</h3>
+<table>
+  <tr><th>优势</th><th>解释</th><th>实际影响</th></tr>
+  <tr><td><span class="tag tag-green">互换性</span></td><td>M8×30 的螺栓，任何厂家生产的都能互换</td><td>维修时随便买，不用定制</td></tr>
+  <tr><td><span class="tag tag-blue">成本低</span></td><td>大规模专业化生产 → 单价极低</td><td>M8 螺栓几分钱一个</td></tr>
+  <tr><td><span class="tag tag-purple">质量可控</span></td><td>有 GB/T / ISO / DIN 等标准约束</td><td>性能参数可查、可验</td></tr>
+  <tr><td><span class="tag tag-yellow">设计效率</span></td><td>不用画细节图，用标准代号即可</td><td>图纸简洁，BOM 清晰</td></tr>
+</table>
+
+<div class="tip">
+  💡 <strong>高工经验：</strong>在工程实践中，<strong>能用标准件的绝不用非标件</strong>。非标件意味着开模具、做检具、库存管理复杂化——成本可能翻 10 倍以上。
+</div>
+
+<!-- ==================== S2 ==================== -->
+<h2 id="s2">二、8 大紧固件家族全景图</h2>
+
+<div class="warn">
+  ⚠️ 下文所有分类均基于<strong>国标 GB/T 系列</strong>和<strong>国际 ISO 标准</strong>。不同标准体系（DIN、ANSI、JIS）存在细微差异，跨国项目需注意。
+</div>
+
+<!-- 螺栓 -->
+<h3>2.1 螺栓（Bolts）—— 最常用的"主力军"</h3>
+<table>
+  <tr><th>品种</th><th>外形特征</th><th>典型场景</th><th>配套使用</th></tr>
+  <tr>
+    <td><strong>六角头螺栓</strong></td>
+    <td>头部为正六边形，最经典</td>
+    <td>钢结构、机械设备通用连接</td>
+    <td>+ 螺母 + 垫���</td>
+  </tr>
+  <tr>
+    <td><strong>方头螺栓</strong></td>
+    <td>头部为方形</td>
+    <td>需要更大拧持面、简单结构件</td>
+    <td>+ 螺母</td>
+  </tr>
+  <tr>
+    <td><strong>法兰面螺栓</strong></td>
+    <td>头部带一体法兰盘</td>
+    <td>汽车发动机、振动环境</td>
+    <td>可省垫圈</td>
+  </tr>
+</table>
+<div class="ok">
+  ✅ <strong>核心特点：</strong>由<strong>头部 + 螺杆</strong>组成，通常与螺母配合，用于带通孔的零件连接。<strong>适用于承受较大载荷</strong>的场合。
+</div>
+
+<!-- 螺柱 -->
+<h3>2.2 螺柱（Studs）—— "双头"的特殊角色</h3>
+<table>
+  <tr><th>品种</th><th>说明</th><th>典型场景</th></tr>
+  <tr>
+    <td><strong>双头螺柱</strong></td>
+    <td>两端都有螺纹，中间光杆</td>
+    <td>缸盖与缸体连接、阀体法兰</td>
+  </tr>
+  <tr>
+    <td><strong>焊接螺柱</strong></td>
+    <td>一端焊接固定于基体</td>
+    <td>汽车车身、钣金件装配</td>
+  </tr>
+</table>
+<div class="tip">
+  💡 <strong>什么时候用螺柱而不是螺栓？</strong>当被连接件之一<strong>厚度大</strong>、<strong>结构紧凑</strong>、或<strong>不宜从背面穿入螺栓</strong>时，螺柱是最佳选择。典型例子：发动机缸盖——缸体侧旋入螺柱，缸盖侧用螺母压紧。
+</div>
+
+<!-- 螺钉 -->
+<h3>2.3 螺钉（Screws）—— "自己钻进去"的那一类</h3>
+<table>
+  <tr><th>品种</th><th>关键区别</th><th>典型场景</th></tr>
+  <tr>
+    <td><strong>机器螺钉</strong></td>
+    <td>头部多样（盘头/沉头/半沉头），拧入螺纹孔</td>
+    <td>电子设备外壳、小型机械</td>
+  </tr>
+  <tr>
+    <td><strong>紧定螺钉（顶丝）</strong></td>
+    <td>无头或矮头，末端顶紧</td>
+    <td>固定齿轮/皮带轮在轴上、调节限位</td>
+  </tr>
+  <tr>
+    <td><strong>内六角螺钉（杯头）</strong></td>
+    <td>圆柱头内六角槽，强度高</td>
+    <td>模具、夹具、精密机构</td>
+  </tr>
+</table>
+<div class="warn">
+  ⚠️ <strong>螺栓 vs 螺钉的核心区别：</strong>螺栓通常穿过通孔+螺母；螺钉直接拧入被连接件的螺纹孔（无螺母）。这个区别在 BOM 和装配工艺中影响很大。
+</div>
+
+<!-- 螺母 -->
+<h3>2.4 螺母（Nuts）—— 螺栓的最佳拍档</h3>
+<table>
+  <tr><th>品种</th><th>特点</th><th>何时选用</th></tr>
+  <tr>
+    <td><strong>六角螺母</strong></td>
+    <td>最常用，标准六边形</td>
+    <td>一般场合首选</td>
+  </tr>
+  <tr>
+    <td><strong>自锁螺母（尼龙防松）</strong></td>
+    <td>嵌有尼龙圈，增加摩擦防松</td>
+    <td>振动环境（汽车、铁路）</td>
+  </tr>
+  <tr>
+    <td><strong>盖形螺母（装饰螺母）</strong></td>
+    <td>圆顶外观，兼装饰与防护</td>
+    <td>外露部位、家具、自行车</td>
+  </tr>
+</table>
+
+<!-- 自攻螺钉 -->
+<h3>2.5 自攻螺钉（Self-tapping Screws）—— "自带攻丝能力"</h3>
+<div class="card">
+  <p><strong>核心能力：</strong>无需预先攻丝，直接在薄金属板、塑料或木材上<strong>钻孔 + 攻丝 + 紧固</strong>一步完成。</p>
+  <table>
+    <tr><th>类型</th><th>适用材料</th><th>典型用途</th></tr>
+    <tr><td>平头自攻（自攻+自钻）</td><td>薄钢板（≤3mm）</td><td>空调风管、电气柜</td></tr>
+    <tr><td>沉头自攻</td><td>塑料、木材、薄板</td><td>家具、电器外壳</td></tr>
+  </table>
+</div>
+<div class="warn">
+  ⚠️ 自攻螺钉<strong>不可重复拆卸多次</strong>——每次拆装都会削弱已形成的螺纹配合。需要频繁维护的部位慎用。
+</div>
+
+<!-- 垫圈 -->
+<h3>2.6 垫圈（Washers）—— 小零件大作用</h3>
+<table>
+  <tr><th>种类</th><th>作用</th><th>注意点</th></tr>
+  <tr>
+    <td><strong>平垫圈</strong></td>
+    <td>增大接触面积、保护被连接件表面</td>
+    <td>软材料（铝、塑料）必须加</td>
+  </tr>
+  <tr>
+    <td><strong>弹簧垫圈</strong></td>
+    <td>弹性防松</td>
+    <td>重要连接不单独依赖它</td>
+  </tr>
+  <tr>
+    <td><strong>锁紧垫圈（防松垫圈）</strong></td>
+    <td>机械结构防松（如 Nord-Lock）</td>
+    <td>高振动环境推荐</td>
+  </tr>
+</table>
+
+<!-- 销 -->
+<h3>2.7 销（Pins）—— 定位 & 连接 & 防松</h3>
+<table>
+  <tr><th>种类</th><th>主要功能</th><th>典型应用</th></tr>
+  <tr><td><strong>圆柱销</strong></td><td>定位（精度依赖配合公差）</td><td>两零件组装定位、模具定位</td></tr>
+  <tr><td><strong>圆锥销</strong></td><td>定位 + 自锁（1:50 锥度）</td><td>频繁拆装的定位销</td></tr>
+  <tr><td><strong>开口销</strong></td><td>防松安全件</td><td>与槽形螺母配合，防止螺母脱落</td></tr>
+</table>
+
+<!-- 挡圈 -->
+<h3>2.8 挡圈（Retaining Rings）—— 轴向运动的"刹车片"</h3>
+<div class="card">
+  <p>安装在轴槽或孔槽内，限制零件轴向移动。</p>
+  <ul>
+    <li><strong>轴用挡圈（卡簧）</strong>—— 卡在轴槽中，限制轴承/齿轮轴向窜动</li>
+    <li><strong>孔用挡圈</strong>—— 卡在孔槽中，限制内部零件脱出</li>
+  </ul>
+  <p style="margin-top:8px;">安装需专用工具（挡圈钳），拆卸时注意不要过度撑开导致塑性变形。</p>
+</div>
+
+<!-- ==================== S3 ==================== -->
+<h2 id="s3">三、性能等级：数字背后的力学含义</h2>
+
+<h3>3.1 碳钢紧固件性能等级标记体系</h3>
+<p>你一定见过螺栓头上刻着 <code>8.8</code>、<code>10.9</code> 这样的数字——它们不是随意标的，而是<strong>严格的力学指标</strong>。</p>
+
+<table>
+  <tr><th>等级</th><th>抗拉强度 Rm (MPa)</th><th>屈服强度 Rp0.2 (MPa)</th><th>硬度 HRC</th><th>适用场景</th></tr>
+  <tr>
+    <td><span class="tag tag-yellow">4.8</span></td>
+    <td>400</td>
+    <td>320</td>
+    <td>~15</td>
+    <td>一般结构件、非承力部位</td>
+  </tr>
+  <tr>
+    <td><span class="tag tag-blue">8.8</span></td>
+    <td>800</td>
+    <td>640</td>
+    <td>~25</td>
+    <td><strong>最常用</strong>——机械设备主流选择</td>
+  </tr>
+  <tr>
+    <td><span class="tag tag-purple">10.9</span></td>
+    <td>1000</td>
+    <td>900</td>
+    <td>~34</td>
+    <td>高强度连接、汽车底盘</td>
+  </tr>
+  <tr>
+    <td><span class="tag tag-red">12.9</span></td>
+    <td>1200</td>
+    <td>1080</td>
+    <td>~39</td>
+    <td>航空航天、高端精密装备</td>
+  </tr>
+</table>
+
+<div class="tip">
+  💡 <strong>读数规则：</strong>"X.Y" 中，X × 100 = 抗拉强度(MPa)���X × Y × 10 = 屈服强度(MPa)。<br>
+  例：<strong>8.8</strong> → Rm = 8×100 = 800 MPa；Rp0.2 = 8×8×10 = 640 MPa
+</div>
+
+<h3>3.2 强度对比可视化</h3>
+<div class="grade-bar">
+  <div class="grade-seg" style="width:25%;background:#d29922;">4.8 — 一般</div>
+  <div class="grade-seg" style="width:30%;background:#58a6ff;">8.8 — 主流</div>
+  <div class="grade-seg" style="width:22%;background:#bc8cff;">10.9 — 高强</div>
+  <div class="grade-seg" style="width:23%;background:#f85149;">12.9 — 航空级</div>
+</div>
+
+<div class="warn">
+  ⚠️ <strong>不是越高越好！</strong>12.9 级螺栓对应<strong>氢脆风险极高</strong>，且对表面处理（镀锌/发黑）敏感。一般机械除非经过充分论证，不建议盲目上 12.9。8.8 是性价比最优的选择。
+</div>
+
+<!-- ==================== S4 ==================== -->
+<h2 id="s4">四、材料选择：碳钢 vs 不锈钢 vs 合金钢</h2>
+
+<table>
+  <tr><th>材料</th><th>牌号示例</th><th>优点</th><th>缺点</th><th>典型场景</th></tr>
+  <tr>
+    <td><strong>碳钢</strong></td>
+    <td>Q235 / 35CrMo / 40Cr</td>
+    <td>便宜、强度范围广、可选等级多</td>
+    <td>易生锈</td>
+    <td>绝大多数机械设备（室内/涂装后）</td>
+  </tr>
+  <tr>
+    <td><strong>不锈钢</strong></td>
+    <td><span class="tag tag-blue">304</span> / <span class="tag tag-teal">316</span></td>
+    <td>耐腐蚀、外观好</td>
+    <td>强度较低（A2-70 为 700MPa）、价格贵 3-5 倍</td>
+    <td>化工、海洋、食品、医疗器械、户外裸露</td>
+  </tr>
+  <tr>
+    <td><strong>合金钢</strong></td>
+    <td>42CrMo / SCM440</td>
+    <td>超高强度 + 韧性好</td>
+    <td>价格高、需热处理</td>
+    <td>发动机连杆螺栓、风电螺栓、重载连接</td>
+  </tr>
+</table>
+
+<div class="ok">
+  ✅ <strong>304 vs 316 怎么选？</strong>316 含 Mo（钼），耐氯离子腐蚀更强。海边、化工含氯环境选 316；一般防腐选 304 就够了。
+</div>
+
+<!-- ==================== S5 ==================== -->
+<h2 id="s5">五、选型决策树——手把手教你选</h2>
+
+<div class="tree">
+  <h4 style="margin-bottom:14px;color:var(--accent)">Step 1：确定连接方式</h4>
+  <div style="font-size:14px;line-height:2.4;">
+    <div class="tree-node"><span class="tree-box" style="background:#21262d;color:var(--text)">被连接件能否从两侧操作？</span></div>
+    <div style="padding-left:24px;">
+      <div class="tree-node"><span class="tree-box" style="background:rgba(63,185,80,.2);color:var(--green)">✓ 能双侧操作</span> <span class="tree-arrow">→</span> <strong>优先考虑螺栓 + 螺母</strong></div>
+      <div class="tree-node"><span class="tree-box" style="background:rgba(248,81,73,.2);color:var(--red)">✗ 只能单侧操作</span> <span class="tree-arrow">→</span> <strong>螺钉（拧入螺纹孔）或螺柱</strong></div>
+    </div>
+  </div>
+
+  <h4 style="margin:20px 0 14px;color:var(--accent)">Step 2：选头部形状</h4>
+  <div style="font-size:14px;line-height:2.4;">
+    <div class="tree-node"><span class="tree-box" style="background:#21262d;color:var(--text)">表面是否要求平整无凸起？</span></div>
+    <div style="padding-left:24px;">
+      <div class="tree-node"><span class="tree-box" style="background:rgba(63,185,80,.2);color:var(--green)">✓ 要平整</span> <span class="tree-arrow">→</span> <strong>沉头 / 内六角沉头</strong></div>
+      <div class="tree-node"><span class="tree-box" style="background:rgba(248,81,73,.2);color:var(--red)">✗ 无要求</span> <span class="tree-arrow">→</span> <strong>六角头（力矩大）或 圆头/盘头</strong></div>
+    </div>
+  </div>
+
+  <h4 style="margin:20px 0 14px;color:var(--accent)">Step 3：确定性能等级</h4>
+  <div style="font-size:14px;line-height:2.4;">
+    <div class="tree-node"><span class="tree-box" style="background:#21262d;color:var(--text)">载荷性质如何？</span></div>
+    <div style="padding-left:24px;">
+      <div class="tree-node"><span class="tree-box" style="background:rgba(210,153,34,.2);color:var(--yellow)">静载 / 轻载</span> <span class="tree-arrow">→</span> <strong>4.8 或 8.8</strong></div>
+      <div class="tree-node"><span class="tree-box" style="background:rgba(88,166,255,.2);color:var(--accent)">中等动载</span> <span class="tree-arrow">→</span> <strong>8.8（默认首选）</strong></div>
+      <div class="tree-node"><span class="tree-box" style="background:rgba(188,140,255,.2);color:var(--purple)">重载 / 冲击</span> <span class="tree-arrow">→</span> <strong>10.9</strong></div>
+      <div class="tree-node"><span class="tree-box" style="background:rgba(248,81,73,.2);color:var(--red)">航空 / 极端</span> <span class="tree-arrow">→</span> <strong>12.9 + 特殊工艺控制</strong></div>
+    </div>
+  </div>
+
+  <h4 style="margin:20px 0 14px;color:var(--accent)">Step 4：选材料</h4>
+  <div style="font-size:14px;line-height:2.4;">
+    <div class="tree-node"><span class="tree-box" style="background:#21262d;color:var(--text)">工作环境？</span></div>
+    <div style="padding-left:24px;">
+      <div class="tree-node"><span class="tree-box" style="background:rgba(63,185,80,.2);color:var(--green)">干燥室内</span> <span class="tree-arrow">→</span> <strong>碳钢 + 表面处理</strong></div>
+      <div class="tree-node"><span class="tree-box" style="background:rgba(57,197,207,.2);color:var(--teal)">潮湿 / 户外 / 化工</span> <span class="tree-arrow">→</span> <strong>不锈钢 304/316</strong></div>
+      <div class="tree-node"><span class="tree-box" style="background:rgba(188,140,255,.2);color:var(--purple)">高温 / 超高载荷</span> <span class="tree-arrow">→</span> <strong>合金钢（42CrMo 等）</strong></div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== S6 ==================== -->
+<h2 id="s6">六、GB/T 常用标准速查表</h2>
+<p>以下是最常用的国标代号，标注时直接写在 BOM 的"标准号"栏即可：</p>
+
+<table>
+  <tr><th>类别</th><th>标准号</th><th>名称</th><th>备注</th></tr>
+  <!-- 螺栓 -->
+  <tr><td rowspan="3">螺栓</td><td>GB/T 5782</td><td>六角头螺栓 A/B 级</td><td>最常用</td></tr>
+  <tr><td>GB/T 5783</td><td>六角头螺栓 全螺纹</td><td>全螺纹款</td></tr>
+  <tr><td>GB/T 16674</td><td>六角法兰面螺栓</td><td>带法兰</td></tr>
+  <!-- 螺柱 -->
+  <tr><td>螺柱</td><td>GB/T 897~901</td><td>双头螺柱（bm=1d~2.5d）</td><td>按旋入深度分系列</td></tr>
+  <!-- 螺钉 -->
+  <tr><td rowspan="3">螺钉</td><td>GB/T 70.1</td><td>内六角圆柱头螺钉</td><td>模具/夹具标配</td></tr>
+  <tr><td>GB/T 68</td><td>沉头螺钉</td><td>平整表面</td></tr>
+  <tr><td>GB/T 77/78</td><td>紧定螺钉</td><td>顶丝</td></tr>
+  <!-- 螺母 -->
+  <tr><td rowspan="2">螺母</td><td>GB/T 6170</td><td>1 型六角螺母 A/B 级</td><td>最常用</td></tr>
+  <tr><td>GB/T 889</td><td>1 型非金属嵌件锁紧螺母</td><td>防松</td></tr>
+  <!-- 垫圈 -->
+  <tr><td rowspan="2">垫圈</td><td>GB/T 97.1</td><td>平垫圈 A 级</td><td>标准平垫</td></tr>
+  <tr><td>GB/T 93</td><td>弹簧垫圈（轻型/重型）</td><td>弹性防松</td></tr>
+  <!-- 销 -->
+  <tr><td rowspan="2">销</td><td>GB/T 119</td><td>圆柱销</td><td>定位</td></tr>
+  <tr><td>GB/T 117</td><td>圆锥销</td><td>自锁定位</td></tr>
+  <!-- 挡圈 -->
+  <tr><td rowspan="2">挡圈</td><td>GB/T 894</td><td>轴用弹性挡圈</td><td>A/B 型</td></tr>
+  <tr><td>GB/T 893</td><td>孔用弹性挡圈</td><td>A/B 型</td></tr>
+  <!-- 自攻 -->
+  <tr><td>自攻螺钉</td><td>GB/T 5283</td><td>沉头自攻螺钉</td><td>C/H/F 型</td></tr>
+</table>
+
+<div class="tip">
+  💡 <strong>BOM 标注规范示例：</strong><br>
+  <code>螺栓 M8×30  GB/T 5782  8.8  镀锌</code><br>
+  含义：公称直径 8mm、长度 30mm、符合 GB/T 5782 标准、性能等级 8.8、表面镀锌处理。
+</div>
+
+<!-- ==================== S7 ==================== -->
+<h2 id="s7">七、新手常犯的 7 个错误</h2>
+
+<div class="quiz-item">
+  <div class="quiz-q">❌ 错误 1：螺栓长度选错——太短没螺纹啮合，太长突出干涉</div>
+  <div class="quiz-a">
+    <strong>✅ 正确做法：</strong>螺栓旋合端至少要有 <strong>0.6~1.0 倍直径的有效螺纹啮合长度</strong>（钢对钢）。露出螺母端以 1~2 牙（约 2~3mm）为宜。参考公式：L ≅ 被连接总厚度 + 垫圈厚 + 螺母厚 + (2~3mm)。
+  </div>
+</div>
+
+<div class="quiz-item">
+  <div class="quiz-q">❌ 错误 2：只靠弹簧垫圈防松</div>
+  <div class="quiz-a">
+    <strong>✅ 正确做法：</strong>弹簧垫圈的防松能力有限（尤其高频振动下）。重要连接应采用：<br>
+    ① 螺纹胶（厌氧胶如 Loctite 243）<br>
+    ② 防松螺母（尼龙圈/法兰面）<br>
+    ③ 双螺母<br>
+    ④ 机械防松（开口销、止动垫圈）
+  </div>
+</div>
+
+<div class="quiz-item">
+  <div class="quiz-q">❌ 错误 3：不锈钢螺栓配碳钢螺母</div>
+  <div class="quiz-a">
+    <strong>✅ 正确做法：</strong><strong>电化学腐蚀！</strong>不同金属接触会形成原电池，加速腐蚀。同一条螺栓连接线路上应尽量使用相同材料的紧固件。如果必须混用，要做绝缘隔离。
+  </div>
+</div>
+
+<div class="quiz-item">
+  <div class="quiz-q">❌ 错误 4：忽略预紧力的概念，凭手感拧</div>
+  <div class="quiz-a">
+    <strong>✅ 正确做法：</strong>螺栓连接的本质是靠<strong>预紧力</strong>产生摩擦力来传递载荷。重要连接必须规定扭矩值并使用扭矩扳手。参考扭矩公式：T = K·F·d（K 为摩擦系数，F 为目标预紧力，d 为公称直径）。8.8 级 M8 螺栓推荐预紧扭矩约 22 N·m。
+  </div>
+</div>
+
+<div class="quiz-item">
+  <div class="quiz-q">❌ 错误 5：沉头螺钉的锪孔深度不够</div>
+  <div class="quiz-a">
+    <strong>✅ 正确做法：</strong>沉头螺钉头部有特定锥角（通常 90°），锪孔角度和深度必须匹配。否则螺钉头高出表面或"虚接触"，严重影响疲劳寿命。
+  </div>
+</div>
+
+<div class="quiz-item">
+  <div class="quiz-q">❌ 错误 6：12.9 级螺栓镀锌后氢脆断裂</div>
+  <div class="quiz-a">
+    <strong>✅ 正确做法：</strong>≥10.9 级的高强度螺栓<strong>严禁酸洗镀锌</strong>（渗氢导致氢脆延迟断裂）。如需防腐，采用磷化、达克罗或机械镀锌，且镀后必须做除氢烘烤（200°C×4h 以上）。
+  </div>
+</div>
+
+<div class="quiz-item">
+  <div class="quiz-q">❌ 错误 7：图纸只写"螺栓 M8"不写标准和等级</div>
+  <div class="quiz-a">
+    <strong>✅ 正确做法：</strong>完整的紧固件标注应包含：<br>
+    <code>名称 | 规格(d×L) | 标准号 | 性能等级 | 材料/表面处理</code><br>
+    缺少任何一项都可能导致采购错误或装配事故。
+  </div>
+</div>
+
+<!-- ==================== S8 ==================== -->
+<h2 id="s8">八、课后思考题</h2>
+
+<div class="quiz-item">
+  <div class="quiz-q">🤔 题 1：一台户外工作的电机安装支架，需要长期暴露在沿海空气中。你会怎么选材和选型？为什么？</div>
+  <div class="quiz-a">
+    <strong>参考答案：</strong><br>
+    • 材料选 <strong>316 不锈钢</strong>（耐氯离子腐蚀优于 304）<br>
+    • 性能等级 <strong>A4-80</strong>（不锈钢 80 级，相当于 800 MPa）<br>
+    • 配套 <strong>防松螺母</strong>（海风振动）<br>
+    • 加 <strong>平垫圈</strong> 保护支座表面<br>
+    • 如有更高强度需求，也可选合金钢 + 达克罗防腐处理
+  </div>
+</div>
+
+<div class="quiz-item">
+  <div class="quiz-q">🤔 题 2：某连接处只能从一侧操作，被连接件之一是铸铁（不宜频繁拆装），另一个是钢板。应该用什么紧固方案？</div>
+  <div class="quiz-a">
+    <strong>参考答案：</strong><br>
+    • 铸铁侧加工螺纹孔 → 用 <strong>螺柱（双头螺柱）</strong> 旋入铸铁<br>
+    • 钢板侧穿通孔 → 用 <strong>螺母</strong> 从外侧拧紧<br>
+    • 为什么不用螺钉直接拧钢板？因为钢板需要经常拆卸时，反复拧入螺钉会损坏铸铁螺纹孔。螺柱方案将磨损集中在可更换的螺柱本身。
+  </div>
+</div>
+
+<div class="quiz-item">
+  <div class="quiz-q">🤔 题 3：螺栓标记 "10.9" 的两个数字分别代表什么？请计算 10.9 级螺栓的抗拉强度和屈服强度。</div>
+  <div class="quiz-a">
+    <strong>参考答案：</strong><br>
+    • 第一位数字 "10" → 抗拉强度 = 10 × 100 = <strong>1000 MPa</strong><br>
+    • 第二位数字 "9" → 屈服比 = 9/10 = 0.9<br>
+    • 屈服强度 = 1000 × 0.9 = <strong>900 MPa</strong><br>
+    （或按简化公式：10 × 9 × 10 = 900 MPa）
+  </div>
+</div>
+
+<div class="quiz-item">
+  <div class="quiz-q">🤔 题 4：为什么内六角螺钉（GB/T 70.1）在模具行业如此流行？它的优势是什么？</div>
+  <div class="quiz-a">
+    <strong>参考答案：</strong><br>
+    • 头部圆柱形 → 可埋入孔中，不干涉周边结构<br>
+    • 内六角驱动 → 扭矩传递效率高，不易滑牙<br>
+    • 头部受力好 → 强度高于同等外六角<br>
+    • 外观整洁 → 适合精密设备<br>
+    • 通常 12.9 级制造 → 模具高应力需求匹配
+  </div>
+</div>
+
+<!-- Footer -->
+<footer>
+  <p>📖 标准件（紧固件）分类与应用指南 — 高工教学版 V1.0</p>
+  <p>基于《常见标准件分类与应用指南_V2》扩展编写 · 仅供教学参考</p>
+  <p style="margin-top:6px;color:var(--text2)">参考资料：华人螺丝网 · GB/T 紧固件国家标准 · ISO 898</p>
+</footer>
+
+</div>
+</body>
+</html>

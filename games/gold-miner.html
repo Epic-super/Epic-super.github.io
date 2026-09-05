@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>黄金矿工</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(to bottom, #87CEEB 0%, #8B4513 30%);
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        #gameContainer {
+            text-align: center;
+            background: #654321;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.3);
+        }
+        
+        #gameCanvas {
+            border: 3px solid #8B4513;
+            background: linear-gradient(to bottom, #87CEEB 0%, #8B4513 20%, #654321 100%);
+        }
+        
+        #gameInfo {
+            color: #FFD700;
+            font-size: 18px;
+            margin: 10px 0;
+        }
+        
+        #controls {
+            color: #FFD700;
+            margin: 10px 0;
+        }
+        
+        .button {
+            background: #FFD700;
+            color: #8B4513;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        .button:hover {
+            background: #FFA500;
+        }
+    .lobby-back{position:fixed;left:14px;top:14px;z-index:9999;display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:999px;background:rgba(20,30,26,.62);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:#86e39b;font-size:13px;font-weight:600;text-decoration:none;border:1px solid rgba(134,227,155,.4);box-shadow:0 4px 14px rgba(0,0,0,.28);transition:background .2s,transform .2s}
+    .lobby-back:hover{background:rgba(20,30,26,.88);transform:translateY(-1px)}
+    .lobby-back svg{width:15px;height:15px}
+    @media(max-width:600px){.lobby-back{top:auto;bottom:calc(14px + env(safe-area-inset-bottom));left:12px;padding:7px 12px;font-size:12px}}
+    </style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+<a class="lobby-back" href="index.html" title="返回游戏大厅">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>游戏大厅
+</a>
+    <div id="gameContainer">
+        <h1 style="color: #FFD700; margin-bottom: 20px;">黄金矿工</h1>
+        <div id="gameInfo">
+            <span>分数: <span id="score">0</span></span>
+            <span style="margin-left: 30px;">目标: <span id="target">1000</span></span>
+            <span style="margin-left: 30px;">时间: <span id="time">60</span>s</span>
+        </div>
+        <canvas id="gameCanvas" width="800" height="600"></canvas>
+        <div id="controls">
+            <p>按空格键发射钩子</p>
+            <button class="button" onclick="game.restart()">重新开始</button>
+        </div>
+    </div>
+
+    <script>
+        class GoldMinerGame {
+            constructor() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.score = 0;
+                this.target = 1000;
+                this.time = 60;
+                this.gameRunning = false;
+                this.gameStarted = false;
+                
+                // 矿工位置
+                this.miner = {
+                    x: 400,
+                    y: 100,
+                    width: 40,
+                    height: 60
+                };
+                
+                // 钩子状态
+                this.hook = {
+                    x: this.miner.x,
+                    y: this.miner.y + this.miner.height,
+                    angle: 0,
+                    length: 0,
+                    maxLength: 400,
+                    speed: 5,
+                    isExtending: false,
+                    isRetracting: false,
+                    hasItem: false,
+                    item: null
+                };
+                
+                // 钩子摆动
+                this.hookSwing = {
+                    angle: 0,
+                    direction: 1,
+                    speed: 0.02
+                };
+                
+                // 地下物品
+                this.items = [];
+                this.generateItems();
+                
+                this.bindEvents();
+                this.gameLoop();
+            }
+            
+            generateItems() {
+                this.items = [];
+                
+                // 生成黄金
+                for (let i = 0; i < 8; i++) {
+                    this.items.push({
+                        x: Math.random() * (this.canvas.width - 40) + 20,
+                        y: Math.random() * 300 + 250,
+                        width: 30,
+                        height: 30,
+                        type: 'gold',
+                        value: 100,
+                        color: '#FFD700'
+                    });
+                }
+                
+                // 生成大金块
+                for (let i = 0; i < 3; i++) {
+                    this.items.push({
+                        x: Math.random() * (this.canvas.width - 60) + 30,
+                        y: Math.random() * 200 + 350,
+                        width: 50,
+                        height: 50,
+                        type: 'bigGold',
+                        value: 300,
+                        color: '#FFD700'
+                    });
+                }
+                
+                // 生成钻石
+                for (let i = 0; i < 2; i++) {
+                    this.items.push({
+                        x: Math.random() * (this.canvas.width - 30) + 15,
+                        y: Math.random() * 150 + 400,
+                        width: 25,
+                        height: 25,
+                        type: 'diamond',
+                        value: 500,
+                        color: '#00FFFF'
+                    });
+                }
+                
+                // 生成石头
+                for (let i = 0; i < 5; i++) {
+                    this.items.push({
+                        x: Math.random() * (this.canvas.width - 40) + 20,
+                        y: Math.random() * 350 + 200,
+                        width: 35,
+                        height: 35,
+                        type: 'stone',
+                        value: 10,
+                        color: '#808080'
+                    });
+                }
+            }
+            
+            bindEvents() {
+                document.addEventListener('keydown', (e) => {
+                    if (e.code === 'Space') {
+                        e.preventDefault();
+                        this.shootHook();
+                    }
+                });
+            }
+            
+            shootHook() {
+                if (!this.gameRunning) {
+                    this.startGame();
+                    return;
+                }
+                
+                if (!this.hook.isExtending && !this.hook.isRetracting) {
+                    this.hook.isExtending = true;
+                    this.hook.angle = this.hookSwing.angle;
+                }
+            }
+            
+            startGame() {
+                this.gameRunning = true;
+                this.gameStarted = true;
+                this.startTimer();
+            }
+            
+            startTimer() {
+                this.timer = setInterval(() => {
+                    this.time--;
+                    document.getElementById('time').textContent = this.time;
+                    
+                    if (this.time <= 0) {
+                        this.endGame();
+                    }
+                }, 1000);
+            }
+            
+            endGame() {
+                this.gameRunning = false;
+                clearInterval(this.timer);
+                
+                if (this.score >= this.target) {
+                    alert('恭喜！你达到了目标分数！');
+                } else {
+                    alert('时间到！你的分数是：' + this.score);
+                }
+            }
+            
+            restart() {
+                this.score = 0;
+                this.time = 60;
+                this.gameRunning = false;
+                this.gameStarted = false;
+                this.hook.isExtending = false;
+                this.hook.isRetracting = false;
+                this.hook.hasItem = false;
+                this.hook.length = 0;
+                this.hook.item = null;
+                this.hookSwing.angle = 0;
+                this.hookSwing.direction = 1;
+                
+                clearInterval(this.timer);
+                this.generateItems();
+                this.updateScore();
+                document.getElementById('time').textContent = this.time;
+            }
+            
+            updateScore() {
+                document.getElementById('score').textContent = this.score;
+            }
+            
+            update() {
+                if (!this.gameRunning) return;
+                
+                // 更新钩子摆动
+                if (!this.hook.isExtending && !this.hook.isRetracting) {
+                    this.hookSwing.angle += this.hookSwing.direction * this.hookSwing.speed;
+                    if (this.hookSwing.angle > Math.PI/3 || this.hookSwing.angle < -Math.PI/3) {
+                        this.hookSwing.direction *= -1;
+                    }
+                }
+                
+                // 更新钩子延伸
+                if (this.hook.isExtending) {
+                    this.hook.length += this.hook.speed;
+                    
+                    // 计算钩子尖端位置
+                    const hookTipX = this.hook.x + Math.sin(this.hook.angle) * this.hook.length;
+                    const hookTipY = this.hook.y + Math.cos(this.hook.angle) * this.hook.length;
+                    
+                    // 检查是否碰到边界
+                    if (this.hook.length >= this.hook.maxLength || 
+                        hookTipX < 0 || hookTipX > this.canvas.width || 
+                        hookTipY > this.canvas.height) {
+                        this.hook.isExtending = false;
+                        this.hook.isRetracting = true;
+                    }
+                    
+                    // 检查是否抓到物品
+                    if (!this.hook.hasItem) {
+                        for (let i = 0; i < this.items.length; i++) {
+                            const item = this.items[i];
+                            if (hookTipX >= item.x && hookTipX <= item.x + item.width &&
+                                hookTipY >= item.y && hookTipY <= item.y + item.height) {
+                                this.hook.hasItem = true;
+                                this.hook.item = item;
+                                this.hook.isExtending = false;
+                                this.hook.isRetracting = true;
+                                this.items.splice(i, 1);
+                                break;
+                            }
+                        }
+                    }
+                }
+                
+                // 更新钩子收回
+                if (this.hook.isRetracting) {
+                    const retractSpeed = this.hook.hasItem ? 
+                        (this.hook.item.type === 'bigGold' ? 1 : 
+                         this.hook.item.type === 'stone' ? 2 : 3) : 5;
+                    
+                    this.hook.length -= retractSpeed;
+                    
+                    if (this.hook.length <= 0) {
+                        this.hook.length = 0;
+                        this.hook.isRetracting = false;
+                        
+                        if (this.hook.hasItem) {
+                            this.score += this.hook.item.value;
+                            this.updateScore();
+                            this.hook.hasItem = false;
+                            this.hook.item = null;
+                        }
+                    }
+                }
+            }
+            
+            render() {
+                // 清除画布
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // 绘制背景
+                const gradient = this.ctx.createLinearGradient(0, 0, 0, this.canvas.height);
+                gradient.addColorStop(0, '#87CEEB');
+                gradient.addColorStop(0.2, '#8B4513');
+                gradient.addColorStop(1, '#654321');
+                this.ctx.fillStyle = gradient;
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // 绘制地面线
+                this.ctx.strokeStyle = '#8B4513';
+                this.ctx.lineWidth = 3;
+                this.ctx.beginPath();
+                this.ctx.moveTo(0, 150);
+                this.ctx.lineTo(this.canvas.width, 150);
+                this.ctx.stroke();
+                
+                // 绘制矿工
+                this.ctx.fillStyle = '#8B4513';
+                this.ctx.fillRect(this.miner.x - this.miner.width/2, this.miner.y - this.miner.height/2, 
+                                this.miner.width, this.miner.height);
+                
+                // 绘制矿工帽子
+                this.ctx.fillStyle = '#FFD700';
+                this.ctx.fillRect(this.miner.x - this.miner.width/2, this.miner.y - this.miner.height/2, 
+                                this.miner.width, 15);
+                
+                // 绘制钩子线
+                if (this.hook.length > 0) {
+                    const hookTipX = this.hook.x + Math.sin(this.hook.angle) * this.hook.length;
+                    const hookTipY = this.hook.y + Math.cos(this.hook.angle) * this.hook.length;
+                    
+                    this.ctx.strokeStyle = '#654321';
+                    this.ctx.lineWidth = 3;
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(this.hook.x, this.hook.y);
+                    this.ctx.lineTo(hookTipX, hookTipY);
+                    this.ctx.stroke();
+                    
+                    // 绘制钩子
+                    this.ctx.fillStyle = '#C0C0C0';
+                    this.ctx.fillRect(hookTipX - 5, hookTipY - 5, 10, 10);
+                    
+                    // 绘制抓到的物品
+                    if (this.hook.hasItem && this.hook.item) {
+                        const item = this.hook.item;
+                        this.ctx.fillStyle = item.color;
+                        this.ctx.fillRect(hookTipX - item.width/2, hookTipY, item.width, item.height);
+                    }
+                } else {
+                    // 绘制摆动的钩子
+                    const swingTipX = this.hook.x + Math.sin(this.hookSwing.angle) * 50;
+                    const swingTipY = this.hook.y + Math.cos(this.hookSwing.angle) * 50;
+                    
+                    this.ctx.strokeStyle = '#654321';
+                    this.ctx.lineWidth = 3;
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(this.hook.x, this.hook.y);
+                    this.ctx.lineTo(swingTipX, swingTipY);
+                    this.ctx.stroke();
+                    
+                    this.ctx.fillStyle = '#C0C0C0';
+                    this.ctx.fillRect(swingTipX - 5, swingTipY - 5, 10, 10);
+                }
+                
+                // 绘制地下物品
+                for (const item of this.items) {
+                    this.ctx.fillStyle = item.color;
+                    this.ctx.fillRect(item.x, item.y, item.width, item.height);
+                    
+                    // 绘制物品类型标识
+                    this.ctx.fillStyle = 'white';
+                    this.ctx.font = '12px Arial';
+                    this.ctx.textAlign = 'center';
+                    let text = '';
+                    switch (item.type) {
+                        case 'gold': text = '金'; break;
+                        case 'bigGold': text = '大金'; break;
+                        case 'diamond': text = '钻'; break;
+                        case 'stone': text = '石'; break;
+                    }
+                    this.ctx.fillText(text, item.x + item.width/2, item.y + item.height/2 + 4);
+                }
+                
+                // 绘制游戏状态
+                if (!this.gameStarted) {
+                    this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                    
+                    this.ctx.fillStyle = '#FFD700';
+                    this.ctx.font = '36px Arial';
+                    this.ctx.textAlign = 'center';
+                    this.ctx.fillText('按空格键开始游戏', this.canvas.width/2, this.canvas.height/2);
+                }
+            }
+            
+            gameLoop() {
+                this.update();
+                this.render();
+                requestAnimationFrame(() => this.gameLoop());
+            }
+        }
+        
+        // 启动游戏
+        const game = new GoldMinerGame();
+    </script>
+</body>
+</html>

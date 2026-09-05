@@ -1,0 +1,456 @@
+{
+  "generated": "2026-08-17",
+  "source_dir": "<本地路径>/Tech/Data structure",
+  "note": "本清单为 workbench 408/自考 双线核心课程资料索引；两份 200MB+ 王道 PDF（数据结构/计网）已通过 Git LFS 入库 workbench（materials/408/），可由 study.html 在线打开；其余 PPT/速成课 PDF 仍为本地资料（存于 source_dir），未入库。",
+  "tracks": {
+    "408 计算机统考": {
+      "name": "408 计算机统考",
+      "courses": {
+        "数据结构": {
+          "file_count": 14,
+          "size_total": 274243290,
+          "files": [
+            {
+              "path": "408 计算机统考/数据结构/01 绪论.pptx",
+              "size": 1134669,
+              "over_100mb": false
+            },
+            {
+              "path": "408 计算机统考/数据结构/02 线性表.pptx",
+              "size": 1149127,
+              "over_100mb": false
+            },
+            {
+              "path": "408 计算机统考/数据结构/03 栈和队列.pptx",
+              "size": 1398999,
+              "over_100mb": false
+            },
+            {
+              "path": "408 计算机统考/数据结构/04 串、数组、广义表.pptx",
+              "size": 1253894,
+              "over_100mb": false
+            },
+            {
+              "path": "408 计算机统考/数据结构/05 树和二叉树.pptx",
+              "size": 1492773,
+              "over_100mb": false
+            },
+            {
+              "path": "408 计算机统考/数据结构/06 图.pptx",
+              "size": 1369795,
+              "over_100mb": false
+            },
+            {
+              "path": "408 计算机统考/数据结构/B007《数据结构》期末速成课 讲义PPT/01+绪论.pptx",
+              "size": 979957,
+              "over_100mb": false
+            },
+            {
+              "path": "408 计算机统考/数据结构/B007《数据结构》期末速成课 讲义PPT/02+线性表.pptx",
+              "size": 998607,
+              "over_100mb": false
+            },
+            {
+              "path": "408 计算机统考/数据结构/B007《数据结构》期末速成课 讲义PPT/03+栈和队列.pptx",
+              "size": 1171928,
+              "over_100mb": false
+            },
+            {
+              "path": "408 计算机统考/数据结构/B007《数据结构》期末速成课 讲义PPT/04+串、数组、广义表.pptx",
+              "size": 1028288,
+              "over_100mb": false
+            },
+            {
+              "path": "408 计算机统考/数据结构/B007《数据结构》期末速成课 讲义PPT/05+树和二叉树.pptx",
+              "size": 1228365,
+              "over_100mb": false
+            },
+            {
+              "path": "408 计算机统考/数据结构/B007《数据结构》期末速成课 讲义PPT/06+图.pptx",
+              "size": 1131500,
+              "over_100mb": false
+            },
+            {
+              "path": "408 计算机统考/数据结构/大题.docx",
+              "size": 1088533,
+              "over_100mb": false
+            },
+            {
+              "path": "408 计算机统考/数据结构/王道2027年数据结构考研复习指导.pdf",
+              "size": 258816855,
+              "over_100mb": true
+            }
+          ]
+        },
+        "计算机网络": {
+          "file_count": 10,
+          "size_total": 284810668,
+          "files": [
+            {
+              "path": "408 计算机统考/计算机网络/2027年计算机网络考研复习指导.pdf",
+              "size": 218174574,
+              "over_100mb": true
+            },
+            {
+              "path": "408 计算机统考/计算机网络/B011《计算机网络》期末速成课讲义PPT/计算机网络.pdf",
+              "size": 48017117,
+              "over_100mb": false
+            },
+            {
+              "path": "408 计算机统考/计算机网络/B055《计算机网络》期末速成课讲义PPT/1 概述.pdf",
+              "size": 1614339,
+              "over_100mb": false
+            },
+            {
+              "path": "408 计算机统考/计算机网络/B055《计算机网络》期末速成课讲义PPT/2 物理层 .pdf",
+              "size": 2575301,
+              "over_100mb": false
+            },
+            {
+              "path": "408 计算机统考/计算机网络/B055《计算机网络》期末速成课讲义PPT/3 数据链路层.pdf",
+              "size": 1710483,
+              "over_100mb": false
+            },
+            {
+              "path": "408 计算机统考/计算机网络/B055《计算机网络》期末速成课讲义PPT/4 网络层.pdf",
+              "size": 2260095,
+              "over_100mb": false
+            },
+            {
+              "path": "408 计算机统考/计算机网络/B055《计算机网络》期末速成课讲义PPT/5 传输层.pdf",
+              "size": 2912333,
+              "over_100mb": false
+            },
+            {
+              "path": "408 计算机统考/计算机网络/B055《计算机网络》期末速成课讲义PPT/6 应用层.pdf",
+              "size": 2495346,
+              "over_100mb": false
+            },
+            {
+              "path": "408 计算机统考/计算机网络/B055《计算机网络》期末速成课讲义PPT/7 网络安全.pdf",
+              "size": 284233,
+              "over_100mb": false
+            },
+            {
+              "path": "408 计算机统考/计算机网络/计算机网络/计算机网络.pdf",
+              "size": 4766847,
+              "over_100mb": false
+            }
+          ]
+        }
+      }
+    },
+    "自考": {
+      "name": "自考",
+      "courses": {
+        "C++程序设计": {
+          "file_count": 8,
+          "size_total": 5333870,
+          "files": [
+            {
+              "path": "自考/C++程序设计/《C++程序设计》讲义/01 数据类型+运算符.pptx",
+              "size": 459562,
+              "over_100mb": false,
+              "online": true,
+              "online_path": "materials/自考/C++程序设计/《C++程序设计》讲义/01 数据类型+运算符.pptx"
+            },
+            {
+              "path": "自考/C++程序设计/《C++程序设计》讲义/02 程序设计的三种基本结构.pptx",
+              "size": 636039,
+              "over_100mb": false,
+              "online": true,
+              "online_path": "materials/自考/C++程序设计/《C++程序设计》讲义/02 程序设计的三种基本结构.pptx"
+            },
+            {
+              "path": "自考/C++程序设计/《C++程序设计》讲义/03 数组+函数.pptx",
+              "size": 551621,
+              "over_100mb": false,
+              "online": true,
+              "online_path": "materials/自考/C++程序设计/《C++程序设计》讲义/03 数组+函数.pptx"
+            },
+            {
+              "path": "自考/C++程序设计/《C++程序设计》讲义/04 指针+自定义数据类型.pptx",
+              "size": 780994,
+              "over_100mb": false,
+              "online": true,
+              "online_path": "materials/自考/C++程序设计/《C++程序设计》讲义/04 指针+自定义数据类型.pptx"
+            },
+            {
+              "path": "自考/C++程序设计/《C++程序设计》讲义/05 类+对象.pptx",
+              "size": 826368,
+              "over_100mb": false,
+              "online": true,
+              "online_path": "materials/自考/C++程序设计/《C++程序设计》讲义/05 类+对象.pptx"
+            },
+            {
+              "path": "自考/C++程序设计/《C++程序设计》讲义/06 继承+多态+虚函数.pptx",
+              "size": 1043345,
+              "over_100mb": false,
+              "online": true,
+              "online_path": "materials/自考/C++程序设计/《C++程序设计》讲义/06 继承+多态+虚函数.pptx"
+            },
+            {
+              "path": "自考/C++程序设计/《C++程序设计》讲义/07 习题选讲.pptx",
+              "size": 482974,
+              "over_100mb": false,
+              "online": true,
+              "online_path": "materials/自考/C++程序设计/《C++程序设计》讲义/07 习题选讲.pptx"
+            },
+            {
+              "path": "自考/C++程序设计/《C++程序设计》讲义/08 C语言习题选讲.pptx",
+              "size": 552967,
+              "over_100mb": false,
+              "online": true,
+              "online_path": "materials/自考/C++程序设计/《C++程序设计》讲义/08 C语言习题选讲.pptx"
+            }
+          ]
+        },
+        "C语言程序设计": {
+          "file_count": 1,
+          "size_total": 1266273,
+          "files": [
+            {
+              "path": "自考/C语言程序设计/C语言程序设计讲义/【C语言程序设计】讲义.pptx",
+              "size": 1266273,
+              "over_100mb": false,
+              "online": true,
+              "online_path": "materials/自考/C语言程序设计/C语言程序设计讲义/【C语言程序设计】讲义.pptx"
+            }
+          ]
+        },
+        "Python课程讲义": {
+          "file_count": 6,
+          "size_total": 55998028,
+          "files": [
+            {
+              "path": "自考/Python课程讲义/Python课程讲义/01_python_基本语法_纯图版.pdf",
+              "size": 5507378,
+              "over_100mb": false,
+              "online": true,
+              "online_path": "materials/自考/Python课程讲义/Python课程讲义/01_python_基本语法_纯图版.pdf"
+            },
+            {
+              "path": "自考/Python课程讲义/Python课程讲义/02_python_组合数据类型_纯图版.pdf",
+              "size": 16538072,
+              "over_100mb": false,
+              "online": true,
+              "online_path": "materials/自考/Python课程讲义/Python课程讲义/02_python_组合数据类型_纯图版.pdf"
+            },
+            {
+              "path": "自考/Python课程讲义/Python课程讲义/03_python_流程控制_纯图版.pdf",
+              "size": 5083884,
+              "over_100mb": false,
+              "online": true,
+              "online_path": "materials/自考/Python课程讲义/Python课程讲义/03_python_流程控制_纯图版.pdf"
+            },
+            {
+              "path": "自考/Python课程讲义/Python课程讲义/04_python_函数与模块_纯图版.pdf",
+              "size": 8902233,
+              "over_100mb": false,
+              "online": true,
+              "online_path": "materials/自考/Python课程讲义/Python课程讲义/04_python_函数与模块_纯图版.pdf"
+            },
+            {
+              "path": "自考/Python课程讲义/Python课程讲义/04_python_函数与模块_纯图版_纯图版.pdf",
+              "size": 9749122,
+              "over_100mb": false,
+              "online": true,
+              "online_path": "materials/自考/Python课程讲义/Python课程讲义/04_python_函数与模块_纯图版_纯图版.pdf"
+            },
+            {
+              "path": "自考/Python课程讲义/Python课程讲义/05_python_异常与文件操作_纯图版.pdf",
+              "size": 10217339,
+              "over_100mb": false,
+              "online": true,
+              "online_path": "materials/自考/Python课程讲义/Python课程讲义/05_python_异常与文件操作_纯图版.pdf"
+            }
+          ]
+        },
+        "人工智能导论": {
+          "file_count": 8,
+          "size_total": 13353843,
+          "files": [
+            {
+              "path": "自考/人工智能导论/B064《人工智能导论》期末速成课讲义PPT/1、绪论.pdf",
+              "size": 882586,
+              "over_100mb": false,
+              "online": true,
+              "online_path": "materials/自考/人工智能导论/B064《人工智能导论》期末速成课讲义PPT/1、绪论.pdf"
+            },
+            {
+              "path": "自考/人工智能导论/B064《人工智能导论》期末速成课讲义PPT/2、知识表示.pdf",
+              "size": 2487059,
+              "over_100mb": false,
+              "online": true,
+              "online_path": "materials/自考/人工智能导论/B064《人工智能导论》期末速成课讲义PPT/2、知识表示.pdf"
+            },
+            {
+              "path": "自考/人工智能导论/B064《人工智能导论》期末速成课讲义PPT/3、确定性推理方法.pdf",
+              "size": 1459807,
+              "over_100mb": false,
+              "online": true,
+              "online_path": "materials/自考/人工智能导论/B064《人工智能导论》期末速成课讲义PPT/3、确定性推理方法.pdf"
+            },
+            {
+              "path": "自考/人工智能导论/B064《人工智能导论》期末速成课讲义PPT/4、不确定性推理方法.pdf",
+              "size": 1686556,
+              "over_100mb": false,
+              "online": true,
+              "online_path": "materials/自考/人工智能导论/B064《人工智能导论》期末速成课讲义PPT/4、不确定性推理方法.pdf"
+            },
+            {
+              "path": "自考/人工智能导论/B064《人工智能导论》期末速成课讲义PPT/5、搜索求解策略.pdf",
+              "size": 2509168,
+              "over_100mb": false,
+              "online": true,
+              "online_path": "materials/自考/人工智能导论/B064《人工智能导论》期末速成课讲义PPT/5、搜索求解策略.pdf"
+            },
+            {
+              "path": "自考/人工智能导论/B064《人工智能导论》期末速成课讲义PPT/6、智能计算及其应用.pdf",
+              "size": 2041175,
+              "over_100mb": false,
+              "online": true,
+              "online_path": "materials/自考/人工智能导论/B064《人工智能导论》期末速成课讲义PPT/6、智能计算及其应用.pdf"
+            },
+            {
+              "path": "自考/人工智能导论/B064《人工智能导论》期末速成课讲义PPT/7、机器学习及其应用.pdf",
+              "size": 1507727,
+              "over_100mb": false,
+              "online": true,
+              "online_path": "materials/自考/人工智能导论/B064《人工智能导论》期末速成课讲义PPT/7、机器学习及其应用.pdf"
+            },
+            {
+              "path": "自考/人工智能导论/B064《人工智能导论》期末速成课讲义PPT/8、人工神经网络及其应用.pdf",
+              "size": 779765,
+              "over_100mb": false,
+              "online": true,
+              "online_path": "materials/自考/人工智能导论/B064《人工智能导论》期末速成课讲义PPT/8、人工神经网络及其应用.pdf"
+            }
+          ]
+        },
+        "离散数学": {
+          "file_count": 11,
+          "size_total": 6843361,
+          "files": [
+            {
+              "path": "自考/离散数学/B020《离散数学》期末3小时突击速成课讲义PPT/10图论-树和二分、平面图.pdf",
+              "size": 1073620,
+              "over_100mb": false,
+              "online": true,
+              "online_path": "materials/自考/离散数学/B020《离散数学》期末3小时突击速成课讲义PPT/10图论-树和二分、平面图.pdf"
+            },
+            {
+              "path": "自考/离散数学/B020《离散数学》期末3小时突击速成课讲义PPT/11数理逻辑.pdf",
+              "size": 747621,
+              "over_100mb": false,
+              "online": true,
+              "online_path": "materials/自考/离散数学/B020《离散数学》期末3小时突击速成课讲义PPT/11数理逻辑.pdf"
+            },
+            {
+              "path": "自考/离散数学/B020《离散数学》期末3小时突击速成课讲义PPT/12代数系统.pdf",
+              "size": 597218,
+              "over_100mb": false,
+              "online": true,
+              "online_path": "materials/自考/离散数学/B020《离散数学》期末3小时突击速成课讲义PPT/12代数系统.pdf"
+            },
+            {
+              "path": "自考/离散数学/B020《离散数学》期末3小时突击速成课讲义PPT/2集合论.pdf",
+              "size": 679461,
+              "over_100mb": false,
+              "online": true,
+              "online_path": "materials/自考/离散数学/B020《离散数学》期末3小时突击速成课讲义PPT/2集合论.pdf"
+            },
+            {
+              "path": "自考/离散数学/B020《离散数学》期末3小时突击速成课讲义PPT/3关系-关系的基础.pdf",
+              "size": 641427,
+              "over_100mb": false,
+              "online": true,
+              "online_path": "materials/自考/离散数学/B020《离散数学》期末3小时突击速成课讲义PPT/3关系-关系的基础.pdf"
+            },
+            {
+              "path": "自考/离散数学/B020《离散数学》期末3小时突击速成课讲义PPT/4关系-运算及求闭包.pdf",
+              "size": 545259,
+              "over_100mb": false,
+              "online": true,
+              "online_path": "materials/自考/离散数学/B020《离散数学》期末3小时突击速成课讲义PPT/4关系-运算及求闭包.pdf"
+            },
+            {
+              "path": "自考/离散数学/B020《离散数学》期末3小时突击速成课讲义PPT/5关系-等价与偏序.pdf",
+              "size": 477320,
+              "over_100mb": false,
+              "online": true,
+              "online_path": "materials/自考/离散数学/B020《离散数学》期末3小时突击速成课讲义PPT/5关系-等价与偏序.pdf"
+            },
+            {
+              "path": "自考/离散数学/B020《离散数学》期末3小时突击速成课讲义PPT/6函数.pdf",
+              "size": 589233,
+              "over_100mb": false,
+              "online": true,
+              "online_path": "materials/自考/离散数学/B020《离散数学》期末3小时突击速成课讲义PPT/6函数.pdf"
+            },
+            {
+              "path": "自考/离散数学/B020《离散数学》期末3小时突击速成课讲义PPT/7图论-图的基本定义.pdf",
+              "size": 493178,
+              "over_100mb": false,
+              "online": true,
+              "online_path": "materials/自考/离散数学/B020《离散数学》期末3小时突击速成课讲义PPT/7图论-图的基本定义.pdf"
+            },
+            {
+              "path": "自考/离散数学/B020《离散数学》期末3小时突击速成课讲义PPT/8图论-图的矩阵及其应用.pdf",
+              "size": 500524,
+              "over_100mb": false,
+              "online": true,
+              "online_path": "materials/自考/离散数学/B020《离散数学》期末3小时突击速成课讲义PPT/8图论-图的矩阵及其应用.pdf"
+            },
+            {
+              "path": "自考/离散数学/B020《离散数学》期末3小时突击速成课讲义PPT/9图论-欧拉图与哈密顿图.pdf",
+              "size": 498500,
+              "over_100mb": false,
+              "online": true,
+              "online_path": "materials/自考/离散数学/B020《离散数学》期末3小时突击速成课讲义PPT/9图论-欧拉图与哈密顿图.pdf"
+            }
+          ]
+        },
+        "软件工程": {
+          "file_count": 2,
+          "size_total": 3676224,
+          "files": [
+            {
+              "path": "自考/软件工程/软件工程复习题.doc",
+              "size": 238857,
+              "over_100mb": false,
+              "online": true,
+              "online_path": "materials/自考/软件工程/软件工程复习题.doc"
+            },
+            {
+              "path": "自考/软件工程/软件工程期末三小时.pdf",
+              "size": 3437367,
+              "over_100mb": false,
+              "online": true,
+              "online_path": "materials/自考/软件工程/软件工程期末三小时.pdf"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "over_100mb_files": [
+    {
+      "track": "408 计算机统考",
+      "course": "数据结构",
+      "path": "408 计算机统考/数据结构/王道2027年数据结构考研复习指导.pdf",
+      "size_mb": 246.8
+    },
+    {
+      "track": "408 计算机统考",
+      "course": "计算机网络",
+      "path": "408 计算机统考/计算机网络/2027年计算机网络考研复习指导.pdf",
+      "size_mb": 208.1
+    }
+  ],
+  "cloud_backup": {
+    "provider": "baidu-netdisk",
+    "path": "（上传后填写，如 /workbench/Data-structure）",
+    "note": "实体资料已备份至百度网盘（用户手动上传）。换电脑流程：1) 从百度网盘下载 Data structure 目录到本机任意路径；2) 修改 study.html 顶部 var BASE_DIR 为你本机的实际路径；3) 刷新 study.html 即可。"
+  }
+}

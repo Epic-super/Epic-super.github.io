@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>民航旅客体验深度解析平台</title>
+<style>
+  :root{
+    --bg:#0f1311; --panel:#171d1a; --panel2:#1f2723; --ink:#e8efe9; --muted:#8b9b93;
+    --line:#262d29; --primary:#34d399; --primary-soft:#14352b; --accent:#7dd3fc;
+    --warn:#fbbf24; --radius:14px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--ink);height:100%;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    line-height:1.7;font-size:15px;-webkit-font-smoothing:antialiased}
+  a{color:var(--accent);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .bar{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:10px;padding:10px 16px;
+    border-bottom:1px solid var(--line);background:rgba(23,29,26,.92);backdrop-filter:blur(8px)}
+  .back{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:10px;border:1px solid var(--line);
+    background:var(--panel);color:var(--ink);font-size:13px;font-weight:700}
+  .back:hover{border-color:var(--primary);text-decoration:none}
+  .title{font-size:14px;font-weight:800;opacity:.92}
+  .stage{position:relative;height:calc(100vh - 53px)}
+  iframe{width:100%;height:100%;border:none;background:#0b0f0d;display:none}
+  /* 离线遮罩 */
+  .offline{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;
+    background:repeating-linear-gradient(45deg,#0f1311,#0f1311 14px,#121816 14px,#121816 28px)}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:24px 26px;max-width:620px}
+  .card h1{font-size:21px;margin:0 0 6px;background:linear-gradient(90deg,#34d399,#7dd3fc);
+    -webkit-background-clip:text;background-clip:text;color:transparent}
+  .card p{color:var(--muted);font-size:13.5px;margin:6px 0}
+  .acts{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .btn{display:inline-flex;align-items:center;gap:7px;padding:11px 16px;border-radius:11px;font-weight:700;font-size:14px;cursor:pointer;border:none}
+  .btn.primary{background:var(--primary);color:#04221a}
+  .btn.ghost{background:var(--panel2);color:var(--ink);border:1px solid var(--line)}
+  .btn:hover{filter:brightness(1.08);text-decoration:none}
+  pre{background:#0b0f0d;border:1px solid var(--line);border-radius:10px;padding:12px 14px;overflow-x:auto;
+    font-size:12.5px;color:#bfe9d6;line-height:1.5;margin:12px 0}
+  .tag{display:inline-block;background:var(--primary-soft);color:var(--primary);border:1px solid #1f4a3b;
+    border-radius:20px;padding:2px 10px;font-size:12px;margin:3px 4px 3px 0}
+  .note{font-size:12.5px;color:var(--muted);border-left:3px solid var(--warn);padding:8px 12px;margin:12px 0;background:var(--panel2)}
+  .dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--warn);margin-right:6px;vertical-align:middle}
+  .ok{background:var(--primary)}
+  .foot{position:absolute;left:0;right:0;bottom:0;padding:8px 14px;font-size:12px;color:var(--muted);
+    background:rgba(15,19,17,.9);border-top:1px solid var(--line);display:flex;gap:14px;flex-wrap:wrap}
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+  <div class="bar">
+    <a class="back" href="../index.html" target="_top">← 返回指挥台</a>
+    <div class="title">✈️ 民航旅客体验深度解析平台</div>
+    <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+      <span id="status" style="font-size:12.5px;color:var(--muted)"><span class="dot"></span>检测后端中…</span>
+      <a class="btn ghost" id="openNew" href="http://localhost:5000" target="_blank" rel="noopener" style="padding:6px 12px;font-size:13px">↗ 新标签打开</a>
+    </div>
+  </div>
+
+  <div class="stage">
+    <iframe id="app" src="" title="民航旅客体验深度解析平台" allow="fullscreen"></iframe>
+
+    <div class="offline" id="offline">
+      <div class="card">
+        <h1>民航旅客体验深度解析平台</h1>
+        <p>基于 AI 的民航旅客体验深度解析（上海市计算机大赛参赛项目 MVP）：情感分析 / LDA 主题 / 5 大业务维度 / 航司归因 / 趋势预测 / 问题优先级 / 可解释性热力图，React + ECharts 看板。</p>
+        <p style="margin-top:10px"><span class="dot" id="dot"></span><b id="msg">后端未启动</b></p>
+        <p>该子系统为<strong>后端耦合全功能</strong>模式，需先在本地启动轻量后端（标准库 http.server，:5000）才能加载看板。</p>
+        <div class="acts">
+          <a class="btn primary" href="start.bat" download>⬇ 下载启动脚本 start.bat</a>
+          <button class="btn ghost" id="retry">↻ 重试连接</button>
+        </div>
+        <div class="note">启动方式（任选其一）：<br>
+          ① 双击本目录下的 <code>start.bat</code>；<br>
+          ② 命令行进入 <code>lab/products/airline-experience/</code> 执行 <code>python server/app.py</code>。<br>
+          启动后稍候数秒（首次带筛选会加载 89 万条结构化语料），点「重试连接」即可。
+        </div>
+        <pre># 手动启动
+cd lab/products/airline-experience
+python server/app.py
+# 打开 http://localhost:5000</pre>
+        <div style="margin-top:6px">
+          <span class="tag">情感 85%+</span><span class="tag">LDA 5 主题</span><span class="tag">5 大维度</span>
+          <span class="tag">BERT 0.9458</span><span class="tag">IAN 0.9693</span><span class="tag">趋势预测</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="foot">
+      <span>数据源：上海市计算机大赛参赛项目（本机 <code><本机项目数据目录></code>）</span>
+      <span>看板加载自 <code>http://localhost:5000</code>（需本地后端）</span>
+    </div>
+  </div>
+
+<script>
+  const API = "http://localhost:5000";
+  const iframe = document.getElementById("app");
+  const offline = document.getElementById("offline");
+  const statusEl = document.getElementById("status");
+  const dot = document.getElementById("dot");
+  const msg = document.getElementById("msg");
+
+  async function probe() {
+    statusEl.innerHTML = '<span class="dot"></span>检测后端中…';
+    try {
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), 2600);
+      const r = await fetch(API + "/api/meta", { cache: "no-store", signal: ctrl.signal });
+      clearTimeout(t);
+      if (!r.ok) throw new Error("bad status " + r.status);
+      // 后端在线：显示看板
+      if (!iframe.src || iframe.src !== API + "/") iframe.src = API + "/";
+      offline.style.display = "none";
+      iframe.style.display = "block";
+      statusEl.innerHTML = '<span class="dot ok"></span>后端在线 · :5000';
+      return true;
+    } catch (e) {
+      iframe.style.display = "none";
+      offline.style.display = "flex";
+      statusEl.innerHTML = '<span class="dot"></span>后端未启动';
+      msg.textContent = "后端未启动（" + (e && e.name === "AbortError" ? "连接超时" : "无法连接 :5000") + "）";
+      return false;
+    }
+  }
+  document.getElementById("retry").addEventListener("click", probe);
+  probe();
+  // 每 8 秒自动重试，直到后端起来
+  const timer = setInterval(() => {
+    if (offline.style.display !== "none") probe();
+    else clearInterval(timer);
+  }, 8000);
+</script>
+</body>
+</html>

@@ -1,0 +1,129 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #1a1a2e;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    font-family: 'Courier New', monospace;
+    color: #fff;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+}
+
+#game-container {
+    position: relative;
+    display: inline-block;
+}
+
+#gameCanvas {
+    border: 4px solid #4a4e69;
+    background-color: #16213e;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    display: block;
+}
+
+#ui-overlay {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    display: flex;
+    justify-content: space-between;
+    pointer-events: none;
+}
+
+#player1-hp,
+#player2-hp {
+    width: 300px;
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 10px;
+    border: 2px solid #4a4e69;
+}
+
+.player-label {
+    font-size: 16px;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+#player1-hp .player-label {
+    color: #00d4ff;
+}
+
+#player2-hp .player-label {
+    color: #ff4757;
+    text-align: right;
+}
+
+.hp-bar {
+    width: 100%;
+    height: 20px;
+    background-color: #2d3436;
+    border: 2px solid #4a4e69;
+    position: relative;
+    overflow: hidden;
+}
+
+.hp-fill {
+    height: 100%;
+    transition: width 0.3s ease;
+}
+
+#p1-hp-fill {
+    background-color: #00d4ff;
+    width: 100%;
+}
+
+#p2-hp-fill {
+    background-color: #ff4757;
+    width: 100%;
+    float: right;
+}
+
+#game-message {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 48px;
+    font-weight: bold;
+    color: #ffd700;
+    text-shadow: 4px 4px 0 #000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.5s;
+    z-index: 10;
+}
+
+#game-message.show {
+    opacity: 1;
+}
+
+#controls-help {
+    position: absolute;
+    bottom: -60px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-between;
+    background-color: rgba(0, 0, 0, 0.8);
+    padding: 10px;
+    border: 2px solid #4a4e69;
+    font-size: 12px;
+}
+
+.control-group h3 {
+    margin-bottom: 5px;
+    color: #ffd700;
+}
+
+.control-group p {
+    line-height: 1.4;
+}

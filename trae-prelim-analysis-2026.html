@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TRAE 2026 初赛·三大工业作品精准解析与复原完整性</title>
+<style>
+  :root{
+    --bg:#f6f8f5; --card:#fff; --text:#1d2723; --muted:#6b7d76;
+    --primary:#0f9d77; --primary-soft:#e6f5ef;
+    --ind:#3b6fb0; --ind-soft:#e8f0fa;
+    --mfg:#9a5fb0; --mfg-soft:#f3ecf8;
+    --amber:#d98a1a; --amber-soft:#fdf3e3;
+    --line:#e3e8e4; --radius:16px;
+    --shadow:0 1px 3px rgba(16,24,40,.06),0 1px 2px rgba(16,24,40,.04);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg);color:var(--text);line-height:1.65;padding:24px 16px 70px;}
+  .wrap{max-width:1000px;margin:0 auto;}
+  h1{font-size:23px;margin:0 0 4px;line-height:1.35;}
+  .sub{color:var(--muted);font-size:13px;margin-bottom:16px;}
+  h2{font-size:18px;margin:30px 0 10px;display:flex;align-items:center;gap:8px;border-left:4px solid var(--primary);padding-left:10px;}
+  h2 .idx{font-size:12px;font-weight:800;color:#fff;background:var(--primary);border-radius:8px;padding:2px 9px;}
+  h3{font-size:14.5px;margin:18px 0 6px;color:var(--primary);}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:14px 0;}
+  .kv{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 13px;box-shadow:var(--shadow);}
+  .kv .k{font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.3px;}
+  .kv .v{font-size:13.5px;margin-top:3px;}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;margin-bottom:16px;box-shadow:var(--shadow);border-left:5px solid var(--muted);}
+  .card.mfg{border-left-color:var(--mfg);}
+  .card.hw{border-left-color:var(--amber);}
+  .card.ind{border-left-color:var(--ind);}
+  .ch{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:6px;}
+  .ch .name{font-size:17px;font-weight:800;}
+  .ch .cat{font-size:12px;color:var(--muted);}
+  .badge{display:inline-block;font-size:11px;font-weight:800;padding:2px 9px;border-radius:999px;margin:2px 4px 2px 0;}
+  .b-real{background:#e8f5ee;color:#1d8a5c;}
+  .b-sim{background:#fdf0e6;color:#b9701a;}
+  .b-con{background:#eef0f3;color:#566;}
+  .b-demo{background:#f3ecf8;color:#8a4fb0;}
+  table{width:100%;border-collapse:collapse;margin:10px 0;font-size:13px;}
+  table th,table td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top;}
+  table th{background:var(--primary-soft);color:var(--primary);font-weight:800;}
+  table tr:nth-child(even){background:#fafcfb;}
+  ul{margin:6px 0 4px;padding-left:18px;font-size:13.5px;color:#33403a;}
+  ul li{margin:3px 0;}
+  .tag-real{color:var(--ind);font-weight:700;}
+  .tag-gap{color:#c0392b;font-weight:700;}
+  .callout{background:var(--ind-soft);border:1px solid #cfe0f5;border-radius:12px;padding:12px 14px;font-size:13px;margin:14px 0;}
+  .callout.amber{background:var(--amber-soft);border-color:#f0d9b0;color:#7a5410;}
+  .score{display:flex;align-items:center;gap:14px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:12px 0;box-shadow:var(--shadow);}
+  .ring{--p:90;width:72px;height:72px;border-radius:50%;flex:0 0 auto;
+    background:conic-gradient(var(--c) calc(var(--p)*1%), #e3e8e4 0);
+    display:flex;align-items:center;justify-content:center;position:relative;}
+  .ring::after{content:"";position:absolute;inset:9px;border-radius:50%;background:var(--card);}
+  .ring b{position:relative;z-index:1;font-size:16px;color:var(--c);}
+  .score .txt{flex:1;}
+  .score .txt b{font-size:14px;}
+  .score .txt span{font-size:12.5px;color:var(--muted);display:block;margin-top:2px;}
+  .concl{background:var(--primary-soft);border:1px solid #bfe6d6;border-radius:14px;padding:15px 17px;margin-top:24px;font-size:14px;}
+  .concl b{color:var(--primary);}
+  .src{font-size:12px;color:var(--muted);margin-top:30px;border-top:1px solid var(--line);padding-top:12px;}
+  .src a{color:var(--primary);}
+  code{background:#eef2f0;padding:1px 5px;border-radius:5px;font-size:12px;}
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+<div class="wrap">
+  <h1>TRAE 2026 初赛 · 三大工业作品精准解析 + 复原完整性评估</h1>
+  <div class="sub">初赛阶段工业/制造主题前三件：芯设备博士 · 智能检具+人形机器人 · 数据立方。调研日期 2026-08-24。「复原」指以我们的 web 全栈能力复刻其软件交付物的最高可达完整度。</div>
+
+  <!-- ===================== 作品1 ===================== -->
+  <h2><span class="idx">01</span> 芯设备博士 — 半导体 CMP 设备 AI 运维系统</h2>
+  <div class="card mfg">
+    <div class="ch"><span class="name">芯设备博士</span><span class="cat">学习工作赛道 · 初赛 · 单文件 Web App（219.6 KB）</span></div>
+    <div>
+      <span class="badge b-sim">数据为模拟</span>
+      <span class="badge b-demo">Demo 级</span>
+      <span class="badge b-real">前端可 1:1 复刻</span>
+    </div>
+    <div class="grid">
+      <div class="kv"><div class="k">形态</div><div class="v">单文件 HTML（Canvas 图表，深色工业风）</div></div>
+      <div class="kv"><div class="k">构建方式</div><div class="v">TRAE Work 多智能体对话生成，&lt;2 周</div></div>
+      <div class="kv"><div class="k">作者背景</div><div class="v">质量工程师+系统 PM+数据挖掘工程师（非专业前端）</div></div>
+      <div class="kv"><div class="k">数据真实度</div><div class="v">设备/告警数据均为模拟（非真实 fab）</div></div>
+      <div class="kv"><div class="k">AI 性质</div><div class="v">诊断闭环是前端脚本化场景演示，非真实 LLM 推理</div></div>
+    </div>
+    <h3>架构与模块（精准）</h3>
+    <table>
+      <tr><th>模块</th><th>内容</th><th>技术实现</th></tr>
+      <tr><td>实时监控中心</td><td>12 台 CMP 设备状态、OEE、MTBF 实时展示，支持钻取详情（设备编号/类型/运行状态/告警数）</td><td>设备卡片墙 + 点击弹窗钻取</td></tr>
+      <tr><td>SPC 过程质控</td><td>8 项关键制程参数（研磨速率、抛光压力、Slurry 流量、WIWNU 等）控制图 + Cpk 趋势，自动套用 Western Electric 判异规则</td><td>Canvas 控制图/直方图，判异规则引擎</td></tr>
+      <tr><td>Alarm 智能诊断</td><td>模拟闭环：输入告警场景 → 数据采集 → 异常检测 → 根因定位 → 维修决策</td><td>前端脚本化流程动画（场景预设）</td></tr>
+      <tr><td>多智能体协同</td><td>监控 / 诊断 / 执行 / 知识 四大智能体分工协作的工流可视化</td><td>状态机/步骤高亮 UI</td></tr>
+    </table>
+    <ul>
+      <li><b>图表难点</b>：控制图/直方图/雷达图/饼图全部用 Canvas 手绘；响应式靠 <code>setupCanvas()</code> 动态取容器尺寸重绘。</li>
+      <li><b>价值主张</b>：根因定位 小时级→分钟级；OEE 预期 +10%–20%；单座 12 吋厂年省数百万元级停机损失。</li>
+      <li><b>真实度边界</b>：明确自述"不是完整落地产品，是具备可行性的框架"；所有数值为预期/演示，无真实晶圆厂数据接入。</li>
+    </ul>
+    <div class="callout"><b>复原关键判断</b>：这是一件<b>纯前端、数据模拟</b>的 Web 应用。所有"难"的部分（Canvas 复杂图表、响应式、钻取、SPC 判异、智能体流程可视化）都是标准 web 技术，我们可 1:1 复刻；且原文"AI 诊断"本就是脚本演示，我们复刻同一脚本即可，还能进一步接真实 LLM API 把它从"模拟"升级为"真诊断"。</div>
+  </div>
+
+  <!-- ===================== 作品2 ===================== -->
+  <h2><span class="idx">02</span> 智能检具 + 人形机器人 — 汽车检测概念系统</h2>
+  <div class="card hw">
+    <div class="ch"><span class="name">智能检具 + 人形机器人结合</span><span class="cat">硬件交互赛道 · 初赛 · 交互式 HTML（ZIP 965.1 KB）</span></div>
+    <div>
+      <span class="badge b-con">概念/讲解页</span>
+      <span class="badge b-demo">无实机联动</span>
+      <span class="badge b-real">网页 100% 可复刻</span>
+    </div>
+    <div class="grid">
+      <div class="kv"><div class="k">形态</div><div class="v">概念讲解网页（阐述原理+降本估算）</div></div>
+      <div class="kv"><div class="k">构建方式</div><div class="v">TRAE 两步：写大纲 → 按导图编网页</div></div>
+      <div class="kv"><div class="k">作者背景</div><div class="v">头部汽车检具厂大客户经理，从业 20 年</div></div>
+      <div class="kv"><div class="k">数据真实度</div><div class="v">无真实工厂数据，仅原理说明+降本预估</div></div>
+      <div class="kv"><div class="k">物理真实度</div><div class="v">无真实机器人/检具/视觉算法，纯描述</div></div>
+    </div>
+    <h3>核心内容（精准）</h3>
+    <ul>
+      <li><b>设想</b>：人形机器人 + 汽车检测结合，核心用户为国内外汽车组装厂。</li>
+      <li><b>解决三大痛点</b>：① 人力瓶颈（检测效率受限工人）；② 数据孤岛（结果无法实时追溯）；③ 换型困难（柔性生产 vs 刚性检具）。</li>
+      <li><b>灵感</b>：蔚来率先将人形机器人投放生产基地投产。</li>
+      <li><b>交付物本质</b>：把"检测原理讲清楚、预估可实现的降本"——是一份<b>方案讲解页</b>，不是可运行检测系统。</li>
+    </ul>
+    <div class="callout amber"><b>复原关键判断</b>：这是三件里<b>软件最薄</b>的一件——本质是带交互的概念 PPT/讲解页。我们 100% 能复刻其网页交付物，还能加 3D 机器人动画、交互式降本计算器做得更炫。但它的"真实价值"（机器人实机检测、视觉算法、MES 数据闭环）<b>原文也完全没做</b>，属于物理/硬件/CV 范畴，软件无法复原，原文同样为 0%。</div>
+  </div>
+
+  <!-- ===================== 作品3 ===================== -->
+  <h2><span class="idx">03</span> 数据立方 DataCube — 工业智能调度数字引擎</h2>
+  <div class="card ind">
+    <div class="ch"><span class="name">数据立方 DataCube</span><span class="cat">社会服务赛道 · 初赛 · WinForms 桌面应用（8.0 MB ZIP，WaterCube.exe）</span></div>
+    <div>
+      <span class="badge b-real">含真实物理模型</span>
+      <span class="badge b-sim">数据为历史导入</span>
+      <span class="badge b-demo">需 Windows/.NET 运行</span>
+    </div>
+    <div class="grid">
+      <div class="kv"><div class="k">形态</div><div class="v">WinForms 桌面（C#/.NET），非 Web</div></div>
+      <div class="kv"><div class="k">构建方式</div><div class="v">TRAE Work 对话生成全部代码</div></div>
+      <div class="kv"><div class="k">作者背景</div><div class="v">工业自动化与数字孪生独立开发者，生产调度员出身</div></div>
+      <div class="kv"><div class="k">数据真实度</div><div class="v">从 SQL 载入 10min PLC 历史（576 子切片），但为离线导入</div></div>
+      <div class="kv"><div class="k">算法真实度</div><div class="v">Sqq 水力模型 + 分时电价排班 + 安全护栏，均为可复现算法</div></div>
+    </div>
+    <h3>架构与模块（精准）</h3>
+    <table>
+      <tr><th>模块</th><th>核心能力</th><th>技术本质</th></tr>
+      <tr><td>多维度数据立方</td><td>历史+未来多计划平行时空，多方案并行推演；时间轴回溯</td><td>三层架构：DataCube / TimeManager-定位模型 / Base基类+索引器</td></tr>
+      <tr><td>Sqq 水力模型</td><td>基于管网阻力系数 S 与流量 q 的平方关系 <code>h = S·q²</code> 模拟水头损失</td><td>真实物理公式，纯函数可精确复刻</td></tr>
+      <tr><td>智能排班引擎</td><td>按分时电价自动生成"低价蓄能、高价释放"最优机组方案</td><td>启发式/优化调度算法</td></tr>
+      <tr><td>安全护栏沙盘</td><td>提前预警水位/温度/压力超限，拦截危险方案</td><td>规则引擎 + 约束校验</td></tr>
+      <tr><td>数据注入链路</td><td>SQL 载入 10min 数据→注入每个子切片独立 Group</td><td>对象解析 + 时间切片系统（分钟粒度）</td></tr>
+    </table>
+    <ul>
+      <li><b>技术栈</b>：C# WinForms、TreeView 设备树、PropertyGrid 属性面板、SQL 数据加载。</li>
+      <li><b>价值主张</b>：零硬件投入激活工业数据；提前 24h 预见管网状态；经验模型化传承；预测误差宣称 ≤5%，撬动千万级利润（需真实水厂验证）。</li>
+      <li><b>真实度边界</b>：算法与物理模型是真的、可运行；但需 Windows 桌面 + .NET + 真实 PLC/SQL 历史数据才能完整体验，离线 demo 用自带数据。</li>
+    </ul>
+    <div class="callout"><b>复原关键判断</b>：这是三件里<b>逻辑最实</b>的一件——Sqq 物理模型、分时电价优化、安全护栏都是可移植的真算法。我们可把它<b>重写为 Web 应用</b>（HTML+JS），物理模型与调度逻辑 1:1 复刻，时间轴回溯/关系网联动/多方案推演用 web 时间轴 scrubber + 联动视图实现。缺口仅在原生桌面壳、实时 PLC 连接、最优性证明（三点原文 demo 同样缺失）。</div>
+  </div>
+
+  <!-- ===================== 复原完整性 ===================== -->
+  <h2>复原完整性评估（我们的最高可达度）</h2>
+  <p class="sub">评估口径：以我们的 web 全栈能力，复刻其"软件交付物"的最高完整度。物理硬件、真实工厂数据、领域最优性验证不计入（原文同样不具备）。</p>
+
+  <div class="score"><div class="ring" style="--p:95;--c:#1d8a5c"><b>95%</b></div>
+    <div class="txt"><b>芯设备博士 — 约 95%</b><span>纯前端 Web + 模拟数据，与我们能力完全匹配。可 1:1 复刻全部 UI/图表/诊断动画；还能接真实 LLM API 反超原文"模拟诊断"。唯一缺口：真实晶圆厂实时数据（原文也无）。</span></div></div>
+
+  <div class="score"><div class="ring" style="--p:100;--c:#3b6fb0"><b>100%</b></div>
+    <div class="txt"><b>智能检具+机器人 — 网页交付物 100% / 工业系统 ~0%</b><span>作为"概念讲解页"100% 可复刻（还能加 3D 动画+交互计算器）。但机器人实机检测/视觉算法/工厂 MES 闭环原文也没做，属物理硬件范畴，软件复原为 0%。</span></div></div>
+
+  <div class="score"><div class="ring" style="--p:88;--c:#9a5fb0"><b>88%</b></div>
+    <div class="txt"><b>数据立方 — 约 85–90%</b><span>全部算法与物理模型可移植到 Web（Sqq h=S·q²、分时电价优化、安全护栏、时间轴推演）。缺口：原生 WinForms 壳（我们改 Web 反而更好）、实时 PLC/SQL 连接（用 CSV 导入同限）、最优性/利润证明（需真实水厂）。</span></div></div>
+
+  <table>
+    <tr><th>维度</th><th>芯设备博士</th><th>检具+机器人</th><th>数据立方</th></tr>
+    <tr><td>前端 UI / 可视化</td><td class="tag-real">✓ 全复刻</td><td class="tag-real">✓ 全复刻(+增强)</td><td class="tag-real">✓ 全复刻</td></tr>
+    <tr><td>核心算法 / 模型</td><td class="tag-real">✓ 脚本/规则可复刻</td><td class="tag-gap">— 无算法</td><td class="tag-real">✓ 物理/优化可复刻</td></tr>
+    <tr><td>数据接入</td><td class="tag-gap">模拟(同原文)</td><td class="tag-gap">无(同原文)</td><td class="tag-gap">离线导入(同原文)</td></tr>
+    <tr><td>真实工业数据/硬件</td><td class="tag-gap">✗ 不可得</td><td class="tag-gap">✗ 不可得</td><td class="tag-gap">✗ 不可得</td></tr>
+    <tr><td>最高软件复原度</td><td><b>95%</b></td><td><b>100%(页)/0%(系统)</b></td><td><b>88%</b></td></tr>
+  </table>
+
+  <div class="concl">
+    <b>结论：</b>三件作品本质都是 <b>Demo 级</b>。它们的"价值"在于<b>作者领域经验（20 年检具、调度员出身）与概念构想</b>，不在可运行软件的工程深度。
+    <br><br>
+    <b>我们可复原其软件外壳 90%+；真正天花板是真实工业数据 / 物理硬件 / 领域验证——这三点原文同样缺失。</b>所以"复原完整性"相对"他们实际造出来的东西"很高（90%+），相对"真实生产系统"很低（与他们持平）。瓶颈从来不是我们的编码能力，而是工业现场数据的可得性。
+    <br><br>
+    <b>若真要做，建议路径：</b>先 1:1 复刻其软件交付物（芯设备博士/数据立方转 Web，检具做交互讲解页），再视情况接真实 LLM（芯设备博士诊断升级）或合成工业数据集（数据立方跑通管线）增强"真实感"，而非追求物理硬件。
+  </div>
+
+  <div class="src">
+    来源：
+    <a href="https://forum.trae.cn/t/topic/41715" target="_blank" rel="noopener">芯设备博士 forum</a> ·
+    <a href="https://forum.trae.cn/t/topic/66942" target="_blank" rel="noopener">智能检具+人形机器人 forum</a> ·
+    <a href="https://forum.trae.cn/t/topic/95437" target="_blank" rel="noopener">数据立方 forum</a> ·
+    <a href="https://www.trae.cn/ai-creativity" target="_blank" rel="noopener">TRAE 大赛官网</a>
+  </div>
+</div>
+</body>
+</html>

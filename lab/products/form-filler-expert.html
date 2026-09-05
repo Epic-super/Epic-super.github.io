@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#1D1F27">
+<meta name="app-title" content="表必过 · 企业表单填写顾问">
+<title>表必过 · 企业表单填写顾问 · 小待</title>
+<style>
+:root{
+  --bg:#1D1F27; --bg2:#23262F; --card:#2A2E3A; --card2:#313646; --line:#393E4C;
+  --txt:#E8EAF0; --mut:#9AA0B0; --acc1:#FF6B6B; --acc2:#4ECDC4; --acc3:#6C8CFF;
+  --tag:#3A3F4E; --gold:#d8b25e;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:var(--acc2);text-decoration:none}
+a:hover{text-decoration:underline}
+.wrap{max-width:920px;margin:0 auto;padding:34px 20px 90px}
+
+/* header */
+.hero{display:flex;gap:20px;align-items:center;flex-wrap:wrap;margin-bottom:26px}
+.avatar{width:84px;height:84px;border-radius:22px;background:linear-gradient(135deg,var(--acc1),var(--acc2));display:flex;align-items:center;justify-content:center;font-size:34px;font-weight:800;color:#fff;flex:none;box-shadow:0 8px 26px rgba(0,0,0,.35)}
+.hero h1{font-size:28px;font-weight:800;letter-spacing:.5px}
+.hero .alias{font-size:13px;color:var(--mut);margin-top:4px}
+.badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.badge{font-size:12px;padding:4px 11px;border-radius:20px;background:var(--tag);color:var(--mut);border:1px solid var(--line)}
+.badge.hl{color:#fff;border-color:transparent}
+.badge.hl.agent{background:var(--acc3)}
+.badge.hl.hr{background:var(--acc1)}
+.badge.hl.v{background:var(--gold)}
+
+/* section */
+.sec{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px 24px;margin-bottom:18px}
+.sec h2{font-size:17px;font-weight:700;display:flex;align-items:center;gap:9px;margin-bottom:14px}
+.sec h2 .bar{width:4px;height:18px;border-radius:2px;background:var(--acc2);flex:none}
+.lead{color:var(--mut);font-size:14.5px}
+
+/* abilities */
+.ab-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.ab{background:var(--bg2);border:1px solid var(--line);border-radius:13px;padding:15px 16px}
+.ab .n{display:flex;align-items:center;gap:9px;font-weight:700;font-size:14.5px;margin-bottom:6px}
+.ab .n .no{width:23px;height:23px;border-radius:7px;background:linear-gradient(135deg,var(--acc1),var(--acc2));color:#fff;font-size:12.5px;display:flex;align-items:center;justify-content:center;flex:none;font-weight:800}
+.ab p{font-size:12.8px;color:var(--mut);line-height:1.55}
+
+/* tags */
+.tags{display:flex;gap:8px;flex-wrap:wrap}
+.tags span{font-size:12.8px;padding:6px 13px;border-radius:10px;background:var(--bg2);border:1px solid var(--line);color:var(--txt)}
+.tags span b{color:var(--acc2);font-weight:700}
+
+/* usage */
+.steps{display:flex;flex-direction:column;gap:11px}
+.step{display:flex;gap:13px;align-items:flex-start}
+.step .sno{width:27px;height:27px;border-radius:9px;background:var(--acc3);color:#fff;font-size:13.5px;font-weight:800;display:flex;align-items:center;justify-content:center;flex:none}
+.step .stxt{font-size:14px}
+.step .stxt b{color:var(--txt)}
+.step .stxt small{display:block;color:var(--mut);font-size:12.6px;margin-top:2px}
+.prompts{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.prompt{display:flex;gap:10px;align-items:center;background:var(--bg2);border:1px solid var(--line);border-radius:11px;padding:10px 14px;font-size:13.6px}
+.prompt .q{flex:1;color:var(--txt)}
+.prompt .cp{flex:none;background:var(--card2);border:1px solid var(--line);color:var(--acc2);font-size:12px;padding:5px 12px;border-radius:8px;cursor:pointer}
+.prompt .cp:hover{border-color:var(--acc2)}
+
+/* redline */
+.redline{border-left:3px solid var(--acc1);background:var(--bg2);border-radius:0 12px 12px 0;padding:14px 18px;margin-bottom:12px}
+.redline h3{font-size:14px;color:var(--acc1);font-weight:800;margin-bottom:8px}
+.redline ul{list-style:none;display:flex;flex-direction:column;gap:6px}
+.redline li{font-size:13.2px;color:var(--mut);padding-left:16px;position:relative}
+.redline li::before{content:"";position:absolute;left:0;top:9px;width:6px;height:6px;border-radius:50%;background:var(--acc1)}
+.note{font-size:12.8px;color:var(--mut);line-height:1.7;background:var(--bg2);border:1px dashed var(--line);border-radius:11px;padding:12px 15px;margin-top:10px}
+.note b{color:var(--txt)}
+
+/* footer */
+.foot{margin-top:26px;font-size:12px;color:var(--mut);text-align:center;line-height:1.9;border-top:1px solid var(--line);padding-top:18px}
+.foot code{background:var(--bg2);border:1px solid var(--line);padding:2px 8px;border-radius:6px;font-size:11.5px}
+@media(max-width:600px){
+  .wrap{padding:24px 14px 70px}
+  .hero .avatar{width:66px;height:66px;font-size:26px;border-radius:17px}
+  .hero h1{font-size:23px}
+  .sec{padding:18px 16px}
+}
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="avatar">表</div>
+    <div>
+      <h1>表必过</h1>
+      <div class="alias">企业表单填写顾问 · Company Form Filling Advisor · 自研专家（WorkBuddy）</div>
+      <div class="badges">
+        <span class="badge hl agent">Agent 型 · 单智能体</span>
+        <span class="badge hl hr">09 · 人事行政 OperationsHR</span>
+        <span class="badge hl v">v1.0.0</span>
+        <span class="badge">花名 Biao</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <h2><span class="bar"></span>一句话介绍</h2>
+    <p class="lead">公司下发的待填文件，交给表必过：<b style="color:var(--acc2)">解析结构 → 逐项列出待填字段 → 生成填写指引 → 回填可编辑文档</b>，你只负责核对签字。</p>
+  </div>
+
+  <div class="sec">
+    <h2><span class="bar"></span>核心能力</h2>
+    <div class="ab-grid">
+      <div class="ab"><div class="n"><span class="no">1</span>文件破障读取</div><p>常规 docx / xlsx / pdf 直接解析；DRM 加密容器、文件头异常等常规库打不开的情况，自动切换 Word COM 通道读取。</p></div>
+      <div class="ab"><div class="n"><span class="no">2</span>待填字段全量提取</div><p>段落填空位、表格空单元格、复选框、签字栏、附件要求一网打尽，不遗漏任何一处必填项。</p></div>
+      <div class="ab"><div class="n"><span class="no">3</span>字段分类</div><p>A 类（客观事实，问你）/ B 类（可推导，我算）/ C 类（主观陈述，给模板），三类分别处理。</p></div>
+      <div class="ab"><div class="n"><span class="no">4</span>填写指引</div><p>按文件原顺序逐项说明，标注位置、填写口径与易错点，新表老表都看得懂。</p></div>
+      <div class="ab"><div class="n"><span class="no">5</span>可编辑文档回填</div><p>Word 自动化写入已知内容，保持原排版，签字栏留白，交付后你只需核对签字。包内自带 <code>office_read.py</code> / <code>office_fill.py</code> 工具，DRM 容器也能读、回填默认 dry-run 只动副本。</p></div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <h2><span class="bar"></span>覆盖文件类型</h2>
+    <div class="tags">
+      <span><b>人事入转调离</b> · 入职登记表 / 转正 / 调动 / 离职单 / 员工信息表</span>
+      <span><b>合规承诺</b> · 反贿赂承诺书 / 保密协议 / 利益冲突申报 / 尽职调查表</span>
+      <span><b>行政申请</b> · 用章 / 资产领用 / 出差 / 访客登记</span>
+      <span><b>财务报销</b> · 报销单 / 付款申请 / 借款单</span>
+      <span><b>假期考勤</b> · 请假单 / 加班 / 调休申请</span>
+      <span><b>绩效评估</b> · 绩效自评 / 述职报告 / 360 问卷</span>
+      <span><b>供应商合作</b> · 准入表 / 开户信息 / 资质申报</span>
+    </div>
+  </div>
+
+  <div class="sec">
+    <h2><span class="bar"></span>实战验证（2026-08-28）</h2>
+    <div class="ab-grid">
+      <div class="ab"><div class="n"><span class="no">✓</span>真实表格全量提取</div><p>两份真实公司表格实测：员工尽职调查表（1 个大表 22 行，32 道选择题 + 4 处简答）与反贿赂承诺书（DRM 加密容器，Word COM 破障读取），全部待填项逐项列出无遗漏。</p></div>
+      <div class="ab"><div class="n"><span class="no">✓</span>模板缺陷识别</div><p>实测发现 2 处模板缺陷：承诺书身份证栏错嵌在条款 3.1 下方、「法定地址」实为甲方地址——均标注提示，不擅自改动。</p></div>
+      <div class="ab"><div class="n"><span class="no">✓</span>条件题与参照法</div><p>2 道条件题（仅当前置选项勾选才填）自动标注「否则留空」；同目录已填版本仅作口径参照，不把他人信息带入。</p></div>
+      <div class="ab"><div class="n"><span class="no">✓</span>合规红线守住</div><p>全程未推荐任何选项、未评价选项安全性；A 类信息（姓名/部门/岗位/身份证号）全部留待本人提供，签字日期留白。</p></div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <h2><span class="bar"></span>如何使用</h2>
+    <div class="steps">
+      <div class="step"><span class="sno">1</span><div class="stxt"><b>打开 WorkBuddy 侧边栏「专家」</b><small>在专家中心搜索「表必过」或「企业表单填写顾问」</small></div></div>
+      <div class="step"><span class="sno">2</span><div class="stxt"><b>开始对话</b><small>把待填文件（docx / xlsx / pdf）直接拖入对话，或粘贴下面任一示例提问</small></div></div>
+      <div class="step"><span class="sno">3</span><div class="stxt"><b>核对签字</b><small>拿到填写指引 + 回填版文档后，逐项核对（客观事实务必以你本人提供为准），签字栏留白处自己签</small></div></div>
+    </div>
+    <div class="prompts">
+      <div class="prompt"><span class="q">帮我看看这份公司表格该怎么填</span><span class="cp" onclick="copyQ(this)">复制</span></div>
+      <div class="prompt"><span class="q">把这份承诺书的待填项全部列出来</span><span class="cp" onclick="copyQ(this)">复制</span></div>
+      <div class="prompt"><span class="q">帮我生成可编辑的填写版文档</span><span class="cp" onclick="copyQ(this)">复制</span></div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <h2><span class="bar"></span>合规红线</h2>
+    <div class="redline">
+      <h3>⚠ 绝不触碰的底线</h3>
+      <ul>
+        <li>绝不编造个人信息：姓名、身份证号、银行账号等一律来自本人提供</li>
+        <li>绝不代替用户做事实性承诺，只给措辞模板 + 核对要点</li>
+        <li><b style="color:var(--txt)">不引导作答倾向</b>：问卷/评估/自评类题目只做题意解释、逻辑一致性检查、文字题结构建议；不推荐选项、不评价哪个选项更安全</li>
+        <li><b style="color:var(--txt)">不帮助规避公司制度</b>：不协助隐瞒事实、美化考核结果、绕开合规审查</li>
+        <li>签名、签字日期、盖章位一律留白</li>
+        <li>原件只读，所有写入针对副本</li>
+      </ul>
+    </div>
+    <div class="note">
+      <b>关于问卷类文件：</b>尽职调查表、满意度问卷、绩效自评这类需要本人签字确认的文件，表必过<b style="color:var(--acc1)">不会</b>给出「建议选 A」「这是安全选项」一类的倾向性引导——签字内容与事实不符，后续劳动争议中反噬作答人自身；公司拿到的调查数据同时失真，评估失去意义。能提供的帮助是：题目在问什么、选项之间有何实际差异、答案之间是否自相矛盾、文字题该怎么组织。
+    </div>
+  </div>
+
+  <div class="foot">
+    自研专家包 · company-form-filler · 作者：小待<br>
+    安装目录：<code>~/.workbuddy/plugins/marketplaces/my-experts/plugins/company-form-filler/</code><br>
+    工作台 · 塔台 Tower · 2026-08
+  </div>
+</div>
+
+<script>
+function copyQ(el){
+  var q = el.parentElement.querySelector('.q').textContent;
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(q).then(function(){flash(el);},function(){fallback(q,el);});
+  }else fallback(q,el);
+}
+function fallback(q,el){
+  var ta=document.createElement('textarea'); ta.value=q; document.body.appendChild(ta);
+  ta.select(); try{document.execCommand('copy');}catch(e){}
+  document.body.removeChild(ta); flash(el);
+}
+function flash(el){
+  var old=el.textContent; el.textContent='已复制 ✓';
+  setTimeout(function(){ el.textContent=old; },1200);
+}
+</script>
+</body>
+</html>

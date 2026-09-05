@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>像素风机甲对战</title>
+    <link rel="stylesheet" href="css/style.css">
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+    <div id="game-container">
+        <canvas id="gameCanvas" width="800" height="600"></canvas>
+        <div id="ui-overlay">
+            <div id="player1-hp">
+                <div class="player-label">玩家1 (蓝)</div>
+                <div class="hp-bar">
+                    <div id="p1-hp-fill" class="hp-fill"></div>
+                </div>
+            </div>
+            <div id="player2-hp">
+                <div class="player-label">玩家2 (红)</div>
+                <div class="hp-bar">
+                    <div id="p2-hp-fill" class="hp-fill"></div>
+                </div>
+            </div>
+            <div id="game-message"></div>
+        </div>
+        <div id="controls-help">
+            <div class="control-group">
+                <h3>玩家1 (蓝色机甲)</h3>
+                <p>WASD - 移动 | J - 攻击 | K - 防御</p>
+            </div>
+            <div class="control-group">
+                <h3>玩家2 (红色机甲)</h3>
+                <p>方向键 - 移动 | 1 - 攻击 | 2 - 防御</p>
+            </div>
+        </div>
+    </div>
+    <script src="js/input.js"></script>
+    <script src="js/renderer.js"></script>
+    <script src="js/player.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

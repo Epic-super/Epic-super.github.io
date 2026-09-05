@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WorkBuddy vs Codex 对比图</title>
+<style>
+  :root{
+    --wb:#2f7cf6;      /* WorkBuddy 蓝 */
+    --cx:#16a34a;      /* Codex 绿 */
+    --bg:#0f1419;
+    --card:#1a2129;
+    --line:#2a333d;
+    --txt:#e6edf3;
+    --sub:#9aa7b2;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--txt);font-family:-apple-system,"Segoe UI","Microsoft YaHei",sans-serif;padding:32px 20px;line-height:1.6;}
+  h1{font-size:24px;font-weight:700;text-align:center;margin-bottom:6px;}
+  .src{text-align:center;color:var(--sub);font-size:12px;margin-bottom:28px;}
+  .wrap{max-width:1080px;margin:0 auto;}
+  .cards{display:flex;gap:16px;margin-bottom:28px;flex-wrap:wrap;}
+  .card{flex:1;min-width:280px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 20px;}
+  .card h3{font-size:16px;margin-bottom:4px;display:flex;align-items:center;gap:8px;}
+  .dot{width:10px;height:10px;border-radius:50%;display:inline-block;}
+  .card .role{color:var(--sub);font-size:12px;margin-bottom:10px;}
+  .card ul{list-style:none;font-size:13px;}
+  .card li{padding:5px 0;border-top:1px dashed var(--line);}
+  .card li:first-child{border-top:none;}
+  .card li b{color:var(--txt);}
+  .chart-box{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;margin-bottom:28px;display:flex;gap:24px;align-items:center;flex-wrap:wrap;justify-content:center;}
+  .legend{display:flex;gap:20px;justify-content:center;margin-bottom:10px;font-size:13px;}
+  .legend span{display:flex;align-items:center;gap:6px;}
+  .table{width:100%;border-collapse:collapse;background:var(--card);border-radius:14px;overflow:hidden;border:1px solid var(--line);font-size:13.5px;}
+  .table th,.table td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top;}
+  .table thead th{background:#222c37;font-weight:600;}
+  .table td.dim{color:var(--sub);font-weight:600;width:140px;}
+  .table td.wb{border-left:3px solid var(--wb);}
+  .table td.cx{border-left:3px solid var(--cx);}
+  .table tr:last-child td{border-bottom:none;}
+  .foot{text-align:center;color:var(--sub);font-size:11px;margin-top:18px;}
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+<div class="wrap">
+  <h1>WorkBuddy vs Codex：两条不同的 AI 工作入口</h1>
+  <div class="src">对比来源：《WorkBuddy和Codex到底选哪个？我帮你对比了一下》（阿铭linux，2026-08-05）</div>
+
+  <div class="cards">
+    <div class="card">
+      <h3><span class="dot" style="background:var(--wb)"></span>WorkBuddy</h3>
+      <div class="role">从「办公桌」出发 · 数字同事 · 成果导向</div>
+      <ul>
+        <li><b>定位</b>：全场景职场 AI 智能体桌面工作台</li>
+        <li><b>关心</b>：把办公任务变成可直接交付的文件</li>
+        <li><b>面向</b>：运营/市场/HR/行政/咨询/教育/研究/管理</li>
+        <li><b>用户门槛</b>：无需懂代码、终端、Git</li>
+        <li><b>交付</b>：一份完整报告/表格/PPT/图表</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3><span class="dot" style="background:var(--cx)"></span>Codex</h3>
+      <div class="role">从「代码仓库」出发 · 智能工作系统 · 工程化基因</div>
+      <ul>
+        <li><b>定位</b>：软件工程智能体 → 可执行环境</li>
+        <li><b>关心</b>：在真实、受控、可验证的环境完成工作</li>
+        <li><b>面向</b>：开发者 + 约 20% 非开发者（增速更快）</li>
+        <li><b>用户门槛</b>：偏向代码/脚本/自动化工具</li>
+        <li><b>交付</b>：结果 + 可重复运行的生产线（脚本+执行记录）</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="chart-box">
+    <div>
+      <div class="legend">
+        <span><span class="dot" style="background:var(--wb)"></span>WorkBuddy</span>
+        <span><span class="dot" style="background:var(--cx)"></span>Codex</span>
+      </div>
+      <svg id="radar" width="420" height="420" viewBox="0 0 420 420"></svg>
+      <div class="foot">雷达轴为基于原文观点的定性评分（0–100），用于直观对比，非精确测量</div>
+    </div>
+  </div>
+
+  <table class="table">
+    <thead>
+      <tr><th>对比维度</th><th style="border-left:3px solid var(--wb)">WorkBuddy</th><th style="border-left:3px solid var(--cx)">Codex</th></tr>
+    </thead>
+    <tbody>
+      <tr><td class="dim">起点 / 路线</td><td class="wb">职场人的办公桌 → 数字同事</td><td class="cx">程序员的代码仓库 → 智能工作操作系统</td></tr>
+      <tr><td class="dim">核心关注</td><td class="wb">最终交付物（成果导向）</td><td class="cx">完成任务所需的执行环境（工程化）</td></tr>
+      <tr><td class="dim">工作对象</td><td class="wb">办公材料 / 业务成果</td><td class="cx">代码 / 数据 / 系统 / 自动化流程</td></tr>
+      <tr><td class="dim">能力结构</td><td class="wb">文档、表格、PPT、数据分析报告</td><td class="cx">代码仓库、终端、测试、Pull Request</td></tr>
+      <tr><td class="dim">用户门槛</td><td class="wb">低，会描述目标即可</td><td class="cx">偏高，倾向代码 / 工程规范</td></tr>
+      <tr><td class="dim">交付形态</td><td class="wb">直接拿到结果文件</td><td class="cx">结果 + 可重复运行的生产线</td></tr>
+      <tr><td class="dim">可审计 / 可追溯</td><td class="wb">弱（看产物与变更）</td><td class="cx">强（执行记录、测试日志）</td></tr>
+      <tr><td class="dim">适合任务</td><td class="wb">以办公材料和业务成果为中心</td><td class="cx">数据量大、需重复执行、可追溯、跨系统连接</td></tr>
+      <tr><td class="dim">2026 趋势</td><td class="wb">向技术场景扩展（Skills/连接器/应用开发）</td><td class="cx">向报告/PPT/合同扩展（非开发者占 20%）</td></tr>
+    </tbody>
+  </table>
+
+  <div class="foot">组织视角：WorkBuddy 负责前台（面向人的业务/办公交付），Codex 负责后台（面向系统的开发/数据处理/自动化）——一个降门槛，一个提上限。</div>
+</div>
+
+<script>window.addEventListener('error',function(e){try{var v=document.getElementById('app')||document.getElementById('view')||document.body;if(!v||v.dataset.err)return;v.dataset.err='1';var s=(e.error&&e.error.stack)||e.message||'';var b=document.createElement('div');b.style.cssText='padding:16px;margin:14px;font-family:ui-monospace,monospace;font-size:13px;color:#a33;background:#fdeceb;border:1px solid #f5c6cb;border-radius:12px;line-height:1.5';b.innerHTML='<b>⚠ 页面出错了</b><br><span style="color:#555">'+(e.message||'')+'</span><pre style="white-space:pre-wrap;margin-top:8px;font-size:11px">'+(s||'').slice(0,1000)+'</pre><small style="color:#666">建议 Ctrl+Shift+R 强刷；F12 → Application → Local Storage 清本页缓存后刷新。</small>';v.insertBefore(b,v.firstChild);}catch(_){}});
+const axes = [
+  {name:"办公交付", wb:95, cx:60},
+  {name:"工程执行", wb:55, cx:95},
+  {name:"低门槛易用", wb:90, cx:45},
+  {name:"可追溯审计", wb:50, cx:92},
+  {name:"自动化上限", wb:65, cx:95},
+  {name:"人群广度", wb:92, cx:70},
+];
+const cx=210, cy=210, R=140, N=axes.length;
+const ang=i=>(-Math.PI/2)+i*2*Math.PI/N;
+const pt=(i,r)=>[cx+Math.cos(ang(i))*r, cy+Math.sin(ang(i))*r];
+let svg="";
+// grid rings
+[0.25,0.5,0.75,1].forEach(f=>{
+  let p="";
+  for(let i=0;i<N;i++){const[x,y]=pt(i,R*f);p+=(i?"L":"M")+x.toFixed(1)+" "+y.toFixed(1);}
+  p+="Z";svg+=`<path d="${p}" fill="none" stroke="#2a333d" stroke-width="1"/>`;
+});
+// axes + labels
+axes.forEach((a,i)=>{
+  const[x,y]=pt(i,R);svg+=`<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="#2a333d" stroke-width="1"/>`;
+  const[lx,ly]=pt(i,R+24);
+  svg+=`<text x="${lx}" y="${ly}" fill="#9aa7b2" font-size="12" text-anchor="middle" dominant-baseline="middle">${a.name}</text>`;
+});
+function poly(key,color){
+  let p="";
+  axes.forEach((a,i)=>{const[x,y]=pt(i,R*a[key]/100);p+=(i?"L":"M")+x.toFixed(1)+" "+y.toFixed(1);});
+  p+="Z";
+  return `<path d="${p}" fill="${color}22" stroke="${color}" stroke-width="2"/>`+
+    axes.map((a,i)=>{const[x,y]=pt(i,R*a[key]/100);return `<circle cx="${x}" cy="${y}" r="3" fill="${color}"/>`;}).join("");
+}
+svg+=poly("wb","#2f7cf6");
+svg+=poly("cx","#16a34a");
+document.getElementById("radar").innerHTML=svg;
+</script>
+</body>
+</html>

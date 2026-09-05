@@ -1,0 +1,27 @@
+# 统一指挥台 · 编辑器一致性规范（REVIEW-2026-08-26 P0-4 落地）
+# 说明：仓库 blob 统一 LF（core.autocrlf 处理工作树换行），故此处不设全局 end_of_line，
+#       只对跨平台脚本强制 LF，避免 CRLF/LF 混用再次引发整文件级三方合并冲突。
+root = true
+
+[*]
+charset = utf-8
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.{mjs,py,sh,bat}]
+end_of_line = lf
+
+[*.mjs]
+indent_style = space
+indent_size = 2
+
+[*.py]
+indent_style = space
+indent_size = 4
+
+[*.{json,jsonc}]
+indent_style = space
+indent_size = 2
+
+[*.md]
+trim_trailing_whitespace = false

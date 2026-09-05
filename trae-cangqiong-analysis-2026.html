@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>苍穹降临 精准解析 + 复原完整性</title>
+<style>
+  :root{
+    --bg:#0f1115; --card:#171a21; --card2:#1d212b; --line:#2a2f3a;
+    --txt:#e6e6e6; --mut:#9aa3b2; --acc:#4ea1ff; --acc2:#ff9500;
+    --ok:#3ecf8e; --warn:#ffb454; --bad:#ff6b6b;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    line-height:1.65;font-size:15px}
+  .wrap{max-width:1000px;margin:0 auto;padding:40px 22px 80px}
+  h1{font-size:27px;margin:0 0 6px;background:linear-gradient(90deg,#4ea1ff,#af52de);
+    -webkit-background-clip:text;background-clip:text;color:transparent}
+  .sub{color:var(--mut);margin-bottom:24px;font-size:14px}
+  .lead{background:linear-gradient(135deg,#14202e,#1b1830);border:1px solid #2c3350;
+    border-left:4px solid var(--acc);border-radius:12px;padding:16px 20px;margin:0 0 26px;font-size:14px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px 24px;margin:18px 0}
+  .card h2{margin:0 0 10px;font-size:18px;color:var(--acc)}
+  .card h2 small{color:var(--mut);font-weight:400;font-size:13px}
+  .kv{font-size:13.5px;margin:5px 0;display:flex;gap:8px}
+  .kv b{color:#fff;min-width:120px;flex-shrink:0}
+  .kv span{color:var(--mut)}
+  pre{background:#0c0e13;border:1px solid #232833;border-radius:10px;padding:14px 16px;
+    overflow-x:auto;font-size:12.5px;color:#cfe3ff;line-height:1.5;margin:12px 0}
+  .c-key{color:#ffd9a0}.c-num{color:#9ee6b0}.c-com{color:#6b7280}
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:13px}
+  th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top}
+  th{background:var(--card2);color:var(--acc);font-weight:600}
+  tr:nth-child(even) td{background:#14171e}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:720px){.grid{grid-template-columns:1fr}}
+  .box{background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:13px 15px}
+  .box h4{margin:0 0 7px;font-size:13.5px;color:var(--acc2)}
+  .box p{margin:0;font-size:13px;color:#cfd6e2}
+  .rate{margin:14px 0 4px}
+  .rate .lab{font-size:13px;color:var(--mut);margin-bottom:5px;display:flex;justify-content:space-between}
+  .bar{height:11px;background:#262b36;border-radius:6px;overflow:hidden}
+  .bar i{display:block;height:100%;border-radius:6px}
+  .ok i{background:linear-gradient(90deg,#3ecf8e,#2bbf7e)}
+  .warn i{background:linear-gradient(90deg,#ffb454,#ff9500)}
+  .bad i{background:linear-gradient(90deg,#ff8a8a,#ff5e5e)}
+  .sec{font-size:15px;color:var(--acc);margin:30px 0 10px;font-weight:700;
+    border-left:3px solid var(--acc);padding-left:10px}
+  .note{font-size:13px;color:var(--mut);margin:8px 0}
+  .verdict{background:var(--card);border:1px solid #2c3350;border-radius:12px;padding:18px 22px;margin:20px 0}
+  .verdict .big{font-size:22px;font-weight:800;color:var(--ok);margin:0 0 6px}
+  .verdict p{margin:6px 0;font-size:14px}
+  .foot{margin-top:34px;padding-top:16px;border-top:1px solid var(--line);color:var(--mut);font-size:12.5px}
+  code{background:#222733;padding:1px 6px;border-radius:5px;font-size:12.5px;color:#ffd9a0}
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+<div class="wrap">
+  <h1>苍穹降临 · 精准解析 + 复原完整性</h1>
+  <div class="sub">TRAE 2026 航空相邻作品 · 社会服务赛道 · 三维城市空中交通推演沙盒 · 源码公开</div>
+
+  <div class="lead">
+    <b>作品一句话：</b>一个单文件网页，用 Three.js 渲染 300 架未来城市飞行器，对比「无调度自由飞行」与「苍穹智能调度」两种状态的碰撞/秩序差异，用实时数据面板证明"空中交通秩序"的价值。<br>
+    <b>关键事实：</b>作者把<b>完整源码直接贴进帖子</b>，"复制保存为 <code>苍穹降临.html</code> 双击即可运行"。这是本次航空相邻四件里<b>复刻确定性最高</b>的一件——近乎"运行作者源码"。
+  </div>
+
+  <div class="sec">一、技术架构</div>
+  <div class="card">
+    <div class="grid">
+      <div class="box">
+        <h4>渲染层</h4>
+        <p>Three.js + WebGL。<code>WebGLRenderer</code>（桌面端开 antialias）<br>
+        <code>PerspectiveCamera(55, aspect, 0.1, 600)</code> 位于 <code>(58,46,58)</code><br>
+        飞行器用 <code>InstancedMesh</code>（合并几何体 <code>mergeGeometries</code>）批量渲染 300 架；城市 100 个 <code>BoxGeometry</code> 建筑（80 随机 + 20 环形），<code>MeshPhongMaterial</code> 半透明蓝。</p>
+      </div>
+      <div class="box">
+        <h4>数据层</h4>
+        <p><code>NP=300</code> 架飞行器，三维坐标 <code>(x,y,z)</code>。<br>
+        飞行高度带 <code>FY0=8 → FY1=35</code>。<br>
+        基础速度 <code>speed=0.15+rand*0.35</code>，混沌放大 <code>SMUL=18</code>。<br>
+        状态字段：<code>vx/vy/vz, falling, dead, layer, oA(角), oAV(角速度), oR/oY(航道半径/高度), bright</code> 等。</p>
+      </div>
+    </div>
+    <div class="kv"><b>视角交互</b><span>OrbitControls：拖拽旋转、滚轮缩放（<code>minDistance=25, maxDistance=150, maxPolarAngle=PI*0.48</code>），真 3D 透视。移动端 <code>touch-action:none</code> 支持触控。</span></div>
+  </div>
+
+  <div class="sec">二、两套状态机（核心逻辑）</div>
+
+  <div class="card">
+    <h2>① 混沌推演 <small>mode='chaos' · 无调度自由飞行</small></h2>
+    <div class="kv"><b>运动生成</b><span><code>updateChaos</code>：每帧加随机扰动 <code>vx += (rand-0.5)*s*0.15</code>；限速 <code>mx=speed*SMUL*1.8</code>；边界 <code>bd=FR+15=45</code> 软回弹；高度约束 <code>y&lt;FY0 上 / y&gt;FY1+5 下</code>。</span></div>
+    <div class="kv"><b>碰撞判定</b><span>空间哈希 <code>CELL=6</code>，邻域 <code>3×3×3</code> 搜索；两机 <code>dist &lt; CD(2.0)</code> 且 &gt;0.01 → 互相排斥 + <code>spawnFlash</code> 闪点 + <code>colCount++</code> + 标记 <code>bright=0.3</code>。</span></div>
+    <div class="kv"><b>建筑坠毁</b><span><code>hitBuilding(a)</code>：建筑 <code>blds</code> 含 <code>hw,hd,hh</code>，若 <code>|x-b.x|&lt;hw && |z-b.z|&lt;hd && y∈(0,hh)</code> → <code>falling=true</code>；坠落 <code>vy -= GRAV(1.2)*dt</code>，<code>y&lt;=0</code> 则 <code>dead</code> 后重生。</span></div>
+    <pre><span class="c-com">// updateChaos 片段（还原逻辑）</span>
+a.vx += (Math.random()-0.5)*s*<span class="c-num">0.15</span>;
+<span class="c-key">if</span>(a.vx &gt; mx) a.vx = mx;  <span class="c-com">// mx = speed*SMUL*1.8</span>
+<span class="c-key">if</span>(Math.abs(a.x) &gt; bd) a.vx -= Math.sign(a.x)*...; <span class="c-com">// 软回弹 bd=45</span>
+<span class="c-key">if</span>(dist &lt; CD) { repel(); colCount++; spawnFlash(); } <span class="c-com">// CD=2.0</span></pre>
+  </div>
+
+  <div class="card">
+    <h2>② 苍穹调度 <small>mode='transit' → 'order' · 三层有序航道</small></h2>
+    <div class="kv"><b>三层航道</b><span>每层 100 架，反向交替 <code>dir</code>：<br>
+      层1 <code>{y:12,  r:18, n:100, dir: 1}</code><br>
+      层2 <code>{y:21.5,r:24, n:100, dir:-1}</code><br>
+      层3 <code>{y:31,  r:30, n:100, dir: 1}</code></span></div>
+    <div class="kv"><b>激活与过渡</b><span>点「苍穹降临」→ <code>mode='transit'</code>，扩展光圈 <code>ringMesh</code> 缩放 <code>transT*40</code>；<code>transT&gt;3</code> 切 <code>mode='order'</code>，分配 <code>oR/oY/oAV/oA</code>；过渡期速度指数衰减、材质转蓝 <code>acBlue</code>。</span></div>
+    <div class="kv"><b>秩序运动</b><span><code>updateOrder</code>：每机 <code>oA += oAV*dt</code> 绕圈，目标点 <code>(cos(oA)*oR, oY, sin(oA)*oR)</code>，线性插值 <code>lerp=1-pow(0.02,dt)</code> 逼近。分层 + 不同半径/方向 → 天然零碰撞。</span></div>
+    <pre><span class="c-com">// updateOrder 片段</span>
+a.oA += a.oAV*dt;
+<span class="c-key">const</span> tx=Math.cos(a.oA)*a.oR, tz=Math.sin(a.oA)*a.oR;
+a.x += (tx-a.x)*(<span class="c-num">1</span>-Math.pow(<span class="c-num">0.02</span>,dt));
+a.z += (tz-a.z)*(<span class="c-num">1</span>-Math.pow(<span class="c-num">0.02</span>,dt)); <span class="c-com">// 逼近圆轨，零碰撞</span></pre>
+  </div>
+
+  <div class="sec">三、实时数据面板</div>
+  <div class="card">
+    <div class="kv"><b>显示</b><span>DOM <code>#stats</code>：<code>碰撞次数: X | 风险率: Y%</code>。</span></div>
+    <div class="kv"><b>碰撞次数</b><span><code>colCount</code>，混沌每次碰撞 +1，初始 0。</span></div>
+    <div class="kv"><b>实时风险率</b><span><code>calcRisk</code>：仅 chaos/transit 计算，每 <code>0.5s</code> 采样；步长 <code>step=max(1,floor(NP/RS))</code>（<code>RS=60</code>→<code>step=5</code>），邻域 <code>dist&lt;RT(14)</code> 计数 <code>close</code>；公式 <code>risk=min(100, close/total*150)</code>；秩序模式 <code>risk</code> 衰减至 0。</span></div>
+  </div>
+
+  <div class="sec">四、复原完整性评估</div>
+
+  <div class="verdict">
+    <p class="big">软件复原度：~97%（运行作者源码）/ ~92%（独立重写）</p>
+    <p>源码已公开 + 单文件 + 纯前端无后端无数据库，<b>没有任何"真实工业数据/物理硬件"依赖</b>。这意味着复刻瓶颈几乎只有一项：<b>Three.js 的加载方式</b>。</p>
+  </div>
+
+  <div class="card">
+    <div class="rate">
+      <div class="lab"><span>A. 直接运行作者源码</span><span>~97%</span></div>
+      <div class="bar ok"><i style="width:97%"></i></div>
+    </div>
+    <div class="note">作者已贴完整 HTML。唯一缺口：源码用 ES module <code>import * as THREE from 'three'</code> + addons（OrbitControls/mergeGeometries），浏览器双击需 <b>importmap 指向 three CDN</b> 或本地 three 包。① 联网：加 importmap 即可跑；② 离线：需把 three.module.js + 两个 addon 下载到本地并改路径。<b>功能 100% 一致</b>，仅部署方式需适配。</div>
+
+    <div class="rate" style="margin-top:16px">
+      <div class="lab"><span>B. 独立重写等效实现</span><span>~92%</span></div>
+      <div class="bar ok"><i style="width:92%"></i></div>
+    </div>
+    <div class="note">渲染（InstancedMesh 批量）、物理（空间哈希碰撞 + 软回弹）、建筑坠毁（重力）、三层航道调度（圆轨插值）、风险采样（邻域计数公式）——全部逻辑清晰、数值明确、可逆。重写的"功能等效版"可达 ~92%，缺口在视觉细节打磨（闪点/光圈/材质过渡）与极端性能优化。</div>
+
+    <div class="rate" style="margin-top:16px">
+      <div class="lab"><span>C. 工程真实度（相对真实 UAM 空管）</span><span>~15%</span></div>
+      <div class="bar bad"><i style="width:15%"></i></div>
+    </div>
+    <div class="note">它是<b>概念可视化论证</b>（作者原话"为三维交通纪元写下第一部交通宪法的可视化证明"），不是真实空管系统：无真实飞行力学（升力/阻力）、无真实空域结构、无真实交通流 OD、无适航/间隔标准（如 FAA UAM ConOps）。这一点作者定位即如此，<b>原文也没做</b>。所以"复刻这个作品"极易，"复刻真实航空交通管理"它本就不是。</div>
+  </div>
+
+  <div class="sec">五、复原路线图（若动手）</div>
+  <div class="card">
+    <div class="grid">
+      <div class="box">
+        <h4>Step 1 · 取源码</h4>
+        <p>从 forum 帖子 <code>topic/49556</code> 复制完整 HTML（作者已贴）。验证可直接跑。</p>
+      </div>
+      <div class="box">
+        <h4>Step 2 · 本地化 Three.js</h4>
+        <p>把 CDN import 改为本地 <code>three.module.js</code> + <code>OrbitControls</code> + <code>mergeGeometries</code>，离线可跑；或用 importmap 指向 CDN 保联网。</p>
+      </div>
+      <div class="box">
+        <h4>Step 3 · 增强方向（可选）</h4>
+        <p>真实飞行器动力学、真实城市 GIS、多机型（eVTOL/直升机/固定翼）、对接真实 UAM 空域标准；把"演示性三层圆轨"升级为可配置航道/间隔管理。</p>
+      </div>
+      <div class="box">
+        <h4>Step 4 · 集成站内</h4>
+        <p>仿 gallery 入口，在 workbench「工具」区挂卡片；或嵌套为独立演示页。纯静态，IndexedDB 无需（无持久化需求）。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">六、价值与局限</div>
+  <table>
+    <tr><th>维度</th><th>评估</th></tr>
+    <tr><td>复刻确定性</td><td>四件航空相邻里最高（源码公开、纯前端、无依赖数据）</td></tr>
+    <tr><td>科普/教学价值</td><td>高——直观论证"空中交通秩序"的必要性，适合 UAM/低空经济演示</td></tr>
+    <tr><td>工程深度</td><td>低——演示性规则（三层圆轨 + 绕圈），非真实空管</td></tr>
+    <tr><td>与"航空制造/设计"距离</td><td>远——飞行器是抽象实体，不涉气动/结构/制造</td></tr>
+    <tr><td>赛事归属</td><td>社会服务赛道初赛帖（报名帖 topic/33950）；未确认晋级复赛</td></tr>
+  </table>
+
+  <div class="foot">
+    来源：论坛初赛专区 <code>topic/49556</code>（含作者贴出的完整源码）+ 报名帖 <code>topic/33950</code>。
+    所有常量（NP=300, FY0/1, SMUL=18, CELL=6, CD=2.0, FR=30, GRAV=1.2, RT=14, RS=60, 三层航道 y/r）均来自原文代码。
+    本页是 <code>trae-aviation-2026.html</code> 的延伸子分析；纯静态，<code>file://</code> 可直接打开。
+  </div>
+</div>
+</body>
+</html>

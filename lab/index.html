@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>实验室 · Lab</title>
+<style>
+  :root{
+    --bg:#1D1F27; --bg2:#23262F; --card:#2A2E3A; --line:#393E4C;
+    --txt:#E8EAF0; --mut:#9AA0B0; --acc1:#FF6B6B; --acc2:#4ECDC4;
+    --tag:#3A3F4E;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif}
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:1080px;margin:0 auto;padding:24px 18px 80px}
+  header{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:8px}
+  .logo{width:42px;height:42px;border-radius:11px;background:linear-gradient(135deg,var(--acc1),var(--acc2));display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+  .logo svg{width:24px;height:24px;fill:#fff}
+  h1{font-size:22px;font-weight:600;letter-spacing:.5px}
+  .sub{color:var(--mut);font-size:13px;margin-top:2px}
+  .search{margin:18px 0 14px;position:relative}
+  .search svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:17px;height:17px;fill:var(--mut)}
+  .search input{width:100%;padding:13px 14px 13px 42px;background:var(--bg2);border:1px solid var(--line);border-radius:12px;color:var(--txt);font-size:15px;outline:none}
+  .search input:focus{border-color:var(--acc2)}
+  .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+  .tab{padding:8px 15px;border:1px solid var(--line);border-radius:20px;background:var(--bg2);color:var(--mut);font-size:13px;cursor:pointer;user-select:none}
+  .tab.on{background:linear-gradient(135deg,var(--acc1),var(--acc2));color:#fff;border-color:transparent}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:15px;display:flex;flex-direction:column;gap:8px;transition:.15s}
+  .card:hover{border-color:var(--acc2);transform:translateY(-2px)}
+  .card .top{display:flex;align-items:center;gap:9px}
+  .ic{width:30px;height:30px;border-radius:8px;background:var(--tag);display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+  .ic svg{width:16px;height:16px;fill:var(--acc2)}
+  .cat{margin-left:auto;font-size:11px;color:var(--mut);background:var(--tag);padding:3px 8px;border-radius:10px}
+  .card h3{font-size:15px;font-weight:600}
+  .card p{font-size:12.5px;color:var(--mut);line-height:1.55;flex:1}
+  .open{margin-top:4px;padding:9px;border:none;border-radius:9px;background:var(--bg2);color:var(--txt);font-size:13px;cursor:pointer;border:1px solid var(--line)}
+  .open:hover{background:var(--acc2);color:#10241f;border-color:transparent}
+  .open.app{background:transparent;color:var(--mut);cursor:default}
+  .open.app:hover{background:var(--bg2);color:var(--mut)}
+  /* preview modal */
+  .mask{position:fixed;inset:0;background:rgba(10,11,15,.82);display:none;z-index:50;padding:18px}
+  .mask.on{display:flex;flex-direction:column}
+  .pbar{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .pbar .pt{font-size:15px;font-weight:600;flex:1}
+  .pbar button{background:var(--card);border:1px solid var(--line);color:var(--txt);border-radius:9px;padding:7px 13px;font-size:13px;cursor:pointer}
+  .pbar button:hover{border-color:var(--acc2)}
+  .frame{flex:1;background:#fff;border-radius:12px;overflow:hidden}
+  .frame iframe{width:100%;height:100%;border:0}
+  /* dedup panel */
+  details.ded{margin-top:30px;background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+  details.ded summary{cursor:pointer;font-size:14px;font-weight:600;color:var(--acc2)}
+  details.ded ul{margin:12px 0 0;list-style:none;display:grid;gap:7px}
+  details.ded li{font-size:12.5px;color:var(--mut);line-height:1.5;padding-left:14px;position:relative}
+  details.ded li::before{content:"";position:absolute;left:0;top:7px;width:6px;height:6px;border-radius:50%;background:var(--acc1)}
+  details.ded li.keep::before{background:var(--acc2)}
+  .redline{margin-top:18px;font-size:12px;color:var(--mut);text-align:center;line-height:1.6;border-top:1px solid var(--line);padding-top:16px}
+  @media(max-width:600px){
+    .wrap{padding:18px 13px 70px}
+    h1{font-size:19px}
+    .grid{grid-template-columns:1fr 1fr}
+    .mask{padding:8px}
+  }
+  @media(max-width:400px){.grid{grid-template-columns:1fr}}
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo"><svg viewBox="0 0 24 24"><path d="M9.5 2.5l-2 5h-4l3.2 2.4L4.3 15l4.2-3 4.2 3-2.4-5.1L13.5 7.5h-4zM14 13l-1.6 4h-3.2l2.6 2 1-2.1 1 2.1 2.6-2h-3.2z"/></svg></div>
+    <div>
+      <h1>实验室 · Lab</h1>
+      <div class="sub">WorkBuddy 对话产物的精选集成 · 30 件交付物 + 知识库</div>
+    </div>
+  </header>
+
+  <div class="search">
+    <svg viewBox="0 0 24 24"><path d="M15.5 14h-.8l-.3-.3a6.5 6.5 0 10-.7.7l.3.3v.8l5 5 1.5-1.5-5-5zm-6 0A4.5 4.5 0 1114 9.5 4.5 4.5 0 019.5 14z"/></svg>
+    <input id="q" type="text" placeholder="搜索工具、报告、知识库…" oninput="render()">
+  </div>
+
+  <div class="tabs" id="tabs"></div>
+  <div class="grid" id="grid"></div>
+
+  <details class="ded">
+    <summary>去重与入选决策（点开看）</summary>
+    <ul>
+      <li class="keep">ColorHarbor：留 2026-07-31 版（58KB），剔 K3 旧副本（58.7KB）。</li>
+      <li class="keep">编程语法闯关台：留单文件 `编程语法闯关台.html`（393KB），剔 `app/` 开发多页、`deploy/` 重复副本、`.edgeone` 缓存、`_verify` Playwright 测试。</li>
+      <li class="keep">门户：`unified-hub.html` 作入口原型、`project-hub.html` 作项目看板，二者不同，均保留。</li>
+      <li class="keep">知识库 TRAE 精华：`.md` 与 `_时间线版.md` 双视图均留。</li>
+      <li>剔除：`.edgeone/assets/` 逐字节缓存副本（约 19 份）、`_verify/` 测试集、空 `.env`、`.pytest_cache`、`.ruff_cache`、开发期 `node_modules`、飞书授权二维码（临时凭证）。</li>
+      <li>全栈应用（办公自动化智能体、两款 client+server 待办应用）：仅列卡片，不塞进静态站——需各自 `npm install` 后独立部署。</li>
+      <li>总计：532 源文件 → 入选 32 静态 HTML + 10 知识库 MD + 3 全栈卡片。</li>
+    </ul>
+  </details>
+
+  <div class="redline">
+    安全红线：已核查 `.env` 仅为 dev 模板无真实密钥、`prisma/dev.db` 为测试账号、飞书二维码未入库。<br>
+    知识库 MD 含项目内部笔记，部署前请确认公开范围。
+  </div>
+</div>
+
+<div class="mask" id="mask">
+  <div class="pbar">
+    <div class="pt" id="ptitle"></div>
+    <button onclick="closePreview()">关闭</button>
+    <button onclick="openNew()">新标签打开</button>
+  </div>
+  <div class="frame"><iframe id="frame" src="about:blank" title="预览"></iframe></div>
+</div>
+
+<script>
+const CAT = {
+  tools:{label:"工具",ic:'<path d="M22 6l-6 6-2-2-2 2 4 4-1.5 1.5L9 13l-5 5 1 1 5-5 8.5-8.5L19 4z"/>'},
+  reports:{label:"报告",ic:'<path d="M5 3h9l5 5v13H5zM14 3v5h5M8 12h8M8 16h8M8 8h3"/>'},
+  hubs:{label:"门户",ic:'<path d="M4 11l8-7 8 7v9H4zM9 20v-6h6v6z"/>'},
+  apps:{label:"全栈应用",ic:'<path d="M4 6h16v12H4zM7 10l3 3-3 3M13 16h4"/>'},
+  kb:{label:"知识库",ic:'<path d="M5 4h11a3 3 0 013 3v13H8a3 3 0 01-3-3zM5 4v13a3 3 0 013 3M16 7h3"/>'}
+};
+const DATA = [
+  // tools
+  {t:"ColorHarbor 配色库",c:"tools",d:"取色、配色方案、对比度检查的配色工作台",s:"products/colorharbor.html"},
+  {t:"编程语法闯关台",c:"tools",d:"C++/Java 语法闯关游戏，多关卡进度与实战练习",s:"products/coding-arena.html"},
+  {t:"糖果小屋",c:"tools",d:"交互式展示 / 小游戏页面",s:"products/candy-house.html"},
+  {t:"个人生活工作台",c:"tools",d:"泛生活人群的集成式生活工作台：今日指数 / 记账理财 / 习惯健康 / 减脂健身 / 日程 / 待买 / 书影音",s:"products/life-hub.html"},
+  {t:"科研智能体",c:"tools",d:"研究流水线（目标→文献→方法→实验→写作→投稿）+ Semantic Scholar 文献实时检索 + AI 提示词工作台 + 写作助手 + Idea 池，与指挥台科研专区数据互通",s:"products/research-agent.html"},
+  {t:"表必过 · 企业表单填写顾问",c:"tools",d:"自研专家（WorkBuddy Agent 型）：拆解公司待填表单，逐项列出必填字段与填写口径，生成填写指引并回填可编辑文档；合规红线——不编造、不引导作答倾向",s:"products/form-filler-expert.html"},
+  {t:"习惯锻造台",c:"tools",d:"早起 / 环境整洁 / 学习习惯养成：每日打卡、全年热力图、连续天数与完成率统计、XP 等级与成就徽章激励",s:"products/habit-forge.html"},
+  {t:"对话 · 聊天",c:"tools",d:"微信风 1:1 聊天（复用原对话数据）：文本/表情/图片/文件/语音、撤回/转发/删除、深色模式、快捷回复、对方输入中、可选 WebSocket 真实连接",s:"products/chat.html"},
+  {t:"招标文档拆解",c:"tools",d:"粘贴招标文本自动提取时间/保证金/资质/评分/废标/工期/付款等关键条款，支持双文档比对、Markdown/JSON 导出",s:"products/bid-parser.html"},
+  {t:"路口理财工作台",c:"tools",d:"资产净值与收益率/配置环形图/定投复利计算/理财目标进度/交易流水/风险测评问卷",s:"products/lukou-finance.html"},
+  {t:"灯塔审计",c:"tools",d:"Lighthouse 五维分数录入（支持粘贴 JSON 自动解析）/趋势图/阈值告警/优化建议",s:"products/lighthouse-instance.html"},
+  {t:"FoloToy NFC 试验台",c:"tools",d:"FOLOTOY 八爪鱼+NFC 打卡/Token 兑换系统：Node 后端+SQLite、ESP-IDF 固件、设备端模拟；Web 试验台填 API 地址即可在线实测打卡/余额/奖品/兑换",s:"products/folotoy-nfc-passport.html"},
+  {t:"图纸清洗器",c:"tools",d:"工程图纸检索与清洗工具",s:"products/drawing-cleaner.html"},
+  {t:"文件名解析器",c:"tools",d:"批量解析图纸文件命名规则",s:"products/filename-parser.html"},
+  {t:"清洗原型",c:"tools",d:"图纸清洗流程原型验证页",s:"products/cleaning-prototype.html"},
+  {t:"空间思维训练",c:"tools",d:"3D 立方块计数练习，训练空间感知与立体几何能力（cube-01）",s:"products/spatial-cube.html"},
+  {t:"空间匹配 Mikado",c:"tools",d:"6 个旋转 3D 图形找唯一重复，升级加复杂度、60s 限时，另有 N-Back 记忆匹配模式",s:"products/spatial-match.html"},
+  {t:"心理旋转测试",c:"tools",d:"经典 Shepard-Metzler 范式：判断两个 3D 物体是旋转还是镜像，10 题记录准确率与反应时间",s:"products/spatial-rotation.html"},
+  {t:"脑力训练合集",c:"tools",d:"21 款认知训练游戏：心理旋转 / N-Back / 舒尔特方格 / Stroop / 汉诺塔等，每款 10 级难度、进度自动保存",s:"products/brain-games.html"},
+    {t:"数学之美·3D可视化",c:"tools",d:"Trae 大赛作品：输入概念 AI 秒级生成 3D 数学可视化（莫比乌斯环/洛伦兹吸引子/克莱因瓶），训练空间与数学直觉（外部在线应用）",s:"products/math-beauty.html"},
+    {t:"MetaMath-Agent·数学建模论文工作台",c:"tools",d:"Trae 大赛学习工作赛道初赛作品：把数学建模论文从手搓流程变成可编排的 AI 工作台（赛题拆解/建模/绘图/论文/文献/质检），外部在线 Demo",s:"products/metamath-agent.html"},
+    {t:"民航旅客体验深度解析平台",c:"tools",d:"上海市计算机大赛参赛项目 MVP：情感分析/LDA主题/5大业务维度/航司归因/趋势预测/问题优先级/可解释性热力图（React+ECharts 看板，需本地启动后端 :5000 全功能）",s:"products/airline-experience.html"},
+  // reports
+  {t:"AI 历史幻灯片",c:"reports",d:"AI 发展历史可视化幻灯片",s:"products/ai-history-slides.html"},
+  {t:"HDI vs GDP",c:"reports",d:"人类发展指数与 GDP 对比分析",s:"products/hdi-vs-gdp.html"},
+  {t:"伟大作品精要",c:"reports",d:"经典作品要点提炼展示",s:"products/greatwork-essence.html"},
+  {t:"标准件教学指南",c:"reports",d:"标准件工程教学指南（高工版）",s:"products/standard-parts-guide.html"},
+  {t:"NCRE 信息安全备考",c:"reports",d:"全国计算机等级考试信息安全工程师备考方案",s:"products/ncre-exam-plan.html"},
+  {t:"因子提交看板",c:"reports",d:"因子提交数据看板",s:"products/factor-dashboard.html"},
+  {t:"对比报告",c:"reports",d:"结构化对比分析报告",s:"products/compare-report.html"},
+  {t:"行级差异对比",c:"reports",d:"逐行差异高亮对比工具",s:"products/compare-rowdiff.html"},
+  {t:"WorkBuddy vs Codex",c:"reports",d:"两款智能体能力对比",s:"products/workbuddy-vs-codex.html"},
+  {t:"RFQ 公式对齐校验",c:"reports",d:"RFQ 主表公式对齐校验报告",s:"products/rfq-align-check.html"},
+  {t:"RFQ 默认公式对比",c:"reports",d:"RFQ 公式细读与默认公式对比",s:"products/rfq-default-compare.html"},
+  {t:"RFQ 逐列对比",c:"reports",d:"RFQ 主表逐列公式对比",s:"products/rfq-column-compare.html"},
+  {t:"RFQ 内容分析",c:"reports",d:"RFQ 公式内容对比分析",s:"products/rfq-content-analysis.html"},
+  {t:"RFQ 差异报告",c:"reports",d:"RFQ 公式差异与填充问题分析报告",s:"products/rfq-diff-report.html"},
+  // hubs
+  {t:"统一门户原型",c:"hubs",d:"多产品统一入口门户原型",s:"products/unified-hub.html"},
+  {t:"项目看板",c:"hubs",d:"项目聚合看板页",s:"products/project-hub.html"},
+  // apps
+  {t:"办公自动化智能体",c:"apps",d:"全栈办公自动化应用（前端 + 服务端），需独立部署",s:null},
+  {t:"全栈待办应用 A",c:"apps",d:"client + server 全栈待办（2026-07-27），需独立部署",s:null},
+  {t:"全栈待办应用 B",c:"apps",d:"client + server 全栈应用（2026-07-29），需独立部署",s:null},
+  // kb
+  {t:"AeroCAD 全项目精华沉淀",c:"kb",d:"AeroCAD 项目核心知识精华",s:"content/AeroCAD全项目精华沉淀.md"},
+  {t:"AeroCAD 研发中枢精华",c:"kb",d:"AeroCAD 研发中枢沉淀",s:"content/AeroCAD研发中枢精华沉淀.md"},
+  {t:"TRAE 账号项目精华",c:"kb",d:"TRAE 账号项目精华沉淀",s:"content/TRAE账号项目精华沉淀.md"},
+  {t:"TRAE 精华（时间线版）",c:"kb",d:"按时间线梳理的 TRAE 精华",s:"content/TRAE账号项目精华沉淀_时间线版.md"},
+  {t:"AeroCAD 知识脉络",c:"kb",d:"AeroCAD 知识脉络梳理",s:"content/AeroCAD知识脉络.md"},
+  {t:"高博航空总体规划",c:"kb",d:"高博航空智能制造总体规划路线图",s:"content/高博航空智能制造总体规划路线图.md"},
+  {t:"高博航空需求对标",c:"kb",d:"高博航空需求与对标简报",s:"content/高博航空智能制造需求与对标简报.md"},
+  {t:"航空案例集",c:"kb",d:"航空制造相关案例",s:"content/aviation_cases.md"},
+  {t:"AI 案例集",c:"kb",d:"AI 相关案例",s:"content/ai_cases.md"},
+  {t:"航空制造案例",c:"kb",d:"航空制造案例",s:"content/aviation_mfg_cases.md"}
+];
+
+let cur = "all";
+const tabsEl = document.getElementById('tabs');
+const gridEl = document.getElementById('grid');
+const qEl = document.getElementById('q');
+
+function buildTabs(){
+  const cats = ["all",...Object.keys(CAT)];
+  tabsEl.innerHTML = cats.map(c=>{
+    const lbl = c==="all"?"全部":CAT[c].label;
+    const n = c==="all"?DATA.length:DATA.filter(d=>d.c===c).length;
+    return `<div class="tab ${c===cur?'on':''}" onclick="setTab('${c}')">${lbl} <span style="opacity:.6">${n}</span></div>`;
+  }).join('');
+}
+function setTab(c){cur=c;buildTabs();render();}
+function icon(c){return `<span class="ic"><svg viewBox="0 0 24 24">${CAT[c].ic}</svg></span>`;}
+function render(){
+  const q = qEl.value.trim().toLowerCase();
+  const list = DATA.filter(d=>{
+    if(cur!=="all" && d.c!==cur) return false;
+    if(q && !(d.t.toLowerCase().includes(q) || d.d.toLowerCase().includes(q))) return false;
+    return true;
+  });
+  gridEl.innerHTML = list.map((d,i)=>{
+    const isApp = d.c==="apps";
+    const isMd = d.c==="kb";
+    const btn = isApp
+      ? `<button class="open app">需独立部署</button>`
+      : `<button class="open" onclick="openPreview('${d.s}','${d.t.replace(/'/g,"\\'")}')">${isMd?'查看文档':'打开预览'}</button>`;
+    const target = isMd ? `target="_blank" href="${d.s}"` : '';
+    return `<div class="card">
+      <div class="top">${icon(d.c)}<span class="cat">${CAT[d.c].label}</span></div>
+      <h3>${d.t}</h3>
+      <p>${d.d}</p>
+      ${isMd?`<a class="open" ${target}>查看文档</a>`:btn}
+    </div>`;
+  }).join('');
+  if(!list.length) gridEl.innerHTML = `<p style="color:var(--mut);font-size:13px">没有匹配的结果。</p>`;
+}
+let curSrc="";
+function openPreview(src,title){
+  curSrc=src;
+  document.getElementById('ptitle').textContent=title;
+  document.getElementById('frame').src=src;
+  document.getElementById('mask').classList.add('on');
+  document.body.style.overflow='hidden';
+}
+function closePreview(){
+  document.getElementById('mask').classList.remove('on');
+  document.getElementById('frame').src='about:blank';
+  document.body.style.overflow='';
+}
+function openNew(){if(curSrc) window.open(curSrc,'_blank');}
+buildTabs();render();
+</script>
+</body>
+</html>

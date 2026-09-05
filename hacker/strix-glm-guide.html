@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="app-version" content="1.0.108">
+<title>Strix + GLM-5.3-Flash：AI 渗透测试实战指南</title>
+<style>
+  :root{
+    --bg:#0f1115; --card:#171a21; --card2:#1d212b; --border:#2a2f3a;
+    --txt:#e6e8ee; --muted:#9aa3b2; --primary:#6c8cff; --primary-soft:#1b2540;
+    --green:#3ecf8e; --amber:#f5b14c; --red:#ff6b6b; --code:#0b0d12;
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f5f6f8; --card:#ffffff; --card2:#f0f2f6; --border:#e2e6ec;
+      --txt:#1a1d23; --muted:#5b6472; --primary:#3a5bff; --primary-soft:#e9efff;
+      --green:#15935b; --amber:#b9770a; --red:#d23b3b; --code:#f3f4f7;
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;
+    line-height:1.7;font-size:15px}
+  .wrap{max-width:920px;margin:0 auto;padding:32px 20px 80px}
+  header h1{font-size:26px;margin:0 0 6px;letter-spacing:.3px}
+  .sub{color:var(--muted);font-size:13.5px;margin-bottom:6px}
+  .badge{display:inline-block;background:var(--primary-soft);color:var(--primary);
+    border-radius:8px;padding:3px 10px;font-size:12px;margin:4px 6px 4px 0}
+  section{background:var(--card);border:1px solid var(--border);border-radius:14px;
+    padding:20px 22px;margin:18px 0}
+  h2{font-size:18px;margin:0 0 12px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+  h3{font-size:15px;margin:18px 0 8px;color:var(--primary)}
+  p{margin:8px 0}
+  a{color:var(--primary);text-decoration:none}
+  a:hover{text-decoration:underline}
+  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13.5px}
+  th,td{border:1px solid var(--border);padding:8px 10px;text-align:left;vertical-align:top}
+  th{background:var(--card2);font-weight:600}
+  tr:nth-child(even) td{background:rgba(127,127,127,.04)}
+  code{background:var(--code);border:1px solid var(--border);border-radius:5px;
+    padding:1px 6px;font-size:12.5px;font-family:"SFMono-Regular",Consolas,Menlo,monospace}
+  pre{background:var(--code);border:1px solid var(--border);border-radius:10px;
+    padding:14px 16px;overflow:auto;font-size:12.5px;line-height:1.55}
+  pre code{background:none;border:none;padding:0}
+  .callout{border-radius:10px;padding:11px 14px;margin:12px 0;font-size:13.5px;
+    border:1px solid;display:flex;gap:9px;align-items:flex-start}
+  .callout .ic{flex:none;font-weight:700}
+  .info{background:var(--primary-soft);border-color:#33457a;color:var(--txt)}
+  .warn{background:rgba(245,177,76,.12);border-color:#7a5a1f;color:var(--txt)}
+  .ok{background:rgba(62,207,142,.12);border-color:#1f5a3f;color:var(--txt)}
+  .pill{display:inline-block;border-radius:999px;padding:1px 9px;font-size:11.5px;font-weight:600}
+  .pill.g{background:rgba(62,207,142,.18);color:var(--green)}
+  .pill.a{background:rgba(245,177,76,.18);color:var(--amber)}
+  .pill.r{background:rgba(255,107,107,.18);color:var(--red)}
+  .links{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px;margin-top:10px}
+  .links a{display:block;background:var(--card2);border:1px solid var(--border);
+    border-radius:10px;padding:11px 13px;font-size:13.5px}
+  .links a small{display:block;color:var(--muted);font-size:11.5px;margin-top:3px}
+  .toc{columns:2;font-size:13.5px}
+  .toc a{display:block;padding:2px 0}
+  @media(max-width:560px){.toc{columns:1}}
+  .foot{color:var(--muted);font-size:12px;margin-top:24px;text-align:center}
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Strix + GLM-5.3-Flash：AI 渗透测试实战指南</h1>
+    <div class="sub">开源 AI 渗透测试工具 Strix 接入智谱 GLM-5.3-Flash 的完整配置 / 折扣 / 成本攻略</div>
+    <div>
+      <span class="badge">整理：2026-08-28</span>
+      <span class="badge">GLM-5.3-Flash 限时 5 折 · 至 2026-09-09</span>
+      <span class="badge">来源：Strix-GLM53-Flash-Guide.md</span>
+    </div>
+  </header>
+
+  <section>
+    <h2>目录</h2>
+    <div class="toc">
+      <a href="#intro">1. Strix 平台简介</a>
+      <a href="#price">2. GLM-5.3-Flash 定价</a>
+      <a href="#discount">3. 折扣获取方式</a>
+      <a href="#cost">4. 成本计算</a>
+      <a href="#config">5. 配置指南</a>
+      <a href="#notes">6. 注意事项</a>
+      <a href="#save">7. 省钱技巧</a>
+      <a href="#faq">8. 常见问题</a>
+      <a href="#links">附录：资源链接</a>
+    </div>
+  </section>
+
+  <section id="intro">
+    <h2>1. Strix 平台简介</h2>
+    <p><b>Strix</b> 是一款<b>开源 AI 渗透测试工具</b>，由 Strix AI 团队全职维护，GitHub Stars 超过 58.7k，是安全工具品类最受欢迎的项目之一。</p>
+    <h3>核心特点</h3>
+    <p>• <b>不扫描，真攻击</b>：不是传统扫描器报一堆误报，而是真的写 PoC 去验证漏洞，能打穿的才写进报告。<br>
+       • <b>一条命令启动</b>：<code>npx @usestrix/strix start -u https://your-app.com -r /path/to/repo</code><br>
+       • <b>Docker 沙箱</b>：攻击在容器内执行，不影响宿主机。<br>
+       • <b>CI/CD 友好</b>：可直接集成到 GitHub Actions，每个 PR 自动跑安全测试。<br>
+       • <b>自动修复</b>：不仅能发现漏洞，还能直接生成修复 PR。</p>
+    <h3>快速开始</h3>
+    <pre><code># 方式1：npx 一键启动
+npx @usestrix/strix setup
+npx @usestrix/strix start -u https://target-app.com -r ./your-code
+
+# 方式2：Docker
+docker run -it --rm usestrix/strix:latest start -u https://target-app.com</code></pre>
+    <h3>技术栈</h3>
+    <table>
+      <tr><th>组件</th><th>说明</th></tr>
+      <tr><td>LLM 引擎</td><td>支持 Claude、DeepSeek、GLM 等多种模型</td></tr>
+      <tr><td>Agent 框架</td><td>基于多智能体架构，自主完成渗透测试全流程</td></tr>
+      <tr><td>工具封装</td><td>内置 Nmap、SQLMap、Burp、Metasploit 等工具</td></tr>
+      <tr><td>沙箱环境</td><td>Docker 隔离，防止逃逸</td></tr>
+      <tr><td>输出格式</td><td>结构化报告 + 修复建议 + 可复用 PoC</td></tr>
+    </table>
+    <h3>基准测试表现</h3>
+    <p>• <b>XBOW 基准</b>：96.15% 成功率（104 题对 100 题）<br>
+       • <b>OWASP Juice Shop</b>：一次发现 20+ 漏洞<br>
+       • <b>c{api}tal</b>：发现 15+ 高危漏洞</p>
+  </section>
+
+  <section id="price">
+    <h2>2. GLM-5.3-Flash 定价详情</h2>
+    <table>
+      <tr><th>项目</th><th>详情</th></tr>
+      <tr><td>模型名称</td><td>GLM-5.3-Flash（320B-A18B）</td></tr>
+      <tr><td>发布方</td><td>智谱 AI（Z.ai）</td></tr>
+      <tr><td>发布日期</td><td>2026-08-26</td></tr>
+      <tr><td>许可证</td><td>MIT（开源可商用）</td></tr>
+      <tr><td>上下文窗口</td><td>1M tokens</td></tr>
+      <tr><td>Artificial Analysis 指数</td><td>57 分（与 Claude Opus 4.8 持平）</td></tr>
+      <tr><td>激活参数</td><td>18B（总参数 320B，MoE 架构）</td></tr>
+    </table>
+    <h3>定价表</h3>
+    <table>
+      <tr><th>计费项</th><th>限时折扣价（至 2026-09-09）</th><th>标准价</th></tr>
+      <tr><td>输入（缓存未命中）</td><td>$0.075/百万 ≈ ¥0.54/百万</td><td>¥0.80/百万</td></tr>
+      <tr><td>输出</td><td>$0.25/百万 ≈ ¥1.80/百万</td><td>¥2.80/百万</td></tr>
+      <tr><td>缓存命中输入</td><td>$0.015/百万 ≈ ¥0.11/百万</td><td>¥0.23/百万</td></tr>
+    </table>
+    <p class="sub">汇率参考：$1 ≈ ¥7.2</p>
+    <h3>定价对比</h3>
+    <table>
+      <tr><th>模型</th><th>输入</th><th>输出</th><th>智能指数</th><th>备注</th></tr>
+      <tr><td>GLM-5.3-Flash（折扣期）</td><td>$0.075</td><td>$0.25</td><td>57</td><td>限时 5 折</td></tr>
+      <tr><td>GLM-5.3-Flash（标准价）</td><td>$0.15</td><td>$0.50</td><td>57</td><td>9.9 后价格</td></tr>
+      <tr><td>GLM-5.3</td><td>$1.40</td><td>$4.40</td><td>60</td><td>旗舰，贵 9 倍</td></tr>
+      <tr><td>DeepSeek V4-Flash</td><td>$0.06–0.44</td><td>$0.12–1.32</td><td>~40</td><td>峰谷定价</td></tr>
+      <tr><td>Claude 3.5 Sonnet</td><td>~$3.00</td><td>~$15.00</td><td>~55</td><td>最贵</td></tr>
+    </table>
+  </section>
+
+  <section id="discount">
+    <h2>3. 折扣获取方式</h2>
+    <h3>3.1 直接 API 限时折扣 <span class="pill g">最推荐</span></h3>
+    <table>
+      <tr><th>项目</th><th>详情</th></tr>
+      <tr><td>优惠内容</td><td>输入 $0.075/百万、输出 $0.25/百万（约 5 折）</td></tr>
+      <tr><td>截止时间</td><td><b>2026 年 9 月 9 日</b></td></tr>
+      <tr><td>如何入手</td><td>直接在智谱开放平台调用，无需额外操作</td></tr>
+      <tr><td>平台地址</td><td><a href="https://open.bigmodel.cn" target="_blank" rel="noopener">open.bigmodel.cn</a> 或 <a href="https://bigmodel.cn" target="_blank" rel="noopener">bigmodel.cn</a></td></tr>
+    </table>
+    <div class="callout info"><span class="ic">i</span><div>这是 launch price，9 月 9 日后恢复标准价；无需优惠码，注册后自动享受；支持支付宝/微信充值。</div></div>
+    <h3>3.2 GLM Coding Plan 订阅（适合重度用户）</h3>
+    <table>
+      <tr><th>套餐</th><th>月费</th><th>核心权益</th></tr>
+      <tr><td>Lite</td><td>¥118/月</td><td>每 5 小时 2000 积分，每周 10000 积分</td></tr>
+      <tr><td>Pro</td><td>¥538/月</td><td>每 5 小时 12000 积分，每周 60000 积分</td></tr>
+      <tr><td>Max</td><td>¥1078/月</td><td>每 5 小时 28000 积分，每周 140000 积分</td></tr>
+    </table>
+    <p>折扣机制：非高峰时段（周一至周五 14:00–18:00 UTC+8 之外）5 折；Batch API 5 折；缓存命中输入低至 28% 积分。</p>
+    <h3>3.3 限时免费体验</h3>
+    <p>• <b>GLM-4.7-Flash</b>：长期免费开放<br>
+       • <b>GLM Coding Plan 体验卡</b>：每天限量 10000 张，可免费体验 GLM-5.3-Flash（<a href="https://bigmodel.cn/glm-coding" target="_blank" rel="noopener">bigmodel.cn/glm-coding</a> 领取）</p>
+    <h3>3.4 Batch API 五折</h3>
+    <p>批量提交任务，API 价格五折；异步执行、非实时，适合离线批量测试与定期全量巡检。</p>
+  </section>
+
+  <section id="cost">
+    <h2>4. 成本计算</h2>
+    <h3>单次测试 Token 消耗（保守按总量 100 万估算：input 60 万 + output 40 万）</h3>
+    <table>
+      <tr><th>场景</th><th>缓存命中 80%</th><th>无缓存</th></tr>
+      <tr><td>限时折扣期（9.9 前）</td><td><b>¥0.84/次</b></td><td>¥1.26/次</td></tr>
+      <tr><td>标准价（9.9 后）</td><td><b>¥1.33/次</b></td><td>¥2.00/次</td></tr>
+    </table>
+    <h3>月度总成本速查表</h3>
+    <table>
+      <tr><th>使用频率</th><th>每月次数</th><th>限时折扣期</th><th>标准价（缓存）</th><th>标准价（无缓存）</th></tr>
+      <tr><td>每周 1 次</td><td>4</td><td>¥3.4</td><td>¥5.3</td><td>¥8.0</td></tr>
+      <tr><td>每周 3 次</td><td>12</td><td>¥10.1</td><td>¥16.0</td><td>¥24.0</td></tr>
+      <tr><td>每天 1 次</td><td>30</td><td>¥25.2</td><td>¥39.9</td><td>¥60.0</td></tr>
+      <tr><td>每天 3 次</td><td>90</td><td>¥75.6</td><td>¥119.7</td><td>¥180.0</td></tr>
+      <tr><td>每个 PR 都跑</td><td>~200</td><td>¥168</td><td>¥266</td><td>¥400</td></tr>
+    </table>
+    <div class="callout ok"><span class="ic">✓</span><div>每天 1 次：GLM-5.3-Flash 限时折扣期约 <b>¥25/月</b>，标准价约 ¥40/月，远低于 Claude 3.5 Sonnet 的 ¥1050+。</div></div>
+  </section>
+
+  <section id="config">
+    <h2>5. 配置指南</h2>
+    <h3>5.1 快速上手步骤</h3>
+    <table>
+      <tr><th>步骤</th><th>操作</th></tr>
+      <tr><td>1</td><td><a href="https://bigmodel.cn" target="_blank" rel="noopener">bigmodel.cn</a> 注册账号（2 分钟）</td></tr>
+      <tr><td>2</td><td>实名认证（个人/企业，5 分钟）</td></tr>
+      <tr><td>3</td><td>创建 API Key（1 分钟）</td></tr>
+      <tr><td>4</td><td>充值（建议先充 ¥50 测试，2 分钟）</td></tr>
+      <tr><td>5</td><td>Strix 配置中修改 API Endpoint 和 Key（5 分钟）</td></tr>
+    </table>
+    <h3>5.2 Strix 配置示例</h3>
+    <pre><code># 环境变量方式
+export ANTHROPIC_API_KEY=your-zhipu-api-key
+export ANTHROPIC_BASE_URL=https://open.bigmodel.cn/api/paas/v4
+export ANTHROPIC_MODEL=glm-5.3-flash
+
+# 或直接在 Strix 配置文件里改
+npx @usestrix/strix config set api.key your-zhipu-api-key
+npx @usestrix/strix config set api.base https://open.bigmodel.cn/api/paas/v4
+npx @usestrix/strix config set api.model glm-5.3-flash</code></pre>
+    <div class="callout info"><span class="ic">i</span><div>Strix 原生支持 OpenAI 兼容接口，智谱 API 兼容 OpenAI 格式，可直接接入；模型名用 <code>glm-5.3-flash</code>，不要用 <code>glm-5.3</code>。</div></div>
+    <h3>5.3 GitHub Actions 集成</h3>
+    <pre><code>name: Security Scan with Strix
+on:
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '0 2 * * *'   # 每天凌晨 2 点（低谷时段）
+jobs:
+  strix-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run Strix
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ZHIPU_API_KEY }}
+          ANTHROPIC_BASE_URL: https://open.bigmodel.cn/api/paas/v4
+          ANTHROPIC_MODEL: glm-5.3-flash
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            npx @usestrix/strix start -u ${{ secrets.TARGET_URL }} -r . --diff-only
+          else
+            npx @usestrix/strix start -u ${{ secrets.TARGET_URL }} -r . --full-scan
+          fi</code></pre>
+  </section>
+
+  <section id="notes">
+    <h2>6. 注意事项</h2>
+    <h3>6.1 法律合规 <span class="pill r">重要</span></h3>
+    <p>• 只测自己拥有的系统或有书面授权的目标<br>
+       • 用 Docker 沙箱隔离，防止误伤生产环境<br>
+       • 保留所有测试记录和授权证明<br>
+       • <b>未授权测试属于违法行为</b></p>
+    <h3>6.2 API 使用限制</h3>
+    <p>速率限制（个人账号通常 10–50 QPS）、上下文 1M tokens（超出截断）、并发限制、API 调用费通常不退款。</p>
+    <h3>6.3 模型能力边界</h3>
+    <p>• MoE 模型：320B 总参数但仅激活 18B，复杂推理可能不如 GLM-5.3<br>
+       • 速度较慢：约 49 tokens/sec（GLM-5.3 为 86）<br>
+       • 长文本生成耗时：4000 token 约 82 秒<br>
+       • 原生支持图像/视频，但 Strix 主要基于文本交互</p>
+    <h3>6.4 成本控制</h3>
+    <p>监控 API 用量、设置预算告警、错峰运行、固定 system prompt 提高缓存命中率（可降本 20–30%）。</p>
+    <h3>6.5 技术兼容性</h3>
+    <p>Strix 兼容智谱 OpenAI 格式；建议开启流式输出降低首 token 延迟感知。</p>
+  </section>
+
+  <section id="save">
+    <h2>7. 省钱技巧</h2>
+    <p>• <b>错峰</b>：配合 Coding Plan 非高峰时段 5 折（<code>0 2 * * * npx @usestrix/strix start ...</code>）<br>
+       • <b>增量测试</b>：PR 触发 <code>--diff-only</code>（成本减半），合并后 <code>--full-scan</code><br>
+       • <b>缓存优化</b>：保持 system prompt 稳定，不要把时间戳/用户 ID 插在开头<br>
+       • <b>批量任务</b>：用 Batch API 五折<br>
+       • <b>套餐选择</b>：每周 1–2 次→按量付费；每天 1–3 次→Lite；每天 5–10 次→Pro；CI 全集成→Max</p>
+  </section>
+
+  <section id="faq">
+    <h2>8. 常见问题</h2>
+    <p><b>Q：GLM-5.3-Flash 和 DeepSeek V4-Flash 哪个好？</b><br>
+       A：GLM-5.3-Flash 综合能力更强（AA 57 vs ~40）且更便宜（限时 ¥0.8/次 vs ¥3–15/次）；但 DeepSeek 上下文更长（1.3M）、无峰谷定价。<b>推荐 GLM-5.3-Flash</b>，9.9 前最划算。</p>
+    <p><b>Q：9 月 9 日后涨价多少？</b><br>
+       A：从 $0.075/$0.25 涨到 $0.15/$0.50，<b>翻倍</b>；但仍比 DeepSeek 便宜且能力更强。</p>
+    <p><b>Q：Strix 支持智谱 API 吗？</b><br>
+       A：支持。改 <code>ANTHROPIC_BASE_URL</code> 与 <code>ANTHROPIC_API_KEY</code> 即可。</p>
+    <p><b>Q：运行失败怎么办？</b><br>
+       A：① 查 Key 有效性与余额；② 确认能访问 open.bigmodel.cn；③ <code>npx @usestrix/strix logs</code>；④ 降并发避 QPS 限制；⑤ 用 curl 测 API 连通性。</p>
+  </section>
+
+  <section id="links">
+    <h2>附录：资源链接</h2>
+    <div class="links">
+      <a href="https://github.com/usestrix/strix" target="_blank" rel="noopener">Strix GitHub<small>开源仓库 · 58.7k stars</small></a>
+      <a href="https://docs.usestrix.com" target="_blank" rel="noopener">Strix 文档<small>使用 / 配置 / CI 集成</small></a>
+      <a href="https://open.bigmodel.cn" target="_blank" rel="noopener">智谱开放平台<small>GLM-5.3-Flash API · 限时 5 折</small></a>
+      <a href="https://open.bigmodel.cn/pricing" target="_blank" rel="noopener">GLM-5.3-Flash 定价页<small>输入 $0.075 / 输出 $0.25</small></a>
+      <a href="https://bigmodel.cn/glm-coding" target="_blank" rel="noopener">GLM Coding Plan<small>订阅 / 每日体验卡</small></a>
+      <a href="https://huggingface.co/zai-org/GLM-5.3-Flash" target="_blank" rel="noopener">HuggingFace 模型页<small>zai-org/GLM-5.3-Flash · MIT</small></a>
+      <a href="https://artificialanalysis.ai/models/glm-5-3-flash" target="_blank" rel="noopener">Artificial Analysis 评测<small>AA 指数 57</small></a>
+    </div>
+  </section>
+
+  <div class="foot">本页基于 2026-08-28 公开信息整理，价格与政策可能随时变化，请以官方最新公告为准。</div>
+</div>
+</body>
+</html>

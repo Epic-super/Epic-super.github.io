@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<!-- 分享集成台 · 由统一指挥台(小待)子系统体系归仓生成；种子数据来自微信语料(夙愿的AI / 卷王群带标签分享) -->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="app-version" content="1.0.151">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>分享集成台 · 小待</title>
+<style>
+:root{
+  --bg:#1D1F27; --bg2:#191b22; --card:#25272F; --card2:#2c2f39;
+  --border:#343743; --text:#e7e9f0; --muted:#9aa1b0; --muted2:#717786;
+  --p1:#FF6B6B; --p2:#4ECDC4; --grad:linear-gradient(135deg,#FF6B6B,#4ECDC4);
+  --amber:#E0A458; --green:#37C871; --red:#FF6B6B;
+  --radius:14px; --shadow:0 4px 18px rgba(0,0,0,.28);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;
+  background:var(--bg); color:var(--text); line-height:1.6; font-size:15px;
+  padding-bottom:env(safe-area-inset-bottom);
+}
+a{color:var(--p2)}
+.wrap{max-width:1080px;margin:0 auto;padding:0 16px}
+
+/* header */
+header{
+  position:sticky;top:0;z-index:20;
+  background:rgba(29,31,39,.86);backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--border);
+}
+.hrow{display:flex;align-items:center;gap:12px;padding:12px 0;flex-wrap:wrap}
+.logo{width:38px;height:38px;border-radius:11px;background:var(--grad);display:flex;align-items:center;justify-content:center;flex:none;box-shadow:var(--shadow)}
+.htitle{font-size:18px;font-weight:800;margin:0;letter-spacing:.3px}
+.hsub{font-size:12px;color:var(--muted);margin:0}
+.hspacer{flex:1}
+.badge{font-size:12px;color:var(--muted);background:var(--card2);border:1px solid var(--border);padding:4px 10px;border-radius:20px;white-space:nowrap}
+.actbar{display:flex;gap:8px;flex-wrap:wrap;padding-bottom:10px}
+.btn{
+  display:inline-flex;align-items:center;gap:6px;cursor:pointer;
+  background:var(--card2);color:var(--text);border:1px solid var(--border);
+  padding:9px 13px;border-radius:10px;font-size:13px;font-weight:600;min-height:44px;
+  transition:.15s;
+}
+.btn:hover{border-color:var(--p2);color:#fff}
+.btn.primary{background:var(--grad);border:none;color:#16181f}
+.btn.ghost{background:transparent}
+.btn.sm{padding:7px 10px;min-height:38px;font-size:12px}
+.btn.danger:hover{border-color:var(--red);color:var(--red)}
+
+/* tabs */
+.tabs{display:flex;gap:6px;overflow-x:auto;padding:10px 0;border-bottom:1px solid var(--border);scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{
+  flex:none;cursor:pointer;padding:9px 16px;border-radius:10px;font-weight:700;font-size:14px;
+  color:var(--muted);border:1px solid transparent;white-space:nowrap;min-height:44px;display:flex;align-items:center;gap:7px;
+}
+.tab.active{color:#fff;background:var(--card2);border-color:var(--border)}
+.tab.active .dot{background:var(--grad)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--muted2)}
+
+/* sections */
+.view{display:none;padding:16px 0 40px}
+.view.active{display:block}
+.note{font-size:12.5px;color:var(--muted);margin:2px 0 14px}
+.warnbar{background:rgba(224,164,88,.12);border:1px solid rgba(224,164,88,.4);color:var(--amber);
+  padding:10px 14px;border-radius:10px;font-size:13px;margin-bottom:14px;display:none}
+
+/* form */
+.form{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:18px;box-shadow:var(--shadow)}
+.form h3{margin:0 0 12px;font-size:15px;display:flex;align-items:center;gap:8px}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fld{display:flex;flex-direction:column;gap:5px}
+.fld.full{grid-column:1 / -1}
+.fld label{font-size:12.5px;color:var(--muted);font-weight:600}
+.fld .req{color:var(--p1)}
+input,textarea,select{
+  background:var(--bg2);border:1px solid var(--border);color:var(--text);
+  border-radius:9px;padding:10px 12px;font-size:16px;font-family:inherit;width:100%;
+}
+textarea{resize:vertical;min-height:74px;line-height:1.55}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--p2)}
+.row2{display:flex;gap:12px;flex-wrap:wrap;margin-top:14px;align-items:center}
+.row2 .grow{flex:1}
+
+/* filters */
+.filt{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
+.filt input[type=search]{flex:1;min-width:180px}
+.filt select{padding:9px 10px;min-height:42px}
+.chk{display:flex;align-items:center;gap:7px;font-size:13px;color:var(--muted);cursor:pointer;user-select:none}
+.chk input{width:18px;height:18px;flex:none}
+
+/* cards */
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:15px 16px;position:relative;box-shadow:var(--shadow);border-left:4px solid var(--p2)}
+.card.ai{border-left-color:var(--p1)}
+.card.mind{border-left-color:var(--p2)}
+.ctitle{font-weight:800;font-size:15.5px;margin:0 0 8px;padding-right:26px;line-height:1.4}
+.cblock{margin:7px 0;font-size:13.5px}
+.cblock .cl{display:inline-block;font-size:11px;font-weight:700;color:var(--muted2);background:var(--bg2);
+  border:1px solid var(--border);border-radius:6px;padding:1px 7px;margin-right:7px;vertical-align:1px}
+.cblock .cv{color:var(--text);white-space:pre-wrap;word-break:break-word}
+.cmeta{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:11px;padding-top:10px;border-top:1px dashed var(--border);font-size:11.5px;color:var(--muted)}
+.tag{background:var(--card2);border:1px solid var(--border);border-radius:20px;padding:2px 9px;font-size:11px;color:var(--muted)}
+.src{font-size:11px;padding:2px 8px;border-radius:6px;font-weight:700}
+.src.seed{background:rgba(224,164,88,.16);color:var(--amber);border:1px solid rgba(224,164,88,.35)}
+.src.mine{background:rgba(55,200,113,.15);color:var(--green);border:1px solid rgba(55,200,113,.35)}
+.del{position:absolute;top:10px;right:10px;width:26px;height:26px;border-radius:7px;border:1px solid var(--border);
+  background:var(--bg2);color:var(--muted2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;line-height:1}
+.del:hover{color:var(--red);border-color:var(--red)}
+.empty{text-align:center;color:var(--muted2);padding:40px 10px;font-size:14px}
+
+/* timeline (unified) */
+.tl{position:relative;padding-left:18px}
+.tl::before{content:"";position:absolute;left:5px;top:4px;bottom:4px;width:2px;background:var(--border)}
+.tlitem{position:relative;margin-bottom:14px}
+.tlitem::before{content:"";position:absolute;left:-16px;top:6px;width:10px;height:10px;border-radius:50%;background:var(--p2);box-shadow:0 0 0 3px var(--bg)}
+.tlitem.ai::before{background:var(--p1)}
+.tlhead{display:flex;gap:8px;align-items:center;font-size:12px;color:var(--muted);margin-bottom:4px}
+.theme-pill{font-size:10.5px;font-weight:800;padding:1px 8px;border-radius:20px;color:#16181f}
+.theme-pill.ai{background:var(--p1)}
+.theme-pill.mind{background:var(--p2)}
+
+@media(max-width:760px){
+  .fgrid{grid-template-columns:1fr}
+  .cards{grid-template-columns:1fr}
+  .htitle{font-size:16px}
+  .actbar .btn{flex:1;justify-content:center}
+}
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="hrow">
+      <div class="logo">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#16181f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 4 0 0 1 16 0"/><path d="M4 12v4a8 4 0 0 0 16 0v-4"/><circle cx="12" cy="12" r="2.4" fill="#16181f" stroke="none"/></svg>
+      </div>
+      <div>
+        <h1 class="htitle">分享集成台</h1>
+        <p class="hsub">AI 应用经验 · 心理状态 · 双主题统一归档</p>
+      </div>
+      <div class="hspacer"></div>
+      <span class="badge" id="statBadge">载入中…</span>
+      <a class="btn sm ghost" href="index.html" style="text-decoration:none;min-height:38px">← 指挥台</a>
+    </div>
+    <div class="actbar">
+      <button class="btn sm" id="btnExpJson">⤓ 导出 JSON</button>
+      <button class="btn sm" id="btnExpMd">⤓ 导出 MD</button>
+      <button class="btn sm" id="btnImp">⤒ 导入恢复</button>
+      <button class="btn sm danger" id="btnClear">清空我的录入</button>
+      <input type="file" id="fileInput" accept=".json,application/json" style="display:none">
+    </div>
+    <div class="tabs" id="tabs">
+      <div class="tab active" data-v="ai"><span class="dot"></span>AI 应用经验</div>
+      <div class="tab" data-v="mind"><span class="dot"></span>心理状态</div>
+      <div class="tab" data-v="uni"><span class="dot"></span>统一输出</div>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="warnbar" id="warn30"></div>
+
+  <!-- AI 视图 -->
+  <section class="view active" id="v_ai">
+    <p class="note">主题一 · AI 应用经验分享：梳理用过的 AI 工具／平台、具体场景、挑战、经验教训、效率提升点与最佳实践。<span style="color:var(--amber)">种子库来自「夙愿的AI」社群语料。</span></p>
+    <div class="form" id="form_ai">
+      <h3><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--p1)" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>录入一条 AI 应用经验</h3>
+      <div class="fgrid" id="fgrid_ai"></div>
+      <div class="row2">
+        <input class="grow" type="text" id="ai_tags" placeholder="标签（逗号分隔，如 GPT,职场,提效）">
+        <input type="date" id="ai_date" style="width:160px">
+        <button class="btn primary" id="ai_submit">保存录入</button>
+      </div>
+    </div>
+    <div class="filt">
+      <input type="search" id="ai_search" placeholder="搜索工具 / 场景 / 经验…">
+      <select id="ai_sort"><option value="date">按日期↓</option><option value="date_a">按日期↑</option></select>
+      <label class="chk" title="勾选时只显示你通过本页面表单录入的（不含 seed 种子沉淀）"><input type="checkbox" id="ai_mineonly">仅看本页面录入</label>
+    </div>
+    <div class="cards" id="cards_ai"></div>
+  </section>
+
+  <!-- 心理状态视图 -->
+  <section class="view" id="v_mind">
+    <p class="note">主题二 · 心理状态分享：以真诚开放的语气，分享当前情绪、性格特点、价值观、近期心路、困扰压力，以及对生活与工作的看法。<span style="color:var(--amber)">种子库来自「卷王群 #日期 带标签分享」。</span></p>
+    <div class="form" id="form_mind">
+      <h3><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--p2)" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>录入一条心理状态分享</h3>
+      <div class="fgrid" id="fgrid_mind"></div>
+      <div class="row2">
+        <input class="grow" type="text" id="mind_tags" placeholder="标签（逗号分隔，如 内耗,成长,利他）">
+        <input type="date" id="mind_date" style="width:160px">
+        <button class="btn primary" id="mind_submit">保存录入</button>
+      </div>
+    </div>
+    <div class="filt">
+      <input type="search" id="mind_search" placeholder="搜索情绪 / 价值观 / 心路…">
+      <select id="mind_sort"><option value="date">按日期↓</option><option value="date_a">按日期↑</option></select>
+      <label class="chk" title="勾选时只显示你通过本页面表单录入的（不含 seed 种子沉淀）"><input type="checkbox" id="mind_mineonly">仅看本页面录入</label>
+    </div>
+    <div class="cards" id="cards_mind"></div>
+  </section>
+
+  <!-- 统一输出视图 -->
+  <section class="view" id="v_uni">
+    <p class="note">统一输出：将「AI 应用经验」与「心理状态」两主题按时间合并为一条时间线，支持筛选与整体导出，方便回顾与对外分享。</p>
+    <div class="filt">
+      <input type="search" id="uni_search" placeholder="搜索任意内容…">
+      <select id="uni_theme"><option value="all">全部主题</option><option value="ai">仅 AI 经验</option><option value="mind">仅 心理状态</option></select>
+      <select id="uni_sort"><option value="date">按日期↓</option><option value="date_a">按日期↑</option></select>
+      <label class="chk" title="勾选时只显示你通过本页面表单录入的（不含 seed 种子沉淀）"><input type="checkbox" id="uni_mineonly">仅看本页面录入</label>
+    </div>
+    <div class="tl" id="tl_uni"></div>
+  </section>
+</div>
+
+<script src="share-hub-seed.js?v=1.0.101"></script>
+<script>
+/* ============ 配置 ============ */
+var KEY = "wb_sharehub_v1";
+var AI_FIELDS = [
+  {k:"tool",     l:"工具 / 平台",         t:"input",    ph:"如 Claude / Coze / ComfyUI / Cursor"},
+  {k:"scenario", l:"应用场景",            t:"input",    ph:"用它解决了什么具体问题"},
+  {k:"challenge",l:"遇到的挑战",          t:"textarea", ph:"踩过的坑、卡住的地方"},
+  {k:"lesson",   l:"经验教训",            t:"textarea", ph:"事后复盘得到的结论"},
+  {k:"efficiency",l:"效率提升点",         t:"textarea", ph:"相比旧方式快了多少 / 省了什么"},
+  {k:"tip",      l:"实用技巧 / 最佳实践", t:"textarea", ph:"可复用的操作诀窍"}
+];
+var MIND_FIELDS = [
+  {k:"mood",    l:"当前情绪状态",      t:"input",    ph:"如 平静 / 有点焦虑但充实"},
+  {k:"trait",   l:"性格特点",          t:"input",    ph:"如 完美主义 / 好奇心强"},
+  {k:"value",   l:"价值观",            t:"textarea", ph:"你在意什么、相信什么"},
+  {k:"journey", l:"近期心路历程",      t:"textarea", ph:"这段时间的内心变化"},
+  {k:"stress",  l:"困扰 / 压力来源",   t:"textarea", ph:"什么在消耗你"},
+  {k:"view",    l:"对生活 / 工作的看法",t:"textarea", ph:"你当下的整体态度"}
+];
+
+/* ============ 状态 ============ */
+var SEED = (window.SHAREHUB_SEED && window.SHAREHUB_SEED.ai) ? window.SHAREHUB_SEED : {ai:[],mind:[],meta:{}};
+// 兜底示例：即使种子脚本加载失败，页面也不空白（满足首屏有示例）
+if(!SEED.ai.length && !SEED.mind.length){
+  SEED = {ai:[{id:"ex_ai",theme:"ai",date:"2026-08-24",source:"示例",tags:["示例"],seed:true,
+      fields:{tool:"Claude",scenario:"代码重构辅助",challenge:"",lesson:"让它先出方案再写码，质量更高",efficiency:"",tip:""},content:""}],
+    mind:[{id:"ex_mind",theme:"mind",date:"2026-08-24",source:"示例",tags:["示例"],seed:true,
+      fields:{mood:"充实",trait:"",value:"利他即利己",journey:"",stress:"",view:"本周把积压的心得沉淀下来，踏实。"},content:""}]};
+}
+var user = loadUser();
+
+function loadUser(){
+  try{ var d=JSON.parse(localStorage.getItem(KEY)); if(d&&d.ai&&d.mind) return d; }catch(e){}
+  return {ai:[],mind:[]};
+}
+function saveUser(){ localStorage.setItem(KEY, JSON.stringify(user)); }
+function today(){ var d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+function uid(pre){ return pre+"_u"+Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+function esc(s){ return (s==null?"":String(s)).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];}); }
+/* theme 落进 class 属性，按白名单收敛，避免外部种子数据拼出属性注入（P0-2） */
+var THEME_CLASS={"ai":"ai","mind":"mind","mind_other":"mind"};
+function themeCls(t){ return THEME_CLASS[t]||"mind"; }
+function merge(theme, mineOnly){ return mineOnly ? user[theme].slice() : SEED[theme].concat(user[theme]); }
+
+/* ============ 表单渲染 ============ */
+function buildForm(theme){
+  var f = theme==="ai" ? AI_FIELDS : MIND_FIELDS;
+  var html = f.map(function(x){
+    var inp = x.t==="textarea"
+      ? '<textarea data-k="'+x.k+'" placeholder="'+esc(x.ph)+'"></textarea>'
+      : '<input type="text" data-k="'+x.k+'" placeholder="'+esc(x.ph)+'">';
+    return '<div class="fld'+(x.t==="textarea"?" full":"")+'"><label>'+esc(x.l)+'</label>'+inp+'</div>';
+  }).join("");
+  document.getElementById("fgrid_"+theme).innerHTML = html;
+}
+function readForm(theme){
+  var f = theme==="ai" ? AI_FIELDS : MIND_FIELDS;
+  var fields={}, content=[];
+  f.forEach(function(x){
+    var el=document.querySelector("#fgrid_"+theme+' [data-k="'+x.k+'"]');
+    var v=(el?el.value:"").trim(); fields[x.k]=v; if(v) content.push(v);
+  });
+  return {fields:fields, content:content.join("\n\n")};
+}
+
+/* ============ 卡片渲染 ============ */
+function firstLine(s){ s=(s||"").split("\n")[0]; return s.length>60?s.slice(0,60)+"…":s; }
+function headline(e){
+  if(!e || typeof e!=="object") return "";
+  var f=(e.fields&&typeof e.fields==="object")?e.fields:{};
+  if(e.theme==="ai") return f.tool || f.scenario || firstLine(e.content) || "AI 经验";
+  return f.mood || f.trait || firstLine(e.content) || "心理状态";
+}
+function blocksOf(e){
+  var out=[];
+  if(!e || typeof e!=="object") return out;
+  if(!e.fields || typeof e.fields!=="object") e.fields={};  // 防御：旧数据缺 fields 不崩
+  if(e.content && e.content.trim()){
+    var c = e.content.trim();
+    var hl = (headline(e)||"").trim();
+    // 去重：content 首行 == headline（常见于种子：title+"\n"+des，ctitle 已展示 title）则跳过首行
+    if(hl && c.split("\n")[0].trim() === hl){
+      c = c.split("\n").slice(1).join("\n").trim();
+    }
+    if(c) out.push({l:null,v:c});
+  }
+  var f = e.theme==="ai"?AI_FIELDS:MIND_FIELDS;
+  f.forEach(function(x){
+    var v=e.fields[x.k];
+    if(v && v.trim() && !(e.content && e.content.indexOf(v.trim())>=0)) out.push({l:x.l,v:v});
+  });
+  return out;
+}
+function cardHTML(e){
+  var blocks = blocksOf(e).map(function(b){
+    return '<div class="cblock">'+(b.l?'<span class="cl">'+esc(b.l)+'</span>':'')+'<span class="cv">'+esc(b.v)+'</span></div>';
+  }).join("");
+  var tags = (e.tags||[]).map(function(t){return '<span class="tag">'+esc(t)+'</span>';}).join("");
+  var srcCls = e.seed?"seed":"mine";
+  // 群来源缩写（e.grp 来自归仓脚本 session 字段）
+  var grpMap={"超绝卷王群":"卷王群","超绝卷王分所502":"分所502","文件传输助手":"文件传输"};
+  var grpShort=(e.grp&&grpMap[e.grp])||e.grp||"";
+  var srcTxt = e.seed?("种子·"+esc(e.source||"语料")+(grpShort?"·"+esc(grpShort):"")):"我的录入";
+  var del = e.seed?"":'<button class="del" title="删除" data-del="'+esc(e.id)+'">✕</button>';
+  return '<div class="card '+e.theme+'">'+del+
+    '<div class="ctitle">'+esc(headline(e))+'</div>'+
+    blocks+
+    '<div class="cmeta">'+tags+
+      '<span class="src '+srcCls+'">'+srcTxt+'</span>'+
+      (e.date?'<span>'+esc(e.date)+'</span>':'')+
+    '</div></div>';
+}
+
+/* ============ 列表渲染 ============ */
+function applyFilt(list, q){
+  q=(q||"").trim().toLowerCase();
+  if(!q) return list;
+  return list.filter(function(e){
+    var hay = (e.content||"")+" "+(e.fields?Object.values(e.fields).join(" "):"")+" "+(e.tags||[]).join(" ")+" "+(e.source||"");
+    return hay.toLowerCase().indexOf(q)>=0;
+  });
+}
+function sortList(list, mode){
+  var a = mode==="date_a"?1:-1;
+  return list.slice().sort(function(x,y){
+    var dx=x.date||"0000", dy=y.date||"0000";
+    if(dx===dy) return 0; return dx<dy?-a:a;
+  });
+}
+var PAGI_SIZE=60;
+var pagi={ai:{page:1,all:[]}, mind:{page:1,all:[]}};
+function renderTheme(theme){
+  var mineOnly = document.getElementById(theme+"_mineonly").checked;
+  var q = document.getElementById(theme+"_search").value;
+  var sort = document.getElementById(theme+"_sort").value;
+  var list = sortList(applyFilt(merge(theme,mineOnly), q), sort);
+  var box = document.getElementById("cards_"+theme);
+  if(!list.length){
+    pagi[theme]={page:1,all:[]};
+    var seedN=(SEED[theme]||[]).length, userN=user[theme].length;
+    if(mineOnly && userN===0 && seedN>0){
+      box.innerHTML='<div class="empty" style="padding:30px 14px"><p style="margin:0 0 6px;font-weight:700;color:var(--text)">当前是「仅看本页面录入」模式</p><p style="margin:0 0 6px;font-size:13px;color:var(--muted)">你还没通过表单录入任何'+(theme==="ai"?"AI 经验":"心理状态")+'内容，种子库有 <b style="color:var(--p1)">'+seedN+'</b> 条沉淀可看。</p><p style="margin:14px 0 0"><button class="btn primary" data-showseed="'+theme+'">显示 '+seedN+' 条种子沉淀 ↗</button></p></div>';
+    } else if(!mineOnly && seedN===0 && userN===0){
+      box.innerHTML='<div class="empty">暂无内容。点上方录入即可添加。</div>';
+    } else {
+      box.innerHTML='<div class="empty">当前筛选无匹配项。试试清空搜索或切换排序。</div>';
+    }
+    return;
+  }
+  // 分页：只渲前 page*60 条 + 加载更多按钮
+  pagi[theme]={page:pagi[theme].page||1, all:list};
+  var p=pagi[theme].page;
+  var slice=list.slice(0, p*PAGI_SIZE);
+  var html=slice.map(cardHTML).join("");
+  if(list.length > slice.length){
+    var remain=list.length-slice.length;
+    html += '<div class="loadmore" style="text-align:center;padding:18px 0;margin-top:8px"><button class="btn primary" data-loadmore="'+theme+'">加载更多（剩 '+remain+' / 共 '+list.length+' 条）</button></div>';
+  } else {
+    html += '<div class="loadmore-end" style="text-align:center;padding:14px 0;color:var(--muted);font-size:12px">— 已显示全部 '+list.length+' 条 —</div>';
+  }
+  box.innerHTML = html;
+}
+function renderUni(){
+  var mineOnly=document.getElementById("uni_mineonly").checked;
+  var q=document.getElementById("uni_search").value;
+  var th=document.getElementById("uni_theme").value;
+  var sort=document.getElementById("uni_sort").value;
+  var list=[];
+  if(th!=="mind") list=list.concat(merge("ai",mineOnly));
+  if(th!=="ai") {
+    list=list.concat(merge("mind",mineOnly));
+    // 群友分享（mind_other）也并入时间线，让全局视图完整
+    var others = (SEED.mind_other||[]).slice();
+    list=list.concat(others);
+  }
+  list=applyFilt(list,q);
+  list=sortList(list,sort);
+  var box=document.getElementById("tl_uni");
+  if(!list.length){ box.innerHTML='<div class="empty">暂无内容。</div>'; return; }
+  box.innerHTML=list.map(function(e){
+    var blocks=blocksOf(e);
+    var body = blocks.length? blocks.map(function(b){
+      return '<div class="cblock">'+(b.l?'<span class="cl">'+esc(b.l)+'</span>':'')+'<span class="cv">'+esc(b.v)+'</span></div>';
+    }).join("") : '<div class="cblock"><span class="cv">'+(esc(e.content)||"(空)")+'</span></div>';
+    var tags=(e.tags||[]).map(function(t){return '<span class="tag">'+esc(t)+'</span>';}).join("");
+    var srcCls=e.seed?"seed":"mine";
+    // mind_other 用 mind pill（仍是心理类）；source 显示实际发言人。theme 走白名单，不直接拼 class
+    var themePill = themeCls(e.theme);
+    var grpMap={"超绝卷王群":"卷王群","超绝卷王分所502":"分所502","文件传输助手":"文件传输"};
+    var grpShort=(e.grp&&grpMap[e.grp])||e.grp||"";
+    return '<div class="tlitem '+themePill+'"><div class="tlhead">'+
+      '<span class="theme-pill '+themePill+'">'+(themePill==="ai"?"AI 经验":"心理状态")+'</span>'+
+      (e.date?'<span>'+esc(e.date)+'</span>':'')+
+      '<span class="src '+srcCls+'">'+(e.seed?("种子·"+esc(e.source||"")+(grpShort?"·"+esc(grpShort):"")):"我的录入")+'</span>'+
+      tags+'</div>'+body+'</div>';
+  }).join("");
+}
+
+/* ============ 录入 ============ */
+function submit(theme){
+  var r=readForm(theme);
+  var tags=document.getElementById(theme==="ai"?"ai_tags":"mind_tags").value.split(/[,，]/).map(function(s){return s.trim();}).filter(Boolean);
+  var date=document.getElementById(theme==="ai"?"ai_date":"mind_date").value||today();
+  if(!r.content && !tags.length){ alert("至少填一项内容或加个标签吧～"); return; }
+  user[theme].unshift({id:uid(theme),theme:theme,date:date,source:"我的录入",tags:tags,fields:r.fields,content:r.content,seed:false,createdAt:Date.now()});
+  saveUser();
+  // 清空表单
+  document.querySelectorAll("#fgrid_"+theme+" [data-k]").forEach(function(el){el.value="";});
+  document.getElementById(theme==="ai"?"ai_tags":"mind_tags").value="";
+  document.getElementById(theme==="ai"?"ai_date":"mind_date").value=today();
+  renderTheme(theme); renderUni(); refreshStat();
+  toast("已保存 ✓");
+}
+
+/* ============ 删除 / 一键显示种子 / 加载更多 ============ */
+document.addEventListener("click",function(ev){
+  // 加载更多（分页）
+  var lb=ev.target.closest("[data-loadmore]");
+  if(lb){
+    var lt=lb.getAttribute("data-loadmore");
+    pagi[lt].page++;
+    renderTheme(lt);
+    return;
+  }
+  // 一键显示种子（取消勾选 mineOnly + 重渲染）
+  var sb=ev.target.closest("[data-showseed]");
+  if(sb){
+    var t=sb.getAttribute("data-showseed");
+    var cb=document.getElementById(t+"_mineonly");
+    if(cb){ cb.checked=false; }
+    pagi[t]={page:1,all:[]};  // 重置分页
+    renderTheme(t); renderUni(); refreshStat();
+    toast("已显示种子沉淀 ✓");
+    return;
+  }
+  // 删除
+  var b=ev.target.closest("[data-del]"); if(!b) return;
+  var id=b.getAttribute("data-del");
+  ["ai","mind"].forEach(function(t){
+    var i=user[t].findIndex(function(e){return e.id===id;});
+    if(i>=0){ user[t].splice(i,1); saveUser(); }
+  });
+  renderTheme("ai"); renderTheme("mind"); renderUni(); refreshStat();
+});
+
+/* ============ 导出 / 导入 ============ */
+function exportData(){
+  var data={ai:SEED.ai.concat(user.ai), mind:SEED.mind.concat(user.mind), mind_other:SEED.mind_other||[], meta:{exportedAt:today(), note:"分享集成台导出"}};
+  return data;
+}
+function download(name, text, type){
+  var blob=new Blob([text],{type:type||"application/json;charset=utf-8"});
+  var a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=name; a.click();
+  setTimeout(function(){URL.revokeObjectURL(a.href);},2000);
+}
+function exportJSON(){ download("share-hub-"+today()+".json", JSON.stringify(exportData(),null,2)); toast("已导出 JSON ✓"); }
+function exportMD(){
+  var d=exportData(); var md="# 分享集成台 · 导出 ("+today()+")\n\n";
+  md+="## 一、AI 应用经验分享（"+d.ai.length+" 条）\n\n";
+  d.ai.forEach(function(e,i){ md+="### "+(i+1)+". "+(headline(e))+"  "+(e.date?"_"+e.date+"_":"")+"\n"; md+=blocksOf(e).map(function(b){return (b.l?"**"+b.l+"**：":"")+b.v;}).join("\n\n")+"\n\n"; });
+  md+="## 二、心理状态分享（"+d.mind.length+" 条）\n\n";
+  d.mind.forEach(function(e,i){ md+="### "+(i+1)+". "+(headline(e))+"  "+(e.date?"_"+e.date+"_":"")+"\n"; md+=blocksOf(e).map(function(b){return (b.l?"**"+b.l+"**：":"")+b.v;}).join("\n\n")+"\n\n"; });
+  download("share-hub-"+today()+".md", md, "text/markdown;charset=utf-8"); toast("已导出 MD ✓");
+}
+function importFile(file){
+  var r=new FileReader();
+  r.onload=function(){
+    try{
+      var d=JSON.parse(r.result);
+      var arr = Array.isArray(d)?d:(d.ai||d.mind?d:null);
+      if(!arr && !d.ai && !d.mind) throw new Error("格式不符");
+      var added=0;
+      ["ai","mind"].forEach(function(t){
+        var src = arr && Array.isArray(d) ? d.filter(function(e){return e.theme===t;}) : (d[t]||[]);
+        src.forEach(function(e){
+          if(!e || e.theme!==t) return;
+          var ne={id:uid(t),theme:t,date:e.date||today(),source:"我的录入",tags:e.tags||[],fields:e.fields||{},content:e.content||"",seed:false,createdAt:Date.now()};
+          user[t].push(ne); added++;
+        });
+      });
+      saveUser(); renderTheme("ai"); renderTheme("mind"); renderUni(); refreshStat();
+      toast("已导入 "+added+" 条 ✓");
+    }catch(err){ alert("导入失败：文件格式不正确。"); }
+  };
+  r.readAsText(file);
+}
+function clearMine(){
+  if(!confirm("确定清空你录入的内容吗？种子库（来自微信语料）不会被删除，可随时恢复显示。")) return;
+  user={ai:[],mind:[]}; saveUser(); renderTheme("ai"); renderTheme("mind"); renderUni(); refreshStat(); toast("已清空我的录入");
+}
+
+/* ============ 视图切换 ============ */
+document.getElementById("tabs").addEventListener("click",function(ev){
+  var t=ev.target.closest(".tab"); if(!t) return;
+  var v=t.getAttribute("data-v");
+  document.querySelectorAll(".tab").forEach(function(x){x.classList.remove("active");});
+  t.classList.add("active");
+  ["ai","mind","uni"].forEach(function(x){ document.getElementById("v_"+x).classList.toggle("active", x===v); });
+  // 切 Tab 重置分页（从头看）
+  if(v!=="uni"){ pagi[v]={page:1,all:[]}; }
+  if(v==="uni") renderUni(); else renderTheme(v);
+  window.scrollTo(0,0);
+});
+
+/* ============ 统计 / 提示 ============ */
+function refreshStat(){
+  var total = SEED.ai.length+SEED.mind.length+user.ai.length+user.mind.length;
+  var mine = user.ai.length+user.mind.length;
+  var other = (SEED.mind_other||[]).length;
+  document.getElementById("statBadge").textContent = "AI "+ (SEED.ai.length+user.ai.length) +" · 心理 "+ (SEED.mind.length+user.mind.length) +" · 我的 "+mine+(other?(" · 群友留底 "+other):"");
+  var w=document.getElementById("warn30");
+  if(mine>=30){ w.style.display="block"; w.textContent="⚠️ 你已录入 "+mine+" 条内容，建议点右上角「导出 JSON」做备份，避免意外丢失。"; }
+  else w.style.display="none";
+}
+
+/* ============ toast ============ */
+function toast(msg){
+  var t=document.createElement("div");
+  t.textContent=msg; t.style.cssText="position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:var(--p2);color:#16181f;padding:9px 18px;border-radius:24px;font-weight:800;font-size:14px;z-index:99;box-shadow:var(--shadow)";
+  document.body.appendChild(t); setTimeout(function(){t.remove();},1600);
+}
+
+/* ============ 绑定 ============ */
+function bind(){
+  buildForm("ai"); buildForm("mind");
+  document.getElementById("ai_date").value=today();
+  document.getElementById("mind_date").value=today();
+  document.getElementById("ai_submit").onclick=function(){submit("ai");};
+  document.getElementById("mind_submit").onclick=function(){submit("mind");};
+  ["ai_search","ai_sort","ai_mineonly"].forEach(function(id){document.getElementById(id).addEventListener("input",function(){renderTheme("ai");});});
+  ["mind_search","mind_sort","mind_mineonly"].forEach(function(id){document.getElementById(id).addEventListener("input",function(){renderTheme("mind");});});
+  ["uni_search","uni_theme","uni_sort","uni_mineonly"].forEach(function(id){document.getElementById(id).addEventListener("input",function(){renderUni();});});
+  document.getElementById("btnExpJson").onclick=exportJSON;
+  document.getElementById("btnExpMd").onclick=exportMD;
+  document.getElementById("btnImp").onclick=function(){document.getElementById("fileInput").click();};
+  document.getElementById("fileInput").onchange=function(e){ if(e.target.files[0]) importFile(e.target.files[0]); e.target.value=""; };
+  document.getElementById("btnClear").onclick=clearMine;
+}
+bind();
+try {
+  if(!window.SHAREHUB_SEED || !window.SHAREHUB_SEED.ai){
+    // 公开站（sanitize 构建期注入 window.__WB_PUBLIC__）不含 5.3MB 种子数据，属预期行为。
+    // 此前两种情况共用"种子数据加载失败"文案，公开站看着像站点坏了；现分开表述。
+    if(window.__WB_PUBLIC__===true){
+      document.body.innerHTML='<div style="padding:40px 20px;text-align:center;color:#e8efe9;background:#181d1a;min-height:100vh"><h2>资料库 · 仅本地环境可用</h2><p style="color:#a8b5ad;margin:12px 0">本页依赖的种子数据未随公开站发布（体积与隐私考量）。</p><p style="color:#a8b5ad;margin:12px 0;font-size:13px">在<b>本地塔台工作台</b>打开即可完整使用。</p><p style="margin:20px 0"><a href="index.html" style="color:#5fe2a8">← 返回工作台首页</a></p></div>';
+    } else {
+      document.body.innerHTML='<div style="padding:40px 20px;text-align:center;color:#e8efe9;background:#181d1a;min-height:100vh"><h2>⚠️ 种子数据加载失败</h2><p style="color:#a8b5ad;margin:12px 0">share-hub-seed.js 未正确加载（网络/缓存/版本不匹配）。</p><p style="color:#a8b5ad;margin:12px 0;font-size:13px">请按 <b>Ctrl+Shift+R</b> 强制刷新，或访问 <a href="share-hub-seed.js?v=1.0.101" style="color:#5fe2a8">share-hub-seed.js?v=1.0.101</a> 确认 200。</p></div>';
+    }
+    throw new Error("SEED missing");
+  }
+  renderTheme("ai"); renderTheme("mind"); refreshStat();
+} catch(e){
+  if(e.message!=="SEED missing") {
+    console.error("[share-hub] init failed:", e);
+    document.body.insertAdjacentHTML("afterbegin",'<div style="padding:20px;background:#3a1a1a;color:#ff9b8a;border-radius:8px;margin:12px">⚠️ 初始化失败：'+ esc(e.message||"未知") +'。请 Ctrl+Shift+R 强刷</div>');
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,84 @@
+/* ===========================================================
+   桌宠浮层样式 · 自包含，复用工作台 CSS 变量
+   暗色/浅色自动适配；不触碰主 IIFE 样式
+   =========================================================== */
+#petWidget{
+  position:fixed; right:16px; bottom:78px; z-index:60;
+  width:264px; max-width:calc(100vw - 32px);
+  background:var(--card); color:var(--text);
+  border:1px solid var(--border); border-radius:18px;
+  box-shadow:0 12px 34px -12px rgba(16,24,40,.28);
+  font-family:inherit; user-select:none; overflow:hidden;
+  transition:opacity .2s ease, transform .2s ease;
+}
+#petWidget[hidden]{display:none;}
+#petWidget.dragging{transition:none;}
+
+.pet-header{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:9px 12px; cursor:grab; color:#fff;
+  background:linear-gradient(135deg,#FF6B6B 0%,#4ECDC4 100%);
+}
+.pet-header:active{cursor:grabbing;}
+.pet-title{font-size:13px; font-weight:700; letter-spacing:.3px;}
+.pet-actions{display:flex; gap:6px;}
+.pet-btn{
+  border:0; border-radius:9px; padding:4px 9px; font-size:12px; font-weight:600;
+  cursor:pointer; background:rgba(255,255,255,.22); color:#fff; font-family:inherit;
+  transition:background .15s;
+}
+.pet-btn:hover{background:rgba(255,255,255,.34);}
+.pet-btn.on{background:#fff; color:#0f9d77;}
+
+.pet-stage{position:relative; padding:14px 12px 4px; display:flex; flex-direction:column; align-items:center;}
+.pet-avatar{
+  width:122px; height:122px;
+  animation:petFloat 3.4s ease-in-out infinite;
+  transform-origin:center bottom;
+}
+@keyframes petFloat{
+  0%,100%{transform:translateY(0) rotate(-1.2deg);}
+  50%{transform:translateY(-7px) rotate(1.2deg);}
+}
+#petWidget.speaking .pet-avatar{
+  animation:petFloat 3.4s ease-in-out infinite, petTalk .4s ease-in-out 2;
+}
+@keyframes petTalk{
+  0%,100%{transform:translateY(0) scale(1);}
+  50%{transform:translateY(-3px) scale(1.05);}
+}
+.pet-bubble{
+  position:relative; margin-top:10px; max-width:100%;
+  background:var(--bg); border:1px solid var(--border); border-radius:12px;
+  padding:8px 11px; font-size:12.5px; line-height:1.5; text-align:center;
+  min-height:20px; word-break:break-word;
+}
+.pet-bubble[hidden]{display:none;}
+.pet-bubble::after{
+  content:""; position:absolute; top:-7px; left:50%; transform:translateX(-50%);
+  border:7px solid transparent; border-bottom-color:var(--border);
+}
+
+.pet-cam{position:relative; padding:6px 12px 12px;}
+.pet-cam[hidden]{display:none;}
+#petVideo{
+  width:100%; border-radius:12px; background:#0b0e0c; display:block;
+  aspect-ratio:4/3; object-fit:cover; transform:scaleX(-1);
+}
+.pet-cam-tip{font-size:11px; color:var(--muted); text-align:center; margin-top:6px; line-height:1.45;}
+.pet-mood{font-size:12px; color:var(--primary); font-weight:700; text-align:center; margin-top:5px;}
+
+/* 表情组：默认隐藏，按 data-mood 切换可见 */
+.pet-face{display:none;}
+.pet-body[data-mood="neutral"]  .face-neutral {display:block;}
+.pet-body[data-mood="happy"]    .face-happy   {display:block;}
+.pet-body[data-mood="sad"]      .face-sad     {display:block;}
+.pet-body[data-mood="angry"]    .face-angry   {display:block;}
+.pet-body[data-mood="surprised"].face-surprised{display:block;}
+.pet-body[data-mood="fearful"]  .face-fearful {display:block;}
+.pet-body[data-mood="disgusted"].face-disgusted{display:block;}
+
+/* 小屏适配 */
+@media (max-width:420px){
+  #petWidget{right:10px; bottom:72px; width:min(264px,calc(100vw - 20px));}
+}

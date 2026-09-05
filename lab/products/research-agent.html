@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#14161f">
+<title>科研智能体 · 小待</title>
+<style>
+:root{
+  --bg:#f4f5fa; --panel:#ffffff; --panel2:#f7f8fc; --ink:#23263a; --muted:#8a8fa6;
+  --line:#e4e6f0; --line2:#eef0f7; --acc1:#5b5bd6; --acc1-soft:#ecebfb; --acc1-ink:#4545b8;
+  --acc2:#0ea5b7; --acc2-soft:#e3f4f6; --green:#3f9e6f; --red:#cf5b4e; --gold:#c9a24b;
+  --shadow:0 1px 2px rgba(30,30,60,.05),0 8px 24px rgba(30,30,60,.07);
+  --radius:16px; --radius-s:11px;
+}
+[data-theme="dark"]{
+  --bg:#14161f; --panel:#1c1f2c; --panel2:#202433; --ink:#e7e9f5; --muted:#8f95ad;
+  --line:#2c3044; --line2:#262a3c; --acc1:#8b8bf0; --acc1-soft:#2a2a4d; --acc1-ink:#b3b3ff;
+  --acc2:#3fc6d9; --acc2-soft:#16303a; --green:#5bb98c; --red:#e07a6e; --gold:#d8b25e;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased;}
+button{font-family:inherit;}
+::-webkit-scrollbar{width:0;height:0;}
+
+/* ===== layout ===== */
+.shell{display:flex;min-height:100vh;}
+.sidebar{width:228px;flex:none;position:sticky;top:0;height:100vh;padding:22px 14px;border-right:1px solid var(--line);background:var(--panel2);display:flex;flex-direction:column;gap:4px;overflow-y:auto;}
+.brand{display:flex;align-items:center;gap:10px;padding:0 8px 18px;}
+.brand .logo{width:36px;height:36px;border-radius:11px;background:linear-gradient(135deg,var(--acc1),var(--acc2));display:flex;align-items:center;justify-content:center;color:#fff;flex:none;font-size:17px;}
+.brand b{font-size:16px;letter-spacing:.5px;display:block;line-height:1.2;}
+.brand small{display:block;color:var(--muted);font-size:11px;font-weight:400;}
+.nav-item{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:12px;cursor:pointer;color:var(--muted);font-weight:600;font-size:14.5px;transition:.15s;border:1px solid transparent;position:relative;}
+.nav-item .ico{width:20px;height:20px;flex:none;display:flex;align-items:center;justify-content:center;font-size:15px;}
+.nav-item:hover{background:var(--panel);color:var(--ink);}
+.nav-item.active{background:var(--acc1-soft);color:var(--acc1-ink);border-color:var(--line);}
+.nav-item .badge{margin-left:auto;background:var(--acc1);color:#fff;font-size:11px;min-width:18px;height:18px;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 5px;font-weight:700;}
+.side-foot{margin-top:auto;padding:10px 8px 0;color:var(--muted);font-size:11px;line-height:1.7;}
+.side-foot .back{display:inline-block;margin-bottom:8px;color:var(--acc1-ink);text-decoration:none;font-weight:700;font-size:12px;}
+
+.main{flex:1;min-width:0;display:flex;flex-direction:column;}
+.topbar{position:sticky;top:0;z-index:15;background:color-mix(in srgb,var(--bg) 86%,transparent);backdrop-filter:blur(12px);padding:14px 22px 12px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.topbar h1{font-size:20px;margin:0;font-weight:800;letter-spacing:.3px;}
+.topbar .sub{color:var(--muted);font-size:12.5px;}
+.topbar .spacer{flex:1;}
+.icon-btn{width:38px;height:38px;border-radius:11px;border:1px solid var(--line);background:var(--panel);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink);font-size:15px;}
+.icon-btn:hover{border-color:var(--acc1);}
+.wrap{max-width:960px;width:100%;margin:0 auto;padding:20px 22px 120px;}
+.view-head{display:flex;align-items:baseline;gap:10px;margin:0 0 16px;flex-wrap:wrap;}
+.view-head h2{font-size:22px;margin:0;font-weight:800;}
+.view-head .desc{color:var(--muted);font-size:13px;}
+
+/* ===== components ===== */
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);margin-bottom:16px;}
+.panel.tight{padding:14px;}
+.panel-title{display:flex;align-items:center;justify-content:space-between;margin:0 0 12px;gap:10px;flex-wrap:wrap;}
+.panel-title h3{font-size:15px;margin:0;font-weight:800;display:flex;align-items:center;gap:8px;}
+.panel-title h3 .dot{width:9px;height:9px;border-radius:50%;flex:none;}
+.panel-title .dim{color:var(--muted);font-size:12px;font-weight:400;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+@media(max-width:760px){.grid2,.grid3,.grid4{grid-template-columns:1fr 1fr;}}
+@media(max-width:520px){.grid2,.grid3,.grid4{grid-template-columns:1fr;}}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+.field{display:flex;flex-direction:column;gap:5px;min-width:0;}
+.field label{font-size:12px;color:var(--muted);font-weight:700;}
+input,select,textarea{font-family:inherit;font-size:14px;color:var(--ink);background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:9px 11px;outline:none;transition:.15s;width:100%;}
+input:focus,select:focus,textarea:focus{border-color:var(--acc1);background:var(--panel);}
+textarea{resize:vertical;min-height:80px;line-height:1.6;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:38px;padding:8px 14px;border-radius:11px;border:1px solid var(--line);background:var(--panel);color:var(--ink);font-size:13.5px;font-weight:700;cursor:pointer;transition:.15s;}
+.btn:hover{border-color:var(--acc1);}
+.btn.primary{background:var(--acc1);border-color:var(--acc1);color:#fff;}
+.btn.primary:hover{background:var(--acc1-ink);}
+.btn.ghost{background:transparent;}
+.btn.sm{min-height:32px;padding:5px 10px;font-size:12.5px;border-radius:9px;}
+.btn.danger{color:var(--red);}
+.btn.danger:hover{border-color:var(--red);}
+.btn.block{width:100%;}
+.chips{display:flex;gap:7px;flex-wrap:wrap;}
+.chip{padding:6px 12px;border-radius:20px;border:1px solid var(--line);background:var(--panel);color:var(--muted);font-size:13px;font-weight:700;cursor:pointer;transition:.15s;}
+.chip:hover{border-color:var(--acc1);color:var(--ink);}
+.chip.on{background:var(--acc1);border-color:var(--acc1);color:#fff;}
+.tag{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11.5px;font-weight:700;background:var(--panel2);border:1px solid var(--line);color:var(--muted);}
+.tag.ok{color:var(--green);border-color:color-mix(in srgb,var(--green) 40%,var(--line));}
+.tag.warn{color:var(--gold);border-color:color-mix(in srgb,var(--gold) 40%,var(--line));}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+@media(max-width:760px){.tiles{grid-template-columns:repeat(2,1fr);}}
+.tile{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:13px 14px;}
+.tile .k{font-size:12px;color:var(--muted);font-weight:700;display:flex;align-items:center;gap:5px;}
+.tile .v{font-size:24px;font-weight:800;margin-top:4px;font-variant-numeric:tabular-nums;}
+.tile .v small{font-size:12px;color:var(--muted);font-weight:400;}
+.empty{color:var(--muted);text-align:center;padding:30px 10px;font-size:14px;}
+.mini{background:none;border:none;color:var(--muted);cursor:pointer;padding:4px 7px;border-radius:7px;font-size:12.5px;}
+.mini:hover{color:var(--red);background:var(--panel2);}
+.ta{width:100%;min-height:120px;margin-top:6px;}
+.hr{height:1px;background:var(--line);border:none;margin:12px 0;}
+.mono{font-family:ui-monospace,SFMono-Regular,Consolas,"Courier New",monospace;font-size:12.5px;}
+
+/* ===== toast ===== */
+#toast{position:fixed;left:50%;bottom:34px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--bg);padding:10px 20px;border-radius:12px;font-size:13.5px;font-weight:700;opacity:0;pointer-events:none;transition:.25s;z-index:99;box-shadow:0 8px 30px rgba(0,0,0,.3);max-width:88vw;}
+#toast.on{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* ===== hero / progress ===== */
+.hero{display:flex;gap:20px;align-items:center;flex-wrap:wrap;}
+.ring{width:132px;height:132px;flex:none;}
+.ring-num{font-size:30px;font-weight:800;fill:var(--ink);}
+.ring-cap{font-size:12px;font-weight:800;fill:var(--acc1);}
+.hero-info{flex:1;min-width:230px;}
+.hero-info .t{font-size:17px;font-weight:800;}
+.hero-info .d{color:var(--muted);font-size:13px;margin-top:3px;}
+.hero-actions{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;}
+
+/* ===== pipeline ===== */
+.steps{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:16px;}
+@media(max-width:900px){.steps{grid-template-columns:repeat(3,1fr);}}
+@media(max-width:520px){.steps{grid-template-columns:repeat(2,1fr);}}
+.step{border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:10px;cursor:pointer;transition:.15s;position:relative;}
+.step:hover{border-color:var(--acc1);}
+.step .no{font-size:11px;color:var(--muted);font-weight:800;letter-spacing:.5px;}
+.step .nm{font-size:13px;font-weight:800;margin-top:2px;display:flex;align-items:center;gap:6px;}
+.step.doing{border-color:var(--acc1);background:var(--acc1-soft);}
+.step.done{border-color:var(--green);background:color-mix(in srgb,var(--green) 10%,var(--panel));}
+.step .stt{position:absolute;top:9px;right:9px;font-size:12px;}
+.stage-card{border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);margin-bottom:14px;overflow:hidden;}
+.stage-head{display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;user-select:none;}
+.stage-head .si{width:38px;height:38px;border-radius:11px;background:var(--panel2);display:flex;align-items:center;justify-content:center;font-size:18px;flex:none;}
+.stage-head .st-tt{flex:1;min-width:0;}
+.stage-head .st-tt b{font-size:15px;display:block;}
+.stage-head .st-tt span{color:var(--muted);font-size:12px;}
+.stage-head .st-arrow{color:var(--muted);font-size:13px;transition:.2s;}
+.stage-card.open .st-arrow{transform:rotate(180deg);}
+.stage-body{display:none;padding:0 16px 16px;border-top:1px solid var(--line2);}
+.stage-card.open .stage-body{display:block;}
+.seg{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:12px 0 6px;}
+.seg-b{font-size:12px;font-weight:800;color:var(--muted);letter-spacing:.4px;}
+.state-pill{display:inline-flex;gap:6px;align-items:center;padding:4px 12px;border-radius:20px;border:1px solid var(--line);font-size:12px;font-weight:800;cursor:pointer;color:var(--muted);}
+.state-pill.on-todo{color:var(--muted);}
+.state-pill.on-doing{color:var(--acc1-ink);background:var(--acc1-soft);border-color:var(--acc1);}
+.state-pill.on-done{color:var(--green);background:color-mix(in srgb,var(--green) 12%,var(--panel));border-color:var(--green);}
+.task{display:flex;align-items:center;gap:9px;padding:7px 2px;font-size:14px;}
+.task input[type=checkbox]{width:17px;height:17px;accent-color:var(--acc1);flex:none;cursor:pointer;}
+.task .tx{flex:1;min-width:0;}
+.task.done .tx{color:var(--muted);text-decoration:line-through;}
+.task input[type=text]{flex:1;}
+.prompt-card{border:1px solid var(--line2);background:var(--panel2);border-radius:11px;padding:11px 13px;margin:8px 0;}
+.prompt-card .pt{display:flex;align-items:center;gap:8px;font-weight:800;font-size:13.5px;}
+.prompt-card .pt .copy{margin-left:auto;}
+.prompt-card pre{white-space:pre-wrap;word-break:break-word;font-family:inherit;font-size:12.5px;color:var(--muted);line-height:1.65;margin:8px 0 0;background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:10px;max-height:220px;overflow-y:auto;}
+.prompt-card.open pre{max-height:none;}
+
+/* ===== search results ===== */
+.paper{border:1px solid var(--line);border-radius:12px;padding:13px 14px;margin-bottom:10px;background:var(--panel);}
+.paper .pt2{font-size:14.5px;font-weight:800;line-height:1.45;}
+.paper .pt2 a{color:inherit;text-decoration:none;}
+.paper .pt2 a:hover{color:var(--acc1-ink);}
+.paper .meta{color:var(--muted);font-size:12.5px;margin-top:4px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.paper .ab{margin-top:7px;font-size:13px;color:var(--muted);line-height:1.6;}
+.paper .ab.cut{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
+.paper .acts{margin-top:9px;display:flex;gap:7px;flex-wrap:wrap;align-items:center;}
+.idx-chip{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:7px;font-size:11px;font-weight:800;text-decoration:none;border:1px solid var(--line);color:var(--muted);background:var(--panel2);}
+.idx-chip:hover{color:var(--acc1-ink);border-color:var(--acc1);}
+.busy{text-align:center;color:var(--muted);padding:26px 10px;font-size:14px;}
+.spin{display:inline-block;width:16px;height:16px;border:2px solid var(--line);border-top-color:var(--acc1);border-radius:50%;animation:sp .8s linear infinite;vertical-align:-3px;margin-right:7px;}
+@keyframes sp{to{transform:rotate(360deg);}}
+
+/* ===== writing sections ===== */
+.sec-card{border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);margin-bottom:14px;overflow:hidden;}
+.sec-head2{display:flex;align-items:center;gap:10px;padding:13px 16px;cursor:pointer;user-select:none;}
+.sec-head2 b{flex:1;font-size:14.5px;}
+.sec-head2 .wc{color:var(--muted);font-size:12px;font-weight:700;}
+.sec-body{display:none;padding:0 16px 16px;border-top:1px solid var(--line2);}
+.sec-card.open .sec-body{display:block;}
+
+/* ===== ideas ===== */
+.idea{display:flex;gap:10px;align-items:flex-start;padding:11px 2px;border-bottom:1px solid var(--line2);}
+.idea:last-child{border-bottom:none;}
+.idea .ib{flex:1;min-width:0;}
+.idea .ib .it{font-size:14px;line-height:1.55;white-space:pre-wrap;}
+.idea .ib .tm{color:var(--muted);font-size:11.5px;margin-top:4px;}
+.idea .acts{display:flex;gap:5px;flex:none;}
+.idea.done .it{color:var(--muted);text-decoration:line-through;}
+
+/* ===== prompt library ===== */
+.pg{margin-bottom:16px;}
+.pg .pg-t{font-size:13px;font-weight:800;color:var(--acc1-ink);margin-bottom:8px;letter-spacing:.3px;}
+
+/* ===== data view ===== */
+.stat-row{display:flex;gap:10px;flex-wrap:wrap;margin:8px 0;}
+.stat-box{flex:1;min-width:130px;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px;}
+.stat-box .k{font-size:12px;color:var(--muted);font-weight:700;}
+.stat-box .v{font-size:19px;font-weight:800;margin-top:3px;}
+
+/* ===== mobile ===== */
+@media(max-width:760px){
+  .shell{flex-direction:column;}
+  .sidebar{width:100%;height:auto;position:static;flex-direction:row;flex-wrap:wrap;gap:6px;padding:10px 12px;border-right:none;border-bottom:1px solid var(--line);overflow-x:auto;}
+  .brand{display:none;}
+  .nav-item{padding:7px 11px;font-size:13.5px;white-space:nowrap;}
+  .side-foot{display:none;}
+  .wrap{padding:16px 14px 110px;}
+}
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+
+<div class="shell">
+  <!-- ============ sidebar ============ -->
+  <aside class="sidebar" id="side">
+    <div class="brand">
+      <div class="logo">🔬</div>
+      <div><b>科研智能体</b><small>Research Copilot</small></div>
+    </div>
+    <div class="nav-item active" data-v="dash"><span class="ico">📊</span>总览</div>
+    <div class="nav-item" data-v="pipe"><span class="ico">🧭</span>研究流水线</div>
+    <div class="nav-item" data-v="search"><span class="ico">🔎</span>文献检索</div>
+    <div class="nav-item" data-v="write"><span class="ico">✍️</span>写作助手</div>
+    <div class="nav-item" data-v="ideas"><span class="ico">💡</span>Idea 池<span class="badge" id="ideaBadge" style="display:none">0</span></div>
+    <div class="nav-item" data-v="prompts"><span class="ico">🧩</span>提示词库</div>
+    <div class="nav-item" data-v="data"><span class="ico">🗄️</span>数据</div>
+    <div class="side-foot">
+      <a class="back" href="../index.html">← 返回实验室</a><br>
+      <a class="back" href="../../index.html#sec-research">← 返回指挥台 · 科研专区</a><br>
+      数据本地存储 · 与科研专区互通
+    </div>
+  </aside>
+
+  <!-- ============ main ============ -->
+  <div class="main">
+    <div class="topbar">
+      <h1 id="tbTitle">科研智能体</h1>
+      <div class="sub" id="tbSub"></div>
+      <div class="spacer"></div>
+      <button class="icon-btn" id="btnTheme" title="切换主题">🌓</button>
+    </div>
+
+    <div class="wrap">
+
+      <!-- ====== 总览 ====== -->
+      <section class="view" id="v-dash">
+        <div class="view-head"><h2>科研总览</h2><span class="desc">一条流水线从 Idea 走到投稿，AI 在每个环节当你的副驾驶</span></div>
+
+        <div class="panel">
+          <div class="hero">
+            <svg class="ring" viewBox="0 0 120 120">
+              <circle cx="60" cy="60" r="52" fill="none" stroke="var(--line2)" stroke-width="12"/>
+              <circle id="ringArc" cx="60" cy="60" r="52" fill="none" stroke="var(--acc1)" stroke-width="12" stroke-linecap="round" stroke-dasharray="326.7" stroke-dashoffset="326.7" transform="rotate(-90 60 60)"/>
+              <text class="ring-num" x="60" y="57" text-anchor="middle" id="ringNum">0%</text>
+              <text class="ring-cap" x="60" y="74" text-anchor="middle">流水线进度</text>
+            </svg>
+            <div class="hero-info">
+              <div class="t" id="heroTopic">尚未开始课题</div>
+              <div class="d" id="heroDesc">在「研究流水线」中选择或新建一个课题，然后按阶段推进：目标 → 文献 → 方法 → 实验 → 写作 → 投稿。每个阶段都内置了 AI 提示词，复制到 DeepSeek / ChatGPT 即可让 AI 协助。</div>
+              <div class="hero-actions">
+                <button class="btn primary sm" onclick="go('pipe')">进入流水线 →</button>
+                <button class="btn sm" onclick="go('search')">检索文献</button>
+                <button class="btn sm" onclick="go('write')">写作助手</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tiles">
+          <div class="tile"><div class="k">📚 课题总数</div><div class="v" id="dTopics">0</div></div>
+          <div class="tile"><div class="k">🔖 文献清单</div><div class="v" id="dPapers">0<small> 篇</small></div></div>
+          <div class="tile"><div class="k">✍️ 草稿章节</div><div class="v" id="dDrafts">0<small> / 7</small></div></div>
+          <div class="tile"><div class="k">💡 Idea 池</div><div class="v" id="dIdeas">0<small> 条</small></div></div>
+        </div>
+
+        <div class="panel" style="margin-top:16px">
+          <div class="panel-title"><h3>🧭 流水线速览</h3><button class="btn sm" onclick="go('pipe')">管理 →</button></div>
+          <div class="steps" id="dashSteps"></div>
+        </div>
+
+        <div class="grid2">
+          <div class="panel">
+            <div class="panel-title"><h3>📚 文献阅读清单</h3><button class="btn sm" onclick="go('search')">+ 检索文献</button></div>
+            <div id="dashPapers"></div>
+          </div>
+          <div class="panel">
+            <div class="panel-title"><h3>💡 最新 Idea</h3><button class="btn sm" onclick="go('ideas')">查看全部</button></div>
+            <div id="dashIdeas"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====== 研究流水线 ====== -->
+      <section class="view" id="v-pipe" style="display:none">
+        <div class="view-head"><h2>研究流水线</h2><span class="desc">选择课题，按阶段推进；AI 提示词 + 任务清单 + 产出归档</span></div>
+
+        <div class="panel tight">
+          <div class="panel-title"><h3>当前课题</h3><span class="dim">与指挥台「科研专区」课题数据实时互通</span></div>
+          <div class="chips" id="topicChips"></div>
+        </div>
+
+        <div class="steps" id="pipeSteps"></div>
+
+        <div id="stageCards"></div>
+      </section>
+
+      <!-- ====== 文献检索 ====== -->
+      <section class="view" id="v-search" style="display:none">
+        <div class="view-head"><h2>文献检索</h2><span class="desc">Semantic Scholar 实时检索 · 结果一键加入科研专区文献清单</span></div>
+
+        <div class="panel">
+          <div class="row">
+            <input id="sQuery" placeholder="输入研究主题 / 关键词，例如：large language model evaluation" style="flex:1;min-width:200px" onkeydown="if(event.key==='Enter')doSearch()">
+            <button class="btn primary" onclick="doSearch()">检索 🔎</button>
+          </div>
+          <div class="dim" style="font-size:11.5px;margin-top:7px;color:var(--muted)">数据来自 Semantic Scholar 开放 API，公开论文均可检索；接口有频率限制，频繁搜索请稍候。</div>
+        </div>
+
+        <div id="sResults"></div>
+      </section>
+
+      <!-- ====== 写作助手 ====== -->
+      <section class="view" id="v-write" style="display:none">
+        <div class="view-head"><h2>写作助手</h2><span class="desc">分章节草稿 · AI 提示词引导 · 一键导出 Markdown</span></div>
+
+        <div class="panel">
+          <div class="row" style="justify-content:flex-end">
+            <span class="dim" style="font-size:12px;color:var(--muted)" id="writeStat"></span>
+            <button class="btn sm" onclick="exportMd()">⬇️ 导出 Markdown</button>
+            <button class="btn sm" onclick="copyAllDrafts()">复制全文</button>
+          </div>
+        </div>
+
+        <div id="secList"></div>
+
+        <div class="panel" style="margin-top:6px">
+          <div class="panel-title"><h3>➕ 自定义章节</h3></div>
+          <div class="row">
+            <input id="newSecName" placeholder="章节名，例如：Appendix · 数据说明" style="flex:1;min-width:180px">
+            <button class="btn sm" onclick="addCustomSec()">添加</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====== Idea 池 ====== -->
+      <section class="view" id="v-ideas" style="display:none">
+        <div class="view-head"><h2>Idea 池</h2><span class="desc">研究灵感随手记，成熟后可一键转为科研课题</span></div>
+
+        <div class="panel">
+          <textarea id="ideaInput" placeholder="记录一个研究想法：问题、可用的数据/方法、可能的创新点…" style="min-height:90px"></textarea>
+          <div class="row" style="margin-top:10px;justify-content:flex-end">
+            <button class="btn primary" onclick="addIdea()">保存 Idea 💡</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-title"><h3>全部 Idea</h3><span class="dim" id="ideaCount"></span></div>
+          <div id="ideaList"></div>
+        </div>
+      </section>
+
+      <!-- ====== 提示词库 ====== -->
+      <section class="view" id="v-prompts" style="display:none">
+        <div class="view-head"><h2>提示词库</h2><span class="desc">精选科研场景提示词，点击复制到任意 AI 使用</span></div>
+        <div id="promptLib"></div>
+      </section>
+
+      <!-- ====== 数据 ====== -->
+      <section class="view" id="v-data" style="display:none">
+        <div class="view-head"><h2>数据管理</h2><span class="desc">本工作台数据 + 科研专区互通数据，均可备份</span></div>
+
+        <div class="grid2">
+          <div class="panel">
+            <div class="panel-title"><h3>💾 备份与恢复</h3></div>
+            <div class="stat-row">
+              <div class="stat-box"><div class="k">本工作台数据</div><div class="v" id="stAgent">-</div></div>
+              <div class="stat-box"><div class="k">科研专区课题</div><div class="v" id="stTopics">-</div></div>
+              <div class="stat-box"><div class="k">文献清单</div><div class="v" id="stPapers">-</div></div>
+              <div class="stat-box"><div class="k">草稿字数</div><div class="v" id="stWords">-</div></div>
+            </div>
+            <div class="row" style="margin-top:12px">
+              <button class="btn" onclick="exportAll()">⬇️ 导出备份 JSON</button>
+              <button class="btn" onclick="document.getElementById('impFile').click()">⬆️ 导入恢复</button>
+              <input type="file" id="impFile" accept=".json" style="display:none" onchange="importAll(this)">
+            </div>
+            <div class="dim" style="font-size:12px;margin-top:10px;color:var(--muted)">导出包含：流水线进度、任务、AI 产出、写作草稿、Idea 池。科研专区课题/文献在主站「科研专区」内导出。</div>
+          </div>
+          <div class="panel">
+            <div class="panel-title"><h3>⚙️ 设置</h3></div>
+            <div class="field" style="margin-bottom:12px">
+              <label>界面主题</label>
+              <select id="selTheme" onchange="setTheme(this.value)">
+                <option value="dark">深色（默认）</option>
+                <option value="light">浅色</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>提示：AI 怎么用？</label>
+              <div style="font-size:13px;color:var(--muted);line-height:1.7">
+                每个阶段/章节都预置了<span style="font-weight:800">提示词模板</span>，点击「复制」粘贴到 DeepSeek、ChatGPT、Kimi 等任一大模型即可，把 AI 返回的结果粘贴回「产出」或草稿区保存。全程无需配置 API Key，数据只存在你的浏览器。
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* ================================================================
+ * 科研智能体 · 纯前端 + localStorage
+ * 数据：
+ *   wb_research_agent_v1  — 本工作台（流水线/草稿/ideas/设置）
+ *   wb_sjtu_research_v1   — 与指挥台科研专区互通（topics/papers/subs）
+ * ================================================================ */
+(function(){
+'use strict';
+
+/* ---------- 工具 ---------- */
+function $id(id){return document.getElementById(id);}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function uid(){return 'r'+Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
+function iso(d){var m=d.getMonth()+1,dd=d.getDate();return d.getFullYear()+'-'+(m<10?'0'+m:m)+'-'+(dd<10?'0'+dd:dd);}
+function today(){return iso(new Date());}
+var toastTimer=null;
+function toast(msg){var t=$id('toast');t.textContent=msg;t.classList.add('on');clearTimeout(toastTimer);toastTimer=setTimeout(function(){t.classList.remove('on');},2200);}
+function copyText(txt,okMsg){
+  function done(){toast(okMsg||'已复制到剪贴板');}
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(done,function(){fallbackCopy(txt);done();});}
+  else{fallbackCopy(txt);done();}
+}
+function fallbackCopy(txt){
+  var ta=document.createElement('textarea');ta.value=txt;ta.style.position='fixed';ta.style.opacity='0';
+  document.body.appendChild(ta);ta.select();
+  try{document.execCommand('copy');}catch(e){}
+  document.body.removeChild(ta);
+}
+
+/* ---------- 数据层 ---------- */
+var RES_KEY='wb_sjtu_research_v1';
+var AGT_KEY='wb_research_agent_v1';
+
+function loadRS(){
+  try{var o=JSON.parse(localStorage.getItem(RES_KEY));if(o&&typeof o==='object'&&!Array.isArray(o)){
+    o.topics=o.topics||[];o.papers=o.papers||[];o.subs=o.subs||[];
+    return o;
+  }}catch(e){}
+  return {topics:[],papers:[],subs:[]};
+}
+function saveRS(rs){try{localStorage.setItem(RES_KEY,JSON.stringify(rs));}catch(e){toast('科研数据保存失败');}}
+
+var STAGES=[
+  {key:'goal',  ico:'🎯', title:'研究目标', desc:'明确研究问题、假设与预期贡献', prompts:[
+    {t:'从想法到可研究问题', p:'我是一名研究者，我的初步想法是：{想法}。请帮我把这个想法转化为一个可操作的研究问题：1) 核心研究问题是什么；2) 现有研究可能已覆盖哪些点（帮我列出需要查证的方向）；3) 潜在创新点在哪里；4) 可行性分析（数据/算力/时间）。用中文回答，分点清晰。'},
+    {t:'研究假设与贡献声明', p:'针对研究问题「{问题}」，请帮我：1) 写出 1-3 个可验证的研究假设；2) 预判可能的正面/负面结果分别说明什么；3) 用一句话写出预期贡献（学术界 + 应用侧各一句）。输出 markdown 格式。'},
+    {t:'文献缺口定位', p:'我想研究「{主题}」。请列出这个领域最关键的 8 个开放问题/研究缺口，按重要性排序，每个缺口说明：为什么重要、当前方法卡在哪、解决它需要什么条件。这是为了帮我找准论文切入点。'}
+  ]},
+  {key:'lit',   ico:'📚', title:'文献调研', desc:'检索并精读关键文献，梳理研究现状', prompts:[
+    {t:'综述框架生成', p:'请围绕「{主题}」写一篇文献综述的框架：1) 按时间线或方法族划分 3-5 个流派/发展阶段；2) 每个流派的核心工作、代表论文、关键结论；3) 流派间的承继与冲突；4) 综述结论部分应强调的未解决问题。输出 markdown。'},
+    {t:'单篇论文精读模板', p:'帮我按以下模板精读论文《{论文标题}》：研究问题/动机、方法核心思路（3 句话）、关键实验与结果、与同类工作的差异、局限与未来工作、对我的研究「{我的方向}」的启发（可借鉴/可反驳/可复用）。'},
+    {t:'对比表生成', p:'我整理了以下文献笔记：{笔记}。请生成一张对比表，行=文献，列=年份/方法/数据集/关键结果/局限，并总结 2-3 条该领域的规律性发现。输出 markdown 表格。'}
+  ]},
+  {key:'method',ico:'🧪', title:'方法设计', desc:'设计技术路线、实验方案与评价指标', prompts:[
+    {t:'技术路线设计', p:'我的研究问题是「{问题}」，可用资源：{资源}。请设计 2-3 套候选技术路线，每套包含：整体架构、关键模块、需要的输入输出、预期复杂度与风险；最后给一个推荐方案及理由。画 ASCII 流程图说明。'},
+    {t:'基线选择', p:'我的方法解决「{任务}」。请推荐 5-8 个必须对比的基线方法（经典 + 最新），每个说明：为什么必须对比、期望差距、如果打平/落后可能的原因。输出列表。'},
+    {t:'消融实验设计', p:'为论文方法设计消融实验：1) 需要验证的核心设计决策有哪些；2) 每个决策的消融变体；3) 消融矩阵表（实验组合）；4) 每项结果可能的解读与应对。输出 markdown 表格。'}
+  ]},
+  {key:'exp',   ico:'⚙️', title:'实验验证', desc:'实现、跑实验、收集结果与消融', prompts:[
+    {t:'实验计划拆解', p:'把论文实验拆成可执行计划：实验目的、数据集、评估指标、超参数范围、预期运行时长、产出物（表格/图）、失败时的备选方案。按周排出时间表。输出表格。'},
+    {t:'结果分析', p:'我的实验结果如下：{结果}。请帮我：1) 提炼 3-5 条可写进论文的关键发现；2) 指出数据里可能的反直觉点并给出解释；3) 检查是否有遗漏的对比或消融；4) 生成论文实验章节的骨架。'},
+    {t:'图表生成建议', p:'我的实验结果包含这些数据：{数据}。请建议：1) 每张图表的类型（折线/柱状/热力/散点）与用途；2) 图表的坐标与配色建议；3) 与相关工作的对比呈现方式；4) 需要保证的图表一致性要点。'}
+  ]},
+  {key:'write', ico:'✍️', title:'论文写作', desc:'按结构撰写论文，图表与润色', prompts:[
+    {t:'摘要生成', p:'根据以下论文信息：标题/问题/方法/主要结果/结论：{信息}，帮我写三段式摘要（Background&Gap / Method / Results&Impact），字数 150-200 词，学术正式语气，避免夸大。中英文各一版。'},
+    {t:'引言结构', p:'帮我写论文引言，结构：1) 领域背景与重要性（漏斗式）；2) 现有方法的不足（3 个，引用具体工作）；3) 我们的方法一句话 + 三个贡献点（编号）；4) 论文组织结构。总长 800-1000 词。研究主题：{主题}。'},
+    {t:'学术润色', p:'请润色以下学术段落：{段落}。要求：1) 保持原意与数据不变；2) 用词更正式、句式更简洁；3) 避免口语化与重复；4) 标注修改理由（可选）。只输出润色后的版本，不要解释。'},
+    {t:'审稿意见回复', p:'审稿人意见：{意见}。请帮我：1) 判断意见性质（理解偏差/补实验/写作问题）；2) 生成逐条回复（态度：先感谢、再解释或承诺修改）；3) 指出需要实际补充的实验或内容。输出 markdown。'}
+  ]},
+  {key:'submit',ico:'🚀', title:'投稿自查', desc:'选刊、格式自查、Cover Letter', prompts:[
+    {t:'期刊/会议匹配', p:'我的论文主题是「{主题}」，方法偏「{类型}」。请推荐 5 个合适的期刊或会议：层级、审稿周期、匹配度理由、APC/版面费（如适用）。按匹配度排序。'},
+    {t:'Cover Letter', p:'帮我写投稿 Cover Letter：给编辑，三段——研究主题与价值 / 与期刊范围的契合 / 原创性声明与推荐审稿人方向。论文标题「{标题}」，目标期刊「{期刊}」。语气专业谦逊。'},
+    {t:'投稿自查清单', p:'帮我生成一份投稿前自查清单：结构完整性、图表清晰度、引用规范、格式要求（模板）、伦理与数据可用性声明、作者贡献、常见拒稿原因规避。输出可勾选清单。'}
+  ]}
+];
+
+var SECTIONS=[
+  {key:'abstract', n:'摘要 Abstract', p:'请根据以下论文要点：{要点}，撰写 150-200 词英文摘要 + 对应中文摘要。包含背景缺口、方法、关键结果、结论影响四要素。'},
+  {key:'intro',    n:'引言 Introduction', p:'撰写论文引言：漏斗式展开（领域重要性→现有方法不足→我们的方案与三个贡献→结构预览），800-1000 词。研究主题：{主题}。'},
+  {key:'related',  n:'相关工作 Related Work', p:'撰写相关工作章节：按方法族分 3-4 小节，每小节末尾指出与我们的差异；最后用对比表总结。文献清单：{文献}。'},
+  {key:'method',   n:'方法 Method', p:'撰写方法章节：问题定义→整体框架（图）→各模块详述→复杂度分析。公式用 LaTeX。方法要点：{要点}。'},
+  {key:'exp',      n:'实验 Experiment', p:'撰写实验章节：设置（数据/指标/实现细节）→主结果表→消融→案例分析→讨论。实验数据：{数据}。'},
+  {key:'concl',    n:'结论 Conclusion', p:'撰写结论：总结贡献→局限性→未来工作。300-400 词，避免重复摘要。'},
+  {key:'extra',    n:'致谢与附录', p:'（手工撰写：致谢、数据可用性声明、作者贡献。）'}
+];
+
+var PROMPT_LIB=[
+  {g:'📖 文献与综述', items:[
+    {t:'领域全景图', p:'请画出「{主题}」领域的全景图：核心问题、主要方法家族、关键里程碑论文、当前热点、饱和区与蓝海区，用 markdown 结构输出。'},
+    {t:'论文速读', p:'用 5 个要点总结这篇论文：动机、方法、关键实验、局限、一句话价值。允许的话附一张流程图。论文：{论文文本/标题}。'},
+    {t:'找差距', p:'对比以下 3 篇论文：《A》《B》《C》，找出它们共同的未解决问题，并判断我的想法「{想法}」是否填补了该差距，给出建议。'}
+  ]},
+  {g:'🧠 方法与创新', items:[
+    {t:'头脑风暴方法', p:'针对问题「{问题}」，头脑风暴 10 个可能的技术思路，涵盖：模块改造、损失/目标函数、数据增强、训练策略、推理时优化、评估重构等维度，每个思路一句话 + 风险提示。'},
+    {t:'可行性预判', p:'判断思路「{思路}」的可行性：理论依据、实现难度、数据需求、失败模式、与 SOTA 的潜在差距。给出 1-5 分可行性评分和理由。'}
+  ]},
+  {g:'💻 代码与实验', items:[
+    {t:'Debug 助手', p:'以下代码/报错：{代码或报错}。请：1) 定位最可能的错误点；2) 给出修复代码；3) 解释根因；4) 提示同类坑。不要泛泛而谈。'},
+    {t:'实验复盘', p:'实验现象：{现象}。可能原因有哪些？如何设计对照实验确认？哪些是值得写进论文的发现？'}
+  ]},
+  {g:'✍️ 写作与发表', items:[
+    {t:'一句话亮点', p:'用一句话向非本领域的人解释我的研究「{研究}」的价值（电梯陈述），然后给出学术版与大众版两个版本。'},
+    {t:'回复审稿人', p:'审稿人意见：{意见}。生成礼貌、逐条、可执行的回复，指出需要补的实验，并给出补实验的最低成本方案。'},
+    {t:'评审角度自查', p:'假装你是这个领域的资深审稿人，审阅我的论文框架「{框架}」。列出最可能被攻击的 5 个点，以及每个点如何提前加固。'}
+  ]}
+];
+
+function defaultAgent(){
+  var stages={};
+  STAGES.forEach(function(s){stages[s.key]={status:'todo',tasks:[],output:''};});
+  var drafts={};
+  SECTIONS.forEach(function(s){drafts[s.key]='';});
+  return {stages:stages,drafts:drafts,customSecs:[],ideas:[],topicId:null,theme:'dark'};
+}
+function loadAgent(){
+  try{var o=JSON.parse(localStorage.getItem(AGT_KEY));if(o&&typeof o==='object')return normalize(o);}catch(e){}
+  return normalize(null);
+}
+function normalize(o){
+  o=o||{};
+  o.stages=o.stages||{};
+  STAGES.forEach(function(s){if(!o.stages[s.key])o.stages[s.key]={status:'todo',tasks:[],output:''};
+    var st=o.stages[s.key];st.status=st.status||'todo';st.tasks=st.tasks||[];st.output=st.output||'';});
+  o.drafts=o.drafts||{};
+  SECTIONS.forEach(function(s){if(o.drafts[s.key]===undefined)o.drafts[s.key]='';});
+  o.customSecs=Array.isArray(o.customSecs)?o.customSecs:[];
+  o.ideas=Array.isArray(o.ideas)?o.ideas:[];
+  o.topicId=o.topicId||null;
+  o.theme=o.theme||'dark';
+  return o;
+}
+var AGENT=loadAgent();
+function saveAgent(){try{localStorage.setItem(AGT_KEY,JSON.stringify(AGENT));}catch(e){toast('数据保存失败：本地存储可能已满');}}
+function topics(){return loadRS().topics;}
+function papers(){return loadRS().papers;}
+function curTopic(){
+  var ts=topics();
+  for(var i=0;i<ts.length;i++)if(ts[i].id===AGENT.topicId)return ts[i];
+  return ts[0]||null;
+}
+
+/* ---------- 导航 ---------- */
+var VIEWS=['dash','pipe','search','write','ideas','prompts','data'];
+function go(v){
+  VIEWS.forEach(function(x){var el=$id('v-'+x);if(el)el.style.display=(x===v)?'block':'none';});
+  var items=document.querySelectorAll('.nav-item[data-v]');
+  items.forEach(function(n){n.classList.toggle('active',n.getAttribute('data-v')===v);});
+  var t={'dash':'科研总览','pipe':'研究流水线','search':'文献检索','write':'写作助手','ideas':'Idea 池','prompts':'提示词库','data':'数据管理'}[v];
+  $id('tbTitle').textContent=t;
+  $id('tbSub').textContent = v==='pipe'?(curTopic()?('当前课题：'+curTopic().name):'请选择或新建课题'):'';
+  window.scrollTo(0,0);
+}
+document.querySelectorAll('.nav-item[data-v]').forEach(function(n){
+  n.addEventListener('click',function(){go(n.getAttribute('data-v'));});
+});
+
+/* ---------- 主题 ---------- */
+function applyTheme(th){document.documentElement.setAttribute('data-theme',th);$id('selTheme').value=th;}
+function setTheme(th){AGENT.theme=th;saveAgent();applyTheme(th);toast(th==='dark'?'已切换深色':'已切换浅色');}
+$id('btnTheme').addEventListener('click',function(){setTheme(AGENT.theme==='dark'?'light':'dark');});
+
+/* ---------- 总览 ---------- */
+function stageProgress(){
+  var done=0,total=STAGES.length;
+  STAGES.forEach(function(s){if(AGENT.stages[s.key].status==='done')done++;});
+  return {done:done,total:total};
+}
+function renderDash(){
+  var rs=loadRS();
+  $id('dTopics').textContent=rs.topics.length;
+  $id('dPapers').textContent=rs.papers.length;
+  var filled=0;SECTIONS.forEach(function(s){if(AGENT.drafts[s.key]&&AGENT.drafts[s.key].trim())filled++;});
+  $id('dDrafts').textContent=filled;
+  $id('dIdeas').textContent=AGENT.ideas.length;
+  var p=stageProgress();
+  var pct=Math.round(p.done/p.total*100);
+  var arc=$id('ringArc');arc.style.transition='stroke-dashoffset .6s ease';
+  arc.setAttribute('stroke-dashoffset',326.7*(1-p.done/p.total));
+  $id('ringNum').textContent=pct+'%';
+  var t=curTopic();
+  $id('heroTopic').textContent=t?('🔬 '+t.name):'尚未开始课题';
+  var stMap={'构思中':'构思中 · 在流水线中打磨成研究方案','进行中':'进行中 · 推进流水线各阶段','已完成':'已完成 · 复盘与归档'};
+  $id('heroDesc').textContent=t?('课题状态：'+(stMap[t.st]||t.st||'构思中')+'。流水线已完成 '+p.done+'/'+p.total+' 个阶段，继续推进 →'):'在「研究流水线」中选择或新建一个课题，然后按阶段推进：目标 → 文献 → 方法 → 实验 → 写作 → 投稿。每个阶段都内置了 AI 提示词，复制到 DeepSeek / ChatGPT 即可让 AI 协助。';
+  $id('dashSteps').innerHTML=STAGES.map(function(s){
+    var st=AGENT.stages[s.key].status;
+    return '<div class="step '+(st==='doing'?'doing':st==='done'?'done':'')+'" onclick="go(\'pipe\')">'
+      +'<div class="no">'+s.ico+' '+s.title+'</div>'
+      +'<div class="stt">'+(st==='done'?'✅':st==='doing'?'⏳':'○')+'</div>'
+      +'</div>';
+  }).join('');
+  var ps=rs.papers.slice(0,5);
+  $id('dashPapers').innerHTML=ps.length?ps.map(function(x){
+    return '<div class="paper" style="margin-bottom:8px"><div class="pt2" style="font-size:13.5px">'+esc(x.title)+'</div>'
+      +'<div class="meta">'+(x.author?esc(x.author)+' · ':'')+(x.year?esc(x.year)+' · ':'')+'<span class="tag '+(x.st==='已读'?'ok':'warn')+'">'+esc(x.st||'待读')+'</span></div></div>';
+  }).join(''):'<div class="empty">文献清单为空，去「文献检索」添加</div>';
+  var is=AGENT.ideas.slice(0,4);
+  $id('dashIdeas').innerHTML=is.length?is.map(function(x){
+    return '<div class="idea"><div class="ib"><div class="it" style="font-size:13px">'+esc(x.text)+'</div><div class="tm">'+esc(x.date)+'</div></div></div>';
+  }).join(''):'<div class="empty">还没有 Idea，随时记录研究灵感</div>';
+  updateBadges();
+}
+function updateBadges(){
+  var b=$id('ideaBadge');
+  if(AGENT.ideas.length){b.style.display='flex';b.textContent=AGENT.ideas.length;}else{b.style.display='none';}
+}
+
+/* ---------- 流水线 ---------- */
+function renderPipe(){
+  var ts=topics();
+  var cur=curTopic();
+  $id('topicChips').innerHTML =
+    '<button class="chip '+(cur===null?'on':'')+'" onclick="pickTopic(null)">＋ 新建课题</button>'+
+    ts.map(function(x){return '<button class="chip '+(cur&&x.id===cur.id?'on':'')+'" onclick="pickTopic(\''+x.id+'\')">'+esc(x.name)+'</button>';}).join('');
+  if(!ts.length)$id('topicChips').innerHTML+='<span style="font-size:12px;color:var(--muted)">指挥台科研专区还没有课题，点「＋ 新建课题」就地创建（数据会同步到主站）</span>';
+  $id('pipeSteps').innerHTML=STAGES.map(function(s,i){
+    var st=AGENT.stages[s.key].status;
+    var tk=AGENT.stages[s.key].tasks.filter(function(t){return t.done;}).length;
+    var tn=AGENT.stages[s.key].tasks.length;
+    return '<div class="step '+(st==='doing'?'doing':st==='done'?'done':'')+'" onclick="openStage(\''+s.key+'\')">'
+      +'<div class="no">STAGE '+(i+1)+' / 6</div>'
+      +'<div class="nm">'+s.ico+' '+esc(s.title)+'</div>'
+      +'<div class="dim" style="font-size:11px;color:var(--muted);margin-top:3px">'+(tn?'任务 '+tk+'/'+tn:st==='done'?'已完成':'未开始')+'</div>'
+      +'<div class="stt">'+(st==='done'?'✅':st==='doing'?'⏳':'○')+'</div>'
+      +'</div>';
+  }).join('');
+  renderStageCards();
+}
+function pickTopic(id){
+  if(id==='null')id=null;
+  if(!id){
+    var name=prompt('新建研究课题（将同步到指挥台「科研专区」）：');
+    if(!name||!name.trim())return;
+    var rs=loadRS();
+    rs.topics.unshift({id:uid(),name:name.trim(),dir:'',st:'构思中',upd:today()});
+    saveRS(rs);
+    AGENT.topicId=rs.topics[0].id;saveAgent();
+    toast('已创建课题并同步到科研专区');
+  }else{AGENT.topicId=id;saveAgent();}
+  renderPipe();renderDash();
+}
+function stageTasks(key){return AGENT.stages[key].tasks;}
+function addTask(key){
+  var txt=prompt('添加任务：');
+  if(!txt||!txt.trim())return;
+  stageTasks(key).push({t:txt.trim(),done:false});saveAgent();renderStageCards();renderPipe();
+}
+function toggleTask(key,i){stageTasks(key)[i].done=!stageTasks(key)[i].done;saveAgent();renderStageCards();renderDash();}
+function delTask(key,i){stageTasks(key).splice(i,1);saveAgent();renderStageCards();renderPipe();}
+function setStatus(key,v){AGENT.stages[key].status=v;saveAgent();renderStageCards();renderPipe();renderDash();}
+function saveOutput(key){AGENT.stages[key].output=$id('out-'+key).value;saveAgent();toast('产出已保存');}
+function openStage(key){
+  var el=$id('sc-'+key);
+  if(el)el.classList.toggle('open');
+}
+function renderStageCards(){
+  var html=STAGES.map(function(s){
+    var st=AGENT.stages[s.key];
+    var open=st.status!=='todo'||st.tasks.length>0;
+    var outId='out-'+s.key;
+    return '<div class="stage-card '+(st.status!=='todo'?'open':'')+'" id="sc-'+s.key+'">'
+      +'<div class="stage-head" onclick="openStage(\''+s.key+'\')">'
+        +'<div class="si">'+s.ico+'</div>'
+        +'<div class="st-tt"><b>'+esc(s.title)+'</b><span>'+esc(s.desc)+'</span></div>'
+        +'<span class="st-arrow">▾</span>'
+      +'</div>'
+      +'<div class="stage-body">'
+        // 状态
+        +'<div class="seg"><span class="seg-b">阶段状态</span>'
+        +'<span class="state-pill '+(st.status==='todo'?'on-todo':'')+'" onclick="setStatus(\''+s.key+'\',\'todo\')">未开始</span>'
+        +'<span class="state-pill '+(st.status==='doing'?'on-doing':'')+'" onclick="setStatus(\''+s.key+'\',\'doing\')">进行中</span>'
+        +'<span class="state-pill '+(st.status==='done'?'on-done':'')+'" onclick="setStatus(\''+s.key+'\',\'done\')">已完成 ✓</span>'
+        +'</div>'
+        // 任务
+        +'<div class="seg"><span class="seg-b">任务清单</span><button class="btn sm" onclick="addTask(\''+s.key+'\')">+ 加任务</button></div>'
+        +(st.tasks.length?st.tasks.map(function(t,i){
+          return '<div class="task '+(t.done?'done':'')+'">'
+            +'<input type="checkbox" '+(t.done?'checked':'')+' onchange="toggleTask(\''+s.key+'\','+i+')">'
+            +'<span class="tx">'+esc(t.t)+'</span>'
+            +'<button class="mini" onclick="delTask(\''+s.key+'\','+i+')">✕</button>'
+            +'</div>';
+        }).join(''):'<div class="dim" style="font-size:12.5px;color:var(--muted);padding:4px 2px">还没有任务，把这一步要做的具体事项列出来</div>')
+        // AI 提示词
+        +'<div class="seg"><span class="seg-b">🤖 AI 提示词</span><span class="dim" style="font-size:11px;color:var(--muted)">复制到 DeepSeek / ChatGPT 使用</span></div>'
+        +s.prompts.map(function(pm,pi){
+          return '<div class="prompt-card" id="pc-'+s.key+'-'+pi+'">'
+            +'<div class="pt"><span>'+esc(pm.t)+'</span><button class="btn sm ghost" onclick="event.stopPropagation();copyText(PROMPTS_'+s.key+'['+pi+'],\'提示词已复制\')">复制</button></div>'
+            +'<pre>'+(pm.p.length>160?'<span style="display:block;cursor:pointer" onclick="document.getElementById(\'pc-'+s.key+'-'+pi+'\').classList.toggle(\'open\')">'+esc(pm.p)+'</span>':esc(pm.p))+'</pre>'
+            +'</div>';
+        }).join('')
+        // 产出
+        +'<div class="seg"><span class="seg-b">📝 AI 产出归档</span><span class="dim" style="font-size:11px;color:var(--muted)">把 AI 的结果粘贴到这里，自动保存</span></div>'
+        +'<textarea class="ta" id="'+outId+'" placeholder="粘贴 AI 输出或自己的笔记…" oninput="saveOutput(\''+s.key+'\')">'+esc(st.output)+'</textarea>'
+      +'</div>'
+    +'</div>';
+  }).join('');
+  $id('stageCards').innerHTML=html;
+}
+
+/* ---------- 文献检索 (Semantic Scholar) ---------- */
+var sBusy=false;
+window._lastPapers=[];
+function doSearch(){
+  var q=$id('sQuery').value.trim();
+  if(!q){toast('请输入检索关键词');return;}
+  if(sBusy)return;
+  sBusy=true;
+  $id('sResults').innerHTML='<div class="busy"><span class="spin"></span>正在检索 Semantic Scholar…</div>';
+  var ctrl=new AbortController();
+  var timer=setTimeout(function(){ctrl.abort();},25000);
+  var url='https://api.semanticscholar.org/graph/v1/paper/search?query='+encodeURIComponent(q)+'&limit=12&fields=title,authors,year,venue,citationCount,externalIds,abstract,url,publicationTypes';
+  fetch(url,{signal:ctrl.signal})
+    .then(function(r){
+      if(r.status===429){throw {msg:'请求过于频繁（API 限流），请稍候 1-2 分钟再试'};}
+      if(!r.ok){throw {msg:'检索服务异常（HTTP '+r.status+'），请稍后重试'};}
+      return r.json();
+    })
+    .then(function(data){
+      var ps=(data&&data.data)||[];
+      if(!ps.length){$id('sResults').innerHTML='<div class="empty">没有找到相关文献，换个关键词试试</div>';return;}
+      window._lastPapers=ps;
+      $id('sResults').innerHTML=ps.map(function(x){
+        var auth=(x.authors||[]).slice(0,4).map(function(a){return a.name;}).join(', ')+(x.authors&&x.authors.length>4?' et al.':'');
+        var ids=x.externalIds||{};
+        var chips='';
+        if(ids.ArXiv)chips+='<a class="idx-chip" href="https://arxiv.org/abs/'+ids.ArXiv+'" target="_blank" rel="noopener">arXiv:'+ids.ArXiv+'</a>';
+        if(ids.DOI)chips+='<a class="idx-chip" href="https://doi.org/'+ids.DOI+'" target="_blank" rel="noopener">DOI</a>';
+        chips+='<a class="idx-chip" href="'+(x.url||'#')+'" target="_blank" rel="noopener">原文 ↗</a>';
+        var ab=x.abstract||'';
+        return '<div class="paper">'
+          +'<div class="pt2"><a href="'+(x.url||'#')+'" target="_blank" rel="noopener">'+esc(x.title)+'</a></div>'
+          +'<div class="meta"><span>'+esc(auth||'未知作者')+'</span>'
+          +(x.year?'<span>'+x.year+'</span>':'')
+          +(x.venue?'<span>'+esc(x.venue)+'</span>':'')
+          +(x.citationCount!=null?'<span>📌 引用 '+x.citationCount+'</span>':'')
+          +'</div>'
+          +(ab?'<div class="ab cut" id="ab-'+x.paperId+'">'+esc(ab)+'<button class="mini" style="padding:0 2px" onclick="event.preventDefault();var e=document.getElementById(\'ab-'+x.paperId+'\');e.classList.toggle(\'cut\');this.textContent=e.classList.contains(\'cut\')?\'展开\':\'收起\'">展开</button></div>':'')
+          +'<div class="acts">'+chips
+          +'<button class="btn sm primary" onclick="addPaperFromSearch(\''+x.paperId+'\')">+ 加入文献清单</button>'
+          +'</div>'
+        +'</div>';
+      }).join('')+'<div class="dim" style="text-align:center;font-size:12px;color:var(--muted);padding:10px 0">共 '+ps.length+' 条结果</div>';
+    })
+    .catch(function(e){
+      var q2=encodeURIComponent(q);
+      var msg=(e&&e.msg)?esc(e.msg):'网络请求失败（可能离线或无法访问外网），请检查网络后重试';
+      $id('sResults').innerHTML='<div class="empty">'+msg+'</div>'
+        +'<div class="empty" style="padding-top:0;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">'
+        +'<a class="idx-chip" href="https://arxiv.org/search/?query='+q2+'" target="_blank" rel="noopener">去 arXiv 检索 ↗</a>'
+        +'<a class="idx-chip" href="https://scholar.google.com/scholar?q='+q2+'" target="_blank" rel="noopener">去 Google Scholar ↗</a>'
+        +'<a class="idx-chip" href="https://xueshu.baidu.com/s?wd='+q2+'" target="_blank" rel="noopener">去 百度学术 ↗</a>'
+        +'</div>';
+    })
+    .finally(function(){sBusy=false;clearTimeout(timer);});
+}
+window.addPaperFromSearch=function(pid){
+  var ps=window._lastPapers||[];
+  var x=null;
+  for(var i=0;i<ps.length;i++)if(ps[i].paperId===pid)x=ps[i];
+  if(!x){toast('未找到该文献数据，请重新检索');return;}
+  var rs=loadRS();
+  var dup=rs.papers.some(function(p){return p.title&&x.title&&p.title.toLowerCase()===x.title.toLowerCase();});
+  if(dup){toast('该文献已在清单中');return;}
+  var auth=(x.authors||[]).slice(0,2).map(function(a){return a.name;}).join(', ');
+  rs.papers.unshift({id:uid(),title:x.title||'(无标题)',author:auth||'',url:x.url||'',st:'待读',venue:x.venue||'',year:x.year||'',cite:x.citationCount||0,source:'semantic-scholar'});
+  saveRS(rs);
+  toast('已加入文献清单（待读）');
+  renderDash();
+};
+
+/* ---------- 写作助手 ---------- */
+function renderWrite(){
+  var html=SECTIONS.map(function(s,i){
+    var txt=AGENT.drafts[s.key]||'';
+    var wc=txt.trim()?txt.trim().split(/\s+/).length:0;
+    return '<div class="sec-card" id="wsc-'+s.key+'">'
+      +'<div class="sec-head2" onclick="var el=document.getElementById(\'wsc-'+s.key+'\');el.classList.toggle(\'open\')">'
+        +'<b>'+esc(s.n)+'</b>'
+        +'<span class="wc">'+(wc?wc+' 字':'')+'</span><span style="color:var(--muted)">▾</span>'
+      +'</div>'
+      +'<div class="sec-body">'
+        +'<div class="prompt-card"><div class="pt"><span>🤖 写作提示词</span><button class="btn sm ghost" onclick="copyText(WRITE_PROMPTS[\''+s.key+'\'],\'提示词已复制\')">复制</button></div><pre>'+esc(s.p)+'</pre></div>'
+        +'<textarea class="ta" placeholder="在这里写草稿，内容自动保存到本地…" oninput="saveDraft(\''+s.key+'\')">'+esc(txt)+'</textarea>'
+        +'<div class="row" style="justify-content:flex-end;margin-top:8px">'
+        +'<button class="btn sm" onclick="copyDraft(\''+s.key+'\')">复制本段</button>'
+        +'<button class="btn sm danger" onclick="clearDraft(\''+s.key+'\')">清空</button>'
+        +'</div>'
+      +'</div>'
+    +'</div>';
+  }).join('');
+  AGENT.customSecs.forEach(function(c,ci){
+    var txt=AGENT.drafts[c.key]||'';
+    var wc=txt.trim()?txt.trim().split(/\s+/).length:0;
+    html+='<div class="sec-card" id="wsc-'+c.key+'">'
+      +'<div class="sec-head2" onclick="var el=document.getElementById(\'wsc-'+c.key+'\');el.classList.toggle(\'open\')">'
+        +'<b>'+esc(c.n)+'</b><span class="wc">'+(wc?wc+' 字':'')+'</span><span style="color:var(--muted)">▾</span>'
+      +'</div>'
+      +'<div class="sec-body">'
+        +'<textarea class="ta" placeholder="自定义章节草稿…" oninput="saveDraft(\''+c.key+'\')">'+esc(txt)+'</textarea>'
+        +'<div class="row" style="justify-content:flex-end;margin-top:8px"><button class="btn sm danger" onclick="removeCustomSec(\''+c.key+'\')">删除该章节</button></div>'
+      +'</div>'
+    +'</div>';
+  });
+  $id('secList').innerHTML=html;
+  var filled=0,total=SECTIONS.length+AGENT.customSecs.length,words=0;
+  SECTIONS.forEach(function(s){var t=AGENT.drafts[s.key]||'';if(t.trim())filled++;words+=t.trim()?t.trim().split(/\s+/).length:0;});
+  AGENT.customSecs.forEach(function(c){var t=AGENT.drafts[c.key]||'';if(t.trim())filled++;words+=t.trim()?t.trim().split(/\s+/).length:0;});
+  $id('writeStat').textContent='已写 '+filled+'/'+total+' 章 · 共约 '+words+' 字';
+}
+function saveDraft(key){
+  var el=document.querySelector('#wsc-'+key+' textarea');
+  if(el)AGENT.drafts[key]=el.value;
+  saveAgent();updateWriteStat();
+}
+function updateWriteStat(){
+  var filled=0,words=0;
+  SECTIONS.forEach(function(s){var t=AGENT.drafts[s.key]||'';if(t.trim())filled++;words+=t.trim()?t.trim().split(/\s+/).length:0;});
+  AGENT.customSecs.forEach(function(c){var t=AGENT.drafts[c.key]||'';if(t.trim())filled++;words+=t.trim()?t.trim().split(/\s+/).length:0;});
+  var total=SECTIONS.length+AGENT.customSecs.length;
+  var el=$id('writeStat');if(el)el.textContent='已写 '+filled+'/'+total+' 章 · 共约 '+words+' 字';
+}
+function copyDraft(key){copyText(AGENT.drafts[key]||'','已复制本段草稿');}
+function clearDraft(key){if(!confirm('确认清空该章节草稿？'))return;AGENT.drafts[key]='';saveAgent();renderWrite();}
+function addCustomSec(){
+  var n=$id('newSecName').value.trim();
+  if(!n){toast('请输入章节名');return;}
+  var key='c'+Date.now().toString(36);
+  AGENT.customSecs.push({key:key,n:n});
+  AGENT.drafts[key]='';
+  $id('newSecName').value='';
+  saveAgent();renderWrite();toast('已添加章节');
+}
+function removeCustomSec(key){
+  if(!confirm('删除该自定义章节？草稿将一并清除'))return;
+  AGENT.customSecs=AGENT.customSecs.filter(function(c){return c.key!==key;});
+  delete AGENT.drafts[key];
+  saveAgent();renderWrite();
+}
+function allDraftText(){
+  var parts=[];
+  SECTIONS.forEach(function(s){var t=(AGENT.drafts[s.key]||'').trim();if(t)parts.push('# '+s.n+'\n\n'+t);});
+  AGENT.customSecs.forEach(function(c){var t=(AGENT.drafts[c.key]||'').trim();if(t)parts.push('# '+c.n+'\n\n'+t);});
+  return parts.join('\n\n---\n\n');
+}
+function exportMd(){
+  var txt=allDraftText();
+  if(!txt){toast('还没有草稿内容');return;}
+  var t=curTopic();
+  var head='# '+(t?t.name:'研究论文')+' · 草稿\n\n';
+  var blob=new Blob([head+txt],{type:'text/markdown;charset=utf-8'});
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=(t?t.name:'论文草稿')+'.md';
+  document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},500);
+  toast('已导出 Markdown');
+}
+function copyAllDrafts(){
+  var txt=allDraftText();
+  if(!txt){toast('还没有草稿内容');return;}
+  copyText(txt,'全文已复制');
+}
+
+/* ---------- Ideas ---------- */
+function addIdea(){
+  var v=$id('ideaInput').value.trim();
+  if(!v){toast('先写点什么');return;}
+  AGENT.ideas.unshift({id:uid(),text:v,date:today(),done:false});
+  $id('ideaInput').value='';
+  saveAgent();renderIdeas();renderDash();toast('Idea 已保存');
+}
+function renderIdeas(){
+  var list=$id('ideaList');
+  $id('ideaCount').textContent=AGENT.ideas.length+' 条';
+  list.innerHTML=AGENT.ideas.length?AGENT.ideas.map(function(x,i){
+    return '<div class="idea '+(x.done?'done':'')+'">'
+      +'<div class="ib"><div class="it">'+esc(x.text)+'</div><div class="tm">'+esc(x.date)+'</div></div>'
+      +'<div class="acts">'
+      +'<button class="btn sm" title="转为研究课题" onclick="ideaToTopic('+i+')">📌 转课题</button>'
+      +'<button class="btn sm ghost" title="标记完成" onclick="toggleIdea('+i+')">'+(x.done?'↩':'✓')+'</button>'
+      +'<button class="btn sm ghost danger" onclick="delIdea('+i+')">✕</button>'
+      +'</div></div>';
+  }).join(''):'<div class="empty">还没有 Idea。研究灵感的有效期很短，想到了就记下来。</div>';
+}
+function toggleIdea(i){AGENT.ideas[i].done=!AGENT.ideas[i].done;saveAgent();renderIdeas();}
+function delIdea(i){if(!confirm('删除这条 Idea？'))return;AGENT.ideas.splice(i,1);saveAgent();renderIdeas();renderDash();}
+function ideaToTopic(i){
+  var x=AGENT.ideas[i];
+  var name=prompt('转成课题，课题名：',x.text.slice(0,30));
+  if(!name||!name.trim())return;
+  var rs=loadRS();
+  rs.topics.unshift({id:uid(),name:name.trim(),dir:'',st:'构思中',upd:today()});
+  saveRS(rs);
+  AGENT.topicId=rs.topics[0].id;
+  AGENT.ideas[i].done=true;
+  saveAgent();renderIdeas();renderDash();
+  toast('已转为课题并设为当前课题');
+}
+
+/* ---------- 提示词库 ---------- */
+function renderPrompts(){
+  $id('promptLib').innerHTML=PROMPT_LIB.map(function(g,gi){
+    return '<div class="pg"><div class="pg-t">'+esc(g.g)+'</div>'
+      +g.items.map(function(pm,ii){
+        return '<div class="prompt-card" style="margin:8px 0">'
+          +'<div class="pt"><span>'+esc(pm.t)+'</span><button class="btn sm ghost" style="margin-left:auto" onclick="copyLibPrompt('+gi+','+ii+')">复制</button></div>'
+          +'<pre>'+esc(pm.p)+'</pre>'
+          +'</div>';
+      }).join('')
+      +'</div>';
+  }).join('');
+}
+function copyLibPrompt(gi,ii){
+  var p=PROMPT_LIB[gi]&&PROMPT_LIB[gi].items[ii];
+  if(p)copyText(p.p,'提示词已复制');
+}
+
+/* ---------- 数据 ---------- */
+function renderData(){
+  var rs=loadRS();
+  var words=0;
+  SECTIONS.forEach(function(s){words+=(AGENT.drafts[s.key]||'').trim()?(AGENT.drafts[s.key].trim().split(/\s+/).length):0;});
+  $id('stAgent').textContent=AGENT.ideas.length+' ideas';
+  $id('stTopics').textContent=rs.topics.length;
+  $id('stPapers').textContent=rs.papers.length;
+  $id('stWords').textContent=words;
+}
+function exportAll(){
+  var rs=loadRS();
+  var blob=new Blob([JSON.stringify({agent:AGENT,research:rs,exportedAt:new Date().toISOString()},null,2)],{type:'application/json'});
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);a.download='科研智能体备份.json';
+  document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},500);
+  toast('备份已导出');
+}
+function importAll(input){
+  var f=input.files[0];
+  if(!f)return;
+  var reader=new FileReader();
+  reader.onload=function(){
+    try{
+      var o=JSON.parse(reader.result);
+      if(o.agent){AGENT=normalize(o.agent);saveAgent();}
+      if(o.research&&o.research.topics){saveRS({topics:o.research.topics,papers:o.research.papers||[],subs:o.research.subs||[]});}
+      applyTheme(AGENT.theme);
+      renderAll();
+      toast('导入成功');
+    }catch(e){toast('导入失败：文件格式不正确');}
+  };
+  reader.readAsText(f);
+  input.value='';
+}
+
+/* ---------- 全局渲染 ---------- */
+function renderAll(){
+  renderDash();renderPipe();renderWrite();renderIdeas();renderPrompts();renderData();
+}
+
+/* 暴露给全局（onclick 需要） */
+window.go=go;
+window.pickTopic=pickTopic;
+window.openStage=openStage;
+window.addTask=addTask;
+window.toggleTask=toggleTask;
+window.delTask=delTask;
+window.setStatus=setStatus;
+window.saveOutput=saveOutput;
+window.doSearch=doSearch;
+window.renderWrite=renderWrite;
+window.saveDraft=saveDraft;
+window.copyDraft=copyDraft;
+window.clearDraft=clearDraft;
+window.addCustomSec=addCustomSec;
+window.removeCustomSec=removeCustomSec;
+window.exportMd=exportMd;
+window.copyAllDrafts=copyAllDrafts;
+window.addIdea=addIdea;
+window.toggleIdea=toggleIdea;
+window.delIdea=delIdea;
+window.ideaToTopic=ideaToTopic;
+window.copyText=copyText;
+window.exportAll=exportAll;
+window.importAll=importAll;
+window.setTheme=setTheme;
+window.PROMPTS_goal=STAGES[0].prompts;
+window.PROMPTS_lit=STAGES[1].prompts;
+window.PROMPTS_method=STAGES[2].prompts;
+window.PROMPTS_exp=STAGES[3].prompts;
+window.PROMPTS_write=STAGES[4].prompts;
+window.PROMPTS_submit=STAGES[5].prompts;
+window.WRITE_PROMPTS=(function(){var o={};SECTIONS.forEach(function(s){o[s.key]=s.p;});return o;})();
+window.LIB_PROMPT=function(p){return p;};
+window.copyLibPrompt=copyLibPrompt;
+
+/* ---------- init ---------- */
+applyTheme(AGENT.theme);
+renderAll();
+})();
+</script>
+</body>
+</html>

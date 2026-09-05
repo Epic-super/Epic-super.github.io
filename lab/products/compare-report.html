@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<title>Excel 对比结果</title>
+<style>
+  :root { --bg:#0f1419; --card:#1a2230; --fg:#e6edf3; --muted:#8b98a8; --ok:#3fb950; --warn:#f0883e; --line:#2b3650; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font-family:-apple-system,"Segoe UI",Roboto,"Microsoft YaHei",sans-serif; line-height:1.6; padding:28px; }
+  .wrap { max-width:920px; margin:0 auto; }
+  h1 { font-size:22px; margin:0 0 4px; }
+  .sub { color:var(--muted); margin-bottom:20px; font-size:13px; }
+  .badge { display:inline-block; padding:8px 14px; border-radius:8px; font-weight:600; font-size:15px; }
+  .badge.ok { background:rgba(63,185,80,.15); color:var(--ok); border:1px solid rgba(63,185,80,.4); }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:18px 20px; margin:16px 0; }
+  .card h2 { font-size:15px; margin:0 0 12px; color:var(--fg); }
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th,td { text-align:left; padding:8px 10px; border-bottom:1px solid var(--line); }
+  th { color:var(--muted); font-weight:500; }
+  td.mono { font-family:ui-monospace,Consolas,monospace; word-break:break-all; }
+  .warn { background:rgba(240,136,62,.12); border:1px solid rgba(240,136,62,.4); color:var(--warn); }
+  .notice { background:#11202b; border:1px solid var(--line); border-radius:8px; padding:12px 14px; font-size:13px; white-space:pre-wrap; word-break:break-all; }
+  .muted { color:var(--muted); font-size:12px; }
+  code { background:#11202b; padding:1px 6px; border-radius:4px; }
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+<div class="wrap">
+  <h1>两个 Excel 文件对比结果</h1>
+  <div class="sub">lamberts_parts_模版填充_xlwings.xlsx &nbsp;vs&nbsp; RFQ&nbsp;物料清单60126-0245.xlsx</div>
+
+  <div class="card">
+    <span class="badge ok">结论：两文件字节级完全一致，无任何内容差异</span>
+  </div>
+
+  <div class="card">
+    <h2>指纹对比</h2>
+    <table>
+      <tr><th>项目</th><th>A（模版填充_xlwings）</th><th>B（RFQ 物料清单）</th></tr>
+      <tr><td>MD5</td><td class="mono">4398515ecf25fb2c9707c048222ed2a5</td><td class="mono">4398515ecf25fb2c9707c048222ed2a5</td></tr>
+      <tr><td>文件大小</td><td>674,842 字节</td><td>674,842 字节</td></tr>
+      <tr><td>是否相同</td><td colspan="2">是 — 完全一致</td></tr>
+    </table>
+  </div>
+
+  <div class="card warn">
+    <strong>⚠️ 重要：这两个文件都不是真正的 Excel 文件</strong>
+    <div style="margin-top:8px;font-weight:400;">
+      扩展名虽为 <code>.xlsx</code>，但文件头不是标准 OOXML 的 <code>PK</code> 签名，内部也没有 XML/Workbook 结构。
+      Excel、openpyxl、以及编辑器 SDK 均无法打开它们——这正是此前工具反复报 "No workbook open / BadZipFile" 的原因。
+      实际内容是一个<strong>带机密声明头的加密/混淆二进制容器</strong>。
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>文件开头可读明文（已解码）</h2>
+    <div class="notice">[该文件为我司机密文件，未经允许不可擅自扩散，否则将视为违反计算机安全法，须承担相应的法律风险，请谨慎处理！]</div>
+    <div class="muted" style="margin-top:8px;">之后是一大段加密/混淆数据，无可读表格内容。</div>
+  </div>
+
+  <div class="card">
+    <h2>提示：目录里还有其它 RFQ 变体（大小不同，可能是真正要对比的对象）</h2>
+    <table>
+      <tr><th>文件名</th><th>大小（字节）</th></tr>
+      <tr><td class="mono">RFQ 物料清单60126-0245-7.21.fixed.xlsx</td><td>1,351,609</td></tr><tr><td class="mono">RFQ 物料清单60126-0245-7.21.xlsx</td><td>1,349,727</td></tr><tr><td class="mono">RFQ 物料清单60126-0245..xlsx</td><td>1,349,734</td></tr>
+    </table>
+    <div class="muted" style="margin-top:10px;">
+      这些变体（如 <code>RFQ 物料清单60126-0245-7.21.xlsx</code>、<code>…-7.21.fixed.xlsx</code>）大小约 1.35 MB，
+      与本对比的两个 674 KB 文件不同。若你本意是“模版填充结果 vs RFQ 原始清单”，很可能对比对象选错了——请确认实际要比较哪两份。
+    </div>
+  </div>
+</div>
+</body>
+</html>
