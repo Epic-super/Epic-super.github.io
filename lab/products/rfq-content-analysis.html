@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RFQ 物料清单 · 公式内容对比分析（初始模板 vs 填充后）</title>
+<style>
+  :root{ --bg:#0f1115; --card:#171a21; --line:#2a2f3a; --txt:#e6e9ef; --mut:#9aa3b2;
+         --red:#ff6b6b; --grn:#4ec9a8; --yel:#e5c07b; --blue:#61afef; --pur:#c678dd; }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);font:14px/1.7 -apple-system,"Segoe UI",Roboto,"Microsoft YaHei",sans-serif}
+  .wrap{max-width:1080px;margin:0 auto;padding:32px 22px 60px}
+  h1{font-size:23px;margin:0 0 4px}
+  .sub{color:var(--mut);margin:0 0 24px;font-size:13px}
+  h2{font-size:18px;margin:34px 0 12px;padding-left:10px;border-left:3px solid var(--blue)}
+  h3{font-size:15px;margin:20px 0 8px;color:var(--yel)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px 20px;margin:14px 0}
+  table{width:100%;border-collapse:collapse;margin:10px 0;font-size:13px}
+  th,td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+  th{background:#1d212b;color:var(--mut);font-weight:600}
+  code{background:#0b0d11;border:1px solid var(--line);border-radius:4px;padding:1px 6px;color:var(--grn);font-family:"SF Mono",Consolas,monospace;font-size:12.5px}
+  .mono{font-family:"SF Mono",Consolas,monospace;font-size:12.5px}
+  .tag{display:inline-block;padding:1px 8px;border-radius:20px;font-size:12px;font-weight:600}
+  .t-red{background:rgba(255,107,107,.16);color:var(--red)}
+  .t-yel{background:rgba(229,192,123,.16);color:var(--yel)}
+  .t-grn{background:rgba(78,201,168,.16);color:var(--grn)}
+  .t-blue{background:rgba(97,175,239,.16);color:var(--blue)}
+  .kpi{display:flex;gap:12px;flex-wrap:wrap;margin:8px 0}
+  .kpi .b{flex:1;min-width:150px;background:#1b1f29;border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+  .kpi .n{font-size:26px;font-weight:700}
+  .kpi .l{color:var(--mut);font-size:12.5px;margin-top:2px}
+  .flow{display:flex;align-items:stretch;gap:0;margin:14px 0;flex-wrap:wrap}
+  .node{background:#1b1f29;border:1px solid var(--line);border-radius:10px;padding:14px 16px;flex:1;min-width:220px}
+  .node .t{font-weight:700;margin-bottom:6px}
+  .node.a .t{color:var(--grn)} .node.b .t{color:var(--red)} .node.c .t{color:var(--blue)}
+  .arrow{display:flex;align-items:center;padding:0 10px;color:var(--mut);font-size:22px}
+  .rowlist{font-family:Consolas,monospace;font-size:12px;color:var(--mut);word-break:break-all}
+  ul{margin:8px 0 8px 4px;padding-left:20px} li{margin:4px 0}
+  .warn{background:rgba(255,107,107,.08);border:1px solid rgba(255,107,107,.35);border-radius:10px;padding:14px 18px;margin:14px 0}
+  .ok{background:rgba(78,201,168,.08);border:1px solid rgba(78,201,168,.35);border-radius:10px;padding:14px 18px;margin:14px 0}
+  footer{color:var(--mut);font-size:12px;margin-top:36px;border-top:1px solid var(--line);padding-top:14px}
+  .note{color:var(--mut);font-size:12.5px}
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+<div class="wrap">
+  <h1>RFQ 物料清单 · 公式内容对比分析</h1>
+  <p class="sub">对比对象：初始模板 <code>RFQ 物料清单60126-0245.xlsx</code>　vs　填充后 <code>RFQ 物料清单60126-0245-7.21.xlsx</code>（主表 <b>报价物料信息</b>）<br>
+  方法：用 xlwings 提取逐格公式，做 <b>归一化签名</b>（去掉行号、保留列字母/常量/函数）后逐格比对，定位"初始公式"与"最终填充公式"的<b>文本层</b>差异。</p>
+
+  <h2>一、总体：96.6% 公式逐字相同，内容变动集中在 3 类</h2>
+  <div class="kpi">
+    <div class="b"><div class="n">6 880</div><div class="l">模板主表公式总数</div></div>
+    <div class="b"><div class="n">10 874</div><div class="l">填充后主表公式总数（多 3 994）</div></div>
+    <div class="b"><div class="n">6 647</div><div class="l">两文件逐字相同（96.6%）</div></div>
+    <div class="b"><div class="n">203</div><div class="l">共享格内容差异（见下）</div></div>
+  </div>
+  <div class="card">
+    <table>
+      <tr><th style="width:24%">差异类别</th><th style="width:12%">数量</th><th>说明</th></tr>
+      <tr><td><span class="tag t-yel">W 列 两写法</span></td><td>171 行</td><td>模板自身含两种：无 Y(171 行,3–173) / 有 Y(290 行,174–463)；填充全列 725 行统一为 <code>=(M+O+Q+S+U+Y)*0.1</code></td></tr>
+      <tr><td><span class="tag t-red">K 列语序</span></td><td>28 行</td><td>初始 <code>=J*I*H*2.8…</code> → 填充修正为 <code>=H*I*J*2.8…</code>（纯语序，数值不变）</td></tr>
+      <tr><td><span class="tag t-blue">K 列密度</span></td><td>4 行</td><td>密度常量 <code>2.8</code>(铝) → <code>7.8</code>(钢)：行 160/163/427/430</td></tr>
+      <tr><td><span class="tag t-red">K 列新增逆序</span></td><td>30 行</td><td>填充新增的 704–733 行全部为 <code>=J*I*H*2.8…</code>（非主体写法）</td></tr>
+    </table>
+    <p class="note">注：其余 8 个工作表（阶梯报价 / 漆计算 / 材料 / 转换成$ / 客户模板Cost Break Down 等）公式词汇表与模板<b>逐字一致</b>——问题只发生在主表的填充区。</p>
+  </div>
+
+  <h2>二、最关键的发现：填充"源"是模板自身的瑕疵块</h2>
+  <div class="warn">
+    <b>初始模板自己就不统一。</b> 模板 K 列（材料重量）主体是 <code>=H*I*J*2.8/1000/1000</code>，
+    但<b>底部 434–463 行已经是逆序</b> <code>=J*I*H*2.8/1000/1000</code>。
+  </div>
+
+  <div class="flow">
+    <div class="node a">
+      <div class="t">① 模板出厂即带瑕疵</div>
+      <div class="rowlist">K 434–463：<br>30 行 <code>=J*I*H*2.8/1000/1000</code><br>（底部块，逆序）</div>
+    </div>
+    <div class="arrow">→</div>
+    <div class="node b">
+      <div class="t">② 填充时部分修正</div>
+      <div class="rowlist">其中 28 行被改成 <code>=H*I*J*2.8…</code><br>剩 2 行（460/462）成空洞</div>
+    </div>
+    <div class="arrow">→</div>
+    <div class="node c">
+      <div class="t">③ 新行复制了瑕疵</div>
+      <div class="rowlist">新增 704–733：<br>30 行 <code>=J*I*H*2.8/1000/1000</code><br>与模板底部块写法一致</div>
+    </div>
+  </div>
+  <p class="note">证据：填充文件 704–733 行的 K 列<b>逐字等于</b>模板 434–463 行的写法（都是 <code>=J*I*H*2.8/1000/1000</code>），
+  而 ≠ 主表主体写法（<code>=H*I*J</code>）。这说明<b>从下往上填充时，用户抓取的"源行"正是模板那段逆序块</b>，
+  于是旧 bug 被原样复制进每一批新行。这正是"从下往上批量填充出问题"的内容层根因。</p>
+
+  <h2>三、三类内容差异详析</h2>
+
+  <h3>① W 列（管理费 / 10% 计提）— 模板自身就两种写法，填充统一成 +Y</h3>
+  <div class="card">
+    <table>
+      <tr><th>区块</th><th>行范围</th><th>模板公式</th><th>填充后</th></tr>
+      <tr><td>顶部块</td><td class="mono">W3…W173</td><td class="mono">=(M+O+Q+S+U)*0.1</td><td class="mono">=(M+O+Q+S+U+<span style="color:var(--red)">Y</span>)*0.1</td></tr>
+      <tr><td>底部块</td><td class="mono">W174…W463</td><td class="mono">=(M+O+Q+S+U+Y)*0.1</td><td class="mono">=(M+O+Q+S+U+Y)*0.1</td></tr>
+      <tr><td>新增块</td><td class="mono">W464…W733</td><td class="mono">（模板无）</td><td class="mono">=(M+O+Q+S+U+Y)*0.1</td></tr>
+    </table>
+    <p><b>纠正（重要）：</b>模板并非"只有无 Y"。它自身就含两种写法——<b>顶部 171 行(3–173)无 Y、底部 290 行(174–463)有 Y</b>，分界恰在 174 行（连续无缺，典型两段式分批改写）。
+    填充把全列 725 行<b>统一为 +Y</b>。因此"多算 Y"不是填充新引入的错误，而是<b>填充沿用了模板底部块的写法、向上(补 171 行)和向下(新 266 行)传播</b>的结果。</p>
+    <p class="note"><b>⚠ 源文件(模板)公式仅作参考，非绝对正确标准。</b>+Y 虽是模板里的多数派(290/461)，但不能仅凭"多数"就断定其 intended；顶部 171 行无 Y 也未必是"残差"。真正的隐患是<b>参考源自身不一致</b>（两版写法），而非 7.21 单方面改错。包装费 Y 是否应计入管理费基数，须由业务最终拍板，不能从参考源反推。</p>
+  </div>
+
+  <h3>② K 列（材料重量）— 语序双轨 + 密度替换</h3>
+  <div class="card">
+    <table>
+      <tr><th>行范围</th><th>写法</th><th>性质</th></tr>
+      <tr><td class="mono">主体 3–433</td><td class="mono">=H*I*J*2.8/1000/1000</td><td><span class="tag t-grn">主体（正序）</span></td></tr>
+      <tr><td class="mono">模板 434–463</td><td class="mono">=J*I*H*2.8/1000/1000</td><td><span class="tag t-red">模板自带逆序</span></td></tr>
+      <tr><td class="mono">填充 434–461（28行）</td><td class="mono">=H*I*J*2.8/1000/1000</td><td><span class="tag t-grn">已修正为正序</span></td></tr>
+      <tr><td class="mono">填充 704–733（30行）</td><td class="mono">=J*I*H*2.8/1000/1000</td><td><span class="tag t-red">新增却逆序</span></td></tr>
+      <tr><td class="mono">160/163/427/430</td><td class="mono">=H*I*J*<span style="color:var(--blue)">7.8</span>/1000/1000</td><td><span class="tag t-blue">密度 2.8→7.8（钢）</span></td></tr>
+    </table>
+    <p class="note">乘法规律 <code>H*I*J</code> 与 <code>J*I*H</code> 数值相同，但<b>文本不一致</b>会让后续维护、查找、复制时难辨真伪；
+    而 <code>2.8→7.8</code> 是真实数值变化（铝件改钢件，重量变大），属正常但须在报告中标注。</p>
+  </div>
+
+  <h2>四、结论与修复建议</h2>
+  <div class="ok">
+    <b>根因（内容层）：</b>"初始公式"本身就不统一——<b>模板是分两批填充拼起来的</b>：
+    W 列在 <b>174 行</b>分界(顶部无 Y / 底部有 Y)、K 列在 <b>434 行</b>分界(主体正序 / 底部逆序)。
+    任何"从下往上、以最后一行作为源"的填充，都会把底部那一批的写法当作模板，复制到新行并回灌旧行。
+    所以问题不是"填充动作错了"，而是<b>被复制的源公式自身就是个 patchwork</b>。
+  </div>
+  <ul>
+    <li><b>先统一源，再填充。</b>模板 K 列全部统一为 <code>=H*I*J*2.8/1000/1000</code>（含原 434–463 逆序块），W 列全部统一为 <code>=(M+O+Q+S+U+Y)*0.1</code>（与多数派 290 行一致），再整块 Ctrl+D 自上而下填充，杜绝"以瑕疵块作源"。</li>
+    <li><b>确认 W 列口径。</b>模板内部 W 列两种写法(顶部无 Y / 底部有 Y)，填充已统一为含 Y。多数派 290 行已含 Y，倾向 intended；定稿后全表保持单一写法即可。</li>
+    <li><b>补齐空洞行。</b>行 460/462/538/539/541/542/571 及 K 列漏填的 571 行，需按主体公式补回（否则下游静默少算，且无 #REF! 报错）。</li>
+    <li><b>统一密度常量逻辑。</b>2.8/7.8 应由"材料类型"列<strong>自动判定</strong>，而非手填常量，避免再次错填。</li>
+  </ul>
+
+  <footer>
+    生成方式：xlwings 0.36.2 逐格读取 → 归一化签名比对。文件名中的"空格"为不间断空格 <code>\xa0</code>，读取时需注意。<br>
+    本次为"公式内容层"补充分析；结构层（缺公式行/空洞）见同目录《RFQ公式差异与填充问题分析报告.html》。
+  </footer>
+</div>
+</body>
+</html>

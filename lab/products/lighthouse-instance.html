@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#f6f3ee">
+<title>灯塔审计 · Lighthouse 性能工作台</title>
+<style>
+:root{
+  --bg:#f6f3ee; --panel:#ffffff; --panel2:#fbf9f5; --ink:#2a2724; --muted:#948b80;
+  --line:#e8e2d8; --line2:#f0ece4; --clay:#2f7d8c; --clay-soft:#e2eef0; --clay-ink:#1f5a66;
+  --sage:#7c9082; --sage-soft:#e9efe9; --gold:#c9a24b; --red:#cf5b4e; --green:#3f9e6f;
+  --shadow:0 1px 2px rgba(40,30,20,.05),0 6px 20px rgba(40,30,20,.05);
+  --radius:18px; --radius-s:12px;
+  --serif:"Songti SC","STSong",Georgia,"Times New Roman",serif;
+}
+[data-theme="dark"]{
+  --bg:#161310; --panel:#1e1b17; --panel2:#211d18; --ink:#ece6dd; --muted:#9a9186;
+  --line:#2d2823; --line2:#262019; --clay:#5fafc0; --clay-soft:#16282d; --clay-ink:#8fd2e0;
+  --sage:#90a597; --sage-soft:#1f2a23; --gold:#d8b25e; --red:#e07a6e; --green:#5bb98c;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased;}
+button{font-family:inherit;}
+::-webkit-scrollbar{height:0;width:0;}
+.shell{display:flex;min-height:100vh;}
+.sidebar{width:212px;flex:none;position:sticky;top:0;height:100vh;padding:22px 13px;border-right:1px solid var(--line);background:var(--panel2);display:flex;flex-direction:column;gap:3px;overflow-y:auto;}
+.brand{display:flex;align-items:center;gap:10px;padding:0 8px 16px;}
+.brand .logo{width:34px;height:34px;border-radius:11px;background:linear-gradient(135deg,var(--clay),var(--gold));display:flex;align-items:center;justify-content:center;color:#fff;flex:none;}
+.brand .logo svg{width:19px;height:19px;}
+.brand b{font-family:var(--serif);font-size:16px;letter-spacing:.5px;}
+.brand small{display:block;color:var(--muted);font-size:10.5px;font-weight:400;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;cursor:pointer;color:var(--muted);font-weight:600;font-size:14px;transition:.15s;border:1px solid transparent;}
+.nav-item svg{width:18px;height:18px;flex:none;}
+.nav-item:hover{background:var(--panel);color:var(--ink);}
+.nav-item.active{background:var(--clay-soft);color:var(--clay-ink);border-color:var(--line);}
+.side-foot{margin-top:auto;padding:10px 8px 0;color:var(--muted);font-size:11px;line-height:1.6;}
+.side-foot button{background:none;border:none;color:var(--clay-ink);cursor:pointer;font-size:11px;padding:0;text-decoration:underline;}
+.main{flex:1;min-width:0;display:flex;flex-direction:column;}
+.topbar{position:sticky;top:0;z-index:15;background:color-mix(in srgb,var(--bg) 86%,transparent);backdrop-filter:blur(12px);padding:15px 22px 11px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px;}
+.topbar h1{font-family:var(--serif);font-size:20px;margin:0;font-weight:700;letter-spacing:.5px;}
+.topbar .date{color:var(--muted);font-size:12px;margin-left:2px;}
+.topbar .spacer{flex:1;}
+.icon-btn{width:38px;height:38px;border-radius:11px;border:1px solid var(--line);background:var(--panel);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink);}
+.icon-btn svg{width:18px;height:18px;}
+.icon-btn:hover{border-color:var(--clay);}
+.wrap{max-width:960px;width:100%;margin:0 auto;padding:20px 22px 120px;}
+.view-head{display:flex;align-items:baseline;gap:10px;margin:0 0 16px;flex-wrap:wrap;}
+.view-head h2{font-family:var(--serif);font-size:22px;margin:0;font-weight:700;}
+.view-head .desc{color:var(--muted);font-size:13px;}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);margin-bottom:16px;}
+.panel-title{display:flex;align-items:center;justify-content:space-between;margin:0 0 14px;gap:10px;flex-wrap:wrap;}
+.panel-title h3{font-size:15px;margin:0;font-weight:700;display:flex;align-items:center;gap:8px;}
+.panel-title h3 svg{width:17px;height:17px;color:var(--clay);}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+.field{display:flex;flex-direction:column;gap:5px;flex:1;min-width:110px;}
+.field label{font-size:12px;color:var(--muted);font-weight:600;}
+input,select,textarea{font-family:inherit;font-size:14px;color:var(--ink);background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:9px 11px;outline:none;transition:.15s;width:100%;}
+input:focus,select:focus,textarea:focus{border-color:var(--clay);background:var(--panel);}
+textarea{resize:vertical;min-height:38px;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:40px;padding:9px 15px;border-radius:11px;border:1px solid var(--line);background:var(--panel);color:var(--ink);font-size:14px;font-weight:600;cursor:pointer;transition:.15s;}
+.btn svg{width:17px;height:17px;}
+.btn:hover{border-color:var(--clay);}
+.btn.primary{background:var(--clay);border-color:var(--clay);color:#fff;}
+.btn.primary:hover{background:var(--clay-ink);}
+.btn.ghost{background:transparent;}
+.btn.sm{min-height:34px;padding:6px 11px;font-size:13px;border-radius:9px;}
+.btn.danger{color:var(--red);}
+.btn.danger:hover{border-color:var(--red);background:var(--panel2);}
+.btn.block{width:100%;}
+.hint{font-size:12.5px;color:var(--muted);line-height:1.7;}
+.stat{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:14px 16px;}
+.stat .n{font-family:var(--serif);font-size:25px;font-weight:700;font-variant-numeric:tabular-nums;}
+.stat .l{font-size:12px;color:var(--muted);margin-top:2px;}
+.dim{display:flex;align-items:center;gap:9px;margin-bottom:8px;font-size:13px;}
+.dim .dname{width:74px;color:var(--muted);font-weight:600;flex:none;}
+.dim .dbar{flex:1;height:9px;border-radius:6px;background:var(--line2);overflow:hidden;}
+.dim .dbar i{display:block;height:100%;border-radius:6px;}
+.dim .dval{width:38px;text-align:right;font-weight:700;font-variant-numeric:tabular-nums;}
+.site-card{display:flex;align-items:center;gap:14px;padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:var(--panel);margin-bottom:12px;cursor:pointer;transition:.15s;}
+.site-card:hover{border-color:var(--clay);}
+.site-card.sel{border-color:var(--clay);background:var(--clay-soft);}
+.site-card .ring{width:60px;height:60px;flex:none;}
+.site-card .meta{flex:1;min-width:0;}
+.site-card .meta b{font-size:15px;}
+.site-card .meta small{display:block;color:var(--muted);font-size:12px;word-break:break-all;}
+.site-card .alert{background:var(--red);color:#fff;font-size:11px;font-weight:700;padding:3px 9px;border-radius:8px;}
+.site-card .del{color:var(--muted);cursor:pointer;font-size:13px;}
+.site-card .del:hover{color:var(--red);}
+.audit{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--panel);margin-bottom:9px;}
+.audit .meta{flex:1;min-width:0;}
+.audit .meta b{font-size:14px;}
+.audit .meta small{color:var(--muted);font-size:12px;display:block;}
+.audit .sc{display:flex;gap:6px;flex-wrap:wrap;}
+.audit .sc span{font-size:11px;font-weight:700;padding:2px 7px;border-radius:7px;color:#fff;}
+.audit .del{color:var(--muted);cursor:pointer;}
+.audit .del:hover{color:var(--red);}
+.banner{background:var(--clay);color:#fff;border-radius:14px;padding:13px 16px;display:flex;align-items:center;gap:12px;margin-bottom:16px;font-size:13.5px;}
+.banner button{background:#fff;color:var(--clay-ink);border:none;border-radius:9px;padding:7px 13px;font-weight:700;cursor:pointer;}
+.banner .x{margin-left:auto;cursor:pointer;opacity:.85;font-size:18px;}
+.tip{background:var(--clay-soft);border:1px solid var(--line);border-left:3px solid var(--clay);border-radius:12px;padding:12px 14px;font-size:13px;color:var(--clay-ink);margin-bottom:9px;}
+.legend{display:flex;flex-wrap:wrap;gap:8px 16px;margin-top:10px;font-size:12.5px;color:var(--muted);}
+.legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:middle;}
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--bg);padding:11px 20px;border-radius:12px;font-size:13.5px;font-weight:600;opacity:0;pointer-events:none;transition:.25s;z-index:60;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+@media(max-width:760px){.sidebar{position:fixed;left:0;top:0;bottom:0;z-index:40;transform:translateX(-100%);transition:.25s;width:200px;}.sidebar.open{transform:translateX(0);}.menu-btn{display:flex!important;}.grid2,.grid3{grid-template-columns:1fr;}.wrap{padding:16px 14px 100px;}}
+.menu-btn{display:none;}
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+<div class="shell">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L4 10h3v10h10V10h3z"/><path d="M9 22V12h6v10"/></svg></div>
+      <div><b>灯塔审计</b><small>Lighthouse 性能工作台</small></div>
+    </div>
+    <div class="nav-item active" onclick="go('overview')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg><span>总览</span></div>
+    <div class="nav-item" onclick="go('sites')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 010 18"/></svg><span>站点与审计</span></div>
+    <div class="nav-item" onclick="go('trends')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19V5M4 19h16M8 16l4-5 4 3 4-6"/></svg><span>趋势对比</span></div>
+    <div class="nav-item" onclick="go('data')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l4-4m-4 4l-4-4"/><path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg><span>数据</span></div>
+    <div class="side-foot"><button onclick="toggleTheme()">切换深浅色</button><br>WorkBuddy · 本地优先</div>
+  </aside>
+  <div class="main">
+    <div class="topbar">
+      <button class="icon-btn menu-btn" onclick="document.getElementById('sidebar').classList.toggle('open')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+      <h1 id="viewTitle">总览</h1>
+      <span class="date" id="topDate"></span>
+      <span class="spacer"></span>
+      <button class="icon-btn" onclick="toggleTheme()" title="深浅色"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19"/></svg></button>
+    </div>
+    <div class="wrap" id="app"></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<input type="file" id="fileInput" accept=".json,application/json" style="display:none" onchange="importJSON(event)">
+<script>
+"use strict";
+window.addEventListener('error',function(e){try{var v=document.getElementById('app')||document.getElementById('view')||document.body;if(!v||v.dataset.err)return;v.dataset.err='1';var s=(e.error&&e.error.stack)||e.message||'';var b=document.createElement('div');b.style.cssText='padding:16px;margin:14px;font-family:ui-monospace,monospace;font-size:13px;color:#a33;background:#fdeceb;border:1px solid #f5c6cb;border-radius:12px;line-height:1.5';b.innerHTML='<b>⚠ 页面出错了</b><br><span style="color:#555">'+(e.message||'')+'</span><pre style="white-space:pre-wrap;margin-top:8px;font-size:11px">'+(s||'').slice(0,1000)+'</pre><small style="color:#666">建议 Ctrl+Shift+R 强刷；F12 → Application → Local Storage 清本页缓存后刷新。</small>';v.insertBefore(b,v.firstChild);}catch(_){}});const KEY='lighthouse_v1', BAK=KEY+'_bak';
+const DIMS={perf:{label:'性能',color:'#cf5b4e'},acc:{label:'无障碍',color:'#3a5a8c'},bp:{label:'最佳实践',color:'#3f9e6f'},seo:{label:'SEO',color:'#c9a24b'},pwa:{label:'PWA',color:'#8b6fa3'}};
+const ADVICE={
+  perf:['压缩与懒加载图片','启用浏览器缓存与 CDN','精简 JS/CSS 体积（代码分割、Tree-shaking）','使用现代图片格式（WebP/AVIF）'],
+  acc:['为图片补充 alt 文本','确保文字与背景对比度达标','使用语义化标签与合理的标题层级','为表单控件关联 label'],
+  bp:['全站启用 HTTPS','修复控制台报错与废弃 API','避免混合内容（http 资源）','设置正确的缓存头'],
+  seo:['补充 meta description','规范标题与 canonical','确保移动端可适配','提供 XML 站点地图'],
+  pwa:['配置 Web App Manifest','注册 Service Worker','实现离线缓存策略','设置图标与主题色']
+};
+let DB=null, corrupted=false, UI={tab:'overview', selSite:null};
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
+function $(s){return document.querySelector(s);}
+function esc(s){return (s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function today(){return new Date().toISOString().slice(0,10);}
+function scoreColor(v,th){if(v==null)return 'var(--muted)';return v>= (th||90)?'var(--green)':(v>=70?'var(--gold)':'var(--red)');}
+
+function seed(){
+  const s1={id:uid(),name:'官网首页',url:'https://example.com'};
+  const s2={id:uid(),name:'商城列表页',url:'https://shop.example.com/list'};
+  const mk=(sid,d,p,a,b,s,pw)=>({id:uid(),siteId:sid,date:d,perf:p,acc:a,bp:b,seo:s,pwa:pw,note:''});
+  const audits=[
+    mk(s1.id,'2026-08-01',72,88,91,80,55),
+    mk(s1.id,'2026-08-10',81,90,93,84,60),
+    mk(s1.id,'2026-08-19',88,92,94,88,63),
+    mk(s2.id,'2026-08-05',65,82,87,76,0),
+    mk(s2.id,'2026-08-15',74,85,90,81,0)
+  ];
+  return {sites:[s1,s2],audits,settings:{threshold:90},meta:{updatedAt:Date.now(),lastBackupAt:0,unbacked:0},demo:true};
+}
+function normalize(d){d.sites=d.sites||[];d.audits=d.audits||[];d.settings=d.settings||{threshold:90};d.meta=d.meta||{updatedAt:Date.now(),lastBackupAt:0,unbacked:0};d.demo=!!d.demo;return d;}
+function load(){try{const raw=localStorage.getItem(KEY);if(!raw){DB=seed();save(true);return;}DB=normalize(JSON.parse(raw));}catch(e){corrupted=true;const bak=localStorage.getItem(BAK);if(bak){try{DB=normalize(JSON.parse(bak));}catch(_){DB=seed();}}else DB=seed();setTimeout(()=>showCorrupt(),60);}}
+function save(silent){if(corrupted)return;try{localStorage.setItem(BAK,JSON.stringify(DB));localStorage.setItem(KEY,JSON.stringify(DB));if(!silent){DB.meta.updatedAt=Date.now();localStorage.setItem(KEY,JSON.stringify(DB));}}catch(e){showStorageError(e);}}
+function showStorageError(e){toast('存储失败：'+(e&&e.name==='QuotaExceededError'?'空间已满':'浏览器限制/隐私模式')+'，请用「数据」页导出备份');}
+function showCorrupt(){const app=$('#app');if(app)app.innerHTML=`<div class="banner" style="background:var(--red)">⚠️ 本地数据损坏，已尝试自动备份恢复；仍有问题可到「数据」页下载原始文件或清空重置。<span class="x" onclick="go('data')">→</span></div>`+app.innerHTML;}
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2200);}
+function toggleTheme(){const r=document.documentElement;r.setAttribute('data-theme',r.getAttribute('data-theme')==='dark'?'light':'dark');try{localStorage.setItem('lighthouse_theme',r.getAttribute('data-theme'));}catch(e){}}
+
+/* compute */
+function latestAudit(siteId){const a=DB.audits.filter(x=>x.siteId===siteId).sort((p,q)=>p.date<q.date?-1:1);return a.length?a[a.length-1]:null;}
+function health(a){if(!a)return null;const vals=[a.perf,a.acc,a.bp,a.seo,a.pwa].filter(v=>v!=null);return Math.round(vals.reduce((x,y)=>x+y,0)/vals.length);}
+function alerts(a,th){if(!a)return [];return Object.keys(DIMS).filter(k=>a[k]!=null&&a[k]<th);}
+function siteAudits(siteId){return DB.audits.filter(x=>x.siteId===siteId).sort((p,q)=>p.date<q.date?1:-1);}
+
+/* svg */
+function ring(pct,size,color){pct=Math.max(0,Math.min(100,pct));const R=size/2-7,C=2*Math.PI*R;return `<svg class="ring" viewBox="0 0 ${size} ${size}"><circle cx="${size/2}" cy="${size/2}" r="${R}" fill="none" stroke="var(--line2)" stroke-width="8"/><circle cx="${size/2}" cy="${size/2}" r="${R}" fill="none" stroke="${color||'var(--clay)'}" stroke-width="8" stroke-linecap="round" stroke-dasharray="${(pct/100*C).toFixed(1)} ${C.toFixed(1)}" transform="rotate(-90 ${size/2} ${size/2})"/><text x="${size/2}" y="${size/2+5}" text-anchor="middle" font-size="${size/7}" font-weight="700" fill="var(--ink)">${pct}</text></svg>`;}
+function lineChart(dates,series){
+  const W=640,H=240,pad=36;const n=dates.length;
+  const x=i=>pad+i/(Math.max(1,n-1))*(W-2*pad);
+  const y=v=>H-pad-(Math.max(0,Math.min(100,v))/100)*(H-2*pad);
+  const grid=[0,25,50,75,100].map(g=>`<line x1="${pad}" y1="${y(g)}" x2="${W-pad}" y2="${y(g)}" stroke="var(--line2)" stroke-width="1"/><text x="${pad-6}" y="${y(g)+4}" text-anchor="end" font-size="10" fill="var(--muted)">${g}</text>`).join('');
+  const lines=series.map(s=>{if(s.vals.every(v=>v==null))return '';const pts=s.vals.map((v,i)=>`${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');return `<polyline points="${pts}" fill="none" stroke="${s.color}" stroke-width="2.4" stroke-linejoin="round"/><circle cx="${x(n-1)}" cy="${y(s.vals[n-1])}" r="3.5" fill="${s.color}"/>`;}).join('');
+  const labels=dates.map((d,i)=>`<text x="${x(i)}" y="${H-12}" text-anchor="middle" font-size="9.5" fill="var(--muted)">${d.slice(5)}</text>`).join('');
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" style="display:block;max-width:${W}px;margin:0 auto">${grid}${lines}${labels}</svg>`;
+}
+function bars(items){ // items:[{label,val,color}]
+  const W=640,H=Math.max(120,items.length*46+30),pad=110;
+  const rows=items.map((it,i)=>{const y=20+i*46;const w=it.val/100*(W-pad-40);return `<text x="${pad-10}" y="${y+14}" text-anchor="end" font-size="12" fill="var(--ink)">${esc(it.label)}</text><rect x="${pad}" y="${y}" width="${W-pad-40}" height="22" rx="6" fill="var(--line2)"/><rect x="${pad}" y="${y}" width="${w.toFixed(1)}" height="22" rx="6" fill="${it.color}"/><text x="${pad+w+8}" y="${y+15}" font-size="12" font-weight="700" fill="var(--ink)">${it.val}</text>`;}).join('');
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" style="display:block;max-width:${W}px;margin:0 auto">${rows}</svg>`;
+}
+
+/* actions */
+function addSite(){const name=$('#siteName').value.trim();const url=$('#siteUrl').value.trim();if(!name){toast('请填写站点名');return;}$('#siteName').value='';$('#siteUrl').value='';DB.sites.push({id:uid(),name,url});DB.meta.unbacked=(DB.meta.unbacked||0)+1;save();renderSites();toast('已添加站点');}
+function delSite(id){DB.audits=DB.audits.filter(a=>a.siteId!==id);DB.sites=DB.sites.filter(s=>s.id!==id);if(UI.selSite===id)UI.selSite=null;save();renderSites();}
+function selectSite(id){UI.selSite=id;renderSites();}
+function parseLH(str){
+  try{const j=JSON.parse(str);const cats=j.categories||(j.lighthouseResult&&j.lighthouseResult.categories)||{};const map={performance:'perf',accessibility:'acc','best-practices':'bp',seo:'seo',pwa:'pwa'};const out={};
+    Object.keys(map).forEach(k=>{if(cats[k]&&typeof cats[k].score==='number')out[map[k]]=Math.round(cats[k].score*100);});
+    return out;
+  }catch(e){return null;}
+}
+function fillFromJSON(){const str=$('#jsonPaste').value.trim();if(!str){toast('请粘贴 Lighthouse JSON');return;}const o=parseLH(str);if(!o){toast('解析失败：非 Lighthouse 报告格式');return;}['perf','acc','bp','seo','pwa'].forEach(k=>{const el=$('#a_'+k);if(o[k]!=null)el.value=o[k];});toast('已解析并填入分数');}
+function saveAudit(){
+  const sid=UI.selSite||$('#auditSite').value;if(!sid){toast('请先选择站点');return;}
+  const g=k=>{const v=$('#a_'+k).value;return v===''||v==null?null:Math.max(0,Math.min(100,parseInt(v)));};
+  const perf=g('perf'),acc=g('acc'),bp=g('bp'),seo=g('seo'),pwa=g('pwa');
+  if([perf,acc,bp,seo,pwa].every(v=>v==null)){toast('请至少填写一个维度分数');return;}
+  const date=$('#a_date').value||today();
+  DB.audits.push({id:uid(),siteId:sid,date,perf,acc,bp,seo,pwa,note:$('#a_note').value.trim()});
+  DB.meta.unbacked=(DB.meta.unbacked||0)+1;save();toast('已记录本次审计');renderSites();
+}
+function delAudit(id){DB.audits=DB.audits.filter(a=>a.id!==id);save();renderSites();renderTrends();}
+function setThreshold(){const v=parseInt($('#thInput').value);if(isNaN(v))return;DB.settings.threshold=Math.max(0,Math.min(100,v));save();toast('告警阈值设为 '+v);renderOverview();}
+function clearDemo(){
+  DB.sites=DB.sites.filter(s=>!s.demo);DB.audits=DB.audits.filter(a=>!a.demo);DB.demo=false;save();UI.selSite=null;
+  if(UI.tab==='overview')renderOverview();if(UI.tab==='sites')renderSites();if(UI.tab==='trends')renderTrends();
+  toast('已清空演示数据');
+}
+
+/* export */
+function exportJSON(){const blob=new Blob([JSON.stringify(DB,null,2)],{type:'application/json'});dl(blob,'灯塔审计_备份_'+today()+'.json');DB.meta.lastBackupAt=Date.now();DB.meta.unbacked=0;save(true);toast('已导出 JSON 备份');}
+function dl(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000);}
+function importJSON(ev){const f=ev.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=normalize(JSON.parse(r.result));d.demo=false;DB=normalize({sites:DB.sites.concat(d.sites),audits:DB.audits.concat(d.audits),settings:DB.settings,meta:DB.meta});save();renderView();toast('已导入合并');}catch(e){toast('导入失败：格式错误');}ev.target.value='';};r.readAsText(f);}
+function wipeAll(){if(!confirm('确定清空全部数据？不可撤销。'))return;DB={sites:[],audits:[],settings:{threshold:90},meta:{updatedAt:Date.now(),lastBackupAt:0,unbacked:0},demo:false};save();UI.selSite=null;UI.tab='overview';renderView();toast('已清空');}
+
+/* render */
+const TABS=[{k:'overview',n:'总览'},{k:'sites',n:'站点与审计'},{k:'trends',n:'趋势对比'},{k:'data',n:'数据'}];
+function go(t){UI.tab=t;$('#viewTitle').textContent=TABS.find(x=>x.k===t).n;renderView();window.scrollTo(0,0);document.getElementById('sidebar').classList.remove('open');}
+function renderView(){const h=render[UI.tab]();$('#app').innerHTML=h;if(UI.tab==='sites')renderSites();if(UI.tab==='trends')renderTrends();if(UI.tab==='overview')renderOverview();}
+
+function renderOverview(){
+  const th=DB.settings.threshold;
+  let alertCount=0;const cards=DB.sites.map(s=>{const a=latestAudit(s.id);const h=health(a);const al=alerts(a,th);alertCount+=al.length;
+    return `<div class="site-card" onclick="selectSite('${s.id}');go('sites')">
+      ${ring(h==null?0:h,60,h==null?'var(--muted)':scoreColor(h,th))}
+      <div class="meta"><b>${esc(s.name)}</b><small>${esc(s.url||'未填 URL')}</small></div>
+      ${al.length?`<span class="alert">${al.length} 项低于 ${th}</span>`:''}
+      <span class="del" onclick="event.stopPropagation();delSite('${s.id}')">删除</span>
+    </div>`;}).join('');
+  $('#app').innerHTML=`
+  <div class="view-head"><h2>性能总览</h2><span class="desc">各站点最新 Lighthouse 健康分与告警</span></div>
+  <div class="grid3" style="margin-bottom:16px">
+    <div class="stat"><div class="n">${DB.sites.length}</div><div class="l">监测站点</div></div>
+    <div class="stat"><div class="n">${DB.audits.length}</div><div class="l">审计记录</div></div>
+    <div class="stat"><div class="n" style="color:${alertCount?'var(--red)':'var(--green)'}">${alertCount}</div><div class="l">告警项(阈值${th})</div></div>
+  </div>
+  <div class="panel" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+    <span class="hint">告警阈值</span><input id="thInput" type="number" value="${th}" style="max-width:90px">
+    <button class="btn sm primary" onclick="setThreshold()">应用</button>
+    <span class="hint">任一维度低于阈值即触发告警（Lighthouse 满分 100）</span>
+  </div>
+  ${DB.sites.length?cards:'<div class="warn">还没有站点，去「站点与审计」添加第一个吧。</div>'}`;
+}
+function auditEditorHTML(sel){
+  const dimInputs=Object.keys(DIMS).map(k=>`<div class="field"><label>${DIMS[k].label}</label><input id="a_${k}" type="number" min="0" max="100" placeholder="-"></div>`).join('');
+  const auds=siteAudits(sel.id);
+  const history=auds.map(a=>`<div class="audit"><div class="meta"><b>${a.date}</b><small>${a.note||'无备注'}</small></div>
+    <div class="sc">${Object.keys(DIMS).map(k=>a[k]!=null?`<span style="background:${DIMS[k].color}">${DIMS[k].label} ${a[k]}</span>`:'').join('')}</div>
+    <span class="del" onclick="delAudit('${a.id}')">删除</span></div>`).join('')||'<div class="hint">暂无审计记录</div>';
+  return `<div class="panel"><div class="panel-title"><h3>录入审计 · ${esc(sel.name)}</h3><span class="hint">分数 0-100</span></div>
+    <div class="grid3" style="margin-bottom:12px">${dimInputs}</div>
+    <div class="row" style="margin-bottom:12px">
+      <input id="a_date" class="field" type="date" value="${today()}" style="max-width:160px">
+      <input id="a_note" class="field" placeholder="备注（可选）">
+    </div>
+    <div class="field" style="margin-bottom:12px"><label>粘贴 Lighthouse JSON 自动解析</label><textarea id="jsonPaste" placeholder="粘贴 lighthouse-cli 输出的 JSON 报告…"></textarea></div>
+    <div class="row">
+      <button class="btn primary" onclick="saveAudit()">保存审计</button>
+      <button class="btn" onclick="fillFromJSON()">从 JSON 填入</button>
+    </div>
+    <div style="margin-top:16px">
+      <div class="panel-title"><h3>历史审计（${auds.length}）</h3></div>
+      ${history}
+    </div>
+  </div>`;
+}
+function renderSites(){
+  const th=DB.settings.threshold;
+  if(UI.selSite && !DB.sites.find(s=>s.id===UI.selSite)) UI.selSite=null;
+  const list=DB.sites.map(s=>{const a=latestAudit(s.id);const h=health(a);const sel=UI.selSite===s.id;const al=alerts(a,th);
+    return `<div class="site-card ${sel?'sel':''}" onclick="selectSite('${s.id}')">
+      ${ring(h==null?0:h,60,h==null?'var(--muted)':scoreColor(h,th))}
+      <div class="meta"><b>${esc(s.name)}</b><small>${esc(s.url||'未填 URL')}</small></div>
+      ${al.length?`<span class="alert">${al.length} 告警</span>`:''}
+      <span class="del" onclick="event.stopPropagation();delSite('${s.id}')">删除</span>
+    </div>`;}).join('');
+  const sel=UI.selSite?DB.sites.find(s=>s.id===UI.selSite):null;
+  $('#app').innerHTML=`
+  <div class="view-head"><h2>站点与审计</h2><span class="desc">管理站点、录入每次审计分数</span></div>
+  <div class="panel"><div class="panel-title"><h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 010 18"/></svg>站点</h3></div>
+    ${list||'<div class="hint">暂无站点</div>'}
+    <div class="row" style="margin-top:12px;border-top:1px dashed var(--line);padding-top:12px">
+      <input id="siteName" class="field" placeholder="站点名（如 官网首页）">
+      <input id="siteUrl" class="field" placeholder="URL（可选）">
+      <button class="btn primary" onclick="addSite()">添加站点</button>
+    </div>
+  </div>
+  ${sel?auditEditorHTML(sel):'<div class="warn">选择上方站点以录入审计分数。</div>'}`;
+}
+function renderTrends(){
+  const th=DB.settings.threshold;
+  const opts=DB.sites.map(s=>`<option value="${s.id}" ${UI.selSite===s.id?'selected':''}>${esc(s.name)}</option>`).join('');
+  let body='';
+  if(UI.selSite){
+    const s=DB.sites.find(x=>x.id===UI.selSite);const auds=siteAudits(UI.selSite).slice().reverse();
+    if(auds.length>=2){
+      const dates=auds.map(a=>a.date);
+      const series=Object.keys(DIMS).map(k=>({name:DIMS[k].label,color:DIMS[k].color,vals:auds.map(a=>a[k])}));
+      body=`<div class="panel"><div class="panel-title"><h3>${esc(s.name)} · 各维度趋势</h3><span class="hint">${auds.length} 次审计</span></div>${lineChart(dates,series)}
+        <div class="legend">${Object.keys(DIMS).map(k=>`<span><i style="background:${DIMS[k].color}"></i>${DIMS[k].label}</span>`).join('')}</div></div>`;
+      // advice based on latest low dims
+      const a=auds[auds.length-1];const low=Object.keys(DIMS).filter(k=>a[k]!=null&&a[k]<th);
+      if(low.length)body+=`<div class="panel"><div class="panel-title"><h3>优化建议</h3><span class="hint">基于低于 ${th} 的维度</span></div>${low.map(k=>`<div class="tip"><b style="color:${DIMS[k].color}">${DIMS[k].label}</b>：${ADVICE[k].join('；')}</div>`).join('')}</div>`;
+    } else body=`<div class="warn">该站点审计少于 2 次，无法绘制趋势。至少记录 2 次后查看。</div>`;
+  } else {
+    body='<div class="warn">选择上方站点查看其趋势；下方为全站最新健康分对比。</div>';
+  }
+  const cmp=DB.sites.map(s=>{const a=latestAudit(s.id);return {label:s.name,val:health(a)==null?0:health(a),color:scoreColor(health(a),th)};});
+  $('#app').innerHTML=`
+  <div class="view-head"><h2>趋势对比</h2><span class="desc">维度随时间变化 · 全站横向对比</span></div>
+  <div class="row" style="margin-bottom:14px">
+    <select id="trendSite" class="field" style="max-width:220px" onchange="UI.selSite=this.value;renderTrends()">${opts}</select>
+    <span class="hint">选择站点查看趋势（需≥2 次审计）</span>
+  </div>
+  ${body}
+  <div class="panel"><div class="panel-title"><h3>全站最新健康分对比</h3></div>${cmp.length?bars(cmp):'<div class="hint">暂无站点</div>'}</div>`;
+}
+function renderData(){
+  const size=Math.round(JSON.stringify(DB).length/1024);
+  $('#app').innerHTML=`
+  <div class="view-head"><h2>数据管理</h2><span class="desc">本地优先 · 输入即保存</span></div>
+  ${(DB.meta.unbacked||0)>=20?`<div class="banner">⚠️ 已新增 ${DB.meta.unbacked} 条未备份记录，建议导出 JSON 备份。<button onclick="exportJSON()">立即备份</button><span class="x" onclick="this.parentNode.remove()">×</span></div>`:''}
+  <div class="grid3" style="margin-bottom:16px">
+    <div class="stat"><div class="n">${DB.sites.length}</div><div class="l">站点</div></div>
+    <div class="stat"><div class="n">${DB.audits.length}</div><div class="l">审计记录</div></div>
+    <div class="stat"><div class="n">${size}KB</div><div class="l">存储占用</div></div>
+  </div>
+  <div class="panel"><div class="panel-title"><h3>备份与恢复</h3></div>
+    <div class="row">
+      <button class="btn primary" onclick="exportJSON()">导出 JSON 备份</button>
+      <button class="btn" onclick="document.getElementById('fileInput').click()">导入合并</button>
+      <button class="btn danger" onclick="wipeAll()">清空全部</button>
+    </div>
+    ${DB.demo?`<div class="row" style="margin-top:12px"><button class="btn" onclick="clearDemo()">清空演示数据（保留我的录入）</button></div>`:''}
+    <div class="hint" style="margin-top:12px">粘贴的 Lighthouse JSON 应为 CLI 输出（含 categories.*.score，0-1 之间）。导入会与现有数据合并。</div>
+  </div>`;
+}
+const render={overview:renderOverview,sites:renderSites,trends:renderTrends,data:renderData};
+
+try{const th=localStorage.getItem('lighthouse_theme');if(th)document.documentElement.setAttribute('data-theme',th);}catch(e){}
+$('#topDate').textContent=new Date().toLocaleDateString('zh-CN',{month:'long',day:'numeric',weekday:'long'});
+load();
+renderView();</script>
+</body>
+</html>

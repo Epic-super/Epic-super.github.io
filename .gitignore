@@ -1,0 +1,48 @@
+_chrome_profile/
+_chrome_profile2/
+_check.js
+_check_*.js
+_test_*.js
+*.tmp
+*.bak
+*.log
+dist/
+.DS_Store
+Thumbs.db
+deploy.bat
+test_*.js
+check*.js
+games-local-config.local.js
+games/.edgeone/
+games/fps-tactical/.edgeone/
+games/fps-tactical/.github/
+games/fps-tactical/.vscode/
+games/fps-tactical/.env
+.env
+.edgeone/
+_scratch/
+games/.env
+
+# airline-experience Python backend
+__pycache__/
+*.pyc
+
+# 本地工具资源（junction 软链目录，不入库）
+hacker/tools/
+
+# 3D 模型不入库：character.glb 真实实体仅保留在 _master/_private 工作树与 _private 运行副本，
+# 仓库/公开站不携带（公开站 world 引导员走 GLTFLoader onerror 兜底，不影响游玩）。
+# 历史教训：push_via_api 走 base64，>1MB 文件有截断事故；LFS 指针 Pages 又不解析。
+world/models/*.glb
+
+# 本地敏感数据（不入库）
+wechat_decrypted/
+PASS*.txt
+
+# pipeline 输出结果（构建产物，不入库）
+lab/products/airline-experience/pipeline/results/*.json
+
+# ===== 学习资料素材（大体积二进制，本地 serve 用，不进 git）=====
+# 同时排除误生成的异常前缀目录（如 \uf022materials），防 git 长路径报错 + 误 add
+materials/
+**/*materials*/

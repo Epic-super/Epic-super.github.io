@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="app-version" content="1.0.120">
+<title>安全工具箱 · 20款工具清单 · 在线版 + 本地版双入口</title>
+<style>
+  :root{
+    --bg:#0a0e14; --panel:#121821; --panel2:#161f2c; --line:#222c3a;
+    --txt:#e6edf3; --muted:#8b9bb0; --accent:#39d98a; --accent2:#4cc9f0;
+    --warn:#ff6b6b; --amber:#ffb454; --radius:16px;
+    --online:#4cc9f0; --local:#39d98a; --dl:#ffb454;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;-webkit-font-smoothing:antialiased}
+  body{padding:0 16px 60px;max-width:960px;margin:0 auto;line-height:1.6}
+  a{color:var(--accent2);text-decoration:none}
+  a:hover{text-decoration:underline}
+
+  .topbar{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 0;background:linear-gradient(var(--bg) 70%,transparent);margin-bottom:6px;flex-wrap:wrap}
+  .back{display:inline-flex;align-items:center;gap:6px;padding:9px 14px;border-radius:999px;background:var(--panel2);border:1px solid var(--line);color:var(--txt);font-size:13px;font-weight:600}
+  .back svg{width:16px;height:16px}
+  .back:hover{text-decoration:none;border-color:var(--accent)}
+  .top-hint{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px}
+  .top-hint .dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent)}
+
+  .warn-card{margin:18px 0;padding:16px 18px;border-radius:var(--radius);background:rgba(255,107,107,.08);border:1px solid rgba(255,107,107,.35);display:flex;gap:12px;align-items:flex-start}
+  .warn-card svg{width:22px;height:22px;flex:none;color:var(--warn);margin-top:2px}
+  .warn-card b{color:var(--warn)}
+  .warn-card p{font-size:13.5px;color:var(--txt)}
+  .warn-card ul{margin:8px 0 0 18px;font-size:13px;color:var(--muted)}
+  .warn-card li{margin:2px 0}
+
+  .sec-title{font-size:15px;font-weight:700;color:var(--muted);margin:26px 4px 12px;display:flex;align-items:center;gap:8px;text-transform:uppercase;letter-spacing:1px}
+  .sec-title::before{content:"";width:4px;height:16px;border-radius:2px;background:var(--accent)}
+
+  .tool-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:14px;transition:border-color .2s,transform .2s}
+  .tool-card:hover{border-color:var(--accent);transform:translateY(-1px)}
+  .tool-head{display:flex;align-items:flex-start;gap:12px;margin-bottom:10px}
+  .tool-icon{width:42px;height:42px;border-radius:10px;background:var(--panel2);display:flex;align-items:center;justify-content:center;flex:none;font-size:20px}
+  .tool-info{flex:1;min-width:0}
+  .tool-name{font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .tool-ver{font-size:11px;padding:2px 8px;border-radius:999px;background:rgba(76,201,240,.12);color:var(--accent2);font-weight:600}
+  .tool-desc{font-size:13px;color:var(--muted);margin-top:3px}
+  .tool-tags{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
+  .tool-tag{font-size:11px;padding:2px 8px;border-radius:6px;background:var(--panel2);color:var(--muted);border:1px solid var(--line)}
+
+  .tool-actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+  .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;border:1px solid transparent;transition:.15s;font-family:inherit;text-decoration:none}
+  .btn svg{width:15px;height:15px;flex:none}
+  .btn-online{background:rgba(76,201,240,.12);color:var(--online);border-color:rgba(76,201,240,.3)}
+  .btn-online:hover{background:rgba(76,201,240,.2);border-color:var(--online)}
+  .btn-local{background:rgba(57,217,138,.12);color:var(--local);border-color:rgba(57,217,138,.3)}
+  .btn-local:hover{background:rgba(57,217,138,.2);border-color:var(--local)}
+  .btn-dl{background:rgba(255,180,84,.12);color:var(--dl);border-color:rgba(255,180,84,.3)}
+  .btn-dl:hover{background:rgba(255,180,84,.2);border-color:var(--dl)}
+  .btn:disabled{opacity:.4;cursor:not-allowed;pointer-events:none}
+
+  .tool-note{font-size:12px;color:var(--muted);margin-top:10px;padding:10px 12px;border-radius:8px;background:var(--panel2);border:1px solid var(--line)}
+  .tool-note b{color:var(--txt)}
+
+  .stats{display:flex;gap:12px;margin:18px 0;flex-wrap:wrap}
+  .stat{flex:1;min-width:120px;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px;text-align:center}
+  .stat-num{font-size:24px;font-weight:800;color:var(--accent)}
+  .stat-lab{font-size:12px;color:var(--muted);margin-top:2px}
+
+  .legend{display:flex;gap:16px;margin:18px 0;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+  .legend-item{display:flex;align-items:center;gap:6px}
+  .legend-dot{width:10px;height:10px;border-radius:50%}
+
+  footer{margin-top:34px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:12px;text-align:center}
+
+  #toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(14px);max-width:min(92vw,560px);
+    background:var(--panel2);border:1px solid var(--accent);color:var(--txt);font-size:13px;line-height:1.5;
+    padding:11px 16px;border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,.45);opacity:0;pointer-events:none;
+    transition:opacity .2s,transform .2s;z-index:99;word-break:break-all}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  code{background:var(--panel2);border:1px solid var(--line);border-radius:5px;padding:1px 5px;font-size:12px}
+
+  .pkg-set{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 10px}
+  .pkg-set input{flex:1;min-width:220px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px 12px;font-size:13px;font-family:inherit;min-height:42px}
+  .pkg-set input:focus{outline:none;border-color:var(--accent)}
+  .btn.ghost{background:transparent;border:1px solid var(--line);color:var(--muted);font-weight:600}
+  .btn.ghost:hover{border-color:var(--accent);color:var(--accent)}
+
+  @media(max-width:640px){
+    .tool-head{flex-direction:column;gap:8px}
+    .tool-actions{flex-direction:column}
+    .btn{justify-content:center}
+  }
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+  <div class="topbar">
+    <a class="back" href="../hacker/index.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>返回黑客区
+    </a>
+    <div class="top-hint"><span class="dot"></span>安全工具箱 · 20款工具
+      <a href="../index.html" style="margin-left:8px">返回主台</a>
+    </div>
+  </div>
+
+  <header class="hero" style="padding:18px 4px 8px">
+    <h1 style="font-size:26px;font-weight:800;display:flex;align-items:center;gap:10px">
+      <span style="font-size:28px">🛡️</span>安全工具箱
+    </h1>
+    <p style="color:var(--muted);font-size:14px;margin-top:6px">20款安全审计 / 红客工具 · 在线版 + 本地版双入口 · 按需选用</p>
+  </header>
+
+  <div class="warn-card">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg>
+    <div>
+      <b>白帽边界（务必遵守）</b>
+      <p>所有工具仅用于合法授权的安全测试。本地版工具功能强大，请格外注意使用范围：</p>
+      <ul>
+        <li>① 官方 / CTF 靶场（PortSwigger、HackTheBox、picoCTF 等）</li>
+        <li>② 你自己拥有或已获明确书面授权的系统</li>
+        <li>③ 严禁对任何未授权系统、他人账户或生产环境进行测试</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item"><span class="legend-dot" style="background:var(--online)"></span>在线版：浏览器直接使用</div>
+    <div class="legend-item"><span class="legend-dot" style="background:var(--local)"></span>本地版：功能完整，需安装</div>
+    <div class="legend-item"><span class="legend-dot" style="background:var(--dl)"></span>下载：获取安装包</div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="stat-num">20</div><div class="stat-lab">工具总数</div></div>
+    <div class="stat"><div class="stat-num" id="onlineCount">--</div><div class="stat-lab">有在线版</div></div>
+    <div class="stat"><div class="stat-num">20</div><div class="stat-lab">本地版可用</div></div>
+    <div class="stat"><div class="stat-num">8</div><div class="stat-lab">功能分类</div></div>
+  </div>
+
+  <div class="sec-title">本地工具包</div>
+  <div id="localBar" class="tool-note" style="margin:0 0 12px"></div>
+  <div class="pkg-set">
+    <input id="pkgRootInput" type="text" spellcheck="false" placeholder="工具包根目录：相对本页路径（如 tools/）或 file:///盘符:/路径">
+    <button class="btn btn-dl" id="pkgSave" type="button">保存</button>
+    <button class="btn ghost" id="pkgReset" type="button">恢复默认</button>
+  </div>
+  <div class="tool-actions" style="margin:0 0 8px">
+    <a class="btn btn-local" id="pkgRoot" href="#">📂 打开工具包目录</a>
+  </div>
+
+  <div class="sec-title">工具清单</div>
+  <div id="toolsCatalog"></div>
+
+  <div id="toast"></div>
+
+  <footer>本页为工具导航与入口聚合 · 所有外链均指向公开合法的工具官网或在线平台 · 仅作白帽自学用途</footer>
+
+<script>
+  var TOOLS = [
+    {
+      category: 'Web漏洞扫描与测试',
+      tools: [
+        {
+          name: 'Acunetix', ver: 'v25.x', icon: '🔍',
+          desc: '自动化 Web 漏洞扫描器，支持 SQL 注入、XSS、SSRF 等 7000+ 漏洞检测。',
+          tags: ['漏洞扫描','OWASP','自动化'],
+          online: { label: '在线演示', url: 'https://www.acunetix.com/web-vulnerability-scanner/' },
+          local: { file: '1-Web漏洞扫描与测试/Acunetix-v24.4.240514098-Linux-cracked.zip' },
+          dl: { label: '官方下载', url: 'https://www.acunetix.com/download/' },
+          note: '<b>在线版：</b>官方提供在线演示，适合快速体验。功能有限，仅检测常见漏洞。<br><b>本地版：</b>完整规则库，支持自定义扫描策略、认证测试、详细报告导出。需 License。'
+        },
+        {
+          name: 'AppScan', ver: 'v10.x', icon: '🛡️',
+          desc: 'IBM 出品的 Web 应用安全扫描工具，企业级漏洞评估。',
+          tags: ['漏洞扫描','企业级','IBM'],
+          online: { label: '在线了解', url: 'https://www.ibm.com/products/appscan' },
+          local: { file: '1-Web漏洞扫描与测试/AppScan_Standard_10.6.0-cracked.zip' },
+          dl: { label: '官方下载', url: 'https://www.ibm.com/products/appscan/downloads' },
+          note: '<b>在线版：</b>无官方在线版，仅产品介绍页。<br><b>本地版：</b>完整企业级扫描能力，需 License。'
+        },
+        {
+          name: 'Yakit', ver: 'v1.3+', icon: '🦯',
+          desc: '国产交互式应用安全测试平台（IAST），由 YAK 团队开发。',
+          tags: ['IAST','国产','交互式测试'],
+          online: { label: '在线文档', url: 'https://www.yaklang.com/' },
+          local: { file: '1-Web漏洞扫描与测试/Yakit-1.3.4-823-windows-amd64.exe' },
+          dl: { label: '官方下载', url: 'https://www.yaklang.com/download' },
+          note: '<b>在线版：</b>官方文档和社区。<br><b>本地版：</b>完整功能，支持插件扩展、流量录制、漏洞验证。'
+        },
+        {
+          name: 'burp_suite_pro', ver: 'v2024.x', icon: '🕷️',
+          desc: 'Web 安全测试事实标准，代理拦截 + 扫描 + 扩展生态。',
+          tags: ['代理','扫描','必备工具'],
+          online: { label: '在线文档', url: 'https://portswigger.net/burp' },
+          local: { file: '1-Web漏洞扫描与测试/burp_suite_pro_v2024.7.4.zip' },
+          dl: { label: '官方下载', url: 'https://portswigger.net/burp/communitydownload' },
+          note: '<b>在线版：</b>官方文档和在线课程（PortSwigger Academy）。<br><b>本地版：</b>完整代理拦截、Scanner、Repeater、Intruder。Community 免费版功能有限，Professional 需 License。'
+        },
+        {
+          name: 'xray', ver: 'v1.9+', icon: '📡',
+          desc: '长亭科技出品的被动/主动 Web 漏洞扫描器，社区版免费。',
+          tags: ['被动扫描','国产','免费'],
+          online: { label: '在线文档', url: 'https://xray.cool/' },
+          local: { file: '1-Web漏洞扫描与测试/xray.zip' },
+          dl: { label: '官方下载', url: 'https://xray.cool/download' },
+          note: '<b>在线版：</b>无官方在线版。<br><b>本地版：</b>社区版免费，支持被动代理扫描和主动爬虫扫描。'
+        }
+      ]
+    },
+    {
+      category: '信息收集与侦察',
+      tools: [
+        {
+          name: 'Layer5.0 子域名挖掘机', ver: 'v5.0', icon: '🔎',
+          desc: '国产子域名收集工具，支持多引擎查询、DNS 解析、结果导出。',
+          tags: ['子域名','信息收集','国产'],
+          online: { label: '在线查询', url: 'https://subdomain.hacking8.com/' },
+          local: { file: '2-信息收集与侦察/Layer5.0子域名挖掘机.zip' },
+          dl: { label: 'GitHub', url: 'https://github.com/naul2014/LayerDomainFinder' },
+          note: '<b>在线版：</b>第三方在线子域名查询平台，结果有限。<br><b>本地版：</b>完整引擎支持，可自定义字典、批量扫描。'
+        },
+        {
+          name: 'WhatWeb', ver: 'v0.5.x', icon: '🌐',
+          desc: 'Web 技术指纹识别工具，识别 CMS、框架、服务器、JS 库等。',
+          tags: ['指纹识别','技术栈','Ruby'],
+          online: { label: '在线识别', url: 'https://whatweb.net/' },
+          local: { file: '2-信息收集与侦察/whatweb.zip' },
+          dl: { label: 'GitHub', url: 'https://github.com/urbanadventurer/WhatWeb' },
+          note: '<b>在线版：</b>官方提供在线版本，适合快速识别单个目标。<br><b>本地版：</b>支持批量扫描、自定义插件、结果导出。'
+        },
+        {
+          name: 'nmap', ver: 'v7.95', icon: '📶',
+          desc: '网络发现与安全审计的行业标准，端口扫描、服务识别、OS 探测。',
+          tags: ['端口扫描','网络发现','必备'],
+          online: { label: '在线扫描', url: 'https://nmap.online/' },
+          local: { file: '2-信息收集与侦察/nmap-7.95-setup.exe' },
+          dl: { label: '官方下载', url: 'https://nmap.org/download.html' },
+          note: '<b>在线版：</b>第三方在线平台，仅扫描常见端口，速度慢。<br><b>本地版：</b>全端口扫描、NSE 脚本引擎、OS 识别、traceroute。功能完整。'
+        },
+        {
+          name: '御剑端口扫描', ver: 'v1.2', icon: '⚔️',
+          desc: '国产轻量端口扫描工具，界面简洁，适合快速扫描。',
+          tags: ['端口扫描','国产','轻量'],
+          online: { label: '无在线版', url: null },
+          local: { file: '2-信息收集与侦察/御剑端口扫描.zip' },
+          dl: { label: 'GitHub', url: 'https://github.com/ymh005/portscan' },
+          note: '<b>在线版：</b>无官方在线版。<br><b>本地版：</b>轻量快速，适合初步端口探测。'
+        }
+      ]
+    },
+    {
+      category: 'Web渗透测试',
+      tools: [
+        {
+          name: 'dirsearch', ver: 'v0.4.x', icon: '📁',
+          desc: 'Python 编写的目录/文件暴力扫描工具，支持多线程、自定义字典。',
+          tags: ['目录扫描','Python','轻量'],
+          online: { label: '在线扫描', url: 'https://github.com/maurosoria/dirsearch' },
+          local: { file: '3-Web渗透测试/dirsearch-0.4.3.zip' },
+          dl: { label: 'GitHub', url: 'https://github.com/maurosoria/dirsearch' },
+          note: '<b>在线版：</b>无官方在线版（第三方平台可替代）。<br><b>本地版：</b>支持递归扫描、延迟控制、自定义字典、结果导出。'
+        },
+        {
+          name: 'sqlmap', ver: 'v1.8+', icon: '💉',
+          desc: '自动化 SQL 注入检测与利用工具，支持 6+ 种注入技术。',
+          tags: ['SQL注入','自动化','必备'],
+          online: { label: '在线 API', url: 'http://sqlmap.org/' },
+          local: { file: '3-Web渗透测试/sqlmap-1.8.zip' },
+          dl: { label: 'GitHub', url: 'https://github.com/sqlmapproject/sqlmap' },
+          note: '<b>在线版：</b>第三方在线 SQL 注入检测平台，功能有限。<br><b>本地版：</b>完整注入检测、数据提取、WAF 绕过、数据库 takeover。功能强大。'
+        }
+      ]
+    },
+    {
+      category: '密码破解',
+      tools: [
+        {
+          name: 'hashcat', ver: 'v6.2+', icon: '🔑',
+          desc: '世界最快的密码恢复工具，支持 GPU 加速，300+ 哈希算法。',
+          tags: ['密码破解','GPU','哈希'],
+          online: { label: '在线破解', url: 'https://hashcat.net/' },
+          local: { file: '4-密码破解/hashcat-6.2.6.7z' },
+          dl: { label: '官方下载', url: 'https://hashcat.net/downloads/' },
+          note: '<b>在线版：</b>第三方在线哈希破解平台（如 CrackStation），仅支持常见哈希。<br><b>本地版：</b>GPU 加速，支持 300+ 算法、自定义规则、掩码攻击。速度是 CPU 的 100-1000 倍。'
+        },
+        {
+          name: 'John the Ripper', ver: 'Jumbo v1.9', icon: '🗝️',
+          desc: '经典密码破解工具，社区版（Jumbo）支持数百种哈希格式。',
+          tags: ['密码破解','经典','多格式'],
+          online: { label: '在线破解', url: 'https://www.password-depot.com/zh/online-password-cracker.htm' },
+          local: { file: '4-密码破解/john-bleeding-jumbo.zip' },
+          dl: { label: 'GitHub', url: 'https://github.com/openwall/john' },
+          note: '<b>在线版：</b>第三方平台，仅支持常见哈希。<br><b>本地版：</b>Jumbo 版本支持 500+ 哈希格式、规则引擎、增量模式。'
+        }
+      ]
+    },
+    {
+      category: 'WebShell管理',
+      tools: [
+        {
+          name: 'Godzilla（哥斯拉）', ver: 'v4.x', icon: '🦎',
+          desc: '国产 WebShell 管理工具，支持多种协议、加密传输、插件扩展。',
+          tags: ['WebShell','国产','管理工具'],
+          online: { label: '无在线版', url: null },
+          local: { file: '5-WebShell管理/godzilla-哥斯拉.jar' },
+          dl: { label: 'GitHub', url: 'https://github.com/BeichenDream/Godzilla' },
+          note: '<b>在线版：</b>无官方在线版。<br><b>本地版：</b>完整功能，支持 HTTP/HTTPS、内存马、加密传输。'
+        },
+        {
+          name: '蚁剑（AntSword）', ver: 'v1.4+', icon: '🐜',
+          desc: '跨平台 WebShell 管理工具，界面友好，插件生态丰富。',
+          tags: ['WebShell','跨平台','插件'],
+          online: { label: '无在线版', url: null },
+          local: { file: '5-WebShell管理/windows蚁剑.zip' },
+          dl: { label: 'GitHub', url: 'https://github.com/AntSwordProject/antSword' },
+          note: '<b>在线版：</b>无官方在线版。<br><b>本地版：</b>支持自定义编码器、终端、文件管理、数据库管理。'
+        }
+      ]
+    },
+    {
+      category: '网络分析',
+      tools: [
+        {
+          name: 'Wireshark', ver: 'v4.4+', icon: '🦈',
+          desc: '全球最流行的网络协议分析器，实时抓包、深度协议解析。',
+          tags: ['抓包','协议分析','必备'],
+          online: { label: '在线文档', url: 'https://www.wireshark.org/' },
+          local: { file: '6-网络分析/Wireshark-4.2.6-x64.exe' },
+          dl: { label: '官方下载', url: 'https://www.wireshark.org/download.html' },
+          note: '<b>在线版：</b>仅有文档和教程，无法抓包。<br><b>本地版：</b>必须本地运行，需要网卡混杂模式支持。完整协议解析、过滤器、统计功能。'
+        }
+      ]
+    },
+    {
+      category: '远程连接与传输',
+      tools: [
+        {
+          name: 'MobaXterm', ver: 'v24.x', icon: '🖥️',
+          desc: '增强型终端，集成 SSH、X11、SFTP、VNC、RDP 等远程连接。',
+          tags: ['终端','SSH','SFTP'],
+          online: { label: '在线版', url: 'https://mobaxterm.mobatek.net/' },
+          local: { file: '7-远程连接与传输/MobaXterm_Portable_v23.0_cn.zip' },
+          dl: { label: '官方下载', url: 'https://mobaxterm.mobatek.net/download.html' },
+          note: '<b>在线版：</b>官方提供基于浏览器的远程连接服务（MobaXterm Online）。<br><b>本地版：</b>完整功能，支持 X 服务器、宏录制、插件扩展。'
+        },
+        {
+          name: 'WinSCP', ver: 'v6.x', icon: '📤',
+          desc: 'Windows 开源 SFTP/FTP 客户端，图形化文件传输。',
+          tags: ['SFTP','FTP','文件传输'],
+          online: { label: '在线文档', url: 'https://winscp.net/' },
+          local: { file: '7-远程连接与传输/WinSCP-6.3.4-Portable.zip' },
+          dl: { label: '官方下载', url: 'https://winscp.net/eng/download.php' },
+          note: '<b>在线版：</b>无官方在线版。<br><b>本地版：</b>图形化 SFTP/SCP/FTP 客户端，支持脚本自动化。'
+        }
+      ]
+    },
+    {
+      category: '编码转换工具',
+      tools: [
+        {
+          name: '万能字符转换 Character', ver: 'v2.x', icon: '🔤',
+          desc: '多功能字符编码转换工具，支持 Unicode、URL、Base64、Hex 等。',
+          tags: ['编码转换','Unicode','Base64'],
+          online: { label: '在线转换', url: 'https://www.qqxiuzi.cn/bianma/unicode.htm' },
+          local: { file: '8-编码转换工具/万能字符转换Character1.2.exe' },
+          dl: { label: 'GitHub', url: 'https://github.com/search?q=character+encoding+converter' },
+          note: '<b>在线版：</b>第三方在线编码转换平台，功能齐全。<br><b>本地版：</b>离线可用，支持批量转换、自定义编码规则。'
+        },
+        {
+          name: 'StrEncode', ver: 'v1.x', icon: '🔣',
+          desc: '字符串编码/解码工具，支持多种编码格式互相转换。',
+          tags: ['编码转换','字符串','解码'],
+          online: { label: '在线转换', url: 'https://www.qqxiuzi.cn/bianma/url.htm' },
+          local: { file: '8-编码转换工具/数据加密编码工具StrEncode.exe' },
+          dl: { label: 'GitHub', url: 'https://github.com/search?q=strencode' },
+          note: '<b>在线版：</b>第三方在线编码转换平台。<br><b>本地版：</b>离线可用，支持批量处理。'
+        }
+      ]
+    }
+  ];
+
+  // ===== 本地工具包：根目录可配置，工具只存相对文件名，不写死绝对路径 =====
+  var LOCAL_MODE   = (location.protocol === 'file:');
+  var LS_KEY       = 'wb_hacker_pkg_root_v1';
+  var DEFAULT_ROOT = 'tools/';   // 相对本页：hacker/tools 为 junction 软链，指向本机真实工具包目录
+
+  function esc(s){ return String(s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  function getRoot(){ try{ var v = localStorage.getItem(LS_KEY); if(v && v.trim()) return v.trim(); }catch(e){} return DEFAULT_ROOT; }
+  function setRoot(v){ try{ localStorage.setItem(LS_KEY, v); }catch(e){} }
+  function normRoot(r){ return String(r == null ? '' : r).trim().replace(/[\\\/]+$/, ''); }
+
+  function absUrl(rel){
+    var root = normRoot(getRoot());
+    try{ return new URL(root ? (root + '/' + rel) : rel, location.href).href; }catch(e){ return rel; }
+  }
+  // file:///<示例路径>/a/b.zip -> &lt;本地示例zip&gt;
+  function toWinPath(url){
+    if(url.indexOf('file:///') !== 0) return null;
+    var p = url.slice(8);
+    try{ p = decodeURIComponent(p); }catch(e){}
+    return p.replace(/\//g, '\\');
+  }
+  function payload(rel){
+    var url = absUrl(rel);
+    var win = toWinPath(url);
+    if(win) return { text: win, tip: '已复制本机路径' };
+    var r = normRoot(getRoot());
+    return { text: r ? (r + '/' + rel) : rel, tip: '在线站无法定位本机文件，已复制相对路径' };
+  }
+
+  function renderTools(){
+    var container = document.getElementById('toolsCatalog');
+    var onlineCount = 0;
+
+    var html = '';
+    TOOLS.forEach(function(cat){
+      html += '<div class="sec-title">' + cat.category + '</div>';
+      cat.tools.forEach(function(tool){
+        if(tool.online && tool.online.url) onlineCount++;
+        var onlineBtn = tool.online
+          ? '<a class="btn btn-online" href="' + tool.online.url + '" target="_blank" rel="noopener">🌐 ' + tool.online.label + '</a>'
+          : '<span class="btn btn-online" style="opacity:.4;cursor:not-allowed">—</span>';
+        var localBtn = tool.local
+          ? '<a class="btn btn-local" href="#" data-rel="' + esc(tool.local.file) + '" title="' + esc(tool.local.file) + '">💻 ' + (LOCAL_MODE ? '本地文件' : '复制路径') + '</a>'
+          : '<span class="btn btn-local" style="opacity:.4;cursor:not-allowed">—</span>';
+        var dlBtn = tool.dl
+          ? '<a class="btn btn-dl" href="' + tool.dl.url + '" target="_blank" rel="noopener">⬇ ' + tool.dl.label + '</a>'
+          : '<span class="btn btn-dl" style="opacity:.4;cursor:not-allowed">—</span>';
+
+        html += '<div class="tool-card">' +
+          '<div class="tool-head">' +
+            '<div class="tool-icon">' + tool.icon + '</div>' +
+            '<div class="tool-info">' +
+              '<div class="tool-name">' + tool.name + '<span class="tool-ver">' + tool.ver + '</span></div>' +
+              '<div class="tool-desc">' + tool.desc + '</div>' +
+              '<div class="tool-tags">' + tool.tags.map(function(t){return '<span class="tool-tag">' + t + '</span>';}).join('') + '</div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="tool-actions">' + onlineBtn + localBtn + dlBtn + '</div>' +
+          '<div class="tool-note">' + tool.note + '</div>' +
+        '</div>';
+      });
+    });
+
+    container.innerHTML = html;
+    document.getElementById('onlineCount').textContent = onlineCount;
+  }
+
+  renderTools();
+
+  // ---- 根目录设置区 ----
+  function refreshPkg(){
+    var bar = document.getElementById('localBar');
+    var root = normRoot(getRoot());
+    var resolved = absUrl('');
+    var win = toWinPath(resolved);
+    if(bar){
+      bar.innerHTML =
+        '<b>当前根目录设置：</b><code>' + esc(root || '(空)') + '</code>' +
+        (win ? '<br><b>解析为：</b><code>' + esc(win) + '</code>'
+             : '<br><span style="color:var(--amber)">当前在在线站上，无法解析为本机路径 —— 改用本地打开本页，或把根目录设为 <code>file:///盘符:/路径</code>。</span>') +
+        '<br>' + (LOCAL_MODE
+          ? '本地模式：点「本地文件」复制完整路径；点下面按钮可直接打开工具包目录。'
+          : '浏览器禁止网页打开 <code>file://</code>，点「复制路径」后粘贴到资源管理器地址栏回车即可。') +
+        '<br><span style="color:var(--muted)">换设备后：把工具包目录<b>拖到本页同目录的 <code>link-tools.bat</code> 上</b>重建软链，或直接改上面的根目录。</span>';
+    }
+    var inp = document.getElementById('pkgRootInput');
+    if(inp && document.activeElement !== inp) inp.value = root;
+    var btn = document.getElementById('pkgRoot');
+    if(btn){
+      btn.setAttribute('data-rel', '');
+      btn.textContent = win ? '📂 打开工具包目录' : '📋 复制根目录相对路径';
+    }
+  }
+
+  (function bindPkg(){
+    var inp  = document.getElementById('pkgRootInput');
+    var save = document.getElementById('pkgSave');
+    var reset= document.getElementById('pkgReset');
+    if(inp) inp.value = normRoot(getRoot());
+    if(save) save.addEventListener('click', function(){
+      var v = inp ? inp.value.trim() : '';
+      setRoot(v || DEFAULT_ROOT);
+      refreshPkg();
+      toast(v ? ('根目录已保存：' + v) : ('已恢复默认：' + DEFAULT_ROOT));
+    });
+    if(reset) reset.addEventListener('click', function(){
+      setRoot(DEFAULT_ROOT); refreshPkg(); toast('已恢复默认根目录：' + DEFAULT_ROOT);
+    });
+    refreshPkg();
+  })();
+
+  function toast(msg){
+    var t = document.getElementById('toast');
+    if(!t) return;
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(t._timer);
+    t._timer = setTimeout(function(){ t.classList.remove('show'); }, 2600);
+  }
+
+  function copyPath(p){
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      return navigator.clipboard.writeText(p).then(function(){ return true; }, function(){ return legacyCopy(p); });
+    }
+    return Promise.resolve(legacyCopy(p));
+  }
+  function legacyCopy(p){
+    try{
+      var ta = document.createElement('textarea');
+      ta.value = p; ta.setAttribute('readonly','');
+      ta.style.position='fixed'; ta.style.top='-1000px';
+      document.body.appendChild(ta); ta.select();
+      var ok = document.execCommand('copy');
+      document.body.removeChild(ta);
+      return ok;
+    }catch(e){ return false; }
+  }
+
+  document.addEventListener('click', function(e){
+    var a = e.target.closest ? e.target.closest('[data-rel]') : null;
+    if(!a) return;
+    e.preventDefault();
+    var rel = a.getAttribute('data-rel') || '';
+    // 根目录按钮（rel 为空）在本地模式下直接打开目录；其余一律复制路径
+    if(rel === '' && LOCAL_MODE){
+      var u = absUrl('');
+      if(u.indexOf('file:///') === 0){ location.href = u; return; }
+    }
+    var pl = payload(rel);
+    copyPath(pl.text).then(function(ok){
+      toast(ok ? (pl.tip + '：' + pl.text) : ('复制失败，请手动复制：' + pl.text));
+    });
+  });
+</script>
+</body>
+</html>

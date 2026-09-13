@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TRAE 2026 航空方向作品调研 · 航空制造/设计篇</title>
+<style>
+  :root{
+    --bg:#0f1115; --card:#171a21; --card2:#1d212b; --line:#2a2f3a;
+    --txt:#e6e6e6; --mut:#9aa3b2; --acc:#4ea1ff; --acc2:#ff9500;
+    --ok:#3ecf8e; --warn:#ffb454; --bad:#ff6b6b;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    line-height:1.65;font-size:15px}
+  .wrap{max-width:1000px;margin:0 auto;padding:40px 22px 80px}
+  h1{font-size:27px;margin:0 0 6px;background:linear-gradient(90deg,#4ea1ff,#af52de);
+    -webkit-background-clip:text;background-clip:text;color:transparent}
+  .sub{color:var(--mut);margin-bottom:26px;font-size:14px}
+  .verdict{background:linear-gradient(135deg,#1b2030,#221a2e);border:1px solid #33304a;
+    border-left:4px solid var(--acc2);border-radius:12px;padding:18px 20px;margin:22px 0 30px}
+  .verdict b{color:var(--acc2)}
+  .disclaimer{background:var(--card);border:1px solid var(--line);border-radius:10px;
+    padding:14px 18px;margin:18px 0;font-size:13.5px;color:var(--mut)}
+  .disclaimer .tag{display:inline-block;background:#23303f;color:var(--acc);border-radius:6px;
+    padding:1px 8px;font-size:12px;margin-right:6px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:22px 24px;margin:18px 0}
+  .card h2{margin:0 0 2px;font-size:19px;display:flex;align-items:center;gap:10px}
+  .pill{font-size:11.5px;padding:2px 9px;border-radius:20px;font-weight:600;white-space:nowrap}
+  .p-hw{background:#2a2150;color:#c4a8ff}
+  .p-soc{background:#1d3a2e;color:#7ee0b0}
+  .p-life{background:#3a2e1d;color:#ffc78a}
+  .p-stu{background:#1d2e3a;color:#8ac4ff}
+  .meta{color:var(--mut);font-size:12.5px;margin-bottom:14px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:8px}
+  @media(max-width:720px){.grid{grid-template-columns:1fr}}
+  .box{background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+  .box h4{margin:0 0 6px;font-size:13px;color:var(--acc);letter-spacing:.3px}
+  .box p{margin:0;font-size:13px;color:#cfd6e2}
+  .kv{font-size:13px;margin:4px 0}
+  .kv span{color:var(--mut)}
+  .rate{display:flex;align-items:center;gap:8px;margin:10px 0 2px}
+  .bar{flex:1;height:9px;background:#262b36;border-radius:6px;overflow:hidden}
+  .bar i{display:block;height:100%;border-radius:6px}
+  .rtxt{font-size:13px;font-weight:700;min-width:42px;text-align:right}
+  .ok i{background:linear-gradient(90deg,#3ecf8e,#2bbf7e)}
+  .warn i{background:linear-gradient(90deg,#ffb454,#ff9500)}
+  .bad i{background:linear-gradient(90deg,#ff8a8a,#ff5e5e)}
+  table{width:100%;border-collapse:collapse;margin:16px 0;font-size:13px}
+  th,td{border:1px solid var(--line);padding:9px 11px;text-align:left;vertical-align:top}
+  th{background:var(--card2);color:var(--acc);font-weight:600}
+  tr:nth-child(even) td{background:#14171e}
+  .sec-title{font-size:15px;color:var(--acc);margin:30px 0 8px;font-weight:700;
+    border-left:3px solid var(--acc);padding-left:10px}
+  .note{font-size:13px;color:var(--mut);margin:8px 0}
+  .foot{margin-top:36px;padding-top:18px;border-top:1px solid var(--line);color:var(--mut);font-size:12.5px}
+  a{color:var(--acc);text-decoration:none}
+  code{background:#222733;padding:1px 6px;border-radius:5px;font-size:12.5px;color:#ffd9a0}
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+<div class="wrap">
+  <h1>TRAE 2026 航空方向作品调研</h1>
+  <div class="sub">聚焦「航空制造 / 航空设计」细分 · 2026-08-24 整理 · 来源：论坛初赛专区 + 决赛报道</div>
+
+  <div class="verdict">
+    <b>核心结论：</b> 经 4 轮定向检索（飞机/机翼/气动/CFD/航空发动机/复材/飞机制造/工装 + 飞行汽车/eVTOL/无人机/低空经济），
+    <b>2026 届大赛没有任何「航空（飞机）制造 / 航空设计」硬核作品</b>。没有出现气动外形设计、CFD 流场、机翼/结构优化、航空发动机、复材铺层、总装工装这类内容。
+    能检索到的"航空相关"全部是<b>航空应用 / 飞行器仿真 / 无人机演示</b>类，且清一色是零基础参赛者用 TRAE Work 生成的 Demo，<b>均未触及"设计或制造飞机"本身</b>。
+  </div>
+
+  <div class="disclaimer">
+    <span class="tag">概念澄清</span>
+    你此前在另一台设备沉淀的 <b>「开源太空 · 卫星守望者」属于「航天」（卫星轨道），不是「航空」（飞机/飞行器）</b>。本页只谈航空（大气层内飞行器）。两者在产业里分属不同赛道，请勿混淆进同一复现清单。
+  </div>
+
+  <div class="sec-title">航空相邻作品（4 件 · 均非航空制造/设计）</div>
+
+  <!-- 01 净滩鹰 -->
+  <div class="card">
+    <h2>① 净滩鹰 Aerial Cleanup System <span class="pill p-hw">硬件交互赛道</span></h2>
+    <div class="meta">Web 端 3D 实时演示 Demo · 海边沙滩垃圾清理无人机概念</div>
+    <div class="grid">
+      <div class="box">
+        <h4>形态与功能</h4>
+        <p>用 <code>Three.js</code> 实时渲染一座低多边形海边沙滩场景（天空/远山/海浪/礁石/椰林/木栈道/长椅/垃圾桶/可拾取易拉罐与塑料瓶）。场景中央一台<b>搭载机械爪的四旋翼无人机</b>，可拖拽旋转、滚轮缩放，演示从地面拾取垃圾的动画。本质是"硬件概念的可视化演示"，非真机控制。</p>
+      </div>
+      <div class="box">
+        <h4>真实度边界</h4>
+        <p>纯前端 3D 演示。作者自述"交互界面渲染会出 bug，再用图片告诉 Trae 想要什么效果，多轮调试达成"。<b>无真实飞行控制、无视觉抓取算法、无垃圾识别模型、无真实海洋数据</b>，是四件里最"概念"的一件。</p>
+      </div>
+    </div>
+    <div class="rate warn"><span class="rtxt">演示 100%</span><div class="bar"><i style="width:100%"></i></div></div>
+    <div class="kv"><span>复现概率（作品本身）：</span><b>~90%</b> — 纯前端 Three.js 场景 + 无人机模型 + 机械爪动画可完整复刻（还能换更精的 GLTF 模型）。</div>
+    <div class="kv"><span>与"航空制造/设计"距离：</span><b>极远</b> — 它做的是"无人机应用场景演示"，连无人机本体的气动/结构都没设计。</div>
+    <div class="kv"><span>价值：</span>作为 3D 科普/概念演示模板可借鉴；对航空制造无参考价值。</div>
+  </div>
+
+  <!-- 02 苍穹降临 -->
+  <div class="card">
+    <h2>② 苍穹降临：三维交通秩序推演沙盒 <span class="pill p-soc">社会服务赛道</span></h2>
+    <div class="meta">网页三维交通推演 · 未来城市空中交通（eVTOL / 飞行汽车）</div>
+    <div class="grid">
+      <div class="box">
+        <h4>形态与功能</h4>
+        <p>单文件 HTML，双击即跑。演示未来城市<b>空中交通在"无调度"与"有调度"两种状态的差异</b>：① 混沌推演——300 架飞行器自由飞行，碰撞/坠毁/混乱；② 苍穹调度——一键激活算法，所有飞行器切换至三层有序航道，零碰撞。③ 实时数据面板：在网飞行器数、碰撞次数、实时碰撞风险率。</p>
+      </div>
+      <div class="box">
+        <h4>真实度边界</h4>
+        <p>作者直接把完整源码贴进帖子（可复制保存为 <code>苍穹降临.html</code> 运行）。调度算法为演示性规则（三层航道划分 + 冲突规避），<b>非真实空管系统、无真实飞行器动力学、无三维城市 GIS</b>。是"城市空中交通 UAM"概念的可视化论证。</p>
+      </div>
+    </div>
+    <div class="rate ok"><span class="rtxt">100% 开源</span><div class="bar"><i style="width:100%"></i></div></div>
+    <div class="kv"><span>复现概率（作品本身）：</span><b>~95%</b> — 源码已公开，纯前端粒子/实体 + 调度规则，可直接跑并二次开发。</div>
+    <div class="kv"><span>与"航空制造/设计"距离：</span><b>远</b> — 属于"空域交通管理仿真"，飞行器只是抽象实体，不涉及飞机设计。</div>
+    <div class="kv"><span>价值：</span>UAM/低空空管科普演示的极佳模板；复刻门槛最低。</div>
+  </div>
+
+  <!-- 03 小飞伴 -->
+  <div class="card">
+    <h2>③ 小飞伴 — 飞行员认知恢复系统 <span class="pill p-life">生活娱乐/学习</span></h2>
+    <div class="meta">HTML 交互 Demo · 民航飞行员落地后认知恢复 App</div>
+    <div class="grid">
+      <div class="box">
+        <h4>形态与功能</h4>
+        <p>可交互 HTML，5 屏流程：AI 评估 → 量化指标 → 认知卸载动画 → 入睡安排 → 早安恢复。输入飞行时长/时区跨越/夜航/连续执勤天数，AI 算三大量化指标（<b>认知电量 / 睡眠债务 / 时差错位</b>），自动匹配四大恢复模块（认知卸载 / 光照恢复 / 决策疲劳恢复 / 身体恢复训练），用孩子声音陪伴执行。</p>
+      </div>
+      <div class="box">
+        <h4>真实度边界</h4>
+        <p>基于航空医学理论（昼夜节律、认知科学、决策疲劳、人体工学）。<b>"AI 计算"为前端脚本化公式（非真实 LLM 推理），数据来自 FAA/DLR 等公开研究报告的理论映射</b>。父子共创（10 岁孩子出核心洞察 + 父亲用 TRAE 实现）。是"航空心理健康"应用，与制造/设计无关。</p>
+      </div>
+    </div>
+    <div class="rate ok"><span class="rtxt">~95%</span><div class="bar"><i style="width:95%"></i></div></div>
+    <div class="kv"><span>复现概率（作品本身）：</span><b>~95%</b> — 纯前端 5 屏 + 动画，可 1:1 复刻，还能接真实 LLM 反超"模拟评估"。</div>
+    <div class="kv"><span>与"航空制造/设计"距离：</span><b>远（但航空场景最贴）</b> — 唯一直接面向"民航飞行员"的作品，但做的是健康恢复 App。</div>
+    <div class="kv"><span>价值：</span>航空人因/职业健康方向的产品参考；对航空制造无参考价值。</div>
+  </div>
+
+  <!-- 04 低空飞行平台 -->
+  <div class="card">
+    <h2>④ 低空飞行服务平台 · 无人机供需撮合 <span class="pill p-soc">社会服务赛道</span></h2>
+    <div class="meta">微信小程序 · 无人机服务（航拍/巡检/植保）供需撮合</div>
+    <div class="grid">
+      <div class="box">
+        <h4>形态与功能</h4>
+        <p>微信小程序完整方案：① 任务发布 & 接单大厅（雇主填服务类型/地点/预算/时间，飞手按类型+距离筛选一键联系）；② 订单管理（待接单/待确认/进行中/已完成/已取消 + 双方评价）；③ 飞手展示体系（LBS 距离排序、机型/技能/历史评分、<b>CAAC 证书核验</b>）。作者是低空经济市场人员，用手机端 TRAE Work 生成。</p>
+      </div>
+      <div class="box">
+        <h4>真实度边界</h4>
+        <p>撮合逻辑 + LBS + 订单状态机是真实可跑的，<b>但无真实飞手/雇主入驻、无真实 CAAC 证书 API 对接、无支付闭环</b>，是 Demo 级平台原型。属于"低空经济运营工具"，不是航空制造。</p>
+      </div>
+    </div>
+    <div class="rate warn"><span class="rtxt">~80%</span><div class="bar"><i style="width:80%"></i></div></div>
+    <div class="kv"><span>复现概率（作品本身）：</span><b>~80%</b> — 小程序框架 + 撮合逻辑可复刻；需微信开发者工具与真实 LBS/证书数据源增强。</div>
+    <div class="kv"><span>与"航空制造/设计"距离：</span><b>远</b> — 是"用无人机做生意"的平台，无人机只是被调度的工具。</div>
+    <div class="kv"><span>价值：</span>低空经济撮合平台的参考架构；对航空制造无参考价值。</div>
+  </div>
+
+  <div class="sec-title">汇总表</div>
+  <table>
+    <tr><th>作品</th><th>赛道</th><th>航空属性</th><th>复现概率</th><th>是否触及"制造/设计"</th></tr>
+    <tr><td>净滩鹰</td><td>硬件交互</td><td>无人机 3D 演示</td><td>~90%</td><td>否（仅演示）</td></tr>
+    <tr><td>苍穹降临</td><td>社会服务</td><td>空中交通推演(eVTOL)</td><td>~95%</td><td>否（空管仿真）</td></tr>
+    <tr><td>小飞伴</td><td>生活/学习</td><td>飞行员健康 App</td><td>~95%</td><td>否（航空人因）</td></tr>
+    <tr><td>低空飞行平台</td><td>社会服务</td><td>无人机撮合小程序</td><td>~80%</td><td>否（运营平台）</td></tr>
+    <tr><td><b>航空制造/设计</b></td><td>—</td><td><b>气动/结构/发动机/复材/总装</b></td><td><b>无对象</b></td><td><b>本届无此类作品</b></td></tr>
+  </table>
+
+  <div class="sec-title">为什么没有硬核「航空制造/设计」作品</div>
+  <div class="note">
+    ① <b>赛事定位</b>：面向全民、零门槛，"用 TRAE Work 几分钟生成 Demo"，参赛者多为非专业背景，产出以 App/小程序/网页演示为主。<br>
+    ② <b>领域门槛</b>：真实航空制造/设计需要气动 CFD（如 OpenFOAM）、结构有限元（如 NASTRAN）、复材铺层、适航认证等重型工程栈与专业数据，远超一个周末 Demo 的承载力。<br>
+    ③ <b>数据可得性</b>：机翼外形、风洞数据、发动机性能曲线等要么涉密、要么需商业授权，个人参赛者拿不到。<br>
+    ④ <b>对比你之前沉淀的工业类</b>：半导体设备/汽车检具/数据立方虽也是工业，但"工业软件/监控/调度"尚可纯前端或桌面端 Demo 化；而"造飞机/设计飞机"的硬核部分无法被轻量 Demo 化，所以本届直接真空。
+  </div>
+
+  <div class="sec-title">与已沉淀系列的衔接</div>
+  <div class="note">
+    本页是 TRAE 2026 工业/科技类调研的延伸。已沉淀：<br>
+    · <code>trae-industrial-2026.html</code>（科技/工业/制造总览：词元开物、开源太空、听到鸟、芳莲、芯设备博士、检具机器人、数据立方）<br>
+    · <code>trae-prelim-analysis-2026.html</code>（初赛三工业件精准解析 + 复原完整性）<br>
+    · <code>trae-extra-analysis-2026.html</code>（词元开物/开源太空/听到鸟/芳莲 复现概率与价值）<br>
+    注意：上述「开源太空」= 航天（卫星），<b>不计入本航空页</b>。若你想把"航天"与"航空"分开归档复现清单，建议建两张表，避免混淆。
+  </div>
+
+  <div class="foot">
+    说明：本届公开作品 1.4 万+，初赛 9000+，仅列官方展示/可检索的航空相邻代表，未逐一核实是否全部晋级复赛。
+    复现概率为"复现该作品本身"的估计，非"复现航空制造能力"。纯静态页，<code>file://</code> 可直接打开。
+  </div>
+</div>
+</body>
+</html>

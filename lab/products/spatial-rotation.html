@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>心理旋转测试 · Mental Rotation</title>
+<style>
+  :root{
+    --bg:#f4f5fa; --panel:#ffffff; --ink:#23263a; --muted:#8a8fa6; --line:#e4e6f0;
+    --acc:#5b5bd6; --radius:12px;
+  }
+  [data-theme="dark"]{
+    --bg:#14161f; --panel:#1c1f2c; --ink:#e7e9f5; --muted:#8f95ad; --line:#2c3044;
+    --acc:#8b8bf0;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;overflow:hidden}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--ink);display:flex;flex-direction:column}
+  .bar{display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:1px solid var(--line);background:var(--panel);flex:none}
+  .back{display:inline-flex;align-items:center;gap:6px;padding:7px 11px;border-radius:9px;border:1px solid var(--line);background:var(--panel);color:var(--ink);font-size:12.5px;cursor:pointer;font-weight:700;text-decoration:none}
+  .back:hover{border-color:var(--acc)}
+  .title{font-size:13.5px;font-weight:800;opacity:.95}
+  .spacer{flex:1}
+  .hint{font-size:11.5px;color:var(--muted)}
+  .frame{flex:1;min-height:0;background:#fff}
+  .frame iframe{width:100%;height:100%;border:0;display:block}
+  @media(max-width:600px){
+    .bar{padding:8px 10px}
+    .back{padding:6px 9px;font-size:12px}
+    .hint{display:none}
+  }
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+  <div class="bar">
+    <a class="back" href="../index.html" target="_top">← 返回指挥台</a>
+    <div class="title">🧩 心理旋转测试</div>
+    <div class="spacer"></div>
+    <div class="hint">经典 Shepard-Metzler 范式 · 判断旋转 vs 镜像 · 10 题计时</div>
+  </div>
+  <div class="frame">
+    <iframe src="../../spatial-games/MentalRotationTest/mental-rotation-test.html" title="Mental Rotation Test" allow="fullscreen"></iframe>
+  </div>
+</body>
+</html>

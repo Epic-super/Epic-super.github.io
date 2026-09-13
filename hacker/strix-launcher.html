@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="app-version" content="1.0.110">
+<title>Strix 启动器 · GLM-5.3-Flash</title>
+<style>
+  :root{
+    --bg:#0f1115; --card:#171a21; --card2:#1d212b; --border:#2a2f3a;
+    --txt:#e6e8ee; --muted:#9aa3b2; --primary:#6c8cff; --primary-soft:#1b2540;
+    --green:#3ecf8e; --amber:#f5b14c; --red:#ff6b6b; --code:#0b0d12;
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f5f6f8; --card:#ffffff; --card2:#f0f2f6; --border:#e2e6ec;
+      --txt:#1a1d23; --muted:#5b6472; --primary:#3a5bff; --primary-soft:#e9efff;
+      --green:#15935b; --amber:#b9770a; --red:#d23b3b; --code:#f3f4f7;
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;
+    line-height:1.6;font-size:15px}
+  .wrap{max-width:940px;margin:0 auto;padding:28px 18px 80px}
+  header h1{font-size:24px;margin:0 0 4px}
+  .sub{color:var(--muted);font-size:13px;margin-bottom:8px}
+  .back{display:inline-block;color:var(--primary);text-decoration:none;font-size:13px;margin-bottom:14px}
+  section{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 20px;margin:16px 0}
+  h2{font-size:17px;margin:0 0 12px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+  h3{font-size:14px;margin:14px 0 8px;color:var(--primary)}
+  label{display:block;font-size:13px;color:var(--muted);margin:12px 0 5px}
+  input,select,textarea{width:100%;background:var(--code);border:1px solid var(--border);
+    color:var(--txt);border-radius:9px;padding:9px 11px;font-size:14px;font-family:inherit;outline:none}
+  input:focus,select:focus,textarea:focus{border-color:var(--primary)}
+  textarea{resize:vertical;min-height:64px;font-family:Consolas,Menlo,monospace;font-size:13px}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media(max-width:560px){.row{grid-template-columns:1fr}}
+  .callout{border-radius:10px;padding:10px 13px;margin:12px 0;font-size:13px;border:1px solid;display:flex;gap:9px;align-items:flex-start}
+  .callout .ic{flex:none;font-weight:700}
+  .warn{background:rgba(245,177,76,.12);border-color:#7a5a1f}
+  .info{background:var(--primary-soft);border-color:#33457a}
+  .ok{background:rgba(62,207,142,.12);border-color:#1f5a3f}
+  .btn{display:inline-flex;align-items:center;gap:6px;background:var(--primary);color:#fff;border:0;
+    border-radius:9px;padding:9px 15px;font-size:13.5px;font-weight:600;cursor:pointer;font-family:inherit}
+  .btn:active{transform:translateY(1px)}
+  .btn.ghost{background:var(--card2);color:var(--txt);border:1px solid var(--border);font-weight:500}
+  .btn.sm{padding:6px 11px;font-size:12.5px}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .grid2{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:start}
+  @media(max-width:560px){.grid2{grid-template-columns:1fr}}
+  pre{background:var(--code);border:1px solid var(--border);border-radius:10px;padding:13px 15px;
+    overflow:auto;font-size:12.5px;line-height:1.55;white-space:pre-wrap;word-break:break-all;margin:8px 0}
+  code{font-family:Consolas,Menlo,monospace}
+  .out-head{display:flex;justify-content:space-between;align-items:center;margin-top:14px}
+  .out-head span{font-size:12.5px;color:var(--muted)}
+  .pill{display:inline-block;border-radius:999px;padding:1px 9px;font-size:11px;font-weight:600;margin-left:6px}
+  .pill.g{background:rgba(62,207,142,.18);color:var(--green)}
+  .pill.a{background:rgba(245,177,76,.18);color:var(--amber)}
+  .pill.r{background:rgba(255,107,107,.18);color:var(--red)}
+  .hist{margin-top:8px}
+  .hist .item{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:10px 13px;margin:8px 0;font-size:13px}
+  .hist .meta{color:var(--muted);font-size:12px;margin-bottom:5px}
+  .hist .cmd{font-family:Consolas,Menlo,monospace;font-size:12px;color:var(--primary);word-break:break-all}
+  .hint{font-size:12px;color:var(--muted);margin-top:6px}
+  .status{font-size:13px;margin-top:10px;white-space:pre-wrap;font-family:Consolas,Menlo,monospace;font-size:12.5px}
+  .hidden{display:none}
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+<div class="wrap">
+  <a class="back" href="strix-glm-guide.html">&larr; 返回实战指南</a>
+  <header>
+    <h1>Strix 启动器</h1>
+    <div class="sub">接智谱 GLM-5.3-Flash · 生成命令 / 配置 / 跨设备任务投递 / 扫描历史</div>
+  </header>
+
+  <div class="callout warn"><span class="ic">⚠</span><div><b>合规红线</b>：只测自己拥有或已书面授权的目标。每次任务必须填写「授权目标说明」并留档；Docker 沙箱内执行，勿对生产环境误伤。未授权测试属违法行为。</div></div>
+
+  <section>
+    <h2>1. 任务参数</h2>
+    <label>目标 URL <span style="color:var(--red)">*</span></label>
+    <input id="target" placeholder="https://target-app.com" value="">
+
+    <div class="row">
+      <div>
+        <label>代码仓库路径（Strix 用它读源码找漏洞）</label>
+        <input id="repo" placeholder="./your-code 或 /abs/path/repo" value="./">
+      </div>
+      <div>
+        <label>模型</label>
+        <select id="model">
+          <option value="glm-5.3-flash" selected>glm-5.3-flash（推荐 · 限时 5 折）</option>
+          <option value="glm-5.3">glm-5.3（旗舰 · 贵 9 倍）</option>
+          <option value="deepseek-v4-flash">deepseek-v4-flash</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <label>扫描模式</label>
+        <select id="mode">
+          <option value="" selected>默认（完整）</option>
+          <option value="--diff-only">--diff-only（仅改动 · PR 用）</option>
+          <option value="--full-scan">--full-scan（全量巡检）</option>
+        </select>
+      </div>
+      <div>
+        <label>智谱 API Key（留空则用环境变量）</label>
+        <input id="apiKey" type="password" placeholder="可选 · 本地生成配置用" value="">
+      </div>
+    </div>
+
+    <label>授权目标说明 <span style="color:var(--red)">*</span></label>
+    <textarea id="authNote" placeholder="例：自有测试站点 https://demo.mydomain.com，已获书面授权（授权书编号 XX-2026）"></textarea>
+  </section>
+
+  <section>
+    <h2>2. 生成结果（一键复制）</h2>
+
+    <div class="out-head"><span>npx 命令</span><button class="btn ghost sm" onclick="copy('cmdNpx')">复制</button></div>
+    <pre id="cmdNpx"></pre>
+
+    <div class="out-head"><span>智谱 API 环境变量</span><button class="btn ghost sm" onclick="copy('cmdEnv')">复制</button></div>
+    <pre id="cmdEnv"></pre>
+
+    <div class="out-head"><span>Docker 运行（沙箱隔离）</span><button class="btn ghost sm" onclick="copy('cmdDocker')">复制</button></div>
+    <pre id="cmdDocker"></pre>
+
+    <p class="hint">复制后到装有 Docker / Node 的设备终端执行。另一台有 Docker 的设备若已部署本启动器的「设备端服务」，可直接用下方「跨设备投递」。</p>
+  </section>
+
+  <section>
+    <h2>3. 跨设备任务投递（overlay 网络）</h2>
+    <p class="hint">在你那台有 Docker 的设备上部署 <code>strix-deploy/</code> 里的服务，经 Tailscale 等私有网络访问。地址与令牌仅存本机浏览器。</p>
+    <a class="btn ghost sm" href="../strix-deploy/README.md" target="_blank" rel="noopener" style="text-decoration:none;margin-bottom:4px">部署说明 ↗</a>
+
+    <div class="row">
+      <div>
+        <label>设备地址（Tailscale，如 http://strix-device:8787）</label>
+        <input id="devUrl" placeholder="http://strix-device:8787" value="">
+      </div>
+      <div>
+        <label>访问令牌（STRIX_TOKEN）</label>
+        <input id="devToken" type="password" placeholder="设备端设置的令牌" value="">
+      </div>
+    </div>
+    <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn ghost sm" onclick="saveDevice()">保存设备配置</button>
+      <button class="btn ghost sm" onclick="testHealth()">测试连通</button>
+      <button class="btn" onclick="submitJob()">投递任务 ↗</button>
+    </div>
+    <div class="status" id="jobStatus"></div>
+  </section>
+
+  <section>
+    <h2>4. 扫描历史</h2>
+    <div style="margin-bottom:8px"><button class="btn ghost sm" onclick="clearHistory()">清空历史</button></div>
+    <div class="hist" id="histList"></div>
+  </section>
+
+  <div class="callout info"><span class="ic">i</span><div>站点本身不执行任何攻击。它只生成命令、向你的私有设备服务投递任务、并保存历史记录。密钥与额度始终在你本地/设备端。</div></div>
+</div>
+
+<script>
+const LS_DEV="strix.launcher.device", LS_HIST="strix.launcher.history", BASE="https://open.bigmodel.cn/api/paas/v4";
+const $=id=>document.getElementById(id);
+
+function esc(s){return (s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+
+function render(){
+  const target=$("target").value.trim();
+  const repo=$("repo").value.trim()||"./";
+  const model=$("model").value;
+  const mode=$("mode").value;
+  const apiKey=$("apiKey").value.trim();
+
+  if(!target){
+    $("cmdNpx").textContent="（填写目标 URL 后自动生成）";
+    $("cmdEnv").textContent=""; $("cmdDocker").textContent=""; return;
+  }
+  const npx=`npx @usestrix/strix start -u ${target} -r ${repo} -m ${model}${mode?" "+mode:""}`;
+  const env=[
+    `export ANTHROPIC_API_KEY=${apiKey||"your-zhipu-api-key"}`,
+    `export ANTHROPIC_BASE_URL=${BASE}`,
+    `export ANTHROPIC_MODEL=${model}`,
+    "",
+    "# 运行：",
+    npx
+  ].join("\n");
+  const docker=`docker run -i --rm \\\n  -e ANTHROPIC_API_KEY=${apiKey||"your-zhipu-api-key"} \\\n  -e ANTHROPIC_BASE_URL=${BASE} \\\n  -e ANTHROPIC_MODEL=${model} \\\n  -v "${repo}":/repo \\\n  usestrix/strix:latest start -u ${target} -r /repo${mode?" "+mode:""}`;
+
+  $("cmdNpx").textContent=npx;
+  $("cmdEnv").textContent=env;
+  $("cmdDocker").textContent=docker;
+}
+
+["target","repo","model","mode","apiKey"].forEach(id=>$(id).addEventListener("input",render));
+render();
+
+function copy(id){
+  const t=$(id).textContent;
+  if(!t)return;
+  navigator.clipboard.writeText(t).then(()=>toast("已复制")).catch(()=>toast("复制失败"));
+}
+function toast(m){const t=$("jobStatus");const old=t.dataset.base||"";t.textContent=m;setTimeout(()=>{if(t.textContent===m)t.textContent=old;},1500);}
+
+// ---- 设备配置 ----
+function loadDevice(){try{const d=JSON.parse(localStorage.getItem(LS_DEV)||"{}");if(d.url)$("devUrl").value=d.url;if(d.token)$("devToken").value=d.token;}catch(e){}}
+function saveDevice(){
+  const d={url:$("devUrl").value.trim(),token:$("devToken").value.trim()};
+  localStorage.setItem(LS_DEV,JSON.stringify(d));
+  toast("设备配置已保存");
+}
+async function testHealth(){
+  const url=$("devUrl").value.trim(); if(!url){toast("先填设备地址");return;}
+  $("jobStatus").textContent="连通测试中…";
+  try{
+    const r=await fetch(url.replace(/\/$/,"")+"/api/health",{headers:hdr()});
+    const j=await r.json().catch(()=>({}));
+    $("jobStatus").textContent="✓ 连通正常 "+(j.ts?("("+j.ts+")"):"");
+  }catch(e){$("jobStatus").textContent="✗ 连通失败："+e.message+"（确认 Tailscale 已连、服务已起）";}
+}
+function hdr(){const t=$("devToken").value.trim();return t?{"Authorization":"Bearer "+t}:{};}
+
+async function submitJob(){
+  const url=$("devUrl").value.trim();
+  const target=$("target").value.trim();
+  const auth=$("authNote").value.trim();
+  if(!url){toast("先填设备地址并保存");return;}
+  if(!target){toast("先填目标 URL");return;}
+  if(!auth){toast("必须填写授权目标说明");return;}
+  const body={
+    target, repo:$("repo").value.trim()||"./",
+    model:$("model").value, mode:$("mode").value,
+    authNote:auth, apiKey:$("apiKey").value.trim()||undefined
+  };
+  $("jobStatus").textContent="投递中…";
+  try{
+    const r=await fetch(url.replace(/\/$/,"")+"/api/scan",{
+      method:"POST",headers:Object.assign({"Content-Type":"application/json"},hdr()),
+      body:JSON.stringify(body)
+    });
+    const j=await r.json().catch(async()=>({raw:await r.text()}));
+    if(!r.ok){$("jobStatus").textContent="✗ 服务端拒绝（"+r.status+"）：\n"+JSON.stringify(j,null,2);return;}
+    $("jobStatus").textContent="✓ 已提交 · jobId="+(j.jobId||"-")+"\n状态："+(j.status||"")+"\n\n"+(j.output||"");
+    pushHistory(body,j);
+  }catch(e){$("jobStatus").textContent="✗ 投递失败："+e.message;}
+}
+
+function pushHistory(body,resp){
+  let h=[];try{h=JSON.parse(localStorage.getItem(LS_HIST)||"[]");}catch(e){}
+  h.unshift({ts:new Date().toISOString(),target:body.target,model:body.model,mode:body.mode,
+    auth:body.authNote,cmd:`npx @usestrix/strix start -u ${body.target} -r ${body.repo} -m ${body.model}${body.mode?" "+body.mode:""}`,
+    jobId:resp&&resp.jobId});
+  h=h.slice(0,50);
+  localStorage.setItem(LS_HIST,JSON.stringify(h));
+  renderHistory();
+}
+function renderHistory(){
+  let h=[];try{h=JSON.parse(localStorage.getItem(LS_HIST)||"[]");}catch(e){}
+  const box=$("histList");
+  if(!h.length){box.innerHTML='<p class="hint">暂无历史。</p>';return;}
+  box.innerHTML=h.map((x,i)=>`<div class="item">
+    <div class="meta">${esc(x.ts)} · <b>${esc(x.model)}</b>${x.mode?(" · "+esc(x.mode)):""}${x.jobId?(" · job "+esc(x.jobId)):""}</div>
+    <div class="cmd">${esc(x.cmd)}</div>
+    <div class="meta" style="margin-top:5px">授权：${esc(x.auth)}</div>
+  </div>`).join("");
+}
+function clearHistory(){localStorage.removeItem(LS_HIST);renderHistory();toast("历史已清空");}
+
+loadDevice();renderHistory();
+</script>
+</body>
+</html>

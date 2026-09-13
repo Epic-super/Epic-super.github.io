@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FOLOTOY NFC 互动打卡系统</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .header {
+      text-align: center;
+      color: white;
+      margin-bottom: 30px;
+    }
+    
+    .header h1 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+    }
+    
+    .header p {
+      font-size: 1.1rem;
+      opacity: 0.9;
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    
+    .stat-card {
+      background: white;
+      border-radius: 15px;
+      padding: 25px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      text-align: center;
+      transition: transform 0.3s ease;
+    }
+    
+    .stat-card:hover {
+      transform: translateY(-5px);
+    }
+    
+    .stat-card .number {
+      font-size: 2.5rem;
+      font-weight: bold;
+      color: #667eea;
+      margin-bottom: 5px;
+    }
+    
+    .stat-card .label {
+      color: #666;
+      font-size: 0.9rem;
+    }
+    
+    .section {
+      background: white;
+      border-radius: 15px;
+      padding: 25px;
+      margin-bottom: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+    
+    .section h2 {
+      color: #333;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #667eea;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+    }
+    
+    th {
+      background: #f8f9fa;
+      font-weight: 600;
+      color: #333;
+    }
+    
+    tr:hover {
+      background: #f8f9fa;
+    }
+    
+    .status-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+    
+    .status-pending {
+      background: #fff3cd;
+      color: #856404;
+    }
+    
+    .status-completed {
+      background: #d4edda;
+      color: #155724;
+    }
+    
+    .refresh-btn {
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background 0.3s ease;
+    }
+    
+    .refresh-btn:hover {
+      background: #5a67d8;
+    }
+    
+    .timestamp {
+      color: #666;
+      font-size: 0.85rem;
+    }
+    
+    @media (max-width: 768px) {
+      .header h1 {
+        font-size: 1.8rem;
+      }
+      
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      table {
+        font-size: 0.9rem;
+      }
+      
+      th, td {
+        padding: 8px;
+      }
+    }
+  </style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+  <div class="container">
+    <div class="header">
+    <h1>🎪 FOLOTOY NFC 互动打卡系统</h1>
+    <p>TRAE AI 创造力大赛现场通行证管理后台</p>
+    <a href="/web/provision" style="
+      display: inline-block;
+      margin-top: 12px;
+      padding: 10px 20px;
+      background: #28a745;
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      font-size: 0.95rem;
+    ">📱 设备配网</a>
+  </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="number" id="totalDevices">-</div>
+        <div class="label">📱 注册设备</div>
+      </div>
+      <div class="stat-card">
+        <div class="number" id="totalCheckins">-</div>
+        <div class="label">📍 总打卡次数</div>
+      </div>
+      <div class="stat-card">
+        <div class="number" id="totalRedemptions">-</div>
+        <div class="label">🎁 兑换次数</div>
+      </div>
+      <div class="stat-card">
+        <div class="number" id="totalTokens">-</div>
+        <div class="label">💰 发放 Token</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>📊 实时统计</h2>
+      <button class="refresh-btn" onclick="loadStats()">🔄 刷新数据</button>
+      <div id="lastUpdated" class="timestamp"></div>
+    </div>
+
+    <div class="section">
+      <h2>📍 最新打卡记录</h2>
+      <div id="checkinsTable">
+        <p>加载中...</p>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>🎁 兑换记录</h2>
+      <div id="redemptionsTable">
+        <p>加载中...</p>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>📱 设备列表</h2>
+      <div id="devicesTable">
+        <p>加载中...</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = window.location.origin;
+
+    async function loadStats() {
+      try {
+        const response = await fetch(`${API_BASE}/web/stats`);
+        const result = await response.json();
+        
+        if (result.success) {
+          document.getElementById('totalDevices').textContent = result.data.total_devices;
+          document.getElementById('totalCheckins').textContent = result.data.total_checkins;
+          document.getElementById('totalRedemptions').textContent = result.data.total_redemptions;
+          document.getElementById('totalTokens').textContent = result.data.total_tokens_issued;
+          
+          document.getElementById('lastUpdated').textContent = 
+            `最后更新: ${new Date().toLocaleString('zh-CN')}`;
+        }
+      } catch (error) {
+        console.error('Failed to load stats:', error);
+      }
+    }
+
+    async function loadCheckins() {
+      try {
+        const response = await fetch(`${API_BASE}/web/checkins?limit=20`);
+        const result = await response.json();
+        
+        if (result.success) {
+          const table = document.getElementById('checkinsTable');
+          if (result.data.length === 0) {
+            table.innerHTML = '<p>暂无打卡记录</p>';
+            return;
+          }
+          
+          table.innerHTML = `
+            <table>
+              <thead>
+                <tr>
+                  <th>设备</th>
+                  <th>位置</th>
+                  <th>获得 Token</th>
+                  <th>打卡时间</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${result.data.map(checkin => `
+                  <tr>
+                    <td>${checkin.device_name}</td>
+                    <td>${checkin.location}</td>
+                    <td>+${checkin.tokens_earned}</td>
+                    <td>${new Date(checkin.checked_at).toLocaleString('zh-CN')}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          `;
+        }
+      } catch (error) {
+        console.error('Failed to load checkins:', error);
+      }
+    }
+
+    async function loadRedemptions() {
+      try {
+        const response = await fetch(`${API_BASE}/web/redemptions?limit=20`);
+        const result = await response.json();
+        
+        if (result.success) {
+          const table = document.getElementById('redemptionsTable');
+          if (result.data.length === 0) {
+            table.innerHTML = '<p>暂无兑换记录</p>';
+            return;
+          }
+          
+          table.innerHTML = `
+            <table>
+              <thead>
+                <tr>
+                  <th>设备</th>
+                  <th>奖品</th>
+                  <th>消耗 Token</th>
+                  <th>状态</th>
+                  <th>兑换时间</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${result.data.map(redemption => `
+                  <tr>
+                    <td>${redemption.device_name}</td>
+                    <td>${redemption.reward_name}</td>
+                    <td>-${redemption.tokens_spent}</td>
+                    <td>
+                      <span class="status-badge ${redemption.status === 'completed' ? 'status-completed' : 'status-pending'}">
+                        ${redemption.status === 'completed' ? '已完成' : '待处理'}
+                      </span>
+                    </td>
+                    <td>${new Date(redemption.created_at).toLocaleString('zh-CN')}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          `;
+        }
+      } catch (error) {
+        console.error('Failed to load redemptions:', error);
+      }
+    }
+
+    async function loadDevices() {
+      try {
+        const response = await fetch(`${API_BASE}/web/devices`);
+        const result = await response.json();
+        
+        if (result.success) {
+          const table = document.getElementById('devicesTable');
+          if (result.data.length === 0) {
+            table.innerHTML = '<p>暂无设备</p>';
+            return;
+          }
+          
+          table.innerHTML = `
+            <table>
+              <thead>
+                <tr>
+                  <th>设备 ID</th>
+                  <th>设备名称</th>
+                  <th>所有者</th>
+                  <th>注册时间</th>
+                  <th>最后活跃</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${result.data.map(device => `
+                  <tr>
+                    <td><code>${device.device_id.substring(0, 16)}...</code></td>
+                    <td>${device.device_name}</td>
+                    <td>${device.owner_name || '-'}</td>
+                    <td>${new Date(device.created_at).toLocaleString('zh-CN')}</td>
+                    <td>${device.last_seen ? new Date(device.last_seen).toLocaleString('zh-CN') : '-'}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          `;
+        }
+      } catch (error) {
+        console.error('Failed to load devices:', error);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadStats();
+      loadCheckins();
+      loadRedemptions();
+      loadDevices();
+      
+      setInterval(loadStats, 30000);
+    });
+  </script>
+</body>
+</html>

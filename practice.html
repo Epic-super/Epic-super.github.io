@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<!-- Python 小尝试 · 词云练习角 | 单文件 HTML 子应用，数据走 lib/store.js 统一数据层（practice.* 命名空间） -->
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0a0e1a">
+<title>Python 小尝试 · 词云练习角</title>
+<style>
+:root{
+  --bg:#0a0e1a; --card:#121828; --card2:#19223a; --line:#243049; --line2:#2d3a58;
+  --text:#e8edf7; --muted:#8a93a8; --py:#ffd43b; --py-d:#f59f00;
+  --main:#5b8cff; --teal:#2dd4bf; --green:#34d399; --red:#f87171; --amber:#fbbf24; --violet:#a78bfa;
+  --ring-track:#222a3d; --r:16px; --r-sm:11px; --r-lg:20px; --r-f:999px;
+  --sh:0 1px 2px rgba(0,0,0,.25),0 4px 14px rgba(0,0,0,.18);
+  --ease:cubic-bezier(.32,.72,0,1); --tf:.16s var(--ease);
+}
+[data-theme="light"]{
+  --bg:#f7f9fc; --card:#ffffff; --card2:#f0f3f9; --line:#e3e8f0; --line2:#d4dcea;
+  --text:#1a2233; --muted:#6b7689;
+  --ring-track:#e6ebf3; --sh:0 1px 3px rgba(16,24,40,.06),0 6px 16px rgba(16,24,40,.06);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","HarmonyOS Sans SC","Microsoft YaHei",sans-serif;
+  background:var(--bg);color:var(--text);font-size:15px;line-height:1.6;
+  padding-bottom:calc(24px + env(safe-area-inset-bottom));
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+}
+button,input,select,textarea{font-family:inherit;font-size:16px}
+button{cursor:pointer;border:none;background:none;color:inherit}
+.wrap{max-width:1080px;margin:0 auto;padding:0 14px}
+
+/* 顶栏：Python 蓝黄配色 */
+.top{position:relative;color:#fff;padding:18px 0 20px;padding-top:calc(18px + env(safe-area-inset-top));
+  background:
+    radial-gradient(120% 150% at 6% -15%,rgba(255,212,59,.18),rgba(255,212,59,0) 46%),
+    radial-gradient(90% 130% at 94% 0%,rgba(45,212,191,.5),rgba(45,212,191,0) 60%),
+    linear-gradient(134deg,#1d3a8f 0%,#3061c7 46%,#2dd4bf 120%);
+  box-shadow:0 1px 0 rgba(255,255,255,.10) inset,0 6px 22px rgba(20,30,80,.25);overflow:hidden}
+.top::after{content:'';position:absolute;left:0;right:0;bottom:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent)}
+.top-row{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.brand{flex:1;min-width:210px}
+.brand h1{margin:0;font-size:20px;font-weight:800;letter-spacing:-.01em;display:flex;align-items:center;gap:9px;text-shadow:0 1px 2px rgba(0,0,0,.15)}
+.brand h1 .py-emoji{font-size:24px;line-height:1}
+.brand p{margin:5px 0 0;font-size:12.5px;opacity:.9}
+.top-acts{display:flex;gap:7px;flex-wrap:wrap}
+.tbtn{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.24);color:#fff;padding:8px 12px;border-radius:var(--r-sm);font-size:13px;font-weight:600;min-height:40px;display:inline-flex;align-items:center;gap:5px;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);transition:background var(--tf),transform var(--tf)}
+.tbtn:hover{background:rgba(255,255,255,.24)}
+.tbtn:active{transform:scale(.96)}
+.tbtn svg{width:16px;height:16px}
+
+/* 子导航 */
+.subnav{position:sticky;top:0;z-index:20;display:flex;gap:6px;overflow-x:auto;padding:10px 0;border-bottom:1px solid var(--line);background:var(--bg);scrollbar-width:none}
+.subnav::-webkit-scrollbar{display:none}
+.subnav a{flex:none;padding:7px 13px;border-radius:var(--r-f);font-size:13px;color:var(--muted);text-decoration:none;font-weight:600;transition:background var(--tf),color var(--tf);white-space:nowrap}
+.subnav a:hover{background:var(--card2);color:var(--text)}
+.subnav a.active{background:var(--main);color:#fff}
+
+/* 卡片 */
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px;box-shadow:var(--sh)}
+.card h3{margin:0 0 4px;font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px}
+.card h3 .badge{font-size:11px;background:var(--card2);color:var(--py);padding:2px 8px;border-radius:var(--r-f);font-weight:700;letter-spacing:.02em}
+.card .desc{color:var(--muted);font-size:13px;margin:0 0 14px}
+.card .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:720px){.card .grid2{grid-template-columns:1fr}}
+
+/* 练习卡片网格 */
+.ex-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:14px 0}
+@media (max-width:880px){.ex-grid{grid-template-columns:1fr}}
+.ex-card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:10px;position:relative;overflow:hidden}
+.ex-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--py)}
+.ex-card.b::before{background:var(--teal)}
+.ex-card.c::before{background:var(--violet)}
+.ex-card .ex-num{font-size:11px;color:var(--py);font-weight:700;letter-spacing:.08em}
+.ex-card.b .ex-num{color:var(--teal)}
+.ex-card.c .ex-num{color:var(--violet)}
+.ex-card h4{margin:0;font-size:15px;font-weight:700}
+.ex-card .ex-desc{font-size:12.5px;color:var(--muted);line-height:1.55;margin:0}
+.ex-card .ex-tags{display:flex;flex-wrap:wrap;gap:5px}
+.ex-card .ex-tag{font-size:11px;background:var(--card2);color:var(--text);padding:3px 8px;border-radius:var(--r-f);font-weight:600}
+.ex-card .ex-img{width:100%;border-radius:var(--r-sm);border:1px solid var(--line);display:block;background:#fff;max-height:220px;object-fit:contain}
+.ex-card .ex-actions{display:flex;gap:6px;flex-wrap:wrap}
+.btn{padding:7px 12px;border-radius:var(--r-sm);font-size:12.5px;font-weight:600;border:1px solid var(--line2);background:var(--card2);color:var(--text);cursor:pointer;transition:background var(--tf),transform var(--tf);display:inline-flex;align-items:center;gap:5px;min-height:36px}
+.btn:hover{background:var(--line)}
+.btn:active{transform:scale(.97)}
+.btn.primary{background:var(--main);border-color:var(--main);color:#fff}
+.btn.primary:hover{background:var(--main-d,#3b6ef0)}
+.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--muted)}
+.btn.ghost:hover{color:var(--text);background:var(--card2)}
+
+/* 代码块 */
+.code-wrap{position:relative}
+.code-wrap pre{margin:0;background:#0d1424;border:1px solid var(--line);border-radius:var(--r-sm);padding:12px 14px;overflow-x:auto;font-family:"JetBrains Mono","Cascadia Code","Consolas",monospace;font-size:12px;line-height:1.55;color:#cbd5e1;max-height:380px;overflow-y:auto;white-space:pre}
+.code-wrap pre .k{color:#c084fc}  /* keyword */
+.code-wrap pre .s{color:#86efac}  /* string */
+.code-wrap pre .c{color:#64748b;font-style:italic}  /* comment */
+.code-wrap pre .n{color:#fbbf24}  /* number */
+.code-wrap pre .f{color:#7dd3fc}  /* function */
+.code-copy{position:absolute;top:8px;right:8px;background:rgba(255,255,255,.06);border:1px solid var(--line);color:var(--text);padding:4px 9px;border-radius:var(--r-sm);font-size:11px;font-weight:600;cursor:pointer;transition:background var(--tf)}
+.code-copy:hover{background:rgba(255,255,255,.14)}
+.code-copy.copied{background:var(--green);border-color:var(--green);color:#0a0e1a}
+
+/* 交互区：词频统计工具 */
+.tool{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px;margin:14px 0}
+.tool h3{margin:0 0 4px;font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px}
+.tool .desc{color:var(--muted);font-size:13px;margin:0 0 12px}
+.tool textarea{width:100%;min-height:120px;background:var(--card2);border:1px solid var(--line);border-radius:var(--r-sm);color:var(--text);padding:10px 12px;font-size:14px;line-height:1.6;resize:vertical}
+.tool .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
+.tool .chip{display:inline-flex;align-items:center;gap:5px;background:var(--card2);border:1px solid var(--line);border-radius:var(--r-f);padding:4px 10px;font-size:12px;color:var(--muted)}
+.tool .chip strong{color:var(--text);font-weight:700}
+.tool-result{margin-top:14px;background:var(--card2);border:1px solid var(--line);border-radius:var(--r-sm);padding:12px}
+.tool-result table{width:100%;border-collapse:collapse;font-size:13px}
+.tool-result th,.tool-result td{text-align:left;padding:7px 9px;border-bottom:1px solid var(--line)}
+.tool-result th{color:var(--muted);font-weight:600;font-size:11.5px;letter-spacing:.04em}
+.tool-result tr:last-child td{border-bottom:none}
+.tool-result .rank-no{color:var(--amber);font-weight:700;font-variant-numeric:tabular-nums;width:48px}
+.tool-result .word{font-weight:700;color:var(--teal)}
+.tool-result .cnt{color:var(--red);font-weight:700;text-align:right;font-variant-numeric:tabular-nums;width:60px}
+.tool-result .bar-cell{width:100%}
+.tool-result .bar-bg{height:8px;background:var(--card);border-radius:var(--r-f);overflow:hidden;position:relative}
+.tool-result .bar-fg{height:100%;background:linear-gradient(90deg,var(--teal),var(--main));border-radius:var(--r-f);transition:width .4s var(--ease)}
+
+/* 学习笔记 */
+.notes{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px;margin:14px 0}
+.notes h3{margin:0 0 10px;font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px}
+.notes textarea{width:100%;min-height:80px;background:var(--card2);border:1px solid var(--line);border-radius:var(--r-sm);color:var(--text);padding:10px 12px;font-size:14px;line-height:1.6;resize:vertical}
+.notes .save-row{display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap}
+.notes .saved-time{font-size:12px;color:var(--muted)}
+
+/* 底部 */
+.foot{text-align:center;color:var(--muted);font-size:12px;padding:24px 14px 12px}
+.foot code{background:var(--card2);padding:2px 6px;border-radius:4px;font-size:11.5px}
+
+/* 主题切换 */
+.theme-tog{position:fixed;right:14px;bottom:18px;width:42px;height:42px;border-radius:50%;background:var(--card);border:1px solid var(--line);color:var(--text);box-shadow:var(--sh);display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:50;transition:transform var(--tf)}
+.theme-tog:hover{transform:scale(1.05)}
+.theme-tog svg{width:20px;height:20px}
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+
+<header class="top">
+  <div class="wrap top-row">
+    <div class="brand">
+      <h1><span class="py-emoji">🐍</span>Python 小尝试 · 词云练习角</h1>
+      <p>jieba 分词 · wordcloud 词云 · rich 表格 · 个人练习沉淀</p>
+    </div>
+    <div class="top-acts">
+      <button class="tbtn" id="btnExport" title="导出本地笔记与历史">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        导出
+      </button>
+      <button class="tbtn" id="btnImport" title="导入 JSON 备份">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        导入
+      </button>
+      <button class="tbtn" id="btnClear" title="清空全部数据">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+        清空
+      </button>
+    </div>
+  </div>
+</header>
+
+<nav class="subnav" id="subnav">
+  <a href="#sec-ex" class="active">练习概览</a>
+  <a href="#sec-tool">词频工具</a>
+  <a href="#sec-notes">学习笔记</a>
+</nav>
+
+<main class="wrap" style="padding-top:14px">
+
+  <!-- 三个练习卡片 -->
+  <section id="sec-ex">
+    <div class="ex-grid">
+
+      <!-- 练习 1: 基础词云 -->
+      <div class="ex-card">
+        <span class="ex-num">EXERCISE 01</span>
+        <h4>基础词云</h4>
+        <p class="ex-desc">jieba 中文分词 + wordcloud 生成最简词云图，中文需指定字体路径避免方块字。</p>
+        <div class="ex-tags">
+          <span class="ex-tag">jieba</span>
+          <span class="ex-tag">WordCloud</span>
+          <span class="ex-tag">matplotlib</span>
+        </div>
+        <img class="ex-img" src="practice/my_wordcloud.png" alt="基础词云输出" loading="lazy">
+        <div class="ex-actions">
+          <button class="btn primary" data-toggle-code="code-1">查看代码</button>
+          <button class="btn" data-copy="code-1">复制</button>
+        </div>
+        <div class="code-wrap" id="code-1" style="display:none">
+          <pre id="src-1"></pre>
+          <button class="code-copy" data-copy="code-1">复制</button>
+        </div>
+      </div>
+
+      <!-- 练习 2: 升级版词云 -->
+      <div class="ex-card b">
+        <span class="ex-num">EXERCISE 02</span>
+        <h4>升级版词云</h4>
+        <p class="ex-desc">加停用词过滤 + 形状蒙版（mask.png）+ viridis 配色主题，让词云更有设计感。</p>
+        <div class="ex-tags">
+          <span class="ex-tag">stopwords</span>
+          <span class="ex-tag">PIL mask</span>
+          <span class="ex-tag">colormap</span>
+        </div>
+        <img class="ex-img" src="practice/my_improved_wordcloud.png" alt="升级版词云输出" loading="lazy">
+        <div class="ex-actions">
+          <button class="btn primary" data-toggle-code="code-2">查看代码</button>
+          <button class="btn" data-copy="code-2">复制</button>
+        </div>
+        <div class="code-wrap" id="code-2" style="display:none">
+          <pre id="src-2"></pre>
+          <button class="code-copy" data-copy="code-2">复制</button>
+        </div>
+      </div>
+
+      <!-- 练习 3: 词频 Top5 -->
+      <div class="ex-card c">
+        <span class="ex-num">EXERCISE 03</span>
+        <h4>词频 Top5</h4>
+        <p class="ex-desc">jieba + Counter 统计词频 + rich 表格彩色看板，命令行的精致排版。</p>
+        <div class="ex-tags">
+          <span class="ex-tag">Counter</span>
+          <span class="ex-tag">rich.table</span>
+          <span class="ex-tag">stopwords</span>
+        </div>
+        <img class="ex-img" src="practice/1782988822407.png" alt="pinlv.py 终端运行截图" loading="lazy">
+        <div class="ex-actions">
+          <button class="btn primary" data-toggle-code="code-3">查看代码</button>
+          <button class="btn" data-copy="code-3">复制</button>
+        </div>
+        <div class="code-wrap" id="code-3" style="display:none">
+          <pre id="src-3"></pre>
+          <button class="code-copy" data-copy="code-3">复制</button>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 交互词频工具 -->
+  <section id="sec-tool" class="tool">
+    <h3>📊 文本词频统计 · 浏览器版</h3>
+    <p class="desc">纯前端实现：汉字字符频率 + 常见 2 字词组合。完整 jieba 词典需 Python 环境，下方工具演示「去停用字后按频率排序」的核心理念。</p>
+    <textarea id="toolInput" placeholder="在这里粘贴中文文本……"></textarea>
+    <div class="row">
+      <button class="btn primary" id="btnAnalyze">分析词频</button>
+      <button class="btn ghost" id="btnDemo">填入示例</button>
+      <button class="btn ghost" id="btnClearInput">清空</button>
+      <span class="chip">共 <strong id="chTotal">0</strong> 字符</span>
+      <span class="chip">去停用后 <strong id="chUseful">0</strong></span>
+      <span class="chip">Top <strong id="chTop">0</strong> 词</span>
+    </div>
+    <div class="tool-result" id="toolResult" style="display:none">
+      <table>
+        <thead>
+          <tr><th>排名</th><th>词汇</th><th>次数</th><th>占比</th></tr>
+        </thead>
+        <tbody id="toolTbody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 学习笔记 -->
+  <section id="sec-notes" class="notes">
+    <h3>📝 学习笔记</h3>
+    <textarea id="noteInput" placeholder="记录你的练习收获、踩坑、灵感…… 自动保存到本机 localStorage"></textarea>
+    <div class="save-row">
+      <button class="btn primary" id="btnNoteSave">保存笔记</button>
+      <span class="saved-time" id="noteSavedAt"></span>
+    </div>
+  </section>
+
+  <div class="foot">
+    <code>~/practice</code> · 三个小练习 + 真实运行截图 · 数据仅存本机浏览器
+  </div>
+</main>
+
+<button class="theme-tog" id="themeTog" title="切换主题">
+  <svg id="themeIco" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+</button>
+
+<input type="file" id="fileImport" accept="application/json" style="display:none">
+
+<script src="lib/store.js"></script>
+<script>
+(function(){
+'use strict';
+
+// ---- 主题 ----
+var root=document.documentElement;
+var storedTheme=(function(){try{return localStorage.getItem('practice.theme');}catch(e){return null;}})();
+if(storedTheme==='light'||storedTheme==='dark'){root.setAttribute('data-theme',storedTheme);}
+function toggleTheme(){
+  var cur=root.getAttribute('data-theme')==='light'?'light':'dark';
+  var nxt=cur==='light'?'dark':'light';
+  root.setAttribute('data-theme',nxt);
+  try{localStorage.setItem('practice.theme',nxt);}catch(e){}
+}
+document.getElementById('themeTog').addEventListener('click',toggleTheme);
+
+// ---- 数据层（统一走 lib/store.js） ----
+var store=window.WBStore;
+function getNote(){return (store&&store.get)?(store.get('practice.note')||''):((function(){try{return localStorage.getItem('practice.note')||'';}catch(e){return '';}})());}
+function setNote(v){if(store&&store.set){store.set('practice.note',v);}else{try{localStorage.setItem('practice.note',v);}catch(e){}}}
+function getSavedAt(){return (store&&store.get)?(store.get('practice.noteAt')||''):((function(){try{return localStorage.getItem('practice.noteAt')||'';}catch(e){return '';}})());}
+function setSavedAt(v){if(store&&store.set){store.set('practice.noteAt',v);}else{try{localStorage.setItem('practice.noteAt',v);}catch(e){}}}
+
+// ---- 三个练习的源码（从本地 practice/*.py 同步） ----
+var SRC = {
+  'code-1': [
+'# base.py — 基础词云',
+'import os',
+'import jieba',
+'import matplotlib.pyplot as plt',
+'from wordcloud import WordCloud',
+'',
+'# 1. 准备原始文本（这里以一段夸赞 Python 的话为例）',
+'text = """',
+'Python 是一种广泛使用的解释型、高级和通用的编程语言。',
+'Python 让你可以更快速地工作，更有效地集成系统。',
+'数据分析、网络爬虫、人工智能、办公自动化、机器学习、深度学习都是它的强项。',
+'高效、简洁、好学、生态强大、可视化、词云图、柱状图、折线图。',
+'"""',
+'',
+'# 2. 中文分词（将句子切碎成词语，并用空格拼接）',
+'word_list = jieba.cut(text)',
+'words = " ".join(word_list)',
+'',
+'# 3. 设置一个中文字体路径（避免中文乱码）',
+'# 这里以 Windows 系统的微软雅黑为例',
+'font_path = "msyh.ttc"',
+'',
+'# 如果字体文件不存在，兼容处理（防止报错）',
+'if not os.path.exists(font_path):',
+'    font_path = None',
+'',
+'# 4. 实例化词云对象并生成',
+'wc = WordCloud(',
+'    font_path=font_path,     # 指定字体',
+'    background_color="white",# 背景颜色',
+'    width=800,               # 图幅宽度',
+'    height=600,              # 图幅高度',
+'    max_words=100,           # 最多显示的词数',
+'    min_font_size=10         # 最小字体大小',
+')',
+'',
+'wc.generate(words)',
+'',
+'# 5. 保存并展示图片',
+'wc.to_file("my_wordcloud.png")',
+'print("词云图已生成并保存为 \'my_wordcloud.png\'！")',
+'plt.imshow(wc, interpolation=\'bilinear\')',
+'plt.axis("off")',
+'plt.show()'
+  ].join('\n'),
+  'code-2': [
+'# degrade.py — 升级版词云（停用词 + 形状蒙版 + 配色）',
+'import os',
+'import jieba',
+'import numpy as np',
+'from PIL import Image',
+'import matplotlib.pyplot as plt',
+'from wordcloud import WordCloud',
+'',
+'# 1. 原始文本',
+'text = """',
+'Python 是一种广泛使用的解释型、高级和通用的编程语言。',
+'Python 让你可以更快速地工作，更有效地集成系统。',
+'数据分析、网络爬虫、人工智能、办公自动化、机器学习、深度学习都是它的强项。',
+'高效、简洁、好学、生态强大、可视化、词云图、柱状图、折线图。',
+'"""',
+'',
+'# 2. 中文分词',
+'word_list = jieba.cut(text)',
+'words = " ".join(word_list)',
+'',
+'# 3. 【升级 1】定义停用词集合（过滤掉不需要的词）',
+'stopwords = {"是", "的", "可以", "一种", "让", "它", "和", "都", "更", "地", "中"}',
+'',
+'# 4. 【升级 2】加载形状图片（可选）',
+'# 请确保当前目录下有一张名为 mask.png 的白底黑图',
+'mask_path = "mask.png"',
+'if os.path.exists(mask_path):',
+'    mask_image = np.array(Image.open(mask_path))',
+'else:',
+'    mask_image = None',
+'    print("未检测到 mask.png，将默认生成长方形词云。")',
+'',
+'# 5. 配置词云参数',
+'font_path = "msyh.ttc"',
+'',
+'wc = WordCloud(',
+'    font_path=font_path,',
+'    background_color="white",',
+'    mask=mask_image,         # 传入形状蒙版',
+'    stopwords=stopwords,     # 传入停用词',
+'    width=800,',
+'    height=600,',
+'    max_words=100,',
+'    colormap="viridis"       # 更换一个自带的炫酷配色主题',
+')',
+'',
+'wc.generate(words)',
+'wc.to_file("my_improved_wordcloud.png")',
+'print("升级版词云已生成！")',
+'plt.imshow(wc, interpolation=\'bilinear\')',
+'plt.axis("off")',
+'plt.show()'
+  ].join('\n'),
+  'code-3': [
+'# pinlv.py — 词频 Top 5 + rich 彩色看板',
+'from collections import Counter',
+'import jieba',
+'from rich.console import Console',
+'from rich.table import Table',
+'',
+'# 1. 原始文本',
+'text = """',
+'Python 是一种广泛使用的解释型、高级和通用的编程语言。',
+'Python 让你可以更快速地工作，更有效地集成系统。',
+'数据分析、网络爬虫、人工智能、办公自动化、机器学习、深度学习都是它的强项。',
+'高效、简洁、好学、生态强大、可视化、词云图、柱状图、折线图。',
+'"""',
+'',
+'# 2. 停用词（加上了标点符号）',
+'stopwords = {"是", "的", "可以", "一种", "让", "它", "和", "都", "更", "地", "中",',
+'             "——", "\\n", " ", "、", "。"}',
+'',
+'# 3. 动态统计词频',
+'word_list = jieba.cut(text)',
+'filtered_words = [word for word in word_list if word not in stopwords]',
+'word_counts = Counter(filtered_words)',
+'',
+'# 动态获取前 5 名',
+'top_5 = word_counts.most_common(5)',
+'',
+'# 4. 初始化 rich 的彩色看板',
+'console = Console()',
+'table = Table(title="📊 文本词频 Top 5 排行榜",',
+'              title_style="bold magenta", border_style="cyan")',
+'',
+'table.add_column("排名", justify="center", style="bold yellow")',
+'table.add_column("核心词汇", justify="left", style="green")',
+'table.add_column("出现次数", justify="right", style="bold red")',
+'',
+'# 5. 【核心】把动态统计出来的 top_5 数据循环塞进表格里',
+'for rank, (word, count) in enumerate(top_5, 1):',
+'    table.add_row(f"No.{rank}", word, f"{count} 次")',
+'',
+'# 6. 渲染打印',
+'console.print(table)'
+  ].join('\n')
+};
+
+// ---- 简单高亮（关键字 / 字符串 / 数字 / 注释） ----
+function escapeHtml(s){return s.replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function highlightPy(code){
+  var esc=escapeHtml(code);
+  // 字符串（双/单引号）
+  esc=esc.replace(/(\#[^\n]*)/g,'<span class="c">$1</span>');
+  esc=esc.replace(/('(?:\\.|[^'\\\n])*'|&quot;(?:\\.|[^"\\\n])*&quot;)/g,'<span class="s">$1</span>');
+  // 数字
+  esc=esc.replace(/\b(\d+)\b/g,'<span class="n">$1</span>');
+  // 关键字
+  var kws=['import','from','as','def','return','if','else','elif','for','in','not','and','or','with','class','None','True','False','print'];
+  var re=new RegExp('\\b('+kws.join('|')+')\\b','g');
+  esc=esc.replace(re,'<span class="k">$1</span>');
+  return esc;
+}
+
+// ---- 渲染代码到对应 pre ----
+Object.keys(SRC).forEach(function(k){
+  var el=document.getElementById(k.replace('code-','src-'));
+  if(el) el.innerHTML=highlightPy(SRC[k]);
+});
+
+// ---- 折叠/展开代码 ----
+document.querySelectorAll('[data-toggle-code]').forEach(function(btn){
+  btn.addEventListener('click',function(){
+    var id=btn.getAttribute('data-toggle-code');
+    var w=document.getElementById(id);
+    if(!w) return;
+    var open=w.style.display!=='none';
+    w.style.display=open?'none':'block';
+    btn.textContent=open?'查看代码':'收起代码';
+  });
+});
+
+// ---- 复制代码 ----
+function copyText(txt,btn){
+  var done=function(){
+    if(!btn) return;
+    var old=btn.textContent;
+    btn.textContent='已复制 ✓';
+    btn.classList.add('copied');
+    setTimeout(function(){btn.textContent=old;btn.classList.remove('copied');},1500);
+  };
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt).then(done,function(){fallback();});
+  }else{fallback();}
+  function fallback(){
+    var ta=document.createElement('textarea');
+    ta.value=txt; ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.select();
+    try{document.execCommand('copy');done();}catch(e){}
+    document.body.removeChild(ta);
+  }
+}
+document.querySelectorAll('[data-copy]').forEach(function(btn){
+  btn.addEventListener('click',function(){
+    var k=btn.getAttribute('data-copy');
+    var code=SRC[k]||'';
+    copyText(code,btn);
+  });
+});
+
+// ---- 词频工具：纯前端汉字 + 常见 2 字词频率统计 ----
+var STOP_CHARS='的了是就在和一有也都还把被让着过用这下那个这些那些吗呢吧啊哦哈呀嘛哇哎';
+var COMMON_BIGRAMS=['数据','分析','网络','爬虫','人工智能','办公','自动化','机器','学习','深度','高效','简洁','好学','生态','强大','可视化','词云','柱状','折线','词频','排行榜','解释','语言','通用','编程','工作','系统','强大','强力','分词','文本','统计','过滤','停用','颜色','宽度','高度','保存','输出','文件','字体','路径','中文','乱码','默认','形状','蒙版','底色','图片','白色','黑色','主题','配色','炫酷','示例','随机','加权','常见','演示','浏览器','实现','核心','词汇','次数','排名','终端','命令','打印','渲染','笔记','收获','踩坑','灵感','小试','小练','开始','学习'];
+var DEMO='Python 是一种广泛使用的解释型、高级和通用的编程语言。Python 让你可以更快速地工作，更有效地集成系统。数据分析、网络爬虫、人工智能、办公自动化、机器学习、深度学习都是它的强项。高效、简洁、好学、生态强大、可视化、词云图、柱状图、折线图。';
+
+function tokenize(s){
+  // 返回 词数组（汉字 2 字组合优先 + 单字回退）
+  var stopSet={};
+  STOP_CHARS.split('').forEach(function(c){stopSet[c]=1;});
+  var bigramSet={};
+  COMMON_BIGRAMS.forEach(function(w){bigramSet[w]=1;});
+  var out=[];
+  var i=0;
+  while(i<s.length){
+    var ch=s.charAt(i);
+    if(/[\u4e00-\u9fa5]/.test(ch)){
+      // 尝试 2 字词
+      var nxt=s.charAt(i+1);
+      if(nxt && /[\u4e00-\u9fa5]/.test(nxt)){
+        var bi=ch+nxt;
+        if(bigramSet[bi]){out.push(bi);i+=2;continue;}
+      }
+      // 单字（过滤停用）
+      if(!stopSet[ch]) out.push(ch);
+      i+=1;
+    }else{
+      i+=1;
+    }
+  }
+  return out;
+}
+
+function analyze(){
+  var s=document.getElementById('toolInput').value||'';
+  var total=s.replace(/\s/g,'').length;
+  var tokens=tokenize(s);
+  var cnt={};
+  tokens.forEach(function(t){cnt[t]=(cnt[t]||0)+1;});
+  var arr=Object.keys(cnt).map(function(k){return [k,cnt[k]];});
+  arr.sort(function(a,b){return b[1]-a[1];});
+  var top=arr.slice(0,12);
+  document.getElementById('chTotal').textContent=total;
+  document.getElementById('chUseful').textContent=tokens.length;
+  document.getElementById('chTop').textContent=top.length;
+  var tbody=document.getElementById('toolTbody');
+  if(top.length===0){
+    tbody.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:18px">未识别到有效词汇，试试粘贴更多中文文本</td></tr>';
+  }else{
+    var max=top[0][1];
+    tbody.innerHTML=top.map(function(it,idx){
+      var pct=Math.round(it[1]/tokens.length*100);
+      var barW=Math.max(8,Math.round(it[1]/max*100));
+      return '<tr>'+
+        '<td class="rank-no">No.'+(idx+1)+'</td>'+
+        '<td class="word">'+escapeHtml(it[0])+'</td>'+
+        '<td class="cnt">'+it[1]+'</td>'+
+        '<td><div class="bar-bg"><div class="bar-fg" style="width:'+barW+'%"></div></div><span style="font-size:11px;color:var(--muted);margin-left:6px">'+pct+'%</span></td>'+
+        '</tr>';
+    }).join('');
+  }
+  document.getElementById('toolResult').style.display='block';
+  scheduleResize();
+}
+document.getElementById('btnAnalyze').addEventListener('click',analyze);
+document.getElementById('btnDemo').addEventListener('click',function(){
+  document.getElementById('toolInput').value=DEMO;
+  analyze();
+});
+document.getElementById('btnClearInput').addEventListener('click',function(){
+  document.getElementById('toolInput').value='';
+  document.getElementById('toolResult').style.display='none';
+  document.getElementById('chTotal').textContent=0;
+  document.getElementById('chUseful').textContent=0;
+  document.getElementById('chTop').textContent=0;
+  scheduleResize();
+});
+
+// ---- 笔记 ----
+var noteInput=document.getElementById('noteInput');
+var noteSavedAt=document.getElementById('noteSavedAt');
+function renderNote(){
+  noteInput.value=getNote();
+  var t=getSavedAt();
+  if(t){noteSavedAt.textContent='上次保存：'+t;}else{noteSavedAt.textContent='';}
+}
+renderNote();
+document.getElementById('btnNoteSave').addEventListener('click',function(){
+  setNote(noteInput.value);
+  var t=new Date().toLocaleString('zh-CN',{hour12:false});
+  setSavedAt(t);
+  renderNote();
+});
+
+// ---- 导出/导入/清空 ----
+document.getElementById('btnExport').addEventListener('click',function(){
+  var data={
+    _exportedAt:new Date().toISOString(),
+    _from:'practice.html',
+    note:getNote(),
+    noteAt:getSavedAt(),
+    theme:root.getAttribute('data-theme')||'dark'
+  };
+  var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url; a.download='practice-backup-'+new Date().toISOString().slice(0,10)+'.json';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function(){URL.revokeObjectURL(url);},500);
+});
+document.getElementById('btnImport').addEventListener('click',function(){
+  document.getElementById('fileImport').click();
+});
+document.getElementById('fileImport').addEventListener('change',function(e){
+  var f=e.target.files&&e.target.files[0]; if(!f) return;
+  var rd=new FileReader();
+  rd.onload=function(){
+    try{
+      var data=JSON.parse(rd.result);
+      if(typeof data.note==='string'){setNote(data.note);if(data.noteAt)setSavedAt(data.noteAt);renderNote();}
+      if(data.theme==='light'||data.theme==='dark'){root.setAttribute('data-theme',data.theme);try{localStorage.setItem('practice.theme',data.theme);}catch(e){}}
+      alert('已导入 ✓');
+      scheduleResize();
+    }catch(err){alert('导入失败：JSON 解析错误');}
+  };
+  rd.readAsText(f);
+  e.target.value='';
+});
+document.getElementById('btnClear').addEventListener('click',function(){
+  if(!confirm('清空笔记、主题与本地缓存？此操作不可撤销（建议先导出备份）')) return;
+  setNote(''); setSavedAt('');
+  try{localStorage.removeItem('practice.theme');}catch(e){}
+  renderNote();
+  scheduleResize();
+});
+
+// ---- 子导航锚点 ----
+document.querySelectorAll('.subnav a').forEach(function(a){
+  a.addEventListener('click',function(e){
+    e.preventDefault();
+    var target=document.querySelector(a.getAttribute('href'));
+    if(target){target.scrollIntoView({behavior:'smooth',block:'start'});}
+    document.querySelectorAll('.subnav a').forEach(function(x){x.classList.remove('active');});
+    a.classList.add('active');
+  });
+});
+
+// ---- iframe 高度自适应 ----
+function postResize(){
+  try{
+    var h=document.documentElement.scrollHeight;
+    parent.postMessage({__wbResize:true,id:'practiceFrame',h:h},'*');
+  }catch(e){}
+}
+var resizeTimer=null;
+function scheduleResize(){clearTimeout(resizeTimer);resizeTimer=setTimeout(postResize,120);}
+window.addEventListener('load',function(){setTimeout(postResize,200);});
+window.addEventListener('resize',scheduleResize);
+// 监听图片加载完成（词云图较慢，等图加载完再重报高度）
+window.addEventListener('load',function(){
+  setTimeout(postResize,600);
+  setTimeout(postResize,1500);
+});
+if(window.ResizeObserver){
+  try{
+    new ResizeObserver(scheduleResize).observe(document.body);
+  }catch(e){}
+}
+
+})();
+</script>
+</body>
+</html>

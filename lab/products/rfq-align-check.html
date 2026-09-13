@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RFQ 主表公式对齐校验报告</title>
+<style>
+  :root{
+    --bg:#0f1419; --card:#1a212b; --line:#2a3441; --txt:#d7dde5; --mut:#8a96a6;
+    --red:#ff6b6b; --grn:#4cd07d; --yel:#ffd166; --blu:#5aa9ff;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);font:14px/1.6 -apple-system,"Segoe UI",Roboto,"Microsoft YaHei",sans-serif;padding:28px}
+  h1{font-size:22px;margin:0 0 4px}
+  h2{font-size:17px;margin:26px 0 10px;border-left:3px solid var(--blu);padding-left:10px}
+  .sub{color:var(--mut);font-size:13px;margin-bottom:18px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin:10px 0}
+  table{width:100%;border-collapse:collapse;margin:8px 0;font-size:13px}
+  th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--mut);font-weight:600;background:#141b24}
+  code{background:#0c1117;padding:1px 6px;border-radius:4px;color:var(--blu);font-family:"Cascadia Code",Consolas,monospace;font-size:12.5px}
+  .mono{font-family:Consolas,monospace;font-size:12px}
+  .tag{display:inline-block;padding:2px 8px;border-radius:5px;font-size:12px;font-weight:600}
+  .t-red{background:rgba(255,107,107,.15);color:var(--red)}
+  .t-grn{background:rgba(76,208,125,.15);color:var(--grn)}
+  .t-yel{background:rgba(255,209,102,.15);color:var(--yel)}
+  .t-blu{background:rgba(90,169,255,.15);color:var(--blu)}
+  .ok{border-left:3px solid var(--grn);background:rgba(76,208,125,.06);padding:10px 14px;border-radius:0 8px 8px 0;margin:10px 0}
+  .warn{border-left:3px solid var(--yel);background:rgba(255,209,102,.06);padding:10px 14px;border-radius:0 8px 8px 0;margin:10px 0}
+  .stat{display:flex;gap:12px;flex-wrap:wrap;margin:10px 0}
+  .stat .b{flex:1;min-width:120px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+  .stat .b .n{font-size:24px;font-weight:700}
+  .stat .b .l{color:var(--mut);font-size:12px;margin-top:2px}
+  .path{background:#0c1117;border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-family:Consolas,monospace;font-size:12.5px;color:var(--grn);word-break:break-all}
+  ul{margin:8px 0;padding-left:20px}
+  li{margin:4px 0}
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+<h1>RFQ 主表公式「逐区对齐」校验报告</h1>
+<div class="sub">主表：<b>报价物料信息</b> ｜ 模板（参考源）行 3–463 ｜ 7.21 文件行 3–733 ｜ 生成于 2026-07-22</div>
+
+<div class="card">
+<b>原则（你的要求）：</b>批量填充产出的公式必须<b>逐字等于源公式</b>，零改动——仅相对引用的行号随行偏移，语序 / 常量 / 引用项一字不差。
+<br><b>结论：</b>以模板为唯一基准，把 7.21 主表公式强制对齐到「重叠行照搬源、新增行跟随源末行」规则，生成<b>修正副本</b>，复检偏差 <span class="tag t-grn">0</span>。
+</div>
+
+<h2>一、事实：模板自身就是两套写法（即参照基准）</h2>
+<div class="card">
+<table>
+<tr><th>列</th><th>模板区段</th><th>公式结构（归一后）</th><th>行数</th></tr>
+<tr><td class="mono">K 材料重量</td><td>行 3–433</td><td class="mono">=H*I*J*2.8/1000/1000（正序）</td><td>431</td></tr>
+<tr><td class="mono">K 材料重量</td><td>行 434–463</td><td class="mono">=J*I*H*2.8/1000/1000（逆序）</td><td>30</td></tr>
+<tr><td class="mono">W 管理费</td><td>行 3–173</td><td class="mono">=(M+O+Q+S+U)*0.1（无 Y）</td><td>171</td></tr>
+<tr><td class="mono">W 管理费</td><td>行 174–463</td><td class="mono">=(M+O+Q+S+U+Y)*0.1（含 Y）</td><td>290</td></tr>
+</table>
+<p class="sub">注：模板不是"错"，而是<b>既定双写法</b>。问题出在 7.21 的填充<b>没有逐区照搬</b>这套基准，引入了额外改动。</p>
+</div>
+
+<h2>二、7.21 相对源的偏差（逐格直接比对）</h2>
+<div class="stat">
+  <div class="b"><div class="n" style="color:var(--red)">203</div><div class="l">重叠区被改动（突变）</div></div>
+  <div class="b"><div class="n" style="color:var(--red)">30</div><div class="l">重叠区公式丢失（460/462）</div></div>
+  <div class="b"><div class="n" style="color:var(--red)">61</div><div class="l">新增行未填充（538等+571K）</div></div>
+  <div class="b"><div class="n" style="color:var(--red)">235</div><div class="l">新增行语序错配（K列）</div></div>
+  <div class="b"><div class="n" style="color:var(--grn)">35</div><div class="l">正向新增（AC，保留）</div></div>
+</div>
+
+<div class="card">
+<table>
+<tr><th>类别</th><th>数量</th><th>位置 / 列</th><th>说明</th></tr>
+<tr><td><span class="tag t-red">突变</span></td><td>203</td><td>K 32 + W 171</td><td>K：28 行语序 J*I*H→H*I*J、4 行密度 2.8→7.8；W：171 行顶部 3–173 被加 +Y</td></tr>
+<tr><td><span class="tag t-red">丢失</span></td><td>30</td><td>行 460、462（15 公式列×2）</td><td>模板有公式，7.21 变空 → 下游 AB/AC/AD/AF 同步空，且 0 个 #REF!，<b>静默少算</b></td></tr>
+<tr><td><span class="tag t-red">新增缺口</span></td><td>61</td><td>行 538/539/541/542（15列×4）+ 行 571（K列）</td><td>7.21 有数据行但无公式——即"从下往上填充"被空行断点跳过的典型症状</td></tr>
+<tr><td><span class="tag t-red">新行错配</span></td><td>235</td><td>K 列新行 464–733</td><td>7.21 填了正序 =H*I*J；按"跟随源末行(463=逆序)"规则对齐为 =J*I*H</td></tr>
+<tr><td><span class="tag t-grn">正向新增</span></td><td>35</td><td>AC 174–208</td><td>模板本空，7.21 已补 =AB*0.12。属补充非改动，<b>保留并标注</b></td></tr>
+</table>
+</div>
+
+<div class="warn">
+<b>关于 K 列新行"逆序"的决策：</b>工具默认让新增行<b>跟随源末行（463 行 = 逆序 =J*I*H）</b>，这是 Excel"从末行向下拖"的标准填充行为，保证与源逐字一致。
+<br>若你更希望新增行用<b>正序 =H*I*J</b>（与主体 3–433 一致），只需把基准改成"主体写法"，一行即可切换——告诉我即可重出副本。
+</div>
+
+<h2>三、修正副本（已生成 · 复检 0 偏差）</h2>
+<div class="ok">
+写入单元格 <b>529</b> 个（30 丢失 + 61 新增缺口 + 203 突变 + 235 新行错配），复检全部 15 个公式列在重叠区与新增区均 100% 对齐源规则。仅"正向新增 AC"按你的意图保留未动。
+</div>
+<div class="path">RFQ&nbsp;物料清单60126-0245-7.21.fixed.xlsx（输出于本地工作目录）</div>
+<p class="sub">这是<b>新文件</b>，原 7.21 未被改动。打开对照：副本里 460/462/538/539/541/542/571 的公式已补齐，K 新行统一为逆序，W 顶部恢复无 Y（与模板 3–173 一致）。</p>
+
+<h2>四、给你的后续建议</h2>
+<ul>
+<li><b>填充操作规范：</b>以后扩展行数时，<b>整块选中所有公式列</b>，以源末行为锚 <code>Ctrl+D</code> 向下填；不要分列、不要从下往上手工拖——空数据行会成为断点被跳过（本次 538 等就是这么漏的）。</li>
+<li><b>先统一源，再填充：</b>模板 K 列底部 434–463 逆序、W 列顶部无 Y，是历史 patchwork。若想彻底"一模一样无歧义"，建议先把模板这两段统一为一种写法，后续填充才不会两边摇摆。</li>
+<li><b>W 列口径待定：</b>管理费基数含不含包装费 Y，模板自身两版都有（顶部无、底部有）。副本已严格照搬源（顶部无 Y）；如业务确认应含 Y，把模板顶部 171 行也改 +Y 即可全表统一。</li>
+<li><b>密度常量应自动判定：</b>K 列 2.8/7.8 硬编码易填错（本次 4 行被改），建议改用"材料类型→密度"查表，杜绝手填。</li>
+</ul>
+
+<p class="sub">附：本次早期曾一度误判"仅 460/462 丢失"，经逐格直接重比更正为上文 91 格缺口（30 重叠 + 61 新增）；以本报告及修正副本为准。</p>
+</body>
+</html>

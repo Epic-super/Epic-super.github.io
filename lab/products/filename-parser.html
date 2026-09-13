@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>图纸文件名解析 · 清洗器</title>
+<style>
+  :root{ --bg:#0d1117; --panel:#161b22; --line:#30363d; --fg:#e6edf3; --mut:#8b949e; --acc:#58a6ff; --ok:#3fb950; --warn:#d29922; --bad:#f85149; }
+  *{box-sizing:border-box}
+  body{background:var(--bg);color:var(--fg);font:13px/1.5 -apple-system,"Segoe UI",Roboto,"Microsoft YaHei",sans-serif;margin:0;padding:18px}
+  h1{font-size:17px;margin:0 0 4px}
+  .sub{color:var(--mut);margin:0 0 14px}
+  .row{display:grid;grid-template-columns:1fr 280px;gap:14px}
+  @media(max-width:820px){.row{grid-template-columns:1fr}}
+  textarea{width:100%;height:200px;background:#0b0f14;color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:10px;font:12px/1.4 Consolas,monospace;resize:vertical}
+  .side{display:flex;flex-direction:column;gap:10px}
+  button{background:var(--acc);color:#04101f;border:none;border-radius:7px;padding:9px 12px;font-weight:600;cursor:pointer}
+  button.ghost{background:transparent;border:1px solid var(--line);color:var(--fg)}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px}
+  .card h3{margin:0 0 8px;font-size:13px}
+  label{display:flex;align-items:center;gap:7px;color:var(--mut);font-size:12px;margin-bottom:6px}
+  .stats{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+  .stat{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:7px 11px;min-width:92px}
+  .stat b{display:block;font-size:17px;color:var(--acc)}
+  .stat span{color:var(--mut);font-size:11px}
+  .card2{background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:auto;max-height:460px;margin-top:14px}
+  table{border-collapse:collapse;width:100%;font-size:12px}
+  th,td{border-bottom:1px solid var(--line);padding:5px 8px;text-align:left;white-space:nowrap}
+  th{color:var(--mut);position:sticky;top:0;background:var(--panel)}
+  td.old{color:var(--mut);text-decoration:line-through;opacity:.6}
+  td.no{font-family:Consolas,monospace}
+  .legend{color:var(--mut);font-size:11px;margin-top:8px}
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+<h1>图纸文件名解析 · 清洗器</h1>
+<p class="sub">输入一批 URL 或文件名（每行一个）→ 自动解析 图号/版本/日期 → 去重留最新版 → 导出 CSV。离线运行，无需联网。</p>
+
+<div class="row">
+  <div>
+    <textarea id="inp" placeholder="每行一个，支持完整 URL 或纯文件名：
+http://&lt;内网图纸服务器&gt;/test/公司2D图纸/20260707/PRJ000-001-001_A.pdf
+PRJ000-002-001_A.pdf
+...">http://&lt;内网图纸服务器&gt;/test/公司2D图纸/20260707/PRJ000-001-001_A.pdf
+http://&lt;内网图纸服务器&gt;/test/公司2D图纸/20260707/PRJ000-001-001_B.pdf
+http://&lt;内网图纸服务器&gt;/test/公司2D图纸/20260707/PRJ000-002-001_A.pdf
+http://&lt;内网图纸服务器&gt;/test/公司2D图纸/20260708/PRJ000-003-001_A.pdf
+PRJ000-003-001_B.pdf
+PRJ000-004-001_A.pdf
+/test/公司2D图纸/20260709/PRJ000-005-001_A.PDF
+PRJ000-005-001_A.pdf</textarea>
+  </div>
+  <div class="side">
+    <div class="card">
+      <h3>解析选项</h3>
+      <label><input type="checkbox" id="dedup" checked> 去重（同图号留最新版）</label>
+      <label><input type="checkbox" id="norm" checked> 图号转大写</label>
+      <label><input type="checkbox" id="ext" checked> 忽略扩展名大小写</label>
+    </div>
+    <button id="run">解析并清洗</button>
+    <button id="csv" class="ghost">导出 CSV</button>
+    <div class="card" style="font-size:12px;color:var(--mut)">
+      命名约定（示例）：<br>
+      <code style="color:#ffa657">PRJ000-001-001_A.pdf</code><br>
+      图号 = PRJ000-001-001<br>
+      版本 = A（末段 _X）<br>
+      日期 = 路径中的 YYYYMMDD
+    </div>
+  </div>
+</div>
+
+<div class="stats" id="stats"></div>
+<div class="card2"><div id="out"></div></div>
+<p class="legend"><b>删除线</b>=被同图号新版覆盖的旧记录（去重时剔除）。</p>
+
+<script>window.addEventListener('error',function(e){try{var v=document.getElementById('app')||document.getElementById('view')||document.body;if(!v||v.dataset.err)return;v.dataset.err='1';var s=(e.error&&e.error.stack)||e.message||'';var b=document.createElement('div');b.style.cssText='padding:16px;margin:14px;font-family:ui-monospace,monospace;font-size:13px;color:#a33;background:#fdeceb;border:1px solid #f5c6cb;border-radius:12px;line-height:1.5';b.innerHTML='<b>⚠ 页面出错了</b><br><span style="color:#555">'+(e.message||'')+'</span><pre style="white-space:pre-wrap;margin-top:8px;font-size:11px">'+(s||'').slice(0,1000)+'</pre><small style="color:#666">建议 Ctrl+Shift+R 强刷；F12 → Application → Local Storage 清本页缓存后刷新。</small>';v.insertBefore(b,v.firstChild);}catch(_){}});
+function verScore(v){
+  if(!v)return 0; v=v.trim();
+  if(/^V/i.test(v)){const n=parseFloat(v.slice(1));return isNaN(n)?0:n;}
+  if(/^[A-Za-z]$/i.test(v))return v.toUpperCase().charCodeAt(0)-64;
+  if(/^\d+(\.\d+)?$/.test(v))return parseFloat(v);
+  return 0;
+}
+function parseLine(line){
+  line=line.trim(); if(!line)return null;
+  let url=line;
+  try{ url=decodeURIComponent(line); }catch(e){}
+  // 取文件名（最后一个 / 之后的部分）
+  let base=url.split(/[\/\\]/).pop();
+  // 扩展名
+  let ext=""; const m=base.match(/\.([^.]+)$/);
+  if(m){ ext=m[1]; base=base.slice(0,m.index); }
+  ext=ext.toUpperCase();
+  // 版本：basename 末尾 _X
+  let ver="", no=base;
+  const vm=base.match(/_([A-Za-z0-9]+)$/);
+  if(vm){ ver=vm[1]; no=base.slice(0,vm.index); }
+  // 日期：路径中任意 YYYYMMDD
+  let date=""; const dm=url.match(/(\d{8})/);
+  if(dm){ const s=dm[1]; date=`${s.slice(0,4)}-${s.slice(4,6)}-${s.slice(6,8)}`; }
+  no=no.toUpperCase();
+  return {no,ver,date,ext,raw:line};
+}
+let LAST=[];
+function run(){
+  const opt={dedup:document.getElementById('dedup').checked,norm:document.getElementById('norm').checked,ext:document.getElementById('ext').checked};
+  const lines=document.getElementById('inp').value.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
+  let rows=lines.map(parseLine).filter(Boolean);
+  if(opt.norm)rows.forEach(r=>r.no=r.no.toUpperCase());
+  if(opt.dedup){
+    const map={}; rows.forEach(r=>{const k=r.no;(map[k]=map[k]||[]).push(r);});
+    rows.forEach(r=>{const grp=map[r.no];const top=grp.reduce((a,b)=>verScore(b.ver)>verScore(a.ver)?b:a); if(r!==top)r._old=true;});
+  }
+  LAST=rows;
+  const kept=rows.filter(r=>!r._old);
+  document.getElementById('stats').innerHTML=`
+    <div class="stat"><b>${rows.length}</b><span>解析总数</span></div>
+    <div class="stat"><b style="color:var(--ok)">${kept.length}</b><span>保留（去重后）</span></div>
+    <div class="stat"><b style="color:var(--warn)">${rows.length-kept.length}</b><span>旧版剔除</span></div>
+    <div class="stat"><b>${new Set(rows.map(r=>r.no)).size}</b><span>独立图号</span></div>
+    <div class="stat"><b>${rows.filter(r=>!r.date).length}</b><span>无日期</span></div>`;
+  document.getElementById('out').innerHTML=`<table><tr><th>图号</th><th>版本</th><th>日期</th><th>扩展名</th><th>原始</th></tr>${
+    rows.map(r=>`<tr><td class="no ${r._old?'old':''}">${r.no||'—'}</td><td class="${r._old?'old':''}">${r.ver||'—'}</td><td class="${r._old?'old':''}">${r.date||'—'}</td><td class="${r._old?'old':''}">${r.ext||'—'}</td><td class="${r._old?'old':''}" style="color:var(--mut)">${r.raw}</td></tr>`).join("")
+  }</table>`;
+}
+function exportCSV(){
+  if(!LAST.length)return;
+  const head=["图号","版本","日期","扩展名","原始"];
+  const body=LAST.filter(r=>!r._old).map(r=>[r.no,r.ver,r.date,r.ext,r.raw].map(v=>`"${v}"`).join(","));
+  const csv="\uFEFF"+[head.join(","),...body].join("\n");
+  const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));
+  a.download="drawings_clean.csv"; a.click();
+}
+run();
+document.getElementById("run").onclick=run;
+document.getElementById("csv").onclick=exportCSV;
+</script>
+</body>
+</html>

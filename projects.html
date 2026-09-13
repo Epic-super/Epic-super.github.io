@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#f6f3ee">
+<title>个人项目 · 作品与巨大目标</title>
+<style>
+/* ============ 设计系统：与灯塔审计 / lab 单文件应用同源（暖纸底 + 陶土主色 + 衬线标题 + 暗色模式） ============ */
+:root{
+  --bg:#f6f3ee; --panel:#ffffff; --panel2:#fbf9f5; --ink:#2a2724; --muted:#948b80;
+  --line:#e8e2d8; --line2:#f0ece4; --clay:#2f7d8c; --clay-soft:#e2eef0; --clay-ink:#1f5a66;
+  --sage:#7c9082; --sage-soft:#e9efe9; --gold:#c9a24b; --red:#cf5b4e; --green:#3f9e6f;
+  --shadow:0 1px 2px rgba(40,30,20,.05),0 6px 20px rgba(40,30,20,.05);
+  --radius:18px; --radius-s:12px;
+  --serif:"Songti SC","STSong",Georgia,"Times New Roman",serif;
+}
+[data-theme="dark"]{
+  --bg:#161310; --panel:#1e1b17; --panel2:#211d18; --ink:#ece6dd; --muted:#9a9186;
+  --line:#2d2823; --line2:#262019; --clay:#5fafc0; --clay-soft:#16282d; --clay-ink:#8fd2e0;
+  --sage:#90a597; --sage-soft:#1f2a23; --gold:#d8b25e; --red:#e07a6e; --green:#5bb98c;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased;}
+button{font-family:inherit;}
+::-webkit-scrollbar{height:0;width:0;}
+.shell{display:flex;min-height:100vh;}
+.sidebar{width:212px;flex:none;position:sticky;top:0;height:100vh;padding:22px 13px;border-right:1px solid var(--line);background:var(--panel2);display:flex;flex-direction:column;gap:3px;overflow-y:auto;}
+.brand{display:flex;align-items:center;gap:10px;padding:0 8px 16px;}
+.brand .logo{width:34px;height:34px;border-radius:11px;background:linear-gradient(135deg,var(--clay),var(--gold));display:flex;align-items:center;justify-content:center;color:#fff;flex:none;}
+.brand .logo svg{width:19px;height:19px;}
+.brand b{font-family:var(--serif);font-size:16px;letter-spacing:.5px;}
+.brand small{display:block;color:var(--muted);font-size:10.5px;font-weight:400;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;cursor:pointer;color:var(--muted);font-weight:600;font-size:14px;transition:.15s;border:1px solid transparent;}
+.nav-item svg{width:18px;height:18px;flex:none;}
+.nav-item:hover{background:var(--panel);color:var(--ink);}
+.nav-item.active{background:var(--clay-soft);color:var(--clay-ink);border-color:var(--line);}
+.side-foot{margin-top:auto;padding:10px 8px 0;color:var(--muted);font-size:11px;line-height:1.6;}
+.side-foot button{background:none;border:none;color:var(--clay-ink);cursor:pointer;font-size:11px;padding:0;text-decoration:underline;}
+.main{flex:1;min-width:0;display:flex;flex-direction:column;}
+.topbar{position:sticky;top:0;z-index:15;background:color-mix(in srgb,var(--bg) 86%,transparent);backdrop-filter:blur(12px);padding:15px 22px 11px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px;}
+.topbar h1{font-family:var(--serif);font-size:20px;margin:0;font-weight:700;letter-spacing:.5px;}
+.topbar .date{color:var(--muted);font-size:12px;margin-left:2px;}
+.topbar .spacer{flex:1;}
+.icon-btn{width:38px;height:38px;border-radius:11px;border:1px solid var(--line);background:var(--panel);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink);}
+.icon-btn svg{width:18px;height:18px;}
+.icon-btn:hover{border-color:var(--clay);}
+.wrap{max-width:960px;width:100%;margin:0 auto;padding:20px 22px 120px;}
+.view-head{display:flex;align-items:baseline;gap:10px;margin:0 0 16px;flex-wrap:wrap;}
+.view-head h2{font-family:var(--serif);font-size:22px;margin:0;font-weight:700;}
+.view-head .desc{color:var(--muted);font-size:13px;}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);margin-bottom:16px;}
+.panel-title{display:flex;align-items:center;justify-content:space-between;margin:0 0 14px;gap:10px;flex-wrap:wrap;}
+.panel-title h3{font-size:15px;margin:0;font-weight:700;display:flex;align-items:center;gap:8px;}
+.panel-title h3 svg{width:17px;height:17px;color:var(--clay);}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+.stat{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:14px 16px;}
+.stat .n{font-family:var(--serif);font-size:25px;font-weight:700;font-variant-numeric:tabular-nums;}
+.stat .l{font-size:12px;color:var(--muted);margin-top:2px;}
+.hint{font-size:12.5px;color:var(--muted);line-height:1.7;}
+.banner{background:linear-gradient(135deg,var(--clay),var(--gold));color:#fff;border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px;margin-bottom:16px;font-size:13.5px;}
+.banner b{font-size:14px;}
+.tip{background:var(--clay-soft);border:1px solid var(--line);border-left:3px solid var(--clay);border-radius:12px;padding:12px 14px;font-size:13px;color:var(--clay-ink);margin-bottom:9px;}
+/* ---- 项目卡片 ---- */
+.proj-card{display:flex;flex-direction:column;gap:10px;padding:16px;border:1px solid var(--line);border-radius:14px;background:var(--panel);margin-bottom:12px;box-shadow:var(--shadow);transition:.15s;}
+.proj-card:hover{border-color:var(--clay);}
+.proj-sections{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;}
+.proj-sec{display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px;}
+.proj-section{padding:5px 10px;background:rgba(126,200,227,.12);border:1px solid rgba(126,200,227,.28);border-radius:6px;color:#7ec8e3;text-decoration:none;font-size:12px;line-height:1.4;transition:.15s;cursor:pointer;}
+.proj-section:hover{background:rgba(126,200,227,.28);border-color:rgba(126,200,227,.5);text-decoration:none;color:#a8d8ee;transform:translateY(-1px);}
+.proj-chapters{display:inline-flex;flex-wrap:wrap;gap:4px;}
+.proj-ch{padding:3px 8px;background:rgba(207,91,78,.1);border:1px solid rgba(207,91,78,.25);border-radius:5px;color:#e88d80;text-decoration:none;font-size:11px;line-height:1.4;transition:.15s;cursor:pointer;}
+.proj-ch:hover{background:rgba(207,91,78,.25);border-color:rgba(207,91,78,.5);text-decoration:none;color:#f0b0a6;transform:translateY(-1px);}
+a.proj-link{display:block;text-decoration:none;color:inherit;}
+a.proj-link:hover{text-decoration:none;color:inherit;}
+.proj-top{display:flex;align-items:flex-start;gap:12px;}
+.proj-ic{width:42px;height:42px;flex:none;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;}
+.proj-meta{flex:1;min-width:0;}
+.proj-meta b{font-size:15px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.proj-meta p{margin:3px 0 0;font-size:13px;color:var(--muted);line-height:1.5;}
+.badge{font-size:11px;font-weight:700;padding:2px 9px;border-radius:8px;color:#fff;flex:none;}
+.tech{display:flex;flex-wrap:wrap;gap:6px;}
+.tech span{font-size:11.5px;font-weight:600;padding:3px 9px;border-radius:8px;background:var(--clay-soft);color:var(--clay-ink);}
+.hl{display:flex;flex-wrap:wrap;gap:6px;}
+.hl span{font-size:11.5px;padding:3px 9px;border-radius:8px;background:var(--sage-soft);color:var(--sage);}
+.prog{display:flex;align-items:center;gap:10px;}
+.prog .bar{flex:1;height:9px;border-radius:6px;background:var(--line2);overflow:hidden;}
+.prog .bar i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,var(--clay),var(--gold));}
+.prog .pval{width:44px;text-align:right;font-weight:700;font-variant-numeric:tabular-nums;font-size:13px;color:var(--clay-ink);}
+/* ---- 巨大目标：愿景宣言 + 里程碑时间线 ---- */
+.goal-hero{text-align:center;padding:34px 20px 28px;background:linear-gradient(180deg,var(--clay-soft) 0%,var(--panel) 85%);border:1px solid var(--line);border-radius:var(--radius);margin-bottom:16px;}
+.goal-hero .kicker{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:700;letter-spacing:2px;color:var(--clay);background:var(--panel);border:1px solid var(--line);border-radius:99px;padding:5px 13px;margin-bottom:16px;}
+.goal-hero h2{font-family:var(--serif);font-size:27px;margin:0 0 10px;font-weight:800;letter-spacing:1px;}
+.goal-hero p{max-width:560px;margin:0 auto;font-size:14px;color:var(--muted);line-height:1.8;}
+.milestone{position:relative;padding:0 0 0 26px;margin:0 0 14px;}
+.milestone::before{content:"";position:absolute;left:6px;top:6px;bottom:-8px;width:2px;background:var(--line2);}
+.milestone:last-child::before{display:none;}
+.milestone .dot{position:absolute;left:0;top:4px;width:14px;height:14px;border-radius:50%;background:var(--panel);border:3px solid var(--clay);}
+.milestone.done .dot{border-color:var(--green);background:var(--green);}
+.milestone .m-year{display:inline-flex;align-items:center;gap:6px;font-weight:800;font-size:14px;color:var(--clay-ink);}
+.milestone.done .m-year{color:var(--green);}
+.milestone .m-year .tag{font-size:10.5px;font-weight:700;padding:1px 7px;border-radius:6px;background:var(--sage-soft);color:var(--sage);}
+.milestone .m-title{font-weight:700;font-size:14px;margin:3px 0 2px;}
+.milestone .m-desc{font-size:12.5px;color:var(--muted);line-height:1.6;}
+/* ---- 数据视图 ---- */
+.dim{display:flex;align-items:center;gap:9px;margin-bottom:9px;font-size:13px;}
+.dim .dname{width:120px;color:var(--muted);font-weight:600;flex:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.dim .dbar{flex:1;height:9px;border-radius:6px;background:var(--line2);overflow:hidden;}
+.dim .dbar i{display:block;height:100%;border-radius:6px;}
+.dim .dval{width:42px;text-align:right;font-weight:700;font-variant-numeric:tabular-nums;color:var(--clay-ink);}
+.legend{display:flex;flex-wrap:wrap;gap:8px 16px;margin-top:10px;font-size:12.5px;color:var(--muted);}
+.legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:middle;}
+.foot-note{margin-top:20px;text-align:center;font-size:12px;color:var(--muted);}
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--bg);padding:11px 20px;border-radius:12px;font-size:13.5px;font-weight:600;opacity:0;pointer-events:none;transition:.25s;z-index:60;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+@media(max-width:760px){.sidebar{position:fixed;left:0;top:0;bottom:0;z-index:40;transform:translateX(-100%);transition:.25s;width:200px;}.sidebar.open{transform:translateX(0);}.menu-btn{display:flex!important;}.grid2,.grid3{grid-template-columns:1fr;}.wrap{padding:16px 14px 100px;}}
+.menu-btn{display:none;}
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+<div class="shell">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M10 3v6L5 19a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1L14 9V3"/></svg></div>
+      <div><b>个人项目</b><small>作品 · 目标 · 里程碑</small></div>
+    </div>
+    <div class="nav-item active" onclick="go('overview')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg><span>总览</span></div>
+    <div class="nav-item" onclick="go('projects')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg><span>项目库</span></div>
+    <div class="nav-item" onclick="go('goals')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg><span>巨大目标</span></div>
+    <div class="nav-item" onclick="go('data')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l4-4m-4 4l-4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg><span>数据</span></div>
+    <div class="side-foot">
+      数据存于本页 localStorage，可自行替换。<br>
+      <button onclick="toggleTheme()">切换深色 / 浅色</button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <button class="icon-btn menu-btn" onclick="document.getElementById('sidebar').classList.toggle('open')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+      <h1 id="viewTitle">总览</h1>
+      <span class="date" id="topDate"></span>
+      <span class="spacer"></span>
+      <button class="icon-btn" onclick="toggleTheme()" title="切换深色/浅色"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
+    </div>
+    <div class="wrap">
+      <div id="app"></div>
+      <div class="foot-note">占位数据展示 · 详见页面脚本注释（PROJECTS / VISION）替换为你的真实项目</div>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+"use strict";
+/* ================================================================
+ *  ═══ 占位数据区：以下 PROJECTS / VISION 为示例数据，请替换为你的真实内容 ═══
+ *  每个字段含义见注释；替换时保持结构不变即可，页面自动渲染。
+ * ================================================================ */
+// 项目库：name 项目名称 | intro 项目简介 | tech 技术栈[] | highlights 亮点成就[] | status 当前状态 | progress 当前进展(0-100) | color 卡片图标底色
+const PROJECTS = [
+  { name:'自动记账 App', color:'#3f9e6f', intro:'统计手机端各大平台消费支出的个人记账应用，移动端优先。',
+    tech:['Laravel 11','Livewire 3','FluxUI','Tailwind CSS'],
+    highlights:['多平台账单聚合','消费自动分类','月度趋势报表'],
+    status:'开发中', progress:65 },
+  { name:'追剧大全', color:'#c2683f', intro:'视频流媒体聚合 App，正从 mock 数据切换到真实 API 的重构阶段。',
+    tech:['React','TypeScript','Node.js'],
+    highlights:['多源聚合检索','跨端响应式','真实 API 接入'],
+    status:'迭代中', progress:50 },
+  { name:'自由剧场', color:'#8b6fa3', intro:'Electron 桌面应用，覆盖开发、打包到发布全流程。',
+    tech:['Electron','React','TypeScript'],
+    highlights:['桌面端体验','自动更新链路','打包发布流程'],
+    status:'打磨中', progress:78 },
+  { name:'3D 小世界', color:'#2f7d8c', intro:'Three.js 第一人称漫游世界，程序化城市 + 动漫 NPC + 昼夜循环。',
+    tech:['Three.js','GLTF','WebGL'],
+    highlights:['程序化世界生成','动漫 NPC 对话跟随','昼夜与收集系统'],
+    status:'已上线', progress:90 },
+  { name:'个人成长工作站', color:'#cf5b4e', intro:'硬件·表达·临场 三大能力训练库，附工作站改进 TODO（本地私有，仅本机/局域网可见）。',
+    tech:['能力地图','硬件入门','口才表达','即兴反应'],
+    highlights:['三板块实质训练材料','改进TODO风险评估','悬停查词'],
+    status:'开发中', progress:45,
+    sections:[
+      { name:'能力地图', url:'/个人成长工作站/00-能力地图与总览.md' },
+      { name:'硬件入门', url:'/个人成长工作站/硬件与电子入门/00-板块大纲.md',
+        chapters:[
+          { name:'烧录', anchor:'1-烧录是什么怎么烧录' },
+          { name:'基础电路', anchor:'2-基础电路' },
+          { name:'AI对照', anchor:'3-与-ai-硬件项目对照降畏' }
+        ] },
+      { name:'口才表达', url:'/个人成长工作站/人际关系与表达/00-板块大纲.md',
+        chapters:[
+          { name:'结构化表达', anchor:'1-表达能力提升思维层说什么' },
+          { name:'口部操', anchor:'2-口腔灵敏度训练器官层怎么说清楚' },
+          { name:'唱歌训练', anchor:'3-唱歌训练声音层怎么好听' }
+        ] },
+      { name:'即兴反应', url:'/个人成长工作站/临场反应与即兴/00-板块大纲.md',
+        chapters:[
+          { name:'联想接龙', anchor:'1-即兴反应训练练速度' },
+          { name:'压力思维', anchor:'2-压力下思维练稳定' },
+          { name:'实战题库', anchor:'3-实战演练题库练场景' }
+        ] },
+      { name:'改进TODO', url:'/个人成长工作站/05-工作站改进TODO.md' }
+    ] },
+  { name:'Trae 大赛经验库', color:'#8b6fa3', intro:'Trae AI 创造力大赛 20 获奖作品 × 7 条可复用打法的经验沉淀（本地私有）。',
+    tech:['作品库','模式库','映射总表'],
+    highlights:['20 作品深度拆解','7 模式双向索引','跨作品元洞察'],
+    status:'已上线', progress:100,
+    sections:[
+      { name:'7 强图谱', url:'/Trae大赛经验沉淀/00-大赛总览与跨作品模式.md',
+        chapters:[
+          { name:'大赛背景', anchor:'一大赛背景' },
+          { name:'7强图谱', anchor:'二7-强图谱' },
+          { name:'共性模式', anchor:'三跨作品共性模式赢法提炼' },
+          { name:'作品索引', anchor:'四扩展收录作品索引已增补至-20-个' }
+        ] },
+      { name:'冠军作品', url:'/Trae大赛经验沉淀/作品/01-词元开物-IterxAI.md',
+        chapters:[
+          { name:'作品卡', anchor:'作品卡' },
+          { name:'官方形态', anchor:'官方产品形态2026-08-官网核实' },
+          { name:'可复用点', anchor:'可复用点' },
+          { name:'决策踩坑', anchor:'关键决策与踩坑' },
+          { name:'来源', anchor:'来源' }
+        ] },
+      { name:'亚军作品', url:'/Trae大赛经验沉淀/作品/02-动作帧-MotionFrame.md',
+        chapters:[
+          { name:'作品卡', anchor:'作品卡' },
+          { name:'可复用点', anchor:'可复用点' },
+          { name:'决策踩坑', anchor:'关键决策与踩坑' },
+          { name:'来源', anchor:'来源' }
+        ] },
+      { name:'模式库', url:'/Trae大赛经验沉淀/模式库/01-选题：从真实痛点出发.md',
+        chapters:[
+          { name:'何时用', anchor:'何时用' },
+          { name:'怎么做', anchor:'怎么做' },
+          { name:'反例', anchor:'反例' },
+          { name:'来源作品', anchor:'来源作品' }
+        ] },
+      { name:'映射总表', url:'/Trae大赛经验沉淀/作品模式映射总表.md',
+        chapters:[
+          { name:'模式代号', anchor:'模式代号速查' },
+          { name:'正向索引', anchor:'正向索引作品-命中的模式' },
+          { name:'反向索引', anchor:'反向索引模式-来源作品' }
+        ] },
+      { name:'决赛报道', url:'/Trae大赛经验沉淀/资料档案/决赛报道-沪上收官-上观新闻.md',
+        chapters:[
+          { name:'本地对照', anchor:'与本地经验库的对照整理备注' }
+        ] }
+    ] }
+  ,
+  { name:'文件占用解除器', color:'#4a9bd4', link:'tools/file-unlocker.html',
+    intro:'Windows 原生文件占用检测与解锁工具，基于 NtQuerySystemInformation 枚举占用句柄，支持 CLI 与 GUI 双界面。',
+    tech:['Python','ctypes','Win32 API','Tkinter GUI'],
+    highlights:['句柄级精准检测','关闭句柄/重启/终止 三档解除','CLI + GUI 双界面'],
+    status:'已上线', progress:90 }
+];
+// 巨大目标：kicker 板块小标 | title 愿景标题 | statement 长期愿景宣言 | milestones 里程碑[{year,title,desc,done}]
+const VISION = {
+  kicker:'🚀 巨大的目标',
+  title:'用作品定义自己，让工具被真实使用',
+  statement:'以「工具效率 × 娱乐内容 × AI 能力」三条产品线为支点，三年内把每一个自研项目打磨成可被真实使用的作品：先做深自己的日常，再服务同类的少数人，最终形成一个互相连接的「个人产品矩阵」。',
+  milestones:[
+    { year:'2026', title:'打好地基', desc:'核心工具全部上线并稳定使用：记账、学习、生活工作台与 3D 世界完成第一轮打磨；技术栈收敛到可维护的组合。', done:true },
+    { year:'2027', title:'产品化元年', desc:'至少 1 个产品获得真实外部用户；建立每周迭代节奏与数据反馈闭环；完成「个人项目」门户整理。', done:false },
+    { year:'2028', title:'矩阵成形', desc:'三条产品线互相打通数据与入口；自动化能力覆盖更多生活场景；沉淀可复用的组件与技能库。', done:false },
+    { year:'2029+', title:'长期主义', desc:'持续深耕 1-2 个方向，追求质量与影响力，而非数量。', done:false }
+  ]
+};
+/* ============ 以上为占位数据 ============ */
+
+const TABS = [
+  {k:'overview', n:'总览'},
+  {k:'projects', n:'项目库'},
+  {k:'goals', n:'巨大目标'},
+  {k:'data', n:'数据'}
+];
+const UI = {tab:'overview'};
+const $ = s => document.querySelector(s);
+function esc(s){return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function resolveLink(l){
+  if(!l) return l;
+  if(location.protocol==='file:'){
+    var here=location.pathname.replace(/\\/g,'/');
+    var i=here.indexOf('/_master/');
+    var root=i>0?here.slice(0,i):'';
+    return 'file://' + (root.charAt(0)==='/'?root:'/'+root) + l;
+  }
+  return l;
+}
+function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove('show'),2000);}
+function toggleTheme(){const r=document.documentElement;r.setAttribute('data-theme',r.getAttribute('data-theme')==='dark'?'light':'dark');try{localStorage.setItem('projects_theme',r.getAttribute('data-theme'));}catch(e){}}
+function go(t){
+  UI.tab=t;
+  $('#viewTitle').textContent=TABS.find(x=>x.k===t).n;
+  document.querySelectorAll('.nav-item').forEach(el=>el.classList.toggle('active',el.getAttribute('onclick').indexOf("'"+t+"'")>=0));
+  renderView();window.scrollTo(0,0);document.getElementById('sidebar').classList.remove('open');
+}
+const STATUS_COLOR = {'开发中':'#c2683f','迭代中':'#c9a24b','打磨中':'#8b6fa3','已上线':'#3f9e6f','已完结':'#7c9082'};
+const STATUS_ORDER = ['已上线','打磨中','迭代中','开发中','已完结'];
+
+function renderOverview(){
+  const active=PROJECTS.filter(p=>p.status!=='已完结');
+  const done=PROJECTS.filter(p=>p.status==='已上线'||p.status==='已完结');
+  const ms=VISION.milestones;
+  const doneMs=ms.filter(m=>m.done).length;
+  const visionPct=Math.round(doneMs/ms.length*100);
+  return `
+  <div class="banner"><b>🎯 巨大的目标</b> ${esc(VISION.title)} — 里程碑进度 ${doneMs}/${ms.length} <span style="opacity:.85">· 详见「巨大目标」</span></div>
+  <div class="grid3">
+    <div class="stat"><div class="n">${PROJECTS.length}</div><div class="l">项目总数</div></div>
+    <div class="stat"><div class="n">${active.length}</div><div class="l">进行中</div></div>
+    <div class="stat"><div class="n">${doneMs}/${ms.length}</div><div class="l">里程碑完成</div></div>
+  </div>
+  <div class="panel" style="margin-top:16px">
+    <div class="panel-title"><h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg>愿景进度</h3><span class="hint">${visionPct}%</span></div>
+    ${ms.map(m=>`<div class="dim"><div class="dname">${m.year}</div><div class="dbar"><i style="width:${m.done?100:0}%;background:var(--green)"></i></div><div class="dval">${m.done?'✓':'—'}</div></div>`).join('')}
+  </div>
+  <div class="panel">
+    <div class="panel-title"><h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg>最新进展</h3></div>
+    ${PROJECTS.slice(0,3).map(p=>`<div class="dim"><div class="dname">${esc(p.name)}</div><div class="dbar"><i style="width:${p.progress}%;background:${STATUS_COLOR[p.status]||'var(--clay)'}"></i></div><div class="dval">${p.progress}%</div></div>`).join('')}
+  </div>
+  <div class="tip">💡 在「项目库」查看完整项目卡片；「巨大目标」查看长期愿景与里程碑规划。</div>`;
+}
+
+function renderProjects(){
+  return `
+  <div class="view-head"><h2>项目库</h2><span class="desc">${PROJECTS.length} 个项目 · 点击板块链接直达具体内容</span></div>
+  ${PROJECTS.map(p=>{
+    const bc=STATUS_COLOR[p.status]||'var(--clay)';
+    const card=`<div class="proj-card">
+      <div class="proj-top">
+        <div class="proj-ic" style="background:${p.color}">${esc(p.name[0])}</div>
+        <div class="proj-meta">
+          <b>${esc(p.name)} <span class="badge" style="background:${bc}">${esc(p.status)}</span></b>
+          <p>${esc(p.intro)}</p>
+        </div>
+      </div>
+      <div class="tech">${p.tech.map(t=>`<span>${esc(t)}</span>`).join('')}</div>
+      <div class="hl">${p.highlights.map(h=>`<span>✦ ${esc(h)}</span>`).join('')}</div>
+      ${p.sections?`<div class="proj-sections">${p.sections.map(s=>{
+        const url=resolveLink(s.url);
+        const ch=s.chapters?`<div class="proj-chapters">${s.chapters.map(c=>`<a class="proj-ch" href="${esc(url+'#'+c.anchor)}" target="_blank" rel="noopener">▸ ${esc(c.name)}</a>`).join('')}</div>`:'';
+        return `<div class="proj-sec"><a class="proj-section" href="${esc(url)}" target="_blank" rel="noopener">📂 ${esc(s.name)}</a>${ch}</div>`;
+      }).join('')}</div>`:''}
+      <div class="prog"><div class="bar"><i style="width:${p.progress}%"></i></div><div class="pval">${p.progress}%</div></div>
+    </div>`;
+    return p.link
+      ? `<a class="proj-link" href="${esc(resolveLink(p.link))}" target="_blank" rel="noopener">${card}</a>`
+      : card;
+  }).join('')}`;
+}
+
+function renderGoals(){
+  return `
+  <div class="goal-hero">
+    <div class="kicker">${esc(VISION.kicker)}</div>
+    <h2>${esc(VISION.title)}</h2>
+    <p>${esc(VISION.statement)}</p>
+  </div>
+  <div class="panel">
+    <div class="panel-title"><h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>里程碑规划</h3><span class="hint">已完成 ${VISION.milestones.filter(m=>m.done).length}/${VISION.milestones.length}</span></div>
+    ${VISION.milestones.map(m=>`<div class="milestone ${m.done?'done':''}">
+      <span class="dot"></span>
+      <div class="m-year">${m.year} ${m.done?'<span class="tag">已完成</span>':''}</div>
+      <div class="m-title">${esc(m.title)}</div>
+      <div class="m-desc">${esc(m.desc)}</div>
+    </div>`).join('')}
+  </div>`;
+}
+
+function renderData(){
+  const techCount={};
+  PROJECTS.forEach(p=>p.tech.forEach(t=>{techCount[t]=(techCount[t]||0)+1;}));
+  const techs=Object.entries(techCount).sort((a,b)=>b[1]-a[1]);
+  const max=Math.max(...techs.map(t=>t[1]),1);
+  const statusCount={};
+  PROJECTS.forEach(p=>{statusCount[p.status]=(statusCount[p.status]||0)+1;});
+  return `
+  <div class="view-head"><h2>数据</h2><span class="desc">技术栈与项目状态分布（由 PROJECTS 自动统计）</span></div>
+  <div class="panel">
+    <div class="panel-title"><h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>技术栈分布</h3></div>
+    ${techs.map(t=>`<div class="dim"><div class="dname">${esc(t[0])}</div><div class="dbar"><i style="width:${t[1]/max*100}%;background:var(--clay)"></i></div><div class="dval">${t[1]}</div></div>`).join('')}
+  </div>
+  <div class="panel">
+    <div class="panel-title"><h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>状态分布</h3></div>
+    <div class="legend">
+      ${STATUS_ORDER.filter(s=>statusCount[s]).map(s=>`<span><i style="background:${STATUS_COLOR[s]}"></i>${s} × ${statusCount[s]}</span>`).join('')}
+    </div>
+    ${Object.keys(statusCount).map(s=>`<div class="dim"><div class="dname">${esc(s)}</div><div class="dbar"><i style="width:${statusCount[s]/PROJECTS.length*100}%;background:${STATUS_COLOR[s]}"></i></div><div class="dval">${statusCount[s]}</div></div>`).join('')}
+  </div>`;
+}
+
+const render = {overview:renderOverview, projects:renderProjects, goals:renderGoals, data:renderData};
+function renderView(){ $('#app').innerHTML = render[UI.tab](); }
+/* 顶部日期 */
+$('#topDate').textContent = new Date().toLocaleDateString('zh-CN',{month:'long',day:'numeric',weekday:'long'});
+/* 主题恢复 */
+try{const th=localStorage.getItem('projects_theme');if(th)document.documentElement.setAttribute('data-theme',th);}catch(e){}
+renderView();
+</script>
+</body>
+</html>

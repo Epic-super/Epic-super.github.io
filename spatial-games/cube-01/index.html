@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>數積木遊戲</title>
+    <!-- 引入外部 CSS -->
+    <link rel="stylesheet" href="style.css">
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+    <!-- Three.js 畫布容器 -->
+    <div id="canvas-container"></div>
+
+    <!-- 分數顯示 (右上角) -->
+    <div id="score-panel">
+        <div id="score-display">0 分</div>
+    </div>
+
+    <!-- 答題區域 -->
+    <div id="answer-panel">
+        <label for="answer-input">數數看，總共有幾個積木呢？</label>
+        <div id="answer-input-group">
+            <input type="number" id="answer-input" min="1" placeholder="輸入數字" inputmode="numeric" pattern="[0-9]*">
+            <button class="btn btn-success" id="submit-btn">我答好了！</button>
+        </div>
+    </div>
+
+    <!-- 過關畫面 -->
+    <div id="victory-screen">
+        <div class="victory-content">
+            <h1 class="victory-title">好棒！全部答對了！</h1>
+            <p class="victory-message">你完成了 10 題，太厲害了！</p>
+            <p class="victory-score">你得到 <span id="final-score">0</span> 分！</p>
+            <button class="btn btn-primary" id="restart-btn">再玩一次！</button>
+        </div>
+    </div>
+
+    <!-- 角色圖片 (預先載入，CSS 控制顯示) -->
+    <img src="images/happy.png" alt="答對" class="character-image" id="character-happy">
+    <img src="images/sad.png" alt="答錯" class="character-image" id="character-sad">
+    <img src="images/pass.png" alt="過關" class="character-image" id="character-pass">
+
+    <!-- Dialog 對話框元素 -->
+    <div id="dialog-wrapper">
+        <dialog id="confirm-dialog">
+            <div class="dialog-content">
+                <h3 id="dialog-title">確認</h3>
+                <p id="dialog-message">您確定要執行此操作嗎?</p>
+                <div class="dialog-buttons">
+                    <button class="btn btn-primary" id="dialog-confirm">確定</button>
+                    <button class="btn btn-danger" id="dialog-cancel">取消</button>
+                </div>
+            </div>
+        </dialog>
+    </div>
+
+    <!-- 引入 Three.js (使用 importmap 和 ES 模組) -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js"
+            }
+        }
+    </script>
+
+    <!-- 引入外部 JavaScript (使用 ES 模組) -->
+    <script type="module" src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<title>苍穹降临 · 三维交通秩序推演沙盒</title>
+<style>
+  :root{
+    --bg:#070b12; --panel:rgba(12,18,28,.78); --line:rgba(255,255,255,.08);
+    --chaos:#ff5e3a; --order:#36d1dc; --txt:#e8eef6; --muted:#7e8ba0;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;overflow:hidden}
+  #scene{position:fixed;inset:0;display:block}
+  /* 顶部标题 */
+  .topbar{position:fixed;top:0;left:0;right:0;padding:14px 18px;display:flex;align-items:baseline;gap:12px;z-index:10;
+    background:linear-gradient(180deg,rgba(7,11,18,.85),rgba(7,11,18,0));pointer-events:none}
+  .topbar h1{font-size:17px;font-weight:800;letter-spacing:.5px}
+  .topbar .sub{font-size:12px;color:var(--muted)}
+  /* 数据面板 */
+  .hud{position:fixed;left:18px;top:64px;z-index:10;display:flex;flex-direction:column;gap:10px;width:190px}
+  .stat{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 14px;backdrop-filter:blur(8px)}
+  .stat .k{font-size:11px;color:var(--muted);letter-spacing:.4px}
+  .stat .v{font-size:26px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.1;margin-top:3px}
+  .stat .v small{font-size:12px;font-weight:600;color:var(--muted);margin-left:3px}
+  .stat.risk .v{color:var(--chaos)}
+  .stat.risk.safe .v{color:var(--order)}
+  /* 模式指示 */
+  .mode{position:fixed;right:18px;top:64px;z-index:10;background:var(--panel);border:1px solid var(--line);border-radius:14px;
+    padding:10px 14px;backdrop-filter:blur(8px);font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px}
+  .mode .dot{width:9px;height:9px;border-radius:50%;background:var(--chaos);box-shadow:0 0 10px var(--chaos)}
+  .mode.on .dot{background:var(--order);box-shadow:0 0 10px var(--order)}
+  /* 控制条 */
+  .controls{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);z-index:10;display:flex;gap:10px;align-items:center}
+  .btn{background:var(--panel);border:1px solid var(--line);color:var(--txt);padding:11px 18px;border-radius:12px;
+    font-size:14px;font-weight:700;cursor:pointer;backdrop-filter:blur(8px);transition:.15s;font-family:inherit}
+  .btn:hover{border-color:rgba(255,255,255,.25)}
+  .btn.primary{background:var(--order);color:#04222a;border-color:transparent}
+  .btn.danger{background:var(--chaos);color:#2a0e06;border-color:transparent}
+  .hint{position:fixed;bottom:22px;right:18px;z-index:10;font-size:11px;color:var(--muted);text-align:right;line-height:1.6;max-width:200px}
+  /* 加载层 */
+  #loading{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;
+    background:var(--bg);color:var(--muted);font-size:14px;text-align:center;padding:24px}
+  #loading .spin{width:34px;height:34px;border:3px solid var(--line);border-top-color:var(--order);border-radius:50%;animation:sp 1s linear infinite}
+  @keyframes sp{to{transform:rotate(360deg)}}
+</style>
+<script type="importmap">
+{
+  "imports": {
+    "three": "./lib/three/three.module.js",
+    "three/addons/": "./lib/three/addons/"
+  }
+}
+</script>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+  <canvas id="scene"></canvas>
+
+  <div class="topbar">
+    <h1>苍穹降临</h1>
+    <span class="sub">三维交通秩序推演沙盒 · UAM 空中交通</span>
+  </div>
+
+  <div class="hud">
+    <div class="stat"><div class="k">在网飞行器</div><div class="v" id="sTotal">300</div></div>
+    <div class="stat"><div class="k">累计碰撞事件</div><div class="v" id="sCol">0</div></div>
+    <div class="stat risk" id="sRiskBox"><div class="k">实时碰撞风险率</div><div class="v" id="sRisk">0<small>%</small></div></div>
+  </div>
+
+  <div class="mode" id="modeTag"><span class="dot"></span><span id="modeTxt">混沌态 · 无调度</span></div>
+
+  <div class="controls">
+    <button class="btn primary" id="btnOrder">激活苍穹调度</button>
+    <button class="btn danger" id="btnChaos" style="display:none">解除调度 · 回归混沌</button>
+  </div>
+  <div class="hint">拖拽旋转视角 · 滚轮缩放<br>建议在 http 服务下打开（需联网加载 3D 引擎）</div>
+
+  <div id="loading">
+    <div class="spin"></div>
+    <div>正在加载 3D 引擎（需联网获取 three.js）…<br>若长时间停留，请检查网络后刷新。</div>
+  </div>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+// ===== 参数（源自苍穹降临源码解析）=====
+const TOTAL = 300;
+const CELL = 6;          // 空间哈希网格
+const CD = 2.0;          // 碰撞判定距离
+const GRAV = 1.2;        // 撞建筑坠落重力
+const RT = 14;           // 风险率邻域半径
+const RS = 60;           // 风险采样次数（每次采样窗口）
+const OAV = 0.55;        // 苍穹航道角速度 rad/s
+// 三层有序航道：y / 半径 / 方向
+const LANES = [
+  { y: 12.0, r: 18, dir:  1 },
+  { y: 21.5, r: 24, dir: -1 },
+  { y: 31.0, r: 30, dir:  1 },
+];
+const BOUND = 40, YLO = 2, YHI = 35;
+
+// ===== 场景 =====
+const canvas = document.getElementById('scene');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x070b12);
+scene.fog = new THREE.FogExp2(0x070b12, 0.012);
+
+const camera = new THREE.PerspectiveCamera(55, innerWidth/innerHeight, 0.1, 1000);
+camera.position.set(0, 46, 74);
+
+const controls = new OrbitControls(camera, canvas);
+controls.target.set(0, 16, 0);
+controls.enableDamping = true;
+controls.dampingFactor = 0.08;
+controls.maxDistance = 220;
+controls.minDistance = 20;
+
+scene.add(new THREE.AmbientLight(0x6677aa, 0.9));
+const dir = new THREE.DirectionalLight(0xffffff, 0.8);
+dir.position.set(40, 80, 30);
+scene.add(dir);
+
+// 地面网格
+const grid = new THREE.GridHelper(160, 32, 0x1b2940, 0x111a2b);
+grid.position.y = 0;
+scene.add(grid);
+
+// ===== 城市建筑（半透明盒，供碰撞/视觉）=====
+const buildings = [];
+const bgeo = new THREE.BoxGeometry(1, 1, 1);
+const bmat = new THREE.MeshStandardMaterial({ color: 0x1a2740, transparent: true, opacity: 0.22, roughness: 1 });
+const bmesh = new THREE.InstancedMesh(bgeo, bmat, 100);
+const dummy = new THREE.Object3D();
+for (let i = 0; i < 100; i++) {
+  const w = 4 + Math.random()*7, d = 4 + Math.random()*7, h = 6 + Math.random()*22;
+  const x = (Math.random()*2-1)*38, z = (Math.random()*2-1)*38;
+  const y = h/2;
+  buildings.push({ x, z, w, d, h, y0: 0, y1: h });
+  dummy.position.set(x, y, z);
+  dummy.scale.set(w, h, d);
+  dummy.updateMatrix();
+  bmesh.setMatrixAt(i, dummy.matrix);
+}
+scene.add(bmesh);
+
+// ===== 飞行器（InstancedMesh 圆锥）=====
+const fgeo = new THREE.ConeGeometry(0.75, 2.4, 8);
+const fmat = new THREE.MeshStandardMaterial({ roughness: 0.5, metalness: 0.1 });
+const flock = new THREE.InstancedMesh(fgeo, fmat, TOTAL);
+flock.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+scene.add(flock);
+
+const C_CHAOS = new THREE.Color(0xff5e3a);
+const C_ORDER = new THREE.Color(0x36d1dc);
+
+// 每架状态
+const pos = [], vel = [], lane = new Int8Array(TOTAL), oA = new Float32Array(TOTAL), colliding = new Uint8Array(TOTAL);
+
+function rand(a, b){ return a + Math.random()*(b-a); }
+function spawn(i, chaos){
+  pos[i] = new THREE.Vector3(rand(-BOUND,BOUND), rand(YLO,YHI), rand(-BOUND,BOUND));
+  const a = Math.random()*Math.PI*2, sp = rand(6, 12);
+  vel[i] = new THREE.Vector3(Math.cos(a)*sp, rand(-2,2), Math.sin(a)*sp);
+  lane[i] = i % 3;
+  oA[i] = Math.random()*Math.PI*2;
+  colliding[i] = 0;
+}
+for (let i = 0; i < TOTAL; i++) spawn(i, true);
+
+// 初始颜色：混沌
+for (let i = 0; i < TOTAL; i++) flock.setColorAt(i, C_CHAOS);
+flock.instanceColor.needsUpdate = true;
+
+let mode = 'chaos';       // 'chaos' | 'order'
+let collisions = 0;
+
+// ===== 更新：混沌 =====
+const _v = new THREE.Vector3();
+function updateChaos(i, dt){
+  // 随机扰动
+  vel[i].x += rand(-1,1)*6*dt;
+  vel[i].y += rand(-1,1)*4*dt;
+  vel[i].z += rand(-1,1)*6*dt;
+  // 限速
+  const sp = vel[i].length();
+  if (sp > 14) vel[i].multiplyScalar(14/sp);
+  if (sp < 4) vel[i].multiplyScalar(4/Math.max(sp,0.001));
+  pos[i].addScaledVector(vel[i], dt);
+  // 边界软回弹
+  if (pos[i].x >  BOUND){ pos[i].x =  BOUND; vel[i].x *= -0.8; }
+  if (pos[i].x < -BOUND){ pos[i].x = -BOUND; vel[i].x *= -0.8; }
+  if (pos[i].z >  BOUND){ pos[i].z =  BOUND; vel[i].z *= -0.8; }
+  if (pos[i].z < -BOUND){ pos[i].z = -BOUND; vel[i].z *= -0.8; }
+  if (pos[i].y >  YHI){ pos[i].y =  YHI; vel[i].y *= -0.8; }
+  if (pos[i].y <  YLO){ pos[i].y =  YLO; vel[i].y *= -0.8; }
+  // 撞建筑 → 坠落重生
+  for (const b of buildings){
+    if (Math.abs(pos[i].x-b.x) < b.w/2 && Math.abs(pos[i].z-b.z) < b.d/2 && pos[i].y < b.y1){
+      vel[i].set(0, -GRAV*6, 0);
+      pos[i].y -= 0.6;
+      if (pos[i].y < -6) spawn(i, true);
+      return;
+    }
+  }
+}
+
+// ===== 更新：苍穹（三层有序航道）=====
+const _t = new THREE.Vector3();
+function updateOrder(i, dt){
+  const L = LANES[lane[i]];
+  oA[i] += OAV * L.dir * dt;
+  _t.set(L.r*Math.cos(oA[i]), L.y, L.r*Math.sin(oA[i]));
+  const lerp = 1 - Math.pow(0.02, dt);   // 平滑逼近航道
+  pos[i].lerp(_t, lerp);
+  // 切线朝向（轨道前进方向）
+  const tx = -Math.sin(oA[i]) * L.dir, tz = Math.cos(oA[i]) * L.dir;
+  vel[i].set(tx, 0, tz).multiplyScalar(OAV * L.r);
+}
+
+// ===== 碰撞检测（空间哈希）=====
+const hash = new Map();
+function key(x,y,z){ return ((Math.floor(x/CELL))+512) + '_' + ((Math.floor(y/CELL))+512) + '_' + ((Math.floor(z/CELL))+512); }
+function buildHash(){
+  hash.clear();
+  for (let i = 0; i < TOTAL; i++){
+    const k = key(pos[i].x, pos[i].y, pos[i].z);
+    if (!hash.has(k)) hash.set(k, []);
+    hash.get(k).push(i);
+  }
+}
+function detectCollisions(){
+  buildHash();
+  const newCol = new Uint8Array(TOTAL);
+  for (let i = 0; i < TOTAL; i++){
+    const cx = Math.floor(pos[i].x/CELL), cy = Math.floor(pos[i].y/CELL), cz = Math.floor(pos[i].z/CELL);
+    for (let ox=-1; ox<=1; ox++) for (let oy=-1; oy<=1; oy++) for (let oz=-1; oz<=1; oz++){
+      const k = (cx+ox+512)+'_'+(cy+oy+512)+'_'+(cz+oz+512);
+      const arr = hash.get(k);
+      if (!arr) continue;
+      for (const j of arr){
+        if (j <= i) continue;
+        if (pos[i].distanceTo(pos[j]) < CD){
+          newCol[i] = 1; newCol[j] = 1;
+          if (!colliding[i] || !colliding[j]) collisions++;  // 新碰撞事件
+        }
+      }
+    }
+  }
+  colliding.set(newCol);
+}
+// 风险率采样（每 0.5s）
+let riskTimer = 0, riskVal = 0;
+function sampleRisk(){
+  let close = 0;
+  for (let i = 0; i < TOTAL; i++){
+    for (let j = i+1; j < TOTAL; j++){
+      if (pos[i].distanceTo(pos[j]) < RT) close++;
+    }
+  }
+  riskVal = Math.min(100, (close / TOTAL) * 150);
+}
+
+// ===== 渲染实例 =====
+const UP = new THREE.Vector3(0,1,0);
+const _d = new THREE.Object3D();
+const _q = new THREE.Quaternion();
+function renderFlock(){
+  for (let i = 0; i < TOTAL; i++){
+    _d.position.copy(pos[i]);
+    const d = vel[i].lengthSq() > 1e-4 ? vel[i].clone().normalize() : UP;
+    _q.setFromUnitVectors(UP, d);
+    _d.quaternion.copy(_q);
+    _d.scale.set(1,1,1);
+    _d.updateMatrix();
+    flock.setMatrixAt(i, _d.matrix);
+  }
+  flock.instanceMatrix.needsUpdate = true;
+}
+
+// ===== 主循环 =====
+const clock = new THREE.Clock();
+let hudTimer = 0;
+function animate(){
+  requestAnimationFrame(animate);
+  const dt = Math.min(clock.getDelta(), 0.05);
+  for (let i = 0; i < TOTAL; i++){
+    if (mode === 'chaos') updateChaos(i, dt);
+    else updateOrder(i, dt);
+  }
+  detectCollisions();
+  riskTimer += dt;
+  if (riskTimer >= 0.5){ sampleRisk(); riskTimer = 0; }
+  renderFlock();
+  controls.update();
+  renderer.render(scene, camera);
+
+  hudTimer += dt;
+  if (hudTimer >= 0.2){
+    hudTimer = 0;
+    document.getElementById('sCol').textContent = collisions;
+    const rb = document.getElementById('sRiskBox');
+    const r = Math.round(riskVal);
+    document.getElementById('sRisk').innerHTML = r + '<small>%</small>';
+    rb.classList.toggle('safe', r < 12);
+  }
+}
+animate();
+
+// ===== 模式切换 =====
+function setMode(m){
+  mode = m;
+  const order = m === 'order';
+  for (let i = 0; i < TOTAL; i++) flock.setColorAt(i, order ? C_ORDER : C_CHAOS);
+  flock.instanceColor.needsUpdate = true;
+  document.getElementById('btnOrder').style.display = order ? 'none' : '';
+  document.getElementById('btnChaos').style.display = order ? '' : 'none';
+  const tag = document.getElementById('modeTag');
+  tag.classList.toggle('on', order);
+  document.getElementById('modeTxt').textContent = order ? '苍穹态 · 有序航道' : '混沌态 · 无调度';
+}
+document.getElementById('btnOrder').onclick = () => setMode('order');
+document.getElementById('btnChaos').onclick = () => setMode('chaos');
+
+addEventListener('resize', () => {
+  camera.aspect = innerWidth/innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+
+// 加载完成，移除遮罩
+document.getElementById('loading').style.display = 'none';
+</script>
+</body>
+</html>

@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NCRE 三级→四级信息安全 完整备考方案</title>
+<style>
+  :root{
+    --bg:#1e1e1e; --panel:#262626; --panel2:#2d2d2d; --ink:#e6e6e6; --muted:#a8a8a8;
+    --accent:#4ea1ff; --accent2:#ffb454; --ok:#5fd38a; --warn:#ff7b72; --line:#3a3a3a;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,"Segoe UI","Microsoft YaHei",sans-serif;line-height:1.7;font-size:15px}
+  .wrap{max-width:1080px;margin:0 auto;padding:32px 24px 80px}
+  header{border-bottom:2px solid var(--accent);padding-bottom:18px;margin-bottom:8px}
+  h1{font-size:26px;margin:0 0 6px;color:#fff}
+  .sub{color:var(--muted);font-size:14px}
+  h2{font-size:21px;margin:38px 0 12px;padding-left:12px;border-left:4px solid var(--accent);color:#fff}
+  h3{font-size:17px;margin:26px 0 10px;color:var(--accent)}
+  h4{font-size:15px;margin:18px 0 8px;color:var(--accent2)}
+  p{margin:8px 0}
+  .note{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--accent2);padding:12px 16px;border-radius:6px;margin:14px 0}
+  .warn{background:#33201f;border:1px solid #5a2e2c;border-left:4px solid var(--warn);color:#ffd9d6;padding:12px 16px;border-radius:6px;margin:14px 0}
+  .ok{color:var(--ok)}
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:13.5px}
+  th,td{border:1px solid var(--line);padding:8px 10px;vertical-align:top;text-align:left}
+  th{background:var(--panel2);color:#fff;font-weight:600}
+  tr:nth-child(even) td{background:#232323}
+  code{background:#333;padding:1px 6px;border-radius:4px;color:#ffd9a0;font-family:"Cascadia Code",Consolas,monospace;font-size:13px}
+  ul,ol{margin:8px 0 8px 4px;padding-left:22px}
+  li{margin:4px 0}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:14px 0}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px}
+  .card .t{color:var(--accent);font-weight:600;margin-bottom:6px}
+  .phase{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px 16px;margin:12px 0}
+  .phase .tag{display:inline-block;background:var(--accent);color:#08111e;font-weight:700;padding:2px 10px;border-radius:20px;font-size:12px;margin-right:8px}
+  .toc{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px 18px;margin:18px 0}
+  .toc a{color:var(--accent);text-decoration:none;margin-right:18px;white-space:nowrap}
+  .toc a:hover{text-decoration:underline}
+  .kbd{background:#333;border:1px solid #444;border-radius:4px;padding:1px 7px;font-size:12px}
+  footer{margin-top:50px;border-top:1px solid var(--line);padding-top:16px;color:var(--muted);font-size:13px}
+  .small{font-size:13px;color:var(--muted)}
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>NCRE 三级 → 四级「信息安全」完整备考方案</h1>
+  <div class="sub">主理人：等考大师许清楚 ｜ NCRE 专家团 ｜ 汇编日期：2026-07-28 ｜ 路线：三级信息安全技术 → 四级信息安全工程师</div>
+</header>
+
+<div class="toc">
+  <strong>目录：</strong><br>
+  <a href="#p0">0. 边界声明</a>
+  <a href="#p1">1. 需求诊断</a>
+  <a href="#p2">2. 晋级路线图</a>
+  <a href="#p3">3. 三级方案</a>
+  <a href="#p4">4. 四级方案</a>
+  <a href="#p5">5. 总时间表</a>
+  <a href="#p6">6. 资源汇总</a>
+  <a href="#p7">7. 下一步</a>
+</div>
+
+<!-- ============ 0. 边界声明 ============ -->
+<h2 id="p0">0. 重要边界声明（务必先读）</h2>
+<div class="warn">
+<strong>⚠️ NCRE 信息安全 ≠ CTF / 渗透测试</strong>
+<ul>
+  <li><b>考核定位</b>：NCRE 三级/四级信息安全考查的是<b>信息安全基础理论体系 + 安全工程设计与综合防护方案</b>（理论 + 设计 + 方案论证），属于防御、合规、架构视角。</li>
+  <li><b>不考</b>：漏洞利用（exploit）、渗透测试流程、CTF 夺旗（pwn / RE / web 解题）、靶机打点、提权横向。</li>
+  <li><b>你的兴趣落点</b>：你此前表达过 CTF/渗透实操兴趣，这只能作为"理解安全威胁的辅助直觉"，<b>备考务必切换为防御/合规/理论视角</b>，否则会把精力投入三级、四级都不考的攻击技术细节，事倍功半。</li>
+  <li><b>实操导向建议</b>：想真正练手打比赛，走通用学习路线（CTFHub / PicoCTF / PortSwigger Academy / Hack The Box），与 NCRE 取证实务分开进行。</li>
+</ul>
+</div>
+
+<!-- ============ 1. 需求诊断 ============ -->
+<h2 id="p1">1. 用户需求诊断（Phase 1 · 主理人）</h2>
+<table>
+  <tr><th style="width:140px">项目</th><th>内容</th></tr>
+  <tr><td>目标级别</td><td>三级 + 四级（连续考取）</td></tr>
+  <tr><td>目标科目</td><td>三级<b>信息安全技术</b> → 四级<b>信息安全工程师</b></td></tr>
+  <tr><td>基础评估</td><td>计算机开发背景（程序员），但 NCRE 信息安全理论体系为初次系统接触；程序员优势——把密码学算法、访问控制模型当"系统设计"理解，比死记快</td></tr>
+  <tr><td>备考周期</td><td>单级约 3–4 个月；建议分两次考试（先三级、再四级），总计约 8–10 个月</td></tr>
+  <tr><td>取证硬规则</td><td>四级信息安全工程师<b>必须先（或同时）取得</b>三级「信息安全技术」证书；四级单过、三级未过 → 不发证，成绩保留待三级通过后一并核发</td></tr>
+</table>
+
+<!-- ============ 2. 晋级路线图 ============ -->
+<h2 id="p2">2. 三级 → 四级 晋级路线图</h2>
+<div class="phase"><span class="tag">阶段一</span><b>三级信息安全技术</b>（约 3–4 个月）— 打理论地基：安全模型 / 密码学 / 各层安全 / 安全设备 / 法规</div>
+<div class="phase"><span class="tag">衔接周</span><b>视角切换</b>（1–2 周）— 从"是什么/怎么记"切换到"怎么设计/怎么落地"，补工程化思维</div>
+<div class="phase"><span class="tag">阶段二</span><b>四级信息安全工程师</b>（约 3–4 个月）— 建工程能力：等保方案 / 安全架构 / 密码应用(密评) / 应急灾备 / 安全测评</div>
+<div class="note">
+<b>能力衔接逻辑</b>：三级不扎实，四级综合设计题就无从下手。三级打地基（理论），四级建楼层（设计+实施+运维+测评）。四级新增且高频的模块：<b>信息安全工程（SSE-CMM / ISSE）、等保全流程与整改设计、密码应用与密评(国密)、数据安全治理、安全运维应急(SOC/BCP)、安全测评</b>——这些三级基本不涉及，是四级拉分关键。
+</div>
+
+<!-- ============ 3. 三级方案 ============ -->
+<h2 id="p3">3. 三级「信息安全技术」备考方案（专家 ncre-level3 产出）</h2>
+
+<h3>3.1 知识体系框架表</h3>
+<p class="small">三级为上机考试，满分 100 分 / 120 分钟；题型 = 选择题（约 60 分）+ 综合应用题（约 40 分），60 分及格。</p>
+<table>
+  <tr><th>模块</th><th>核心内容（大纲覆盖点）</th><th>重要性</th><th>主要题型</th></tr>
+  <tr><td>信息安全概述</td><td>CIA 三属性；安全威胁与攻击分类；PDR/P2DR/IATF 模型；TCSEC 橘皮书、CC/ISO 15408</td><td>中（约8%）</td><td>选择</td></tr>
+  <tr><td>密码学</td><td>对称(DES/3DES/AES/IDEA/RC4)、非对称(RSA/ECC/DH/ElGamal)、哈希(MD5/SHA)、MAC、数字签名、PKI/CA、密钥管理、认证</td><td><b>高（约20%）</b></td><td>选择+综应</td></tr>
+  <tr><td>网络安全基础</td><td>OSI/TCP-IP 各层安全；IPSec/SSL/TLS；无线安全(WEP/WPA)；DDoS/ARP 欺骗/端口扫描</td><td>中（约10%）</td><td>选择</td></tr>
+  <tr><td>系统安全·操作系统</td><td>DAC/MAC/RBAC；Windows 加固；Linux(权限/SELinux/PAM/日志)</td><td><b>高（约15%）</b></td><td>选择+综应</td></tr>
+  <tr><td>系统安全·数据库</td><td>访问控制/授权；视图/触发器；审计；加密；备份恢复；Oracle/MySQL/SQL Server 安全</td><td>中（约10%）</td><td>选择+综应</td></tr>
+  <tr><td>网络安全·设备与架构</td><td>防火墙(包过滤/状态检测/应用代理)；VPN(IPSec/SSL)；IDS/IPS；隔离/DMZ/网闸；UTM</td><td><b>高（约17%）</b></td><td>选择+综应</td></tr>
+  <tr><td>应用安全</td><td>SQL注入/XSS/CSRF/缓冲区溢出防护；恶意代码；SDL</td><td>中（约10%）</td><td>选择+综应</td></tr>
+  <tr><td>管理与法规</td><td>ISMS/ISO27001(PDCA)；风险评估；等保2.0(GB/T 22239-2019 五级)；BCP/DRP；网安法/数安法/个保法/密码法</td><td><b>高（约10%）</b></td><td>选择+综应</td></tr>
+</table>
+
+<h3>3.2 核心考点精讲（高频 + 易错）</h3>
+<h4>密码学（分值最高，必须吃透）</h4>
+<ul>
+  <li><b>对称加密</b>：DES 分组 64 位/有效密钥 56 位；3DES 三密钥；AES 分组 128 位/密钥 128/192/256；RC4 是流密码。</li>
+  <li><b>非对称加密</b>：RSA=大整数因子分解；ECC=椭圆曲线离散对数；DH/ElGamal=离散对数。非对称速度慢，仅用于密钥交换/签名，不加密大量数据。</li>
+  <li><b>哈希</b>：MD5=128 位(已不安全)；SHA-1=160 位(不推荐)；SHA-256=256 位。单向、定长、抗碰撞。</li>
+  <li><b>数字签名</b>：发送方<b>私钥</b>签、公钥验，实现不可否认+完整性；<b>不保证机密性</b>（需再加密）。</li>
+  <li>易错：混淆"加密=签名"；混淆对称/非对称场景；误记 DES/AES 分组长度。</li>
+</ul>
+<h4>网络安全设备</h4>
+<ul>
+  <li>防火墙三类：包过滤(网络/传输层、快、不查内容)、状态检测(维护连接表、性能安全均衡、最常用)、应用代理(应用层、安全高、慢)。<b>防火墙防不了内部威胁与病毒</b>。</li>
+  <li>VPN：IPSec(网络层，站点到站点)、SSL VPN(远程接入，免客户端)。</li>
+  <li>IDS(旁路、只告警不阻断) vs IPS(串联、可阻断)；HIDS/HIPS 主机型。</li>
+</ul>
+<h4>系统安全 / 应用安全 / 法规</h4>
+<ul>
+  <li>访问控制三模型：DAC(自主可转授)、MAC(强制，如 BLP)、RBAC(基于角色，企业最常用)。</li>
+  <li>SQL 注入根因是<b>字符串拼接</b>，防护靠参数化查询/预编译；XSS 靠输出编码+CSP；CSRF 靠 Token。</li>
+  <li><b>等保2.0 五级</b>：①自主保护 ②指导保护 ③监督保护 ④强制保护 ⑤专控保护；三级及以上每年测评。</li>
+  <li>ISO/IEC 27001 核心是 <b>PDCA</b>。易错：混淆各法生效时间/管辖。</li>
+</ul>
+
+<h3>3.3 典型真题</h3>
+<p><b>真题1（密码学·单选）</b>：RSA 算法基于的数学难题是？A.离散对数 B.<b>大整数因子分解</b> C.椭圆曲线离散对数 D.背包。— 答案 <b>B</b>。</p>
+<p><b>真题2（防火墙·单选）</b>：状态检测防火墙能跟踪连接状态，安全性与性能较均衡（正确项）。包过滤在网络层、应用代理在应用层且慢、防火墙不能防内部与病毒。</p>
+<p><b>真题3（等保·单选）</b>：等保2.0 共 <b>五级</b>，第三级称<b>监督保护级</b>。注意第四级是强制保护级（易混）。</p>
+<p><b>真题4（综应·防火墙规则）</b>：仅放 Web(80/443)、禁外部直连 DB、禁内网访问危险 IP、默认拒绝。体现<b>默认拒绝 / 最小权限 / DMZ 隔离</b>三原则，规则按序首匹配生效。</p>
+
+<h3>3.4 分阶段备考计划（3–4 个月）</h3>
+<table>
+  <tr><th>阶段</th><th>时间</th><th>目标</th><th>每周投入</th></tr>
+  <tr><td>基础期</td><td>第1–6周</td><td>建框架，吃透密码学 + 网络安全设备</td><td>8–10h</td></tr>
+  <tr><td>强化期</td><td>第7–11周</td><td>扫清系统/应用/管理模块，开始综应训练</td><td>10–12h</td></tr>
+  <tr><td>冲刺期</td><td>第12–16周</td><td>全真模拟、法规背记、上机模拟</td><td>12–15h</td></tr>
+</table>
+<p class="small">节奏：每周「2天新学 + 2天做题 + 1天复盘」，周末限时模考。<b>第7周前必须完成密码学</b>（后续 VPN/PKI/签名的基础，占分最高）。法规放冲刺期集中背记。</p>
+
+<h3>3.5 上机训练建议</h3>
+<ul>
+  <li>综应考：加解密/签名/证书操作、防火墙规则配置、系统安全策略、日志/入侵分析、Web 风险防护识别。</li>
+  <li>程序员友好练法：OpenSSL 做 AES/RSA/SHA-256、GPG 签名；VirtualBox + iptables/OpenVPN 落地防火墙/VPN 概念；Linux 配 SSH 密钥登录+fail2ban；Wireshark 抓包识别 ARP 欺骗/端口扫描；用参数化查询改写注入风险代码（仅防御视角）。</li>
+  <li>工具：VirtualBox、OpenSSL、GPG、Wireshark、iptables、OpenVPN、OpenVAS（概念）。</li>
+</ul>
+
+<h3>3.6 教材与资源</h3>
+<ul>
+  <li>必买：<b>《全国计算机等级考试三级教程——信息安全技术》</b>（教育部教育考试院编，高教社，当年最新版）+ 配套历年真题与模拟题。</li>
+  <li>免费：教育部考试中心官网（大纲/样题）、B站/慕课串讲、GB/T 22239-2019 原文、ISO27001 公开资料。</li>
+</ul>
+
+<!-- ============ 4. 四级方案 ============ -->
+<h2 id="p4">4. 四级「信息安全工程师」备考方案（专家 ncre-level4 产出）</h2>
+<p class="small">四级上机：90 分钟 / 满分 100 / 合格 60。题型 = 单选(约60分) + 综合应用题/案例分析(约40分，含设计/计算/论证)。是在电脑作答选择 + 答题区写方案，<b>不是配防火墙、不是打靶机</b>。</p>
+
+<h3>4.1 知识体系框架表（四级考纲全模块 + 权重）</h3>
+<table>
+  <tr><th>模块</th><th>三级基础</th><th>四级深化核心内容</th><th>权重</th></tr>
+  <tr><td>信息安全保障系统</td><td>概述、PDR、TCSEC/CC</td><td>IATF 深度防御、保障体系、总体安全架构设计</td><td>8%</td></tr>
+  <tr><td>信息安全工程</td><td>（基本未涉及）</td><td>SSE-CMM、ISSE、安全需求/设计/实施/运维生命周期</td><td>10%</td></tr>
+  <tr><td>信息安全等级保护</td><td>等保2.0 五级</td><td>定级-备案-建设整改-测评-监督检查；技术+管理设计；差距分析</td><td><b>14%</b></td></tr>
+  <tr><td>安全威胁与架构</td><td>各层威胁</td><td>STRIDE 建模、攻击面、纵深防御、零信任、安全域划分</td><td>8%</td></tr>
+  <tr><td>密码应用</td><td>对称/非对称/哈希/签名/PKI</td><td>密码应用方案、密钥全生命周期、密评、国密 SM1/2/3/4/9</td><td><b>12%</b></td></tr>
+  <tr><td>网络安全防护</td><td>各层安全、IPSec/TLS</td><td>网络架构设计、分区隔离、边界防护、VPN体系、抗DDoS、NAC</td><td>10%</td></tr>
+  <tr><td>系统安全防护</td><td>DAC/MAC/RBAC、加固</td><td>加固方案设计、主机IDS、恶意代码防护体系、基线核查</td><td>8%</td></tr>
+  <tr><td>应用安全防护</td><td>注入/XSS/CSRF/溢出</td><td>SDL、Web防护方案、WAF部署、代码审计、API安全</td><td>8%</td></tr>
+  <tr><td>数据安全</td><td>数据库安全</td><td>分类分级、全生命周期六环节、DLP、隐私合规、备份容灾</td><td>8%</td></tr>
+  <tr><td>安全运维与应急</td><td>（偏管理未涉及）</td><td>SOC/SIEM、态势感知、应急预案、响应六阶段、BCP/DRP(RTO/RPO)</td><td>8%</td></tr>
+  <tr><td>安全测评</td><td>（基本未涉及）</td><td>测评流程(GB/T28448)、差距测评、风险评估(GB/T20984)、漏扫报告</td><td>6%</td></tr>
+</table>
+<p class="small">综合应用题主要落在模块 2/3/5/9/10（工程 / 等保 / 密码 / 数据 / 运维），是拉分关键。</p>
+
+<h3>4.2 核心考点精讲（四级 vs 三级深化 + 易错）</h3>
+<ul>
+  <li><b>从"是什么"到"怎么设计"</b>：三级记等保五级，四级给定场景设计等保三级建设整改方案。</li>
+  <li><b>新增信息安全工程</b>：SSE-CMM 五能力等级(1非正规→5持续改进)、ISSE 五步(发掘需求→定义目标→设计架构→开发设计→集成)。易错：混淆 SSE-CMM / SW-CMM / ISO27001 PDCA / 等保级别。</li>
+  <li><b>新增密码应用与密评</b>：四层面(物理/网络/设备/应用)；国密 SM2(非对称/签名/ECC)、SM3(哈希)、SM4(对称)、SM9(标识)、SM1(对称/硬件不公开)。易错：SM3当对称、SM1当公开、SM2 替代 RSA 合规。</li>
+  <li><b>新增等保全流程</b>：五环节定级→备案→建设整改→测评→监督检查；二维定级(客体×程度)；云/物联网/大数据/工控特殊规则。</li>
+  <li><b>新增数据安全治理</b>：分类分级(一般/重要/核心)、全生命周期六环节、个保法(告知-同意/最小必要)、数安法(出境)。</li>
+  <li><b>新增运维应急</b>：RTO/RPO 与备份频率关系；响应六阶段(准备→检测→遏制→根除→恢复→跟踪)；BCP/DRP。</li>
+  <li>高频易错：等保2.0 是<b>技术+管理双要求</b>；定级二维表必熟；密评四层面≠等保测评；SSE-CMM 等级≠等保级别；响应阶段顺序不可颠倒；可用性公式 <code>A=MTBF/(MTBF+MTTR)</code>。</li>
+</ul>
+
+<h3>4.3 典型真题（四级综合设计风格）</h3>
+<p><b>例一·综合设计</b>：某市"政务服务平台"定级等保三级，设计建设整改方案（安全域划分 / 边界设备 / 密码应用 / 制度清单≥4类）。要点：安全域=接入区/DMZ/核心业务区/安全管理区(SOC)/数据区；设备=防火墙+IPS+抗DDoS+堡垒机+数据库审计+WAF+态势感知；密码=链路SM4 VPN、传输SM2/SM3、存储SM4、KMS统一管理；制度=建设/运维/人员/应急/密码管理。<b>关键：技术+管理双维度齐全 + 纵深防御</b>。</p>
+<p><b>例二·计算</b>：每日0点全量、每小时增量；最大丢1小时数据、最大停机4小时。求 RPO/RTO。答：<b>RPO=1小时</b>(=增量周期)，<b>RTO=4小时</b>；策略=全量+hourly增量，先全量再顺序增量，辅异地容灾。RPO 定备份频率，RTO 定恢复方案。</p>
+<p><b>例三·方案论证</b>：原 RSA-2048+SHA-1 需过密评，指出不合规并整改。答：SHA-1 不安全改 SM3/SHA-256；关基或等保三级以上优先 SM2 替代 RSA；密钥纳合规 KMS 禁硬编码；落实四层面密码应用。</p>
+
+<h3>4.4 分阶段备考计划（3–4 月）+ 衔接</h3>
+<table>
+  <tr><th>周次</th><th>内容</th></tr>
+  <tr><td>W1–3</td><td>基础重构：模块1/4/6/7/8，补设计视角</td></tr>
+  <tr><td>W4–7</td><td>工程+等保重点：模块2(SSE-CMM/ISSE)、3(等保全流程+整改)，投最多时间</td></tr>
+  <tr><td>W8–11</td><td>密码+数据：模块5(密评/国密)、9(数据治理/灾备)</td></tr>
+  <tr><td>W12–14</td><td>运维应急+测评：模块10(SOC/应急/BCP)、11(测评/风险评估)</td></tr>
+  <tr><td>W15–16</td><td>冲刺：刷综合应用题、默三套方案模板、模拟考</td></tr>
+</table>
+<p class="small">每周 6–8h 学习 + ≥1 次综合题手写练习。衔接时点：三级 3–4 月 → 确认通过后，用 1–2 周做"概念→设计"视角切换，再进四级。最稳妥 = 先过三级再考四级。</p>
+
+<h3>4.5 上机训练建议</h3>
+<ul>
+  <li>选择理解为主练双维度判断；综合题动手写方案，备三模板（等保三级 / 密码密评 / 应急灾备）反复默写；计算题练 RTO/RPO、定级二维、可用性公式；模拟限时 20 分钟"场景→方案"结构化表达。</li>
+  <li><b>明确不做</b>：不练 Kali、不练 CTF、不练纯渗透工具——与四级无关。</li>
+</ul>
+
+<h3>4.6 教材与资源</h3>
+<ul>
+  <li>核心：<b>《全国计算机等级考试四级教程——信息安全工程师》</b>（教育部考试中心编，高教社，当年最新版），唯一官方教程。</li>
+  <li>标准原文：GB/T 22239-2019、GB/T 28448、GB/T 25070（等保）；GB/T 39786-2021（密评）；GB/T 20984（风险评估）；网安法/数安法/个保法。</li>
+  <li>社区(课外)：看雪、FreeBuf、TC260 标准动态。<b>考试以官方教程与国标为准</b>。</li>
+</ul>
+
+<h3>4.7 三级 → 四级 晋级路径与先修硬规则</h3>
+<div class="note">
+<b>硬规则</b>：取证四级必须先（或同期有效）取得三级「信息安全技术」证；四级过、三级未过 → 不发证，成绩保留，待三级通过后一并核发。<br>
+<b>路径</b>：阶段一(3–4月)过三级 → 衔接周(1–2周)视角切换 → 阶段二(3–4月)过四级 → 两段成绩有效后四级证随三级证一并核发。<br>
+<b>岗位图谱</b>：等保方案→等保咨询师/合规工程师；密码应用→密码应用工程师/密评；安全架构→安全架构师；应急灾备→安全运维/SOC；安全测评→测评师(需资质)。
+</div>
+
+<!-- ============ 5. 总时间表 ============ -->
+<h2 id="p5">5. 主理人汇编：连续取证总时间表</h2>
+<table>
+  <tr><th>时段</th><th>阶段</th><th>关键动作</th><th>里程碑</th></tr>
+  <tr><td>第 1–16 周</td><td>三级备考</td><td>基础→强化→冲刺；第7周前吃透密码学；刷真题+上机模拟</td><td>参加三级考试并合格</td></tr>
+  <tr><td>第 17–18 周</td><td>衔接</td><td>视角切换：从"记概念"到"做设计"；补 SSE-CMM/ISSE、等保整改、密评思维</td><td>拿到三级证书</td></tr>
+  <tr><td>第 19–34 周</td><td>四级备考</td><td>工程/等保/密码/数据/运维/测评；写三套方案模板；限时综合题</td><td>参加四级考试并合格</td></tr>
+  <tr><td>出证</td><td>取证</td><td>四级成绩 + 三级证书 → 四级证一并核发</td><td>持双证</td></tr>
+</table>
+<p class="small">总周期约 8–10 个月（含衔接）。若时间紧，可同年 3 月、9 月两次考试窗口连续报考（NCRE 每年 3/6/9/12 月开考），但务必保证三级先于四级取证。</p>
+
+<!-- ============ 6. 资源汇总 ============ -->
+<h2 id="p6">6. 教材与资源汇总</h2>
+<div class="grid">
+  <div class="card"><div class="t">三级官方</div>《三级教程——信息安全技术》+ 配套真题模拟题（高教社）</div>
+  <div class="card"><div class="t">四级官方</div>《四级教程——信息安全工程师》（教育部考试中心，高教社）</div>
+  <div class="card"><div class="t">国标原文</div>GB/T 22239-2019、28448、25070、39786-2021、20984</div>
+  <div class="card"><div class="t">法律法规</div>网络安全法 / 数据安全法 / 个人信息保护法 / 密码法</div>
+  <div class="card"><div class="t">实操练习</div>OpenSSL、GPG、VirtualBox、iptables、Wireshark、OpenVPN</div>
+  <div class="card"><div class="t">免费辅助</div>教育部考试中心官网、B站/慕课串讲、看雪/FreeBuf（课外）</div>
+</div>
+
+<!-- ============ 7. 下一步 ============ -->
+<h2 id="p7">7. 下一步建议</h2>
+<ul>
+  <li>如果<b>确定走 NCRE 路线</b>：按上面总时间表启动三级备考，先买三级官方教程，第1–6周吃透密码学与网络安全设备。</li>
+  <li>如果<b>想先练 CTF/渗透手感</b>：这是 NCRE 大纲外内容，建议以通用问题再问我，单独拉一份 CTF 学习路线，与 NCRE 备考并行不冲突。</li>
+  <li>想让某位专家（ncre-level3 / ncre-level4）<b>就某模块深入讲解</b>（如密码学、等保整改设计、密评），告诉我模块名即可。</li>
+  <li>需要把本方案导出为 <b>可打印 PDF / Markdown</b> 或按你的具体考试窗口（如距下次考试还有 X 个月）重排时间表，也可以说。</li>
+</ul>
+
+<footer>
+  本方案由 NCRE 专家团主理人许清楚汇编：需求诊断（主理人）→ 三级方案（ncre-level3）→ 四级方案（ncre-level4）→ 主理人汇编。所有专业产出均来自对应级别专家，主理人仅做编排与衔接。内容以当年官方大纲与最新国标为准。
+</footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="app-version" content="1.0.109">
+<title>阶跃 StepFun · 站内对话</title>
+<style>
+  :root{--bg:#0f1311;--card:#181d1a;--primary:#2D7FF9;--primary-soft:#1b2740;--text:#e8efe9;--muted:#8b9b93;--border:#262d29;--red:#f0715f;--green:#46c07e;--radius:14px;--shadow:0 1px 3px rgba(0,0,0,.3);}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;height:100vh;display:flex;flex-direction:column}
+  header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px}
+  header h1{font-size:17px;margin:0;font-weight:700}
+  header .badge{font-size:12px;color:var(--muted);border:1px solid var(--border);padding:2px 8px;border-radius:999px}
+  header a{margin-left:auto;color:var(--primary);text-decoration:none;font-size:13px}
+  #cfg{background:var(--card);border-bottom:1px solid var(--border);padding:12px 18px;display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;align-items:end}
+  #cfg label{display:block;font-size:12px;color:var(--muted);margin-bottom:4px}
+  #cfg input,#cfg select{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:9px;padding:8px 10px;font-size:14px}
+  #cfg .row{display:flex;flex-direction:column}
+  #cfg .btns{grid-column:1/-1;display:flex;gap:8px;align-items:center}
+  button{background:var(--primary);color:#fff;border:none;border-radius:9px;padding:8px 14px;font-size:14px;font-weight:600;cursor:pointer}
+  button.ghost{background:transparent;border:1px solid var(--border);color:var(--text)}
+  #cfgStatus{font-size:12px;margin-left:6px}
+  .ok{color:var(--green)} .err{color:var(--red)}
+  #log{max-height:0;overflow:hidden;transition:max-height .2s;background:#0b0e0c;border-bottom:1px solid var(--border);font:12px/1.5 ui-monospace,Menlo,Consolas,monospace;color:var(--muted);padding:0 18px}
+  #log.show{max-height:140px;padding:10px 18px;overflow:auto}
+  #chat{flex:1;overflow:auto;padding:18px;display:flex;flex-direction:column;gap:14px}
+  .msg{max-width:82%;padding:11px 14px;border-radius:14px;white-space:pre-wrap;word-break:break-word}
+  .msg .role{font-size:11px;color:var(--muted);margin-bottom:4px}
+  .user{align-self:flex-end;background:var(--primary-soft);border:1px solid #2a3a5c}
+  .assistant{align-self:flex-start;background:var(--card);border:1px solid var(--border)}
+  .assistant .cursor{display:inline-block;width:7px;height:15px;background:var(--primary);vertical-align:-2px;animation:blink 1s steps(2) infinite}
+  @keyframes blink{50%{opacity:0}}
+  .imgchip{display:inline-block;max-width:160px;max-height:90px;border-radius:8px;margin-top:6px;border:1px solid var(--border)}
+  #composer{border-top:1px solid var(--border);padding:12px 18px;display:flex;flex-direction:column;gap:8px}
+  #imgRow{display:flex;gap:8px;align-items:center;font-size:12px;color:var(--muted)}
+  #imgUrl{flex:1;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:9px;padding:7px 10px;font-size:13px}
+  #input{flex:1;resize:none;min-height:54px;max-height:160px;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:11px;padding:11px 13px;font:15px/1.5 inherit}
+  #sendRow{display:flex;gap:8px;align-items:center}
+  #send{flex:0 0 auto}
+  #send:disabled{opacity:.5;cursor:default}
+  .hint{font-size:12px;color:var(--muted)}
+  .spinner{border:2px solid var(--border);border-top-color:var(--primary);border-radius:50%;width:14px;height:14px;display:inline-block;animation:spin .8s linear infinite;vertical-align:-2px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+<header>
+  <h1>阶跃 StepFun</h1>
+  <span class="badge" id="ver">v1.0.109</span>
+  <a href="https://platform.stepfun.com/" target="_blank" rel="noopener">控制台 / 密钥 ↗</a>
+</header>
+
+<div id="cfg">
+  <div class="row">
+    <label>EdgeOne 基地址（留空=同源；GH Pages 访问填 EdgeOne 域名）</label>
+    <input id="base" placeholder="https://xxx.edgeone.app 或留空">
+  </div>
+  <div class="row">
+    <label>StepFun API Key（仅存本机 localStorage）</label>
+    <input id="key" type="password" placeholder="sk-...">
+  </div>
+  <div class="row">
+    <label>模型</label>
+    <select id="model">
+      <option value="step-3.7-flash">step-3.7-flash（多模态推理）</option>
+      <option value="step-3.5-flash-2603">step-3.5-flash-2603（Agent 优化）</option>
+      <option value="step-3.5-flash">step-3.5-flash</option>
+      <option value="step-router-v1">step-router-v1（智能路由）</option>
+    </select>
+  </div>
+  <div class="row">
+    <label>推理强度（reasoning_effort）</label>
+    <select id="effort">
+      <option value="default">默认</option>
+      <option value="low">low（简单问答/摘要）</option>
+      <option value="medium">medium（一般推理）</option>
+      <option value="high">high（复杂/数学/代码）</option>
+    </select>
+  </div>
+  <div class="btns">
+    <button id="saveCfg">保存配置</button>
+    <button class="ghost" id="toggleLog">调试日志</button>
+    <span id="cfgStatus"></span>
+  </div>
+</div>
+<div id="log"></div>
+
+<div id="chat"></div>
+
+<div id="composer">
+  <div id="imgRow">
+    <span>图片 URL（可选，step-3.7-flash 多模态）：</span>
+    <input id="imgUrl" placeholder="https://... 留空则纯文本">
+  </div>
+  <textarea id="input" placeholder="给阶跃发消息…（Enter 发送，Shift+Enter 换行）"></textarea>
+  <div id="sendRow">
+    <button id="send">发送</button>
+    <button class="ghost" id="stop" style="display:none">停止</button>
+    <button class="ghost" id="clear">清空对话</button>
+    <span class="hint" id="status"></span>
+  </div>
+</div>
+
+<script>
+(function(){
+  var LS={base:'stepfun_base',key:'stepfun_key',model:'stepfun_model',effort:'stepfun_effort'};
+  function g(k){try{return localStorage.getItem(k)||''}catch(e){return''}}
+  function s(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+  var $=function(id){return document.getElementById(id)};
+  var logEl=$('log'), logLines=[];
+  function log(m){logLines.push('• '+m);if(logLines.length>60)logLines.shift();logEl.textContent=logLines.join('\n');logEl.scrollTop=logEl.scrollHeight;}
+  function setStatus(el,t,cls){el.textContent=t;el.className=cls||'';}
+  function apiBase(){return g(LS.base).replace(/\/$/,'');}
+
+  // 载入已存配置
+  $('base').value=g(LS.base);$('key').value=g(LS.key);
+  $('model').value=g(LS.model)||'step-3.7-flash';
+  $('effort').value=g(LS.effort)||'default';
+
+  $('saveCfg').onclick=function(){
+    s(LS.base,$('base').value.trim());s(LS.key,$('key').value.trim());
+    s(LS.model,$('model').value);s(LS.effort,$('effort').value);
+    setStatus($('cfgStatus'),'已保存 · 密钥仅留本机','ok');
+  };
+  $('toggleLog').onclick=function(){logEl.classList.toggle('show');};
+
+  var chat=$('chat'),messages=[],busy=false,reader=null,abort=null;
+
+  function addBubble(role){
+    var d=document.createElement('div');d.className='msg '+(role==='user'?'user':'assistant');
+    var r=document.createElement('div');r.className='role';r.textContent=role==='user'?'你':'阶跃';
+    var b=document.createElement('div');b.className='body';
+    d.appendChild(r);d.appendChild(b);chat.appendChild(d);chat.scrollTop=chat.scrollHeight;
+    return b;
+  }
+
+  function send(){
+    if(busy)return;
+    var text=$('input').value.trim();
+    var img=$('imgUrl').value.trim();
+    if(!text&&!img){setStatus($('status'),'请输入内容','err');return;}
+    if(!g(LS.key)){setStatus($('status'),'请先填写 StepFun API Key','err');return;}
+
+    // 拼用户消息（支持图片多模态）
+    var content=[];
+    if(img)content.push({type:'image_url',image_url:{url:img}});
+    if(text)content.push({type:'text',text:text});
+    if(content.length===1&&text)content=text; // 纯文本时退化成字符串，兼容性更好
+    messages.push({role:'user',content:content});
+
+    var ub=addBubble('user');
+    if(img){var im=document.createElement('img');im.className='imgchip';im.src=img;ub.appendChild(im);}
+    if(text){ub.appendChild(document.createTextNode(text));}
+
+    $('input').value='';$('imgUrl').value='';
+    doRequest();
+  }
+
+  async function doRequest(){
+    busy=true;$('send').disabled=true;$('stop').style.display='';
+    var ab=new AbortController();abort=ab;
+    var out=addBubble('assistant');
+    var cursor=document.createElement('span');cursor.className='cursor';out.appendChild(cursor);
+    var full='';
+    var payload={
+      model:g(LS.model)||'step-3.7-flash',
+      messages:messages,
+      stream:true,
+      temperature:0.9,
+      max_tokens:2048
+    };
+    var eff=g(LS.effort)||'default';
+    if(eff!=='default')payload.reasoning_effort=eff;
+
+    try{
+      var url=apiBase()+'/api/stepfun';
+      log('POST '+url+' model='+payload.model+' stream=true');
+      var resp=await fetch(url,{
+        method:'POST',
+        headers:{'Content-Type':'application/json','x-stepfun-key':g(LS.key)},
+        body:JSON.stringify(payload),
+        signal:ab.signal
+      });
+      if(!resp.ok){
+        var et=await resp.text();
+        var em='HTTP '+resp.status;
+        try{var ej=JSON.parse(et);em=ej.error||em;if(ej.hint)em+=' · '+ej.hint;}catch(e){}
+        log('ERR '+em);
+        cursor.remove();
+        out.textContent='⚠️ '+em;
+        busy=false;$('send').disabled=false;$('stop').style.display='none';abort=null;
+        return;
+      }
+      // 解析 SSE
+      var rdr=resp.body.getReader(),dec=new TextDecoder(),buf='',assistantText='';
+      while(true){
+        var ch=await rdr.read();if(ch.done)break;
+        buf+=dec.decode(ch.value,{stream:true});
+        var parts=buf.split('\n\n');buf=parts.pop();
+        for(var p of parts){
+          var line=(p||'').split('\n').find(function(l){return l.indexOf('data:')===0;});
+          if(!line)continue;
+          var data=line.slice(5).trim();
+          if(data==='[DONE]')continue;
+          try{
+            var j=JSON.parse(data);
+            var delta=(j.choices&&j.choices[0]&&j.choices[0].delta&&j.choices[0].delta.content)||'';
+            if(delta){assistantText+=delta;full+=delta;
+              cursor.remove();out.textContent=full;out.appendChild(cursor);
+              chat.scrollTop=chat.scrollHeight;}
+          }catch(e){}
+        }
+      }
+      cursor.remove();out.textContent=full||'（空响应）';
+      messages.push({role:'assistant',content:full});
+      log('OK len='+full.length);
+    }catch(e){
+      cursor.remove();
+      if(e.name==='AbortError'){out.textContent=full+'\n〔已停止〕';log('stopped');}
+      else{out.textContent='⚠️ 请求失败：'+e.message;log('EXC '+e.message);}
+      if(full)messages.push({role:'assistant',content:full});
+    }
+    busy=false;$('send').disabled=false;$('stop').style.display='none';abort=null;
+    chat.scrollTop=chat.scrollHeight;
+  }
+
+  $('send').onclick=send;
+  $('stop').onclick=function(){if(abort)abort.abort();};
+  $('clear').onclick=function(){messages=[];chat.innerHTML='';};
+  $('input').addEventListener('keydown',function(e){
+    if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();}
+  });
+  setStatus($('status'),'就绪 · 填入 Key 即可对话','ok');
+})();
+</script>
+</body>
+</html>

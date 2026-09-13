@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<!-- 探索 · AI 视频工作流 | 单文件 HTML 子应用：MoneyPrinterTurbo 本地最大集成（服务探测 + WebUI 嵌入）+ 六大开源方案便携入口 -->
+<!-- 公开页无私有数据；本地集成功能（探测/嵌入 localhost）仅 file:// 或 localhost 打开时可用，公开站自动降级为链接模式 -->
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0a0e1a">
+<title>探索 · AI 视频工作流</title>
+<style>
+:root{
+  --bg:#0a0e1a; --card:#121828; --card2:#19223a; --line:#243049; --line2:#2d3a58;
+  --text:#e8edf7; --muted:#8a93a8;
+  --main:#5b8cff; --teal:#2dd4bf; --green:#34d399; --red:#f87171; --amber:#fbbf24; --violet:#a78bfa;
+  --r:16px; --r-sm:11px; --r-lg:20px;
+  --sh:0 1px 2px rgba(0,0,0,.25),0 4px 14px rgba(0,0,0,.18);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","HarmonyOS Sans SC","Microsoft YaHei",sans-serif;
+  background:var(--bg);color:var(--text);font-size:15px;line-height:1.6;
+  padding-bottom:calc(28px + env(safe-area-inset-bottom));
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:920px;margin:0 auto;padding:22px 18px 8px;}
+.top{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:4px;}
+.top h1{font-size:21px;margin:0;font-weight:700;letter-spacing:.4px;}
+.top .sync{color:var(--muted);font-size:12.5px;}
+.sub{color:var(--muted);font-size:12.5px;margin:0 0 16px;}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px;box-shadow:var(--sh);margin-bottom:14px;}
+.panel.hero{border-color:rgba(167,139,250,.45);background:linear-gradient(160deg,rgba(167,139,250,.10),rgba(18,24,40,.9) 42%);}
+.panel h2{margin:0 0 12px;font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.panel h2 .dot{width:8px;height:8px;border-radius:50%;background:var(--violet);flex:none;}
+.chip{display:inline-block;padding:2px 10px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap;}
+.chip.star{background:rgba(251,191,36,.14);color:var(--amber);}
+.chip.ok{background:rgba(52,211,153,.14);color:var(--green);}
+.chip.off{background:rgba(138,147,168,.14);color:var(--muted);}
+.chip.info{background:rgba(91,140,255,.14);color:var(--main);}
+.desc{color:var(--muted);font-size:13px;margin:0 0 12px;}
+.desc b{color:var(--text);font-weight:600;}
+/* 状态条 */
+.status{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px;}
+.status .pill{display:inline-flex;align-items:center;gap:6px;background:var(--card2);border:1px solid var(--line);border-radius:999px;padding:5px 12px;font-size:12.5px;color:var(--muted);}
+.status .pill i{width:8px;height:8px;border-radius:50%;background:var(--muted);flex:none;}
+.status .pill.on{border-color:rgba(52,211,153,.4);}
+.status .pill.on i{background:var(--green);box-shadow:0 0 6px rgba(52,211,153,.8);}
+.status .pill.on{color:var(--green);}
+.status .chk{background:var(--card2);border:1px solid var(--line);color:var(--text);border-radius:999px;padding:5px 13px;font-size:12.5px;cursor:pointer;}
+.status .chk:hover{border-color:var(--line2);}
+/* 嵌入区 */
+.embed{display:none;border:1px solid var(--line);border-radius:var(--r-sm);overflow:hidden;background:#0d1220;}
+.embed.show{display:block;}
+.embed iframe{width:100%;height:840px;border:0;display:block;background:#fff;}
+.embed-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 12px;background:var(--card2);border-bottom:1px solid var(--line);font-size:12.5px;color:var(--muted);flex-wrap:wrap;}
+.embed-bar a{color:var(--main);text-decoration:none;font-weight:600;}
+/* 引导卡 */
+.guide{display:none;}
+.guide.show{display:block;}
+.steps{display:grid;gap:8px;margin:0 0 12px;}
+.step{display:flex;gap:10px;align-items:flex-start;background:var(--card2);border:1px solid var(--line);border-radius:var(--r-sm);padding:10px 12px;}
+.step b.n{flex:none;width:22px;height:22px;border-radius:50%;background:rgba(167,139,250,.16);color:var(--violet);display:flex;align-items:center;justify-content:center;font-size:12px;margin-top:1px;}
+.step p{margin:0;font-size:13px;color:var(--muted);}
+.step p b{color:var(--text);}
+code{background:#0d1220;border:1px solid var(--line);border-radius:6px;padding:1px 7px;font-size:12px;font-family:Consolas,Menlo,monospace;color:var(--teal);word-break:break-all;}
+.copyrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;}
+.copyrow button{background:var(--card2);border:1px solid var(--line);color:var(--text);border-radius:999px;padding:6px 14px;font-size:12.5px;cursor:pointer;}
+.copyrow button:hover{border-color:var(--line2);}
+details{border:1px solid var(--line);border-radius:var(--r-sm);background:var(--card2);padding:0;margin-top:12px;}
+details summary{cursor:pointer;padding:11px 14px;font-size:13.5px;font-weight:600;list-style:none;display:flex;align-items:center;gap:8px;}
+details summary::before{content:"▸";color:var(--violet);transition:transform .15s;}
+details[open] summary::before{transform:rotate(90deg);}
+details .inner{padding:0 14px 12px;font-size:13px;color:var(--muted);}
+details .inner p{margin:8px 0;}
+details .inner b{color:var(--text);}
+details .inner a{color:var(--main);text-decoration:none;font-weight:600;}
+.kv{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:12px 0 2px;}
+@media(max-width:640px){.kv{grid-template-columns:repeat(2,1fr);}}
+.kv .it{background:var(--card2);border:1px solid var(--line);border-radius:var(--r-sm);padding:10px 12px;}
+.kv .it b{display:block;font-size:17px;}
+.kv .it span{color:var(--muted);font-size:11.5px;}
+/* 其它方案卡片 */
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
+@media(max-width:640px){.grid{grid-template-columns:1fr;}}
+.tool{background:var(--card2);border:1px solid var(--line);border-radius:var(--r-sm);padding:13px 14px;display:flex;flex-direction:column;gap:6px;}
+.tool .hd{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.tool .hd b{font-size:14.5px;}
+.tool .hd .chip{margin-left:auto;}
+.tool p{margin:0;font-size:12.5px;color:var(--muted);}
+.tool .lnk{display:flex;gap:12px;margin-top:2px;flex-wrap:wrap;}
+.tool .lnk a{font-size:12.5px;color:var(--main);text-decoration:none;font-weight:600;}
+.tool .lnk a:hover{text-decoration:underline;}
+.note{font-size:12px;color:var(--muted);text-align:center;margin:6px 0 0;}
+.foot-tip{background:rgba(91,140,255,.08);border:1px dashed rgba(91,140,255,.35);border-radius:var(--r-sm);padding:10px 14px;font-size:12.5px;color:var(--muted);margin-bottom:14px;}
+.foot-tip b{color:var(--main);}
+a{color:var(--main);}
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <h1>🧭 探索 · AI 视频工作流</h1>
+    <span class="sync">开源雷达 · 数据实测于 2026-08-29</span>
+  </div>
+  <p class="sub">最佳方案 MoneyPrinterTurbo 已最大集成到本地（一键启动 + 服务探测 + WebUI 嵌入），其余评价最高的开源方案提供便携入口。</p>
+
+  <!-- ============ MoneyPrinterTurbo 最大集成 ============ -->
+  <div class="panel hero">
+    <h2><span class="dot"></span>MoneyPrinterTurbo · AI 短视频全自动生成
+      <span class="chip star">★ 118.3k</span>
+      <span class="chip info">本地已集成</span>
+    </h2>
+    <p class="desc">输入一个主题 → <b>文案 → 素材匹配 → 字幕 → BGM → 合成高清成片</b> 全自动流水线。整条链路可用免费组件拼出：<b>Edge TTS 免费配音 + Pexels 免费素材 + DeepSeek 极低价文案</b>，单片边际成本 ≈ 几分钱，无需 GPU。</p>
+
+    <div class="status" id="statusBar">
+      <span class="pill" id="pillWebui"><i></i>WebUI :8501</span>
+      <span class="pill" id="pillApi"><i></i>API :8080</span>
+      <button class="chk" id="btnCheck">重新探测</button>
+    </div>
+
+    <!-- 在线：嵌入 WebUI -->
+    <div class="embed" id="embedBox">
+      <div class="embed-bar">
+        <span>已嵌入本地 MoneyPrinterTurbo WebUI（Streamlit）</span>
+        <a href="http://localhost:8501" target="_blank" rel="noopener">新窗口打开 ↗</a>
+      </div>
+      <iframe id="mptEmbed" src="about:blank" title="MoneyPrinterTurbo WebUI"></iframe>
+    </div>
+
+    <!-- 离线：启动引导 -->
+    <div class="guide" id="guideBox">
+      <div class="steps">
+        <div class="step"><b class="n">1</b><p>双击指挥台脚本 <b><code>tools\mpt-start.bat</code></b>（首次运行自动完成 git 拉取、虚拟环境与依赖安装）</p></div>
+        <div class="step"><b class="n">2</b><p>首次使用在 WebUI 左侧「基础设置」填入 <b>LLM API Key</b>（推荐 DeepSeek）与 <b>Pexels 素材 Key</b>，配音默认 Edge TTS 免费无需配置</p></div>
+        <div class="step"><b class="n">3</b><p>回到本页点 <b>重新探测</b>，服务亮灯后 WebUI 会直接嵌入下方，输入主题即可出片</p></div>
+      </div>
+      <div class="copyrow">
+        <button data-copy="http://localhost:8501">复制 WebUI 地址</button>
+        <button data-copy="git clone --depth 1 https://github.com/harry0703/MoneyPrinterTurbo.git">复制 git 克隆命令</button>
+        <button data-copy="https://github.com/harry0703/MoneyPrinterTurbo">打开 GitHub 仓库 ↗</button>
+      </div>
+      <details>
+        <summary>首次配置清单（API Key 与成本说明）</summary>
+        <div class="inner">
+          <p><b>① 文案 LLM</b>：推荐 <a href="https://platform.deepseek.com" target="_blank" rel="noopener">DeepSeek 开放平台</a>（每百万 token 几元，一条视频用量可忽略）；也支持 OpenAI / Kimi / 通义千问 / 本地 Ollama 等。</p>
+          <p><b>② 视频素材</b>：<a href="https://www.pexels.com/api/" target="_blank" rel="noopener">Pexels API</a> 免费申请 Key，Pixabay / Coverr 同理；也可接 WaveSpeed、火山 Seedance 生成式素材（按量付费，可选）。</p>
+          <p><b>③ 配音 TTS</b>：默认 Edge TTS（WebUI 内显示为 Azure TTS V1）<b>免费、无需 Key</b>；需要音色克隆再配 Azure V2 / ElevenLabs 等。</p>
+          <p><b>④ 配置文件</b>：首次启动自动在项目根目录生成 <code>config.toml</code>（源自 config.example.toml），WebUI 设置页可直接改；ffmpeg 一般自动下载。</p>
+          <p><b>成本结论</b>：DeepSeek + Edge TTS + Pexels 全免费/极低价组合，一条成品片边际成本 ≈ 几分钱。</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="kv">
+      <div class="it"><b>≈3 分钟</b><span>主题 → 成片（实测口径）</span></div>
+      <div class="it"><b>几分钱</b><span>单片边际成本</span></div>
+      <div class="it"><b>0 GPU</b><span>普通电脑即可跑</span></div>
+      <div class="it"><b>08-28</b><span>最近更新（日更级维护）</span></div>
+    </div>
+  </div>
+
+  <!-- ============ 其它方案便携入口 ============ -->
+  <div class="panel">
+    <h2><span class="dot" style="background:var(--main)"></span>其它评价最高的开源方案 · 便携入口
+      <span class="chip off">链接直达</span>
+    </h2>
+    <p class="desc">同赛道备选，按用途分列；星标数为 2026-08-29 GitHub API 实测。</p>
+    <div class="grid">
+      <div class="tool">
+        <div class="hd"><b>🎬 KrillinAI / KlicStudio</b><span class="chip star">★ 11.3k</span></div>
+        <p>已有视频的翻译 + AI 配音 + 字幕一站式改写，100+ 语言，专为 Shorts / TikTok / B 站竖屏优化，面向人类与 AI Agent。</p>
+        <div class="lnk"><a href="https://github.com/krillinai/KrillinAI" target="_blank" rel="noopener">GitHub ↗</a></div>
+      </div>
+      <div class="tool">
+        <div class="hd"><b>🗣️ NarratoAI</b><span class="chip star">★ 10.9k</span></div>
+        <p>影视解说二创专用：LLM 写解说文案 + 自动切片剪辑 + 配音 + 字幕，10 分钟一键出片，MIT 协议。</p>
+        <div class="lnk"><a href="https://github.com/linyqh/NarratoAI" target="_blank" rel="noopener">GitHub ↗</a></div>
+      </div>
+      <div class="tool">
+        <div class="hd"><b>📖 Story-Flicks</b><span class="chip star">★ ~2.5k</span></div>
+        <p>输入故事主题 → AI 生成图片 + 旁白 + 字幕的高清故事短视频，多语言多模型供应商。</p>
+        <div class="lnk"><a href="https://github.com/alecm20/story-flicks" target="_blank" rel="noopener">GitHub ↗</a></div>
+      </div>
+      <div class="tool">
+        <div class="hd"><b>✂️ Kdenlive</b><span class="chip ok">KDE 官方</span></div>
+        <p>手工精剪王者、公认最强的 Premiere 开源替代，当前稳定版 26.04.3（2026-07）。适合少量高质量手工剪辑。</p>
+        <div class="lnk"><a href="https://kdenlive.org/download/" target="_blank" rel="noopener">官网下载 ↗</a><a href="https://invent.kde.org/multimedia/kdenlive" target="_blank" rel="noopener">源码 ↗</a></div>
+      </div>
+      <div class="tool">
+        <div class="hd"><b>🔪 Shotcut</b><span class="chip star">★ 15.0k</span></div>
+        <p>2026 榜单"最受欢迎 + 开发最活跃"开源剪辑器，跨平台（Win / Mac / Linux），基于 MLT 框架。</p>
+        <div class="lnk"><a href="https://github.com/mltframework/shotcut" target="_blank" rel="noopener">GitHub ↗</a><a href="https://shotcut.org/download/" target="_blank" rel="noopener">官网 ↗</a></div>
+      </div>
+      <div class="tool">
+        <div class="hd"><b>🔰 OpenShot</b><span class="chip star">★ 6.2k</span></div>
+        <p>最易上手的获奖开源剪辑器，时间线 / 特效 / 字幕 / 多轨齐全，适合新手轻量剪片。</p>
+        <div class="lnk"><a href="https://github.com/OpenShot/openshot-qt" target="_blank" rel="noopener">GitHub ↗</a><a href="https://www.openshot.org/download/" target="_blank" rel="noopener">官网 ↗</a></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot-tip"><b>为何这样布局：</b>MoneyPrinterTurbo 是开源 AI 视频赛道断层第一（11.8 万星、日更、全免费组件可拼装），值得常驻本地；其余方案场景分化（翻译 / 解说 / 故事 / 手工剪辑），先留便携入口，用得上再集成。</div>
+  <p class="note">本地集成功能（服务探测 / WebUI 嵌入）需以 file:// 或 localhost 打开本页；GitHub Pages 公开站因浏览器混合内容限制自动降级为链接模式 · 数据截至 2026-08-29</p>
+</div>
+
+<script>
+(function(){
+  // ---- 复制到剪贴板 ----
+  document.querySelectorAll('[data-copy]').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var txt=btn.getAttribute('data-copy');
+      function done(){var t=btn.textContent;btn.textContent='✓ 已复制';setTimeout(function(){btn.textContent=t;},1400);}
+      if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(done).catch(function(){fallback();});}else{fallback();}
+      function fallback(){
+        var ta=document.createElement('textarea');ta.value=txt;ta.style.position='fixed';ta.style.opacity='0';
+        document.body.appendChild(ta);ta.select();try{document.execCommand('copy');done();}catch(e){}document.body.removeChild(ta);
+      }
+    });
+  });
+
+  // ---- 本地服务探测（no-cors fetch：能连上即 resolve，连不上 reject）----
+  function probe(url,timeout){
+    return new Promise(function(resolve){
+      var done=false;
+      var ctl=('AbortController' in window)?new AbortController():null;
+      var timer=setTimeout(function(){if(!done){done=true;resolve(false);}},timeout||2600);
+      fetch(url,{mode:'no-cors',cache:'no-store',signal:ctl?ctl.signal:undefined})
+        .then(function(){if(!done){done=true;clearTimeout(timer);resolve(true);}})
+        .catch(function(){if(!done){done=true;clearTimeout(timer);resolve(false);}});
+    });
+  }
+  var pillW=document.getElementById('pillWebui'),pillA=document.getElementById('pillApi');
+  var embedBox=document.getElementById('embedBox'),guideBox=document.getElementById('guideBox'),mptEmbed=document.getElementById('mptEmbed');
+  var embedLoaded=false;
+  function setPill(pill,on,label){
+    pill.classList.toggle('on',!!on);
+    pill.innerHTML='<i></i>'+label+(on?' · 在线':' · 离线');
+  }
+  function checkAll(){
+    setPill(pillW,false,'WebUI :8501');setPill(pillA,false,'API :8080');
+    Promise.all([probe('http://127.0.0.1:8501/'),probe('http://127.0.0.1:8080/docs')]).then(function(r){
+      setPill(pillW,r[0],'WebUI :8501');
+      setPill(pillA,r[1],'API :8080');
+      if(r[0]){
+        guideBox.classList.remove('show');
+        embedBox.classList.add('show');
+        if(!embedLoaded){mptEmbed.src='http://localhost:8501';embedLoaded=true;scheduleResize();}
+      }else{
+        embedBox.classList.remove('show');
+        guideBox.classList.add('show');
+        scheduleResize();
+      }
+    });
+  }
+  document.getElementById('btnCheck').addEventListener('click',checkAll);
+  checkAll();
+  setInterval(checkAll,30000);
+
+  // ---- iframe 高度自适应（与 practice/peki 同协议）----
+  function postResize(){
+    try{
+      var h=document.documentElement.scrollHeight;
+      parent.postMessage({__wbResize:true,id:'exploreFrame',h:h},'*');
+    }catch(e){}
+  }
+  var resizeTimer=null;
+  function scheduleResize(){clearTimeout(resizeTimer);resizeTimer=setTimeout(postResize,160);}
+  window.addEventListener('load',function(){setTimeout(postResize,200);});
+  window.addEventListener('resize',scheduleResize);
+  // 探测结果切换（嵌入/引导）后重报高度
+  var obs=new MutationObserver(scheduleResize);
+  obs.observe(embedBox,{attributes:true,attributeFilter:['class']});
+  obs.observe(guideBox,{attributes:true,attributeFilter:['class']});
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TRAE 2026 · 词元开物/开源太空/听到鸟/芳莲 精准解析 + 复现概率与价值</title>
+<style>
+  :root{
+    --bg:#f6f8f5; --card:#fff; --text:#1d2723; --muted:#6b7d76;
+    --primary:#0f9d77; --primary-soft:#e6f5ef;
+    --ind:#3b6fb0; --ind-soft:#e8f0fa;
+    --mfg:#9a5fb0; --mfg-soft:#f3ecf8;
+    --amber:#d98a1a; --amber-soft:#fdf3e3;
+    --line:#e3e8e4; --radius:16px;
+    --shadow:0 1px 3px rgba(16,24,40,.06),0 1px 2px rgba(16,24,40,.04);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg);color:var(--text);line-height:1.62;padding:24px 16px 70px;}
+  .wrap{max-width:1000px;margin:0 auto;}
+  h1{font-size:23px;margin:0 0 4px;line-height:1.35;}
+  .sub{color:var(--muted);font-size:13px;margin-bottom:16px;}
+  h2{font-size:18px;margin:30px 0 10px;display:flex;align-items:center;gap:8px;border-left:4px solid var(--primary);padding-left:10px;}
+  h2 .idx{font-size:12px;font-weight:800;color:#fff;background:var(--primary);border-radius:8px;padding:2px 9px;}
+  h3{font-size:14px;margin:16px 0 6px;color:var(--primary);}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;margin-bottom:16px;box-shadow:var(--shadow);border-left:5px solid var(--muted);}
+  .card.gold{border-left-color:var(--amber);}
+  .card.bronze{border-left-color:var(--ind);}
+  .card.hw{border-left-color:#c0703a;}
+  .card.adj{border-left-color:var(--muted);}
+  .ch{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:6px;}
+  .ch .name{font-size:17px;font-weight:800;}
+  .ch .prize{font-size:12px;font-weight:700;color:#fff;background:var(--amber);padding:2px 9px;border-radius:999px;}
+  .ch .prize.gold{background:#d4a017;}
+  .ch .prize.bronze{background:#9a6b3f;}
+  .ch .prize.silver{background:#8a98a8;}
+  .ch .cat{font-size:12px;color:var(--muted);}
+  .badge{display:inline-block;font-size:11px;font-weight:800;padding:2px 9px;border-radius:999px;margin:2px 4px 2px 0;}
+  .b-real{background:#e8f5ee;color:#1d8a5c;}
+  .b-sim{background:#fdf0e6;color:#b9701a;}
+  .b-con{background:#eef0f3;color:#566;}
+  .b-demo{background:#f3ecf8;color:#8a4fb0;}
+  .b-hw{background:#fbeede;color:#9a5a1a;}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:14px 0;}
+  .kv{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;box-shadow:var(--shadow);}
+  .kv .k{font-size:11px;color:var(--muted);font-weight:700;}
+  .kv .v{font-size:13px;margin-top:3px;}
+  table{width:100%;border-collapse:collapse;margin:10px 0;font-size:13px;}
+  table th,table td{border:1px solid var(--line);padding:7px 9px;text-align:left;vertical-align:top;}
+  table th{background:var(--primary-soft);color:var(--primary);font-weight:800;}
+  table tr:nth-child(even){background:#fafcfb;}
+  ul{margin:6px 0 4px;padding-left:18px;font-size:13.3px;color:#33403a;}
+  ul li{margin:3px 0;}
+  .callout{background:var(--ind-soft);border:1px solid #cfe0f5;border-radius:12px;padding:11px 14px;font-size:13px;margin:13px 0;}
+  .callout.amber{background:var(--amber-soft);border-color:#f0d9b0;color:#7a5410;}
+  .callout.green{background:var(--primary-soft);border-color:#bfe6d6;color:#1d6b4a;}
+  .rep{display:flex;align-items:center;gap:14px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px 16px;margin:12px 0;box-shadow:var(--shadow);}
+  .ring{--p:90;width:70px;height:70px;border-radius:50%;flex:0 0 auto;
+    background:conic-gradient(var(--c) calc(var(--p)*1%), #e3e8e4 0);
+    display:flex;align-items:center;justify-content:center;position:relative;}
+  .ring::after{content:"";position:absolute;inset:8px;border-radius:50%;background:var(--card);}
+  .ring b{position:relative;z-index:1;font-size:15px;color:var(--c);}
+  .rep .txt{flex:1;}
+  .rep .txt b{font-size:14px;}
+  .rep .txt span{font-size:12.3px;color:var(--muted);display:block;margin-top:2px;}
+  .concl{background:var(--primary-soft);border:1px solid #bfe6d6;border-radius:14px;padding:15px 17px;margin-top:22px;font-size:14px;}
+  .concl b{color:var(--primary);}
+  .src{font-size:12px;color:var(--muted);margin-top:28px;border-top:1px solid var(--line);padding-top:12px;}
+  .src a{color:var(--primary);}
+  code{background:#eef2f0;padding:1px 5px;border-radius:5px;font-size:12px;}
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+<div class="wrap">
+  <h1>TRAE 2026 · 词元开物 / 开源太空 / 听到鸟 / 芳莲 精准解析</h1>
+  <div class="sub">含「复现概率」与「价值」评估。前三者为决赛获奖 + 初赛相邻参考，芳莲为弱制造相关的相邻 IoT 作品。调研日期 2026-08-24。</div>
+
+  <!-- ============ 词元开物 ============ -->
+  <h2><span class="idx">01</span> 词元开物 IterxAI — 冠军 · 30万</h2>
+  <div class="card gold">
+    <div class="ch"><span class="name">词元开物 IterxAI</span><span class="prize gold">冠军 · 30万</span><span class="cat">硬件交互赛道 · AI 硬件 IDE + 桌面 PCB 雕刻机</span></div>
+    <div>
+      <span class="badge b-real">软件链真实</span>
+      <span class="badge b-hw">含真实雕刻硬件</span>
+      <span class="badge b-demo">初赛=条件满足才跑的 Demo</span>
+    </div>
+    <div class="grid">
+      <div class="kv"><div class="k">团队</div><div class="v">杨振宇(硬件)/郑仲鹏(工业设计)/鹿诚龙(软件)，深圳科创学院，全职创业者</div></div>
+      <div class="kv"><div class="k">形态</div><div class="v">AI 硬件 IDE + 桌面级 PCB 雕刻机（软硬件一体）</div></div>
+      <div class="kv"><div class="k">开发周期</div><div class="v">20 天数百次迭代；复赛交 ~500 名真实创客实测</div></div>
+      <div class="kv"><div class="k">真实度</div><div class="v">软件链真实可跑；雕刻机是真实第二代硬件</div></div>
+    </div>
+    <h3>完整链路（精准）</h3>
+    <p style="font-size:13.3px;margin:4px 0;">自然语言一句话 → 确认需求 → <b>生成 PRD</b> → <b>元件选型</b> → <b>引脚连接</b> → <b>代码生成 + 编译/烧录/仿真</b> → 确认能跑 → <b>PCB Layout 自动布线</b> → 生成加工文件 → 发给桌面雕刻机 → <b>雕出真实电路板</b>。</p>
+    <ul>
+      <li><b>稳定复现关键</b>：建元件库规范，AI 不再"猜"；编译失败能判断是代码/依赖/开发板配置问题。</li>
+      <li><b>初赛局限</b>：链路跑通但更像"条件都对时能工作的 Demo"；复赛暴露选板难、缺引脚、仿真能跑实物接不上、换电脑环境崩等问题并死磕解决。</li>
+      <li><b>现场演示</b>：会"跑"的手机智能底座、双轮驱动气球人。</li>
+    </ul>
+    <div class="rep"><div class="ring" style="--p:75;--c:#d4a017"><b>75%</b></div>
+      <div class="txt"><b>复现概率：软件 IDE 层 ~75% / 端到端含物理雕刻 ~25%</b><span>IDE 前端 + 调用 KiCad 等开源 EDA 做 Layout/布线/出 G-code 可复刻；但"雕出真实板"需真实 CNC 雕刻机（我们无设备）。无硬件则链路止于 G-code 文件。</span></div></div>
+    <div class="callout amber"><b>价值</b>：概念价值<b>极高</b>——戳中 AI Coding 从软件走向硬件的断点，商业化潜力大（硬件创客教育/降门槛）。复刻价值在于做出"AI 硬件 IDE"原型演示；缺真实 EDA 集成与雕刻硬件时，只是流程演示而非造物。</div>
+  </div>
+
+  <!-- ============ 开源太空 ============ -->
+  <h2><span class="idx">02</span> 开源太空 · 卫星守望者 — 季军 · 10万</h2>
+  <div class="card bronze">
+    <div class="ch"><span class="name">开源太空 · 卫星守望者 OpenSpace Satellite Watcher</span><span class="prize bronze">季军 · 10万</span><span class="cat">学习工作赛道 · 3D 航天仿真软件（Web）</span></div>
+    <div>
+      <span class="badge b-real">真实 TLE + SGP4</span>
+      <span class="badge b-real">纯软件可复刻</span>
+      <span class="badge b-demo">对标 STK 百万级</span>
+    </div>
+    <div class="grid">
+      <div class="kv"><div class="k">团队</div><div class="v">谭谈(40+，大厂转行航天，架构+码农) + 儿子波波(初中，资料/挑刺/点子)</div></div>
+      <div class="kv"><div class="k">形态</div><div class="v">Web 3D 航天软件：态势感知 SSA + 任务仿真 + 第一视角驾驶舱</div></div>
+      <div class="kv"><div class="k">开发速度</div><div class="v">首版完整跑通 4.5 小时，代码空间 1.63GB；3 天出初赛版</div></div>
+      <div class="kv"><div class="k">数据源</div><div class="v">美国北美防空司令部 TLE + 国产 AOE 轨道数据</div></div>
+    </div>
+    <h3>核心能力（精准）</h3>
+    <table>
+      <tr><th>模块</th><th>技术实现</th><th>真实度</th></tr>
+      <tr><td>卫星态势感知</td><td>专业级 3D 地球；TLE + <code>SGP4/SDP4</code> 算法推算真实实时/未来位置</td><td>真实（标准轨道力学，开源实现成熟）</td></tr>
+      <tr><td>星座批量导入</td><td>SpaceLink/星链、GPS、北斗、美军事卫星，手动导入国产 AOE</td><td>真实</td></tr>
+      <tr><td>TREA-01 任务仿真</td><td>虚拟卫星运维；计算南海/霍尔木兹任务窗口；AI 辅助规划；报告导出；紧急碎片预警+躲避；任务回放</td><td>仿真+规则+LLM，真实可复刻</td></tr>
+      <tr><td>第一视角驾驶舱</td><td>视角来到卫星旁，真实昼夜变化，飞行操控</td><td>3D 可视化特效</td></tr>
+    </table>
+    <ul>
+      <li><b>对标</b>：价格上百万的 STK 卫星仿真软件（单 licence 年授权约 100 万，受美制裁有断供风险），做国产低成本替代基座。</li>
+      <li><b>愿景</b>：Open AOS（Aerospace Operation System）开源体系，基础能力与数据开源化。</li>
+    </ul>
+    <div class="rep"><div class="ring" style="--p:92;--c:#3b6fb0"><b>92%</b></div>
+      <div class="txt"><b>复现概率：~92%（四件里最高）</b><span>纯软件 + 公开 TLE 数据 + 标准 SGP4 + Three.js/Cesium 3D 库，全可 Web 复刻（satellite.js 直接算轨道）。缺口仅在国产 AOE 数据源接入与完整任务中心的工程复杂度。</span></div></div>
+    <div class="callout"><b>价值</b>：航天科普/教学/国产 STK 替代概念，开源愿景清晰。<b>复刻价值最高</b>——可直接做成航天科普 Web 应用，学习/演示/教学价值突出，且无硬件门槛。</div>
+  </div>
+
+  <!-- ============ 听到鸟 ============ -->
+  <h2><span class="idx">03</span> 听到鸟 HEARDIT — 硬件交互赛道大奖 · 5万</h2>
+  <div class="card hw">
+    <div class="ch"><span class="name">听到鸟 / HEARDIT</span><span class="prize silver">硬件交互赛道大奖 · 5万</span><span class="cat">科技/消费电子（助听）· PWA Web App</span></div>
+    <div>
+      <span class="badge b-real">Web Audio 真实可跑</span>
+      <span class="badge b-real">无后端/离线</span>
+      <span class="badge b-demo">非医疗替代</span>
+    </div>
+    <div class="grid">
+      <div class="kv"><div class="k">作者</div><div class="v">Shaker，失业 1 月的汽车 HMI/UI 设计师，0.25 年 vibe coding</div></div>
+      <div class="kv"><div class="k">迭代</div><div class="v">27 天 170+ 版本；复赛 120+ 版</div></div>
+      <div class="kv"><div class="k">形态</div><div class="v">PWA，手机浏览器即用，离线可用，无后端</div></div>
+      <div class="kv"><div class="k">实测</div><div class="v">轻/中度有效；测试耳机 PDD ¥6.9 有线耳机</div></div>
+    </div>
+    <h3>五阶段信号链（精准）</h3>
+    <p style="font-size:13.3px;margin:4px 0 6px;">麦克风 → <b>前置滤波</b> → <b>六频段 WDRC 压缩</b>(+EQ) → <b>NAL-NL2 听力补偿</b>(双耳独立测听) → <b>啸叫防护</b>(自适应陷波+反馈延迟三级) → <b>安全限幅</b> → 耳机。端到端 &lt;15ms。</p>
+    <ul>
+      <li><b>真实度</b>：Web Audio API 实时音频处理真能跑；WDRC/NAL-NL2 是真实助听算法（有公开公式/文献）。</li>
+      <li><b>边界清晰</b>：不替代专业助听器，覆盖因经济/操作/心理门槛"什么都不做"的轻中度与临时需求。</li>
+      <li><b>开源</b>：作者承诺近期发开源贴公开全部源码（当前未开源）。</li>
+    </ul>
+    <div class="rep"><div>概率</div></div>
+    <div class="rep"><div class="ring" style="--p:90;--c:#c0703a"><b>90%</b></div>
+      <div class="txt"><b>复现概率：~90%</b><span>纯前端 Web Audio，无硬件依赖（任意有线耳机+手机麦克风）。信号链各环节为可复刻标准 DSP（BiquadFilter/AudioWorklet + WDRC/NAL-NL2 公开算法）。缺口在算法精度调优需声学专业知识，但功能框架可完整复刻。</span></div></div>
+    <div class="callout amber"><b>价值</b>：社会价值高（助老/低成本助听），公益属性强，已承诺开源。<b>复刻价值=直接可用的公益助听产品</b>，是最易落地、最"即拿即用"的一件。</div>
+  </div>
+
+  <!-- ============ 芳莲 ============ -->
+  <h2><span class="idx">04</span> 芳莲 — 独居长辈不打扰守护（相邻参考）</h2>
+  <div class="card adj">
+    <div class="ch"><span class="name">芳莲守护助手</span><span class="cat">硬件交互 + 社会公益 · IoT 传感器四端闭环</span></div>
+    <div>
+      <span class="badge b-real">真实 ESP32+TDengine</span>
+      <span class="badge b-con">制造业相关度弱</span>
+      <span class="badge b-demo">相邻参考</span>
+    </div>
+    <div class="grid">
+      <div class="kv"><div class="k">作者</div><div class="v">李佩恒，数据库背景，江浙沪高端养老院实时看护系统建设经验</div></div>
+      <div class="kv"><div class="k">形态</div><div class="v">无感传感器 + 微信小程序 + Web 后台 + TDengine 时序库 + 云服务器</div></div>
+      <div class="kv"><div class="k">传感器</div><div class="v">药盒干簧管、水杯压力垫、床头平安按钮，ESP32 Hub，2 秒上报</div></div>
+      <div class="kv"><div class="k">发展阶段</div><div class="v">初赛跑通核心链路；复赛做成多场景、四端闭环、可交付真实家庭</div></div>
+    </div>
+    <h3>核心设计（精准）</h3>
+    <ul>
+      <li><b>原则</b>："关心要有边界"——不打扰、无感、零操作；老人照常生活，家属微信里看状态。</li>
+      <li><b>闭环</b>：硬件烧录 → heartbeat/事件上报 → 数据库记录 + Web 后台展示 → 微信小程序提醒。</li>
+      <li><b>动机</b>：奶奶叫芳莲；反对用摄像头"像宠物一样被监看"，选更温和的传感器路径。</li>
+      <li><b>价值定位</b>：低成本替代每年大几十万的养老院看护数据库方案；不依赖老人用智能手机。</li>
+    </ul>
+    <div class="rep"><div class="ring" style="--p:80;--c:#6b7d76"><b>80%</b></div>
+      <div class="txt"><b>复现概率：软件闭环 ~80% / 含真实硬件部署 ~45%</b><span>Web 后台 + 小程序 + TDengine + 云端事件管道可复刻；真实 ESP32+传感器焊接部署需买件+接线（我们无硬件，可用模拟事件注入替代软件闭环）。</span></div></div>
+    <div class="callout"><b>价值</b>：社会价值（不打扰养老监护），低成本替代高端方案。<b>复刻价值=完整 IoT 产品参考</b>，但偏离"科技工业制造"主线，列为相邻参考。若做养老方向值得复刻。</div>
+  </div>
+
+  <!-- ============ 汇总 ============ -->
+  <h2>复现概率与价值汇总</h2>
+  <table>
+    <tr><th>作品</th><th>复现概率</th><th>最大瓶颈</th><th>价值类型</th><th>复刻优先级</th></tr>
+    <tr><td>词元开物</td><td><b>软件 75% / 含雕刻 25%</b></td><td class="tag-gap" style="color:#c0392b">真实 PCB 雕刻机（无设备）</td><td>概念/商业极高</td><td>中（需 EDA+硬件）</td></tr>
+    <tr><td>开源太空</td><td><b>~92%</b></td><td style="color:#1d8a5c">几乎无（公开数据+标准算法）</td><td>科普/教学/国产替代</td><td><b>高</b></td></tr>
+    <tr><td>听到鸟</td><td><b>~90%</b></td><td style="color:#b9701a">WDRC/NAL-NL2 精度调优需声学知识</td><td>公益/即拿即用</td><td><b>高</b></td></tr>
+    <tr><td>芳莲</td><td><b>软件 80% / 硬件 45%</b></td><td style="color:#c0392b">真实 ESP32 焊接部署</td><td>社会/IoT 参考</td><td>低（偏离制造主线）</td></tr>
+  </table>
+
+  <div class="concl">
+    <b>结论：</b>四件里<b>开源太空（92%）与听到鸟（90%）复现概率最高</b>——前者纯软件+公开 TLE/标准 SGP4+Three.js，后者纯前端 Web Audio 无硬件依赖，都是"写代码就能跑"的 web 应用，我们可直接复刻。
+    <br><br>
+    <b>词元开物</b>概念最性感但复现最卡硬件——软件 IDE 层 75% 可复刻，端到端"雕出真实板"需真实 CNC 雕刻机（我们无），概率跌到 25%。<b>芳莲</b>软件闭环 80% 可复刻，但真实传感器焊接部署需买件，且制造业相关度弱，列为相邻。
+    <br><br>
+    <b>价值排序</b>：词元开物（商业/概念）> 开源太空（科普/国产替代）≈ 听到鸟（公益/即用）> 芳莲（养老 IoT 参考）。
+    <br><br>
+    <b>若我们动手</b>：优先复刻<b>开源太空</b>（航天科普 web，零门槛高价值）与<b>听到鸟</b>（公益助听 PWA，即拿即用）；词元开物只做软件 IDE 原型；芳莲按需（养老方向）再做。
+  </div>
+
+  <div class="src">
+    来源：
+    <a href="https://forum.trae.cn/t/topic/172820" target="_blank" rel="noopener">开源太空 复赛 forum</a> ·
+    <a href="https://forum.trae.cn/t/topic/95777" target="_blank" rel="noopener">开源太空 初赛 forum</a> ·
+    <a href="https://forum.trae.cn/t/topic/173927" target="_blank" rel="noopener">听到鸟 forum</a> ·
+    <a href="https://forum.trae.cn/t/topic/173838" target="_blank" rel="noopener">芳莲 复赛 forum</a> ·
+    <a href="https://forum.trae.cn/t/topic/71232" target="_blank" rel="noopener">芳莲 初赛 forum</a> ·
+    <a href="https://www.163.com/dy/article/L5336H7Q05568W0A.html" target="_blank" rel="noopener">词元开物 报道</a>
+  </div>
+</div>
+</body>
+</html>

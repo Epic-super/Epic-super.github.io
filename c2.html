@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>计算机二级 MS Office 高级应用 · 必过工作台</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg:#1D1F27; --card:#262A35; --card2:#2E3340; --line:#353B4A;
+    --text:#E8EAF0; --muted:#9AA0B0;
+    --a1:#FF6B6B; --a2:#4ECDC4; --grad:linear-gradient(135deg,#FF6B6B,#4ECDC4);
+    --red:#FF6B6B; --green:#4ECDC4; --yellow:#FFD166; --purple:#A78BFA; --orange:#FF8A5B;
+  }
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    background:var(--bg); color:var(--text); line-height:1.55;
+    padding:14px; padding-bottom:calc(28px + env(safe-area-inset-bottom));
+    max-width:1000px; margin:0 auto; font-size:15px;
+  }
+  h1,h2,h3{font-weight:700; letter-spacing:.3px}
+  .muted{color:var(--muted)}
+  /* header */
+  .topbar{display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:12px}
+  .brand{display:flex; align-items:center; gap:10px; flex:1; min-width:200px}
+  .logo{width:40px;height:40px;border-radius:11px;background:var(--grad);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .brand h1{font-size:18px; line-height:1.2}
+  .brand p{font-size:12px;color:var(--muted)}
+  .top-actions{display:flex; gap:8px; flex-wrap:wrap; align-items:center}
+  .pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:6px 10px;border-radius:999px;background:var(--card2);border:1px solid var(--line);color:var(--muted)}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--yellow)}
+  /* buttons */
+  button{font-family:inherit; cursor:pointer; border:none; border-radius:10px; font-size:14px; color:#fff; background:var(--card2); transition:.15s}
+  button:active{transform:scale(.97)}
+  .btn{min-height:44px; padding:0 14px; display:inline-flex; align-items:center; justify-content:center; gap:6px; border:1px solid var(--line)}
+  .btn.primary{background:var(--grad); border:none; font-weight:700}
+  .btn.sm{min-height:36px; padding:0 10px; font-size:13px}
+  .btn.ghost{background:transparent}
+  .btn.danger{background:transparent; border:1px solid var(--red); color:var(--red)}
+  .btn svg{width:16px;height:16px}
+  /* countdown */
+  .countdown{background:linear-gradient(135deg,#2a2030,#1d2a2e); border:1px solid var(--line); border-radius:16px; padding:16px 18px; margin-bottom:14px; display:flex; align-items:center; gap:16px; flex-wrap:wrap}
+  .cd-num{font-size:46px; font-weight:800; background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent; line-height:1}
+  .cd-meta{flex:1; min-width:160px}
+  .cd-meta .t{font-size:14px;font-weight:700}
+  .cd-meta .s{font-size:12px;color:var(--muted);margin-top:2px}
+  .cd-edit{display:flex;gap:8px;align-items:center}
+  input,select,textarea{font-family:inherit; font-size:16px; background:var(--card2); color:var(--text); border:1px solid var(--line); border-radius:10px; padding:11px 12px; width:100%}
+  input:focus,select:focus,textarea:focus{outline:none; border-color:var(--a2)}
+  textarea{resize:vertical; min-height:80px; line-height:1.5}
+  label{font-size:12px;color:var(--muted);display:block;margin-bottom:5px;font-weight:600}
+  /* card */
+  .card{background:var(--card); border:1px solid var(--line); border-radius:16px; padding:16px; margin-bottom:14px}
+  .card h2{font-size:16px; display:flex; align-items:center; gap:8px; margin-bottom:4px}
+  .card .sub{font-size:12px;color:var(--muted);margin-bottom:14px}
+  .ic{width:20px;height:20px;flex-shrink:0}
+  /* today */
+  .today{border-color:var(--a2)}
+  .today h2 .badge{margin-left:auto;font-size:12px;font-weight:600;color:var(--muted)}
+  .todo-item{display:flex; align-items:center; gap:10px; padding:10px 0; border-top:1px solid var(--line)}
+  .todo-item:first-of-type{border-top:none}
+  .todo-main{flex:1; min-width:0}
+  .todo-main .tt{font-weight:600; word-break:break-word}
+  .todo-main .tm{font-size:12px;color:var(--muted)}
+  .tag-overdue{color:var(--red); font-weight:700}
+  .tag-today{color:var(--a2); font-weight:700}
+  .tag-review{color:var(--yellow); font-weight:700}
+  .do-btn{flex-shrink:0}
+  /* forms grid */
+  .grid{display:grid; gap:10px}
+  .g2{grid-template-columns:1fr 1fr}
+  .g3{grid-template-columns:1fr 1fr 1fr}
+  @media(max-width:640px){ .g2,.g3{grid-template-columns:1fr} .cd-num{font-size:38px} }
+  .row{display:flex; gap:8px; flex-wrap:wrap; align-items:flex-end}
+  .row > *{flex:1; min-width:120px}
+  /* filters */
+  .filters{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px}
+  .filters select,.filters input{flex:1; min-width:110px}
+  /* kp list */
+  .kp{border:1px solid var(--line); border-radius:12px; padding:12px; margin-bottom:10px; background:var(--card2)}
+  .kp .kh{display:flex; align-items:flex-start; gap:8px}
+  .kp .kt{font-weight:700; flex:1; word-break:break-word}
+  .kp .kc{font-size:12px; color:var(--muted); margin-top:4px; word-break:break-word}
+  .kp .ktags{margin-top:8px; display:flex; gap:6px; flex-wrap:wrap}
+  .chip{font-size:11px; padding:3px 9px; border-radius:999px; background:#33394a; color:var(--muted)}
+  .cat-tag{font-size:11px; padding:3px 9px; border-radius:999px; font-weight:700; color:#1D1F27}
+  .m-badge{font-size:11px; padding:3px 9px; border-radius:999px; font-weight:700}
+  .m-unlearned{background:#3a2a2a;color:var(--red)}
+  .m-learning{background:#3a3320;color:var(--yellow)}
+  .m-mastered{background:#1f3a34;color:var(--green)}
+  .kp-ops{display:flex; gap:6px; margin-top:10px; flex-wrap:wrap}
+  .icon-btn{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;background:var(--card);border:1px solid var(--line)}
+  .icon-btn svg{width:16px;height:16px}
+  /* stats */
+  .stats{display:flex; gap:14px; align-items:center; flex-wrap:wrap; margin-bottom:14px}
+  .stat-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(90px,1fr)); gap:10px; margin-bottom:14px}
+  .stat{background:var(--card2); border:1px solid var(--line); border-radius:12px; padding:12px; text-align:center}
+  .stat .v{font-size:22px; font-weight:800}
+  .stat .l{font-size:11px; color:var(--muted); margin-top:2px}
+  .bar-row{display:flex; align-items:center; gap:10px; margin-bottom:8px; font-size:13px}
+  .bar-row .bl{width:120px; flex-shrink:0; color:var(--muted)}
+  .bar-track{flex:1; height:10px; background:#33394a; border-radius:6px; overflow:hidden}
+  .bar-fill{height:100%; border-radius:6px}
+  .bar-row .bv{width:34px; text-align:right; flex-shrink:0; font-weight:700}
+  /* task list */
+  .task{display:flex; align-items:center; gap:10px; padding:10px 0; border-top:1px solid var(--line)}
+  .task:first-of-type{border-top:none}
+  .chk{width:22px;height:22px;border-radius:7px;border:2px solid var(--line);flex-shrink:0;display:flex;align-items:center;justify-content:center;background:transparent}
+  .chk.done{background:var(--grad);border:none}
+  .chk.done svg{width:14px;height:14px}
+  .task .tt{flex:1; word-break:break-word}
+  .task.done .tt{text-decoration:line-through; color:var(--muted)}
+.task .td{font-size:12px; color:var(--muted); flex-shrink:0}
+/* phase timeline */
+.timeline{position:relative; padding-left:18px}
+.timeline::before{content:""; position:absolute; left:5px; top:8px; bottom:8px; width:2px; background:#353B4A}
+.phase{position:relative; padding-left:16px; margin-bottom:14px}
+.phase::before{content:""; position:absolute; left:-13px; top:8px; width:10px; height:10px; border-radius:50%; background:var(--line); border:2px solid #353B4A}
+.phase.current::before{background:var(--a2); border-color:var(--a2); box-shadow:0 0 0 3px rgba(78,205,196,.15)}
+.phase.done::before{background:var(--green); border-color:var(--green)}
+.phase.current .phase-title{color:var(--a2)}
+.phase.done .phase-title{color:var(--green)}
+.phase-title{font-weight:700; margin-bottom:2px; font-size:14px}
+.phase-date{font-size:12px; color:var(--muted); margin-bottom:5px}
+.phase-body{font-size:13px; color:var(--text); line-height:1.5}
+.phase-body strong{color:var(--a1)}
+.phase-ops{display:flex; gap:6px; margin-top:8px; flex-wrap:wrap; align-items:center}
+.phase-status{font-size:11px; padding:3px 9px; border-radius:999px; font-weight:700}
+.st-pending{background:#3a2a2a; color:var(--red)}
+.st-doing{background:#3a3320; color:var(--yellow)}
+.st-done{background:#1f3a34; color:var(--green)}
+/* chart */
+  .chart-wrap{background:var(--card2); border:1px solid var(--line); border-radius:12px; padding:12px; overflow-x:auto}
+  .empty{color:var(--muted); text-align:center; padding:20px; font-size:13px}
+  /* modal */
+  .mask{position:fixed; inset:0; background:rgba(0,0,0,.6); display:none; align-items:center; justify-content:center; padding:16px; z-index:50}
+  .mask.show{display:flex}
+  .modal{background:var(--card); border:1px solid var(--line); border-radius:16px; padding:18px; width:100%; max-width:520px; max-height:86vh; overflow:auto}
+  .modal h3{margin-bottom:6px}
+  .modal .hint{font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.6}
+  .modal .hint code{background:var(--card2);padding:1px 6px;border-radius:5px;color:var(--a2)}
+  .modal-ops{display:flex; gap:8px; margin-top:14px}
+  .modal-ops > *{flex:1}
+  .backup-hint{background:#2a2418; border:1px solid #5a4a20; color:var(--yellow); font-size:12px; padding:10px 12px; border-radius:10px; margin-bottom:14px; display:none}
+  .backup-hint.show{display:block}
+  .seg{display:flex; gap:4px; background:var(--card2); border:1px solid var(--line); border-radius:10px; padding:4px}
+  .seg button{flex:1; min-height:38px; background:transparent; color:var(--muted); border-radius:7px}
+  .seg button.on{background:var(--grad); color:#1D1F27; font-weight:700}
+  .foot{text-align:center; color:var(--muted); font-size:11px; margin-top:6px; line-height:1.8}
+  .foot b{color:var(--text)}
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+
+<!-- HEADER -->
+<div class="topbar">
+  <div class="brand">
+    <div class="logo">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1D1F27" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h12l4 4v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z"/><path d="M15 4v4h4"/><path d="M8 13h7M8 17h5"/></svg>
+    </div>
+    <div>
+      <h1>计算机二级 · 必过工作台</h1>
+      <p>MS Office 高级应用（Word / Excel / PPT）</p>
+    </div>
+  </div>
+  <div class="top-actions">
+    <span class="pill"><span class="dot"></span>本地存储模式</span>
+    <span class="pill" id="verPill" style="color:var(--a2);border-color:var(--a2)">v2026-08-11.4</span>
+    <button class="btn sm" id="btnExport">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>导出
+    </button>
+    <button class="btn sm" id="btnImport">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V9"/><path d="M7 14l5-5 5 5"/><path d="M5 3h14"/></svg>导入
+    </button>
+    <button class="btn sm danger" id="btnClear">清空数据</button>
+    <a class="btn sm" href="c2-bank.html" style="text-decoration:none;display:inline-flex;align-items:center;gap:5px;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      题库
+    </a>
+  </div>
+</div>
+
+<div class="backup-hint" id="backupHint">数据已积累 30 条以上，建议点右上角「导出」做一份本地备份，防止意外丢失。</div>
+
+<!-- COUNTDOWN -->
+<div class="countdown">
+  <div class="cd-num" id="cdNum">--</div>
+  <div class="cd-meta">
+    <div class="t">距离考试还有</div>
+    <div class="s" id="cdDate">考试日期未设置</div>
+  </div>
+  <div class="cd-edit">
+    <input type="date" id="examDate" style="width:auto; min-width:150px">
+    <button class="btn sm primary" id="btnSetExam">设定</button>
+  </div>
+</div>
+
+<!-- TODAY -->
+<div class="card today">
+  <h2>
+    <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="var(--a2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4"/><circle cx="12" cy="12" r="4"/></svg>
+    今天要处理
+    <span class="badge" id="todayCount">0 项</span>
+  </h2>
+  <div class="sub">逾期任务标红 · 昨天没做完的会自动滚到今天 · 复习标记的知识点也会在这里出现</div>
+  <div id="todayList"></div>
+</div>
+
+<!-- MODULE 0: PHASE PLAN -->
+<div class="card">
+  <h2>
+    <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 7l-5 5-3-3-4 4"/></svg>
+    阶段冲刺计划
+    <span class="badge muted" id="phaseCount" style="margin-left:auto;font-size:12px;font-weight:600"></span>
+  </h2>
+  <div class="sub">按图片计划拆解的 7 阶段路线，当前阶段自动高亮，点状态可切换。</div>
+  <div class="timeline" id="phaseList"></div>
+</div>
+
+<!-- MODULE 1: KNOWLEDGE BASE -->
+<div class="card">
+  <h2>
+    <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="var(--a1)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h11a2 2 0 0 1 2 2v14a2 2 0 0 0-2-2H4a1 1 0 0 0-1 1V5a1 1 0 0 1 1-1z"/><path d="M17 6h2a1 1 0 0 1 1 1v11a2 2 0 0 1-2 2"/></svg>
+    知识点库
+    <span class="badge muted" id="kpCount" style="margin-left:auto;font-size:12px;font-weight:600"></span>
+  </h2>
+  <div class="sub">系统化你的笔记：单条录入，或「批量导入」粘贴已整理的笔记，自动按分类归档。</div>
+
+  <div class="stats" id="kpStats"></div>
+
+  <div class="row" style="margin-bottom:12px">
+    <div style="flex:2;min-width:160px">
+      <label>标题</label>
+      <input id="kpTitle" placeholder="例如：VLOOKUP 纵向查找函数">
+    </div>
+    <div style="flex:1;min-width:120px">
+      <label>分类</label>
+      <select id="kpCat">
+        <option value="word">Word 高级应用</option>
+        <option value="excel" selected>Excel 高级应用</option>
+        <option value="ppt">PPT 高级应用</option>
+        <option value="base">公共基础（选择题）</option>
+      </select>
+    </div>
+  </div>
+  <div class="row" style="margin-bottom:12px">
+    <div style="flex:2;min-width:160px">
+      <label>内容 / 要点</label>
+      <textarea id="kpContent" placeholder="核心步骤、易错点、公式…"></textarea>
+    </div>
+    <div style="flex:1;min-width:130px;display:flex;flex-direction:column;gap:10px">
+      <div>
+        <label>标签（空格分隔）</label>
+        <input id="kpTags" placeholder="函数 重点">
+      </div>
+      <div>
+        <label>掌握度</label>
+        <select id="kpMastery">
+          <option value="unlearned">未学</option>
+          <option value="learning" selected>学习中</option>
+          <option value="mastered">已掌握</option>
+        </select>
+      </div>
+      <button class="btn primary" id="btnAddKp" style="margin-top:auto">+ 添加知识点</button>
+    </div>
+  </div>
+
+  <div class="filters">
+    <select id="fCat"><option value="">全部分类</option><option value="word">Word</option><option value="excel">Excel</option><option value="ppt">PPT</option><option value="base">公共基础</option></select>
+    <select id="fMastery"><option value="">全部掌握度</option><option value="unlearned">未学</option><option value="learning">学习中</option><option value="mastered">已掌握</option></select>
+    <input id="fSearch" placeholder="搜索标题 / 内容 / 标签">
+    <button class="btn sm" id="btnBatch" style="flex:0 0 auto">批量导入</button>
+  </div>
+
+  <div id="kpList"></div>
+</div>
+
+<!-- MODULE 2: PRACTICE -->
+<div class="card">
+  <h2>
+    <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-5 3 3 5-7"/></svg>
+    练习 / 模考记录
+  </h2>
+  <div class="sub">记录每次练习，自动算正确率并画出趋势线。</div>
+
+  <div class="stat-grid" id="practiceStats"></div>
+
+  <div class="row" style="margin-bottom:12px">
+    <div>
+      <label>日期</label>
+      <input type="date" id="pDate">
+    </div>
+    <div>
+      <label>类型</label>
+      <select id="pType"><option value="choice">选择题</option><option value="operation">操作题</option></select>
+    </div>
+    <div>
+      <label>总题量</label>
+      <input type="number" id="pCount" min="1" placeholder="20">
+    </div>
+    <div>
+      <label>正确数</label>
+      <input type="number" id="pCorrect" min="0" placeholder="16">
+    </div>
+    <div>
+      <label>用时(分)</label>
+      <input type="number" id="pMin" min="0" placeholder="30">
+    </div>
+    <div>
+      <button class="btn primary" id="btnAddPractice" style="margin-top:auto">+ 记录</button>
+    </div>
+  </div>
+
+  <div class="chart-wrap" id="practiceChart"></div>
+  <div id="practiceList" style="margin-top:12px"></div>
+</div>
+
+<!-- MODULE 3: TASKS -->
+<div class="card">
+  <h2>
+    <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="var(--yellow)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3 8-8"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+    备考任务
+    <span class="badge muted" id="taskCount" style="margin-left:auto;font-size:12px;font-weight:600"></span>
+  </h2>
+  <div class="sub">拆解你的复习计划，完成打卡。逾期和今日任务会出现在顶部「今天要处理」。</div>
+
+  <div class="row" style="margin-bottom:14px">
+    <div style="flex:2;min-width:160px">
+      <label>任务内容</label>
+      <input id="taskText" placeholder="例如：完成 Excel 函数专项练习">
+    </div>
+    <div style="flex:1;min-width:130px">
+      <label>截止日期</label>
+      <input type="date" id="taskDue">
+    </div>
+    <div>
+      <button class="btn primary" id="btnAddTask" style="margin-top:auto">+ 添加</button>
+    </div>
+  </div>
+
+  <div id="taskList"></div>
+</div>
+
+<div class="foot">
+  数据保存在本机浏览器（localStorage），<b>不会上传服务器</b>。<br>
+  换设备 / 清缓存前请先「导出」备份。部署到公网后链接任何人可打开，请勿填入真实隐私。
+</div>
+
+<!-- BATCH MODAL -->
+<div class="mask" id="batchMask">
+  <div class="modal">
+    <h3>批量导入知识点</h3>
+    <div class="hint">
+      每行一条，自动解析：<br>
+      <code>[Excel] VLOOKUP：纵向查找函数 #函数 #重点</code><br>
+      <code>[Word] 分节符：不同页眉页脚 #排版</code><br>
+      分类支持 <code>[Word]</code> <code>[Excel]</code> <code>[PPT]</code> <code>[公共]/[基础]</code>，省略则归为公共基础；<code>#</code> 后为标签。
+    </div>
+    <textarea id="batchText" placeholder="[Excel] SUMIF：条件求和 #函数&#10;[Word] 样式集：一键统一格式 #排版 #重点&#10;计算机病毒特征 #基础"></textarea>
+    <div class="modal-ops">
+      <button class="btn ghost" id="btnBatchCancel">取消</button>
+      <button class="btn primary" id="btnBatchConfirm">解析并导入</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM MODAL -->
+<div class="mask" id="confirmMask">
+  <div class="modal">
+    <h3 id="confirmTitle">确认操作</h3>
+    <div class="hint" id="confirmText">确定要继续吗？</div>
+    <div class="modal-ops">
+      <button class="btn ghost" id="confirmCancel">取消</button>
+      <button class="btn danger" id="confirmOk">确定</button>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="fileInput" accept=".json,application/json" style="display:none">
+
+<script>
+"use strict";
+const KEY="wb_c2office_";
+const CATS={
+  word:{name:"Word 高级应用",color:"#FF8A5B"},
+  excel:{name:"Excel 高级应用",color:"#4ECDC4"},
+  ppt:{name:"PPT 高级应用",color:"#A78BFA"},
+  base:{name:"公共基础（选择题）",color:"#FFD166"}
+};
+const MNAME={unlearned:"未学",learning:"学习中",mastered:"已掌握"};
+const todayStr=()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");};
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const $=(s)=>document.querySelector(s);
+
+let DATA={
+  kp:[], practice:[], tasks:[], examDate:"", phases:[], settings:{}
+};
+
+function load(){
+  try{
+    DATA.kp=JSON.parse(localStorage.getItem(KEY+"kp")||"null")||null;
+    DATA.practice=JSON.parse(localStorage.getItem(KEY+"practice")||"[]");
+    DATA.tasks=JSON.parse(localStorage.getItem(KEY+"tasks")||"null")||null;
+    DATA.examDate=localStorage.getItem(KEY+"exam")||"";
+    DATA.phases=JSON.parse(localStorage.getItem(KEY+"phases")||"null")||null;
+  }catch(e){}
+  if(!DATA.kp || DATA.kp.length===0 || !DATA.tasks || DATA.tasks.length===0){ seed(); }
+  if(!Array.isArray(DATA.phases) || DATA.phases.length===0){ seedPhases(); save(); }
+  if(!DATA.examDate){ DATA.examDate="2026-09-19"; save(); }
+}
+function save(){
+  localStorage.setItem(KEY+"kp",JSON.stringify(DATA.kp));
+  localStorage.setItem(KEY+"practice",JSON.stringify(DATA.practice));
+  localStorage.setItem(KEY+"tasks",JSON.stringify(DATA.tasks));
+  localStorage.setItem(KEY+"exam",DATA.examDate);
+  localStorage.setItem(KEY+"phases",JSON.stringify(DATA.phases));
+}
+reportBridge();
+function reportBridge(){
+  try{
+    const total=DATA.kp.length;
+    const mastered=DATA.kp.filter(k=>k.mastery==="mastered").length;
+    const kpPct=total?Math.round(mastered/total*100):0;
+    const phDone=DATA.phases.filter(p=>p.status==="done").length;
+    const phPct=DATA.phases.length?Math.round(phDone/DATA.phases.length*100):0;
+    const t=todayStr();
+    const todos=[];
+    DATA.tasks.forEach(ts=>{if(!ts.done&&ts.due<=t)todos.push({id:ts.id,text:ts.text,date:ts.due,over:ts.due<t,tag:"备考"});});
+    DATA.kp.forEach(k=>{if(k.review)todos.push({id:k.id,text:k.title,date:t,over:false,tag:"复习"});});
+    let examDays="--";
+    if(DATA.examDate){examDays=Math.ceil((new Date(DATA.examDate)-new Date(t))/86400000);}
+    const bridge=JSON.parse(localStorage.getItem("wb_hub_bridge")||"{}");
+    bridge.c2={name:"计算机二级·MS Office",progress:Math.max(kpPct,phPct),sub:"知识点 "+kpPct+"% · 阶段 "+phPct+"%",examDays:examDays,examDate:DATA.examDate,todos:todos,link:"c2.html",updated:Date.now()};
+    localStorage.setItem("wb_hub_bridge",JSON.stringify(bridge));
+  }catch(e){}
+}
+
+function seed(){
+  DATA.kp=[
+    {id:uid(),cat:"excel",title:"VLOOKUP 纵向查找",content:"语法 VLOOKUP(查找值, 表格区域, 列序号, 0/1)。0=精确匹配，1=近似匹配。查找值须在区域首列。",tags:["函数","重点"],mastery:"learning",review:false,created:todayStr()},
+    {id:uid(),cat:"word",title:"样式与多级列表",content:"通过「定义新多级列表」绑定标题样式，实现自动编号与目录生成。",tags:["排版"],mastery:"mastered",review:false,created:todayStr()},
+    {id:uid(),cat:"ppt",title:"幻灯片母版",content:"在母版视图统一字体、配色、占位符，批量改版式效率最高。",tags:["排版"],mastery:"unlearned",review:false,created:todayStr()},
+    {id:uid(),cat:"base",title:"计算机病毒特征",content:"传染性、隐蔽性、破坏性、潜伏性、可触发性。不等于【免疫性】。",tags:["基础","易错"],mastery:"unlearned",review:true,created:todayStr()}
+  ];
+  const y=todayStr();
+  const yest=(()=>{const d=new Date();d.setDate(d.getDate()-1);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");})();
+  DATA.tasks=[
+    {id:uid(),text:"完成 Excel 函数专项练习",due:yest,done:false},
+    {id:uid(),text:"复习 Word 长文档排版",due:y,done:false},
+    {id:uid(),text:"做一套选择题模考",due:y,done:false}
+  ];
+  DATA.examDate="2026-09-19";
+  seedPhases();
+  save();
+}
+
+function seedPhases(){
+  const t=todayStr();
+  const arr=[
+    {id:uid(),start:"2026-08-11",end:"2026-08-12",title:"阶段一：PPT 高频突破",body:"做 <strong>VIP 题库 2 次 PPT 高频考点作业</strong> + 看 <strong>2 套 PPT 精选真题</strong>。",status:"pending"},
+    {id:uid(),start:"2026-08-13",end:"2026-08-18",title:"阶段二：Word 高频突破",body:"做 <strong>VIP 题库 6 次 Word 高频考点作业</strong> + 看 <strong>6 套 Word 精选真题</strong>。",status:"pending"},
+    {id:uid(),start:"2026-08-13",end:"2026-08-24",title:"阶段三：Excel 高频突破",body:"做 <strong>VIP 题库 6 次 Excel 高频考点作业</strong> + 看 <strong>6 套 Excel 精选真题</strong>。",status:"pending"},
+    {id:uid(),start:"2026-08-25",end:"2026-08-31",title:"阶段四：精选真题 5 套",body:"做 <strong>VIP 题库 5 套精选真题</strong>，继续巩固操作题手感。",status:"pending"},
+    {id:uid(),start:"2026-09-01",end:"2026-09-10",title:"阶段五：精选真题 10 套",body:"做 <strong>VIP 题库剩下 10 套精选真题</strong>，保持题量。",status:"pending"},
+    {id:uid(),start:"2026-09-11",end:"2026-09-18",title:"阶段六：考前突击",body:"<strong>重点突击选择题</strong> + <strong>考前操作题查漏补缺</strong>。",status:"pending"},
+    {id:uid(),start:"2026-09-19",end:"2026-09-21",title:"考试日",body:"祝一次高分通过！调整好状态，带好准考证。",status:"pending"}
+  ];
+  arr.forEach(p=>{ if(t>=p.start && t<=p.end) p.status="doing"; });
+  DATA.phases=arr;
+}
+
+/* ---------- RENDER: TODAY ---------- */
+function renderToday(){
+  const t=todayStr();
+  const items=[];
+  DATA.tasks.forEach(ts=>{
+    if(!ts.done && ts.due<=t){
+      items.push({type:"task",over:ts.due<t,obj:ts});
+    }
+  });
+  DATA.kp.forEach(k=>{
+    if(k.review){
+      items.push({type:"kp",obj:k});
+    }
+  });
+  $("#todayCount").textContent=items.length+" 项";
+  if(items.length===0){
+    $("#todayList").innerHTML='<div class="empty">今天没有待处理事项，稳！🎯 去加点任务或复习吧。</div>';
+    return;
+  }
+  $("#todayList").innerHTML=items.map(it=>{
+    if(it.type==="task"){
+      const cls=it.over?"tag-overdue":"tag-today";
+      const label=it.over?"逾期":"今日";
+      return `<div class="todo-item">
+        <div class="todo-main">
+          <div class="tt">${esc(it.obj.text)}</div>
+          <div class="tm"><span class="${cls}">${label}</span> · 截止 ${it.obj.due}</div>
+        </div>
+        <button class="btn sm primary do-btn" data-act="dotask" data-id="${it.obj.id}">完成</button>
+      </div>`;
+    }else{
+      return `<div class="todo-item">
+        <div class="todo-main">
+          <div class="tt">${esc(it.obj.title)}</div>
+          <div class="tm"><span class="tag-review">待复习</span> · ${CATS[it.obj.cat].name}</div>
+        </div>
+        <button class="btn sm do-btn" data-act="doreview" data-id="${it.obj.id}" style="border:1px solid var(--line)">已复习</button>
+      </div>`;
+    }
+  }).join("");
+}
+
+/* ---------- RENDER: COUNTDOWN ---------- */
+function renderCountdown(){
+  const d=$("#examDate"); d.value=DATA.examDate||todayStr();
+  if(!DATA.examDate){$("#cdNum").textContent="--";$("#cdDate").textContent="考试日期未设置";return;}
+  const diff=Math.ceil((new Date(DATA.examDate)-new Date(todayStr()))/86400000);
+  if(diff<0){$("#cdNum").textContent="已考";$("#cdDate").textContent="考试日 "+DATA.examDate+"（已过去 "+Math.abs(diff)+" 天）";}
+  else{$("#cdNum").textContent=diff;$("#cdDate").textContent="考试日 "+DATA.examDate;}
+}
+
+/* ---------- RENDER: KP ---------- */
+function ring(pct,color){
+  const r=30,c=2*Math.PI*r,off=c*(1-pct/100);
+  return `<svg width="76" height="76" viewBox="0 0 76 76">
+    <circle cx="38" cy="38" r="${r}" fill="none" stroke="#33394a" stroke-width="8"/>
+    <circle cx="38" cy="38" r="${r}" fill="none" stroke="${color}" stroke-width="8" stroke-linecap="round" stroke-dasharray="${c.toFixed(1)}" stroke-dashoffset="${off.toFixed(1)}" transform="rotate(-90 38 38)"/>
+    <text x="38" y="44" text-anchor="middle" fill="#E8EAF0" font-size="17" font-weight="800">${pct}%</text>
+  </svg>`;
+}
+/* ---------- RENDER: PHASES ---------- */
+function renderPhases(){
+  if(!Array.isArray(DATA.phases) || DATA.phases.length===0){ seedPhases(); save(); }
+  const t=todayStr();
+  const done=DATA.phases.filter(p=>p.status==="done").length;
+  const countEl=$("#phaseCount"), listEl=$("#phaseList");
+  if(countEl) countEl.textContent=done+"/"+DATA.phases.length+" 完成";
+  if(!listEl) return;
+  if(DATA.phases.length===0){listEl.innerHTML='<div class="empty">暂无阶段计划</div>';return;}
+  $("#phaseList").innerHTML=DATA.phases.map(p=>{
+    const isCurrent=p.status!=="done" && t>=p.start && t<=p.end;
+    const cls=isCurrent?"current":(p.status==="done"?"done":"");
+    const stCls="st-"+p.status;
+    const stText={pending:"未开始",doing:"进行中",done:"已完成"}[p.status];
+    return `<div class="phase ${cls}">
+      <div class="phase-title">${esc(p.title)}</div>
+      <div class="phase-date">${p.start} ~ ${p.end} ${isCurrent?'<span style="color:var(--a2);font-weight:700;margin-left:6px">当前阶段</span>':""}</div>
+      <div class="phase-body">${p.body}</div>
+      <div class="phase-ops">
+        <span class="phase-status ${stCls}">${stText}</span>
+        <button class="btn sm" data-act="phase" data-id="${p.id}" style="border:1px solid var(--line)">切换状态</button>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+/* ---------- RENDER: KP ---------- */
+function renderKP(){
+  const total=DATA.kp.length;
+  $("#kpCount").textContent=total+" 条";
+  const mastered=DATA.kp.filter(k=>k.mastery==="mastered").length;
+  const pct=total?Math.round(mastered/total*100):0;
+  // category counts
+  const byCat={word:0,excel:0,ppt:0,base:0};
+  DATA.kp.forEach(k=>byCat[k.cat]=(byCat[k.cat]||0)+1);
+  const maxCat=Math.max(1,...Object.values(byCat));
+  $("#kpStats").innerHTML=`
+    <div style="display:flex;gap:14px;align-items:center">
+      ${ring(pct,"#4ECDC4")}
+      <div>
+        <div style="font-weight:700;font-size:14px">整体掌握率</div>
+        <div class="muted" style="font-size:12px">已掌握 ${mastered} / 共 ${total} 条</div>
+      </div>
+    </div>
+    <div style="flex:1;min-width:220px">
+      ${Object.keys(CATS).map(c=>`
+        <div class="bar-row">
+          <div class="bl">${CATS[c].name}</div>
+          <div class="bar-track"><div class="bar-fill" style="width:${byCat[c]/maxCat*100}%;background:${CATS[c].color}"></div></div>
+          <div class="bv">${byCat[c]}</div>
+        </div>`).join("")}
+    </div>`;
+
+  const fc=$("#fCat").value, fm=$("#fMastery").value, fs=$("#fSearch").value.trim().toLowerCase();
+  let list=DATA.kp.filter(k=>{
+    if(fc && k.cat!==fc) return false;
+    if(fm && k.mastery!==fm) return false;
+    if(fs){const hay=(k.title+" "+(k.content||"")+" "+(k.tags||[]).join(" ")).toLowerCase();if(!hay.includes(fs))return false;}
+    return true;
+  });
+  list.sort((a,b)=> (b.review?1:0)-(a.review?1:0) || b.created.localeCompare(a.created));
+  if(list.length===0){
+    $("#kpList").innerHTML='<div class="empty">还没有匹配的知识点，点「批量导入」或上方添加一条吧。</div>';
+    return;
+  }
+  $("#kpList").innerHTML=list.map(k=>`
+    <div class="kp">
+      <div class="kh">
+        <div class="kt">${esc(k.title)}</div>
+        <span class="cat-tag" style="background:${CATS[k.cat].color}">${CATS[k.cat].name}</span>
+      </div>
+      ${k.content?`<div class="kc">${esc(k.content)}</div>`:""}
+      <div class="ktags">
+        <span class="m-badge m-${k.mastery}">${MNAME[k.mastery]}</span>
+        ${(k.tags||[]).map(t=>`<span class="chip">#${esc(t)}</span>`).join("")}
+        ${k.review?`<span class="chip" style="background:#5a4a20;color:var(--yellow)">待复习</span>`:""}
+      </div>
+      <div class="kp-ops">
+        <button class="btn sm" data-act="master" data-id="${k.id}" style="border:1px solid var(--line)">切换掌握度</button>
+        <button class="btn sm" data-act="review" data-id="${k.id}" style="border:1px solid var(--line)">${k.review?"取消复习":"标为复习"}</button>
+        <button class="icon-btn" data-act="delkp" data-id="${k.id}" title="删除">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+        </button>
+      </div>
+    </div>`).join("");
+}
+
+/* ---------- RENDER: PRACTICE ---------- */
+function renderPractice(){
+  const p=DATA.practice;
+  const total=p.length;
+  const avg=total?Math.round(p.reduce((s,x)=>s+(x.correct/x.count),0)/total*100):0;
+  const last=total?Math.round(p[total-1].correct/p[total-1].count*100):0;
+  $("#practiceStats").innerHTML=`
+    <div class="stat"><div class="v">${total}</div><div class="l">练习次数</div></div>
+    <div class="stat"><div class="v" style="color:var(--green)">${avg}%</div><div class="l">平均正确率</div></div>
+    <div class="stat"><div class="v" style="color:var(--a2)">${last}%</div><div class="l">最近一次</div></div>`;
+
+  if(total===0){
+    $("#practiceChart").innerHTML='<div class="empty">还没有练习记录，先记一笔吧。</div>';
+    $("#practiceList").innerHTML="";
+    return;
+  }
+  const pts=p.slice(-12);
+  const w=320,h=130,pad=22;
+  const stepX=(w-2*pad)/Math.max(pts.length-1,1);
+  const coords=pts.map((l,i)=>{
+    const x=pad+i*stepX;
+    const y=h-pad-(l.correct/l.count)*(h-2*pad);
+    return [x,y];
+  });
+  const path=coords.map((c,i)=>(i===0?"M":"L")+c[0].toFixed(1)+" "+c[1].toFixed(1)).join(" ");
+  const dots=coords.map((c,i)=>`<circle cx="${c[0].toFixed(1)}" cy="${c[1].toFixed(1)}" r="3.5" fill="${pts[i].type==='choice'?'#FFD166':'#4ECDC4'}"/>`).join("");
+  $("#practiceChart").innerHTML=`<svg width="100%" viewBox="0 0 ${w} ${h}" preserveAspectRatio="xMidYMid meet" style="min-width:300px">
+    <line x1="${pad}" y1="${h-pad}" x2="${w-pad}" y2="${h-pad}" stroke="#353B4A"/>
+    <line x1="${pad}" y1="${pad}" x2="${pad}" y2="${h-pad}" stroke="#353B4A"/>
+    <text x="${pad}" y="${pad-6}" fill="#9AA0B0" font-size="10">100%</text>
+    <text x="${pad}" y="${h-pad+14}" fill="#9AA0B0" font-size="10">0%</text>
+    <path d="${path}" fill="none" stroke="#4ECDC4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    ${dots}
+  </svg>
+  <div style="font-size:11px;color:var(--muted);margin-top:6px">● 黄=选择题　● 青=操作题　（横轴为时间顺序，最近 ${pts.length} 次）</div>`;
+
+  $("#practiceList").innerHTML=p.slice().reverse().slice(0,6).map(x=>{
+    const acc=Math.round(x.correct/x.count*100);
+    return `<div class="task" style="border-top:1px solid var(--line)">
+      <div class="td" style="width:84px">${x.date}</div>
+      <div class="tt">${x.type==='choice'?'选择题':'操作题'} · 正确 ${x.correct}/${x.count}${x.min?' · '+x.min+'分':''}</div>
+      <div class="td" style="color:${acc>=80?'var(--green)':(acc>=60?'var(--yellow)':'var(--red)')}">${acc}%</div>
+      <button class="icon-btn" data-act="delp" data-id="${x.id}" title="删除"><svg viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button>
+    </div>`;
+  }).join("");
+}
+
+/* ---------- RENDER: TASKS ---------- */
+function renderTasks(){
+  const t=todayStr();
+  const done=DATA.tasks.filter(x=>x.done).length;
+  $("#taskCount").textContent=done+"/"+DATA.tasks.length+" 完成";
+  const sorted=DATA.tasks.slice().sort((a,b)=> a.done-b.done || a.due.localeCompare(b.due));
+  if(sorted.length===0){$("#taskList").innerHTML='<div class="empty">还没有任务，添加一个复习小目标吧。</div>';return;}
+  $("#taskList").innerHTML=sorted.map(x=>{
+    const over=!x.done && x.due<t;
+    return `<div class="task ${x.done?'done':''}">
+      <div class="chk ${x.done?'done':''}" data-act="chk" data-id="${x.id}">${x.done?'<svg viewBox="0 0 24 24" fill="none" stroke="#1D1F27" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 6"/></svg>':''}</div>
+      <div class="tt">${esc(x.text)}</div>
+      <div class="td ${over?'tag-overdue':''}">${over?'逾期 ':''}${x.due}</div>
+      <button class="icon-btn" data-act="deltask" data-id="${x.id}" title="删除"><svg viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button>
+    </div>`;
+  }).join("");
+}
+
+function esc(s){return (s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+
+function renderAll(){
+  [renderCountdown, renderToday, renderPhases, renderKP, renderPractice, renderTasks].forEach(fn=>{
+    try{ fn(); }catch(e){ console.error("render error", fn.name, e); }
+  });
+  const total=(DATA.kp?.length||0)+(DATA.practice?.length||0)+(DATA.tasks?.length||0)+(DATA.phases?.length||0);
+  $("#backupHint").classList.toggle("show",total>=30);
+}
+
+/* ---------- ACTIONS ---------- */
+document.body.addEventListener("click",e=>{
+  const b=e.target.closest("[data-act]"); if(!b)return;
+  const id=b.dataset.id, act=b.dataset.act;
+  if(act==="dotask"){const t=DATA.tasks.find(x=>x.id===id);if(t){t.done=true;save();renderAll();}}
+  else if(act==="doreview"){const k=DATA.kp.find(x=>x.id===id);if(k){k.review=false;save();renderAll();}}
+  else if(act==="master"){const k=DATA.kp.find(x=>x.id===id);if(k){const o=["unlearned","learning","mastered"];k.mastery=o[(o.indexOf(k.mastery)+1)%3];save();renderAll();}}
+  else if(act==="review"){const k=DATA.kp.find(x=>x.id===id);if(k){k.review=!k.review;save();renderAll();}}
+  else if(act==="delkp"){confirmDo("删除知识点","确定删除这条知识点吗？不可恢复。",()=>{DATA.kp=DATA.kp.filter(x=>x.id!==id);save();renderAll();});}
+  else if(act==="delp"){confirmDo("删除练习记录","确定删除这条练习记录吗？",()=>{DATA.practice=DATA.practice.filter(x=>x.id!==id);save();renderAll();});}
+  else if(act==="chk"){const t=DATA.tasks.find(x=>x.id===id);if(t){t.done=!t.done;save();renderAll();}}
+  else if(act==="deltask"){confirmDo("删除任务","确定删除这条任务吗？",()=>{DATA.tasks=DATA.tasks.filter(x=>x.id!==id);save();renderAll();});}
+  else if(act==="phase"){const p=DATA.phases.find(x=>x.id===id);if(p){const o=["pending","doing","done"];p.status=o[(o.indexOf(p.status)+1)%3];save();renderAll();}}
+});
+
+/* add KP */
+$("#btnAddKp").onclick=()=>{
+  const title=$("#kpTitle").value.trim();
+  if(!title){alert("请填写标题");return;}
+  DATA.kp.push({id:uid(),cat:$("#kpCat").value,title,content:$("#kpContent").value.trim(),tags:$("#kpTags").value.trim().split(/\s+/).filter(Boolean),mastery:$("#kpMastery").value,review:false,created:todayStr()});
+  $("#kpTitle").value="";$("#kpContent").value="";$("#kpTags").value="";
+  save();renderAll();
+};
+/* filters */
+["fCat","fMastery","fSearch"].forEach(id=>$("#"+id).addEventListener("input",renderKP));
+
+/* practice */
+$("#pDate").value=todayStr();
+$("#btnAddPractice").onclick=()=>{
+  const count=parseInt($("#pCount").value,10), correct=parseInt($("#pCorrect").value,10);
+  if(!count||count<1){alert("请填写有效题量");return;}
+  if(isNaN(correct)||correct<0||correct>count){alert("正确数需在 0~题量 之间");return;}
+  DATA.practice.push({id:uid(),date:$("#pDate").value||todayStr(),type:$("#pType").value,count,correct,min:parseInt($("#pMin").value,10)||0});
+  $("#pCount").value="";$("#pCorrect").value="";$("#pMin").value="";
+  save();renderAll();
+};
+
+/* tasks */
+$("#taskDue").value=todayStr();
+$("#btnAddTask").onclick=()=>{
+  const text=$("#taskText").value.trim();
+  if(!text){alert("请填写任务内容");return;}
+  DATA.tasks.push({id:uid(),text,due:$("#taskDue").value||todayStr(),done:false});
+  $("#taskText").value="";
+  save();renderAll();
+};
+
+/* exam date */
+$("#btnSetExam").onclick=()=>{
+  DATA.examDate=$("#examDate").value;save();renderCountdown();
+};
+
+/* batch import */
+function parseBatch(text){
+  const lines=text.split("\n").map(s=>s.trim()).filter(Boolean);
+  const out=[];
+  for(const line of lines){
+    let cat="base", rest=line;
+    const m=line.match(/^\[([^\]]+)\]\s*(.*)$/);
+    if(m){const c=m[1].toLowerCase();rest=m[2];
+      if(/word/.test(c))cat="word";else if(/excel/.test(c))cat="excel";else if(/ppt/.test(c))cat="ppt";else cat="base";
+    }
+    const tagMatches=rest.match(/#([^\s#]+)/g)||[];
+    const tags=tagMatches.map(t=>t.slice(1));
+    rest=rest.replace(/#([^\s#]+)/g,"").trim();
+    const sep=rest.search(/[:：]/);
+    let title=rest,content="";
+    if(sep>0){title=rest.slice(0,sep).trim();content=rest.slice(sep+1).trim();}
+    out.push({cat,title,content,tags});
+  }
+  return out;
+}
+$("#btnBatch").onclick=()=>{$("#batchMask").classList.add("show");};
+$("#btnBatchCancel").onclick=()=>{$("#batchMask").classList.remove("show");};
+$("#btnBatchConfirm").onclick=()=>{
+  const arr=parseBatch($("#batchText").value);
+  if(arr.length===0){alert("没有解析到内容");return;}
+  arr.forEach(a=>DATA.kp.push({id:uid(),cat:a.cat,title:a.title,content:a.content,tags:a.tags,mastery:"unlearned",review:false,created:todayStr()}));
+  $("#batchText").value="";$("#batchMask").classList.remove("show");
+  save();renderAll();
+  alert("已导入 "+arr.length+" 条知识点");
+};
+$("#batchMask").addEventListener("click",e=>{if(e.target===$("#batchMask"))$("#batchMask").classList.remove("show");});
+
+/* export / import / clear */
+$("#btnExport").onclick=()=>{
+  const blob=new Blob([JSON.stringify(DATA,null,2)],{type:"application/json"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);
+  a.download="计算机二级工作台备份_"+todayStr()+".json";a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+};
+$("#btnImport").onclick=()=>$("#fileInput").click();
+$("#fileInput").onchange=e=>{
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{
+    try{
+      const d=JSON.parse(r.result);
+      confirmDo("导入备份","将用备份覆盖当前全部数据（知识点/阶段计划/练习/任务/考试日）。确定继续？",()=>{
+        DATA={kp:d.kp||[],practice:d.practice||[],tasks:d.tasks||[],examDate:d.examDate||"",phases:d.phases||[],settings:d.settings||{}};
+        save();renderAll();alert("导入完成");
+      });
+    }catch(err){alert("文件解析失败，请确认是有效的备份 JSON");}
+    e.target.value="";
+  };
+  r.readAsText(f);
+};
+$("#btnClear").onclick=()=>{
+  confirmDo("清空全部数据","将删除所有知识点、阶段计划、练习记录、任务与考试日期（含示例数据），且不可恢复。确定？",()=>{
+    DATA={kp:[],practice:[],tasks:[],examDate:"",phases:[],settings:{}};save();renderAll();alert("已清空，从头开始吧！");
+  });
+};
+
+/* confirm modal */
+let confirmCb=null;
+function confirmDo(title,text,cb){
+  $("#confirmTitle").textContent=title;$("#confirmText").textContent=text;
+  confirmCb=cb;$("#confirmMask").classList.add("show");
+}
+$("#confirmCancel").onclick=()=>{$("#confirmMask").classList.remove("show");confirmCb=null;};
+$("#confirmOk").onclick=()=>{$("#confirmMask").classList.remove("show");if(confirmCb)confirmCb();confirmCb=null;};
+$("#confirmMask").addEventListener("click",e=>{if(e.target===$("#confirmMask"))$("#confirmMask").classList.remove("show");});
+
+/* init */
+load();renderAll();
+
+/* AUTO_REPORT_BRIDGE */
+try{var _r=function(){try{reportBridge();}catch(e){}};if(document.readyState!=='loading'){setTimeout(_r,50);}else{document.addEventListener('DOMContentLoaded',function(){setTimeout(_r,50);});}}catch(e){}
+</script>
+</body>
+</html>

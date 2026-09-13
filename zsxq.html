@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>知识星球 · AI星球</title>
+<style>
+  :root{
+    --bg:#0f1115; --panel:#171a21; --panel2:#1f232c; --line:#2a2f3a;
+    --txt:#e6e8ec; --sub:#9aa3b2; --accent:#7c5cff; --ok:#3ecf8e; --err:#ff6b6b;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;padding:24px;max-width:880px;margin:0 auto}
+  h1{font-size:22px;margin:0 0 4px}
+  .sub{color:var(--sub);font-size:13px;margin-bottom:18px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:16px}
+  .card h2{font-size:15px;margin:0 0 12px;color:var(--txt);display:flex;align-items:center;gap:8px}
+  label{display:block;font-size:12px;color:var(--sub);margin:10px 0 4px}
+  input[type=text],input[type=password]{width:100%;background:var(--panel2);border:1px solid var(--line);color:var(--txt);border-radius:9px;padding:10px 12px;font-size:14px;outline:none}
+  input:focus{border-color:var(--accent)}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  button{background:var(--accent);color:#fff;border:none;border-radius:9px;padding:10px 16px;font-size:14px;cursor:pointer;font-weight:600}
+  button.sec{background:var(--panel2);color:var(--txt);border:1px solid var(--line)}
+  button:hover{filter:brightness(1.08)}
+  button:disabled{opacity:.5;cursor:not-allowed}
+  .status{font-size:13px;margin-top:10px;min-height:18px}
+  .status.err{color:var(--err)} .status.ok{color:var(--ok)}
+  .grp{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--line);border-radius:10px;margin-bottom:8px;background:var(--panel2);cursor:pointer}
+  .grp.sel{border-color:var(--accent)}
+  .grp .name{font-weight:600} .grp .meta{color:var(--sub);font-size:12px}
+  .topic{border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:12px;background:var(--panel2)}
+  .topic .th{display:flex;justify-content:space-between;gap:10px;font-size:12px;color:var(--sub);margin-bottom:6px}
+  .topic .tt{font-size:16px;font-weight:700;margin:2px 0 6px}
+  .topic .tx{font-size:14px;color:#d4d8e0;white-space:pre-wrap;word-break:break-word;max-height:240px;overflow:auto}
+  .topic a.src{color:var(--accent);font-size:13px;text-decoration:none}
+  .imgs{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+  .imgs img{width:96px;height:96px;object-fit:cover;border-radius:8px;border:1px solid var(--line)}
+  .files{margin-top:8px;font-size:13px}
+  .files a{color:var(--accent);text-decoration:none;margin-right:14px}
+  .badge{display:inline-block;background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:2px 10px;font-size:12px;color:var(--sub)}
+  .dateChip{display:inline-block;background:var(--panel2);border:1px solid var(--line);color:var(--txt);border-radius:20px;padding:5px 13px;font-size:13px;margin:0 8px 8px 0;cursor:pointer}
+  .dateChip:hover{border-color:var(--accent)}
+  .grpHead{font-size:14px;font-weight:700;margin:14px 0 8px;padding-bottom:6px;border-bottom:1px solid var(--line)}
+  .err{color:var(--err);font-size:13px;padding:6px 0}
+  a.back{color:var(--sub);font-size:13px;text-decoration:none}
+  .hint{font-size:12px;color:var(--sub);margin-top:6px}
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+  <h1>知识星球 · AI星球</h1>
+  <div class="sub">登录态内容经由 EdgeOne 函数代理抓取，token 仅存于你本机浏览器，不上传仓库/服务端。</div>
+
+  <div class="card">
+    <h2>① 配置</h2>
+    <label>API 基地址（留空 = 同源/EdgeOne；若经 GitHub Pages 访问请填 EdgeOne 域名，如 https://xxx.edgeone.app）</label>
+    <input id="apiBase" type="text" placeholder="留空即可（推荐用 EdgeOne 域名访问本页）" />
+    <label>zsxq_access_token（浏览器开发者工具 → 请求头 Authorization 的值）</label>
+    <input id="token" type="password" placeholder="粘贴你的知识星球 token" />
+    <div class="row" style="margin-top:12px">
+      <button id="saveCfg">保存配置</button>
+      <span id="cfgStatus" class="status"></span>
+    </div>
+    <div class="hint">token 获取：电脑浏览器登录 wx.zsxq.com → F12 → Network → 任意 api.zsxq.com 请求 → 复制 Request Headers 里的 <code>Authorization</code> 值（一长串数字）。</div>
+  </div>
+
+  <div class="card">
+    <h2>② 选择星球</h2>
+    <div class="row">
+      <button id="loadGroups">拉取我的星球列表</button>
+      <span id="grpStatus" class="status"></span>
+    </div>
+    <div id="groups" style="margin-top:10px"></div>
+  </div>
+
+  <div class="card">
+    <h2>③ AI星球 内容</h2>
+    <div class="row">
+      <button id="loadTopics" class="sec">加载内容</button>
+      <span id="topStatus" class="status"></span>
+    </div>
+    <div id="topics" style="margin-top:10px"></div>
+  </div>
+
+  <div class="card">
+    <h2>④ 历史归档（Edge KV）</h2>
+    <p class="hint" style="margin-top:0">定时任务（zsxq-automation · GitHub Actions / 本地 cron）每日抓取后经密钥推入 EdgeOne KV。此处按你的 token 读取归档——token 过期后仍可看历史。付费内容仅登录态可见。</p>
+    <div class="row">
+      <button id="loadArchive" class="sec">拉取归档列表</button>
+      <span id="archStatus" class="status"></span>
+    </div>
+    <div id="archDates" style="margin-top:10px"></div>
+    <div id="archBox" style="margin-top:10px"></div>
+  </div>
+
+  <div style="margin-top:18px"><a class="back" href="index.html">← 返回指挥台</a></div>
+
+<script>
+(function(){
+  var LS={base:'wb_api_base',token:'wb_zsxq_token',group:'wb_zsxq_group',groupName:'wb_zsxq_group_name'};
+  function g(k){return localStorage.getItem(k)||'';}
+  function s(k,v){try{localStorage.setItem(k,v);}catch(e){}}
+  var apiBaseEl=document.getElementById('apiBase');
+  var tokenEl=document.getElementById('token');
+  apiBaseEl.value=g(LS.base);
+  tokenEl.value=g(LS.token);
+
+  function apiBase(){return g(LS.base).replace(/\/$/,'');}
+  function setStatus(el,msg,kind){el.textContent=msg||'';el.className='status'+(kind?(' '+kind):'');}
+
+  document.getElementById('saveCfg').onclick=function(){
+    s(LS.base,apiBaseEl.value.trim());
+    s(LS.token,tokenEl.value.trim());
+    setStatus(document.getElementById('cfgStatus'),'已保存',"ok");
+  };
+
+  function authHeaders(){
+    var h={'Content-Type':'application/json'};
+    var tk=g(LS.token); if(tk) h['x-zsxq-token']=tk;
+    return h;
+  }
+
+  document.getElementById('loadGroups').onclick=async function(){
+    var st=document.getElementById('grpStatus'); setStatus(st,'拉取中…');
+    try{
+      var r=await fetch(apiBase()+'/api/zsxq?action=groups',{headers:authHeaders(),cache:'no-store'});
+      var j=await r.json();
+      if(!r.ok||j.error){setStatus(st,'失败：'+(j.error||r.status),"err");return;}
+      var box=document.getElementById('groups'); box.innerHTML='';
+      (j.groups||[]).forEach(function(gp){
+        var div=document.createElement('div'); div.className='grp'; div.dataset.id=gp.id; div.dataset.name=gp.name;
+        div.innerHTML='<div><div class="name">'+esc(gp.name)+'</div><div class="meta">'+esc(gp.type||'')+(gp.unread?(' · 未读 '+num(gp.unread)):'')+'</div></div>';
+        div.onclick=function(){
+          Array.prototype.forEach.call(box.querySelectorAll('.grp'),function(x){x.classList.remove('sel');});
+          div.classList.add('sel');
+          s(LS.group,gp.id); s(LS.groupName,gp.name);
+          setStatus(st,'已选：「'+gp.name+'」',"ok");
+        };
+        box.appendChild(div);
+      });
+      if(!j.groups||!j.groups.length) setStatus(st,'未返回星球，检查 token 是否有效',"err");
+      else setStatus(st,'共 '+j.groups.length+' 个星球，点击选择',"ok");
+    }catch(e){setStatus(st,'请求异常：'+e,"err");}
+  };
+
+  document.getElementById('loadTopics').onclick=async function(){
+    var gid=g(LS.group);
+    var st=document.getElementById('topStatus');
+    if(!gid){setStatus(st,'请先在上方选择一个星球',"err");return;}
+    setStatus(st,'加载中…');
+    try{
+      var r=await fetch(apiBase()+'/api/zsxq?action=topics&group='+encodeURIComponent(gid)+'&count=30',{headers:authHeaders(),cache:'no-store'});
+      var j=await r.json();
+      if(!r.ok||j.error){setStatus(st,'失败：'+(j.error||r.status)+(j.msg?(' · '+j.msg):''),"err");return;}
+      var box=document.getElementById('topics'); box.innerHTML='';
+      (j.topics||[]).forEach(function(t){ box.appendChild(renderTopic(t)); });
+      setStatus(st,'已加载 '+j.count+' 条',"ok");
+    }catch(e){setStatus(st,'请求异常：'+e,"err");}
+  };
+
+  function renderTopic(t){
+    var d=document.createElement('div'); d.className='topic';
+    var head='<div class="th"><span>'+esc(t.author||'')+' · '+esc((t.createTime||'').replace('T',' ').slice(0,16))+'</span>'+
+      '<span class="badge">♥ '+num(t.liked)+' · 💬 '+num(t.comments)+' · 👁 '+num(t.views)+'</span></div>';
+    var title=t.title?'<div class="tt">'+esc(t.title)+'</div>':'';
+    var tx=t.text?'<div class="tx">'+esc(t.text)+'</div>':'';
+    var imgs='';
+    if(t.images&&t.images.length){
+      imgs='<div class="imgs">'+t.images.slice(0,6).map(function(u){var su=safeImg(u);return su?'<a href="'+esc(su)+'" target="_blank" rel="noopener"><img src="'+esc(su)+'" loading="lazy"></a>':'';}).join('')+'</div>';
+    }
+    var files='';
+    if(t.files&&t.files.length){
+      files='<div class="files">'+t.files.map(function(f){var fu=safeUrl(f.url);return fu?'<a href="'+esc(fu)+'" target="_blank" rel="noopener">📎 '+esc(f.name)+'</a>':'<span class="files">📎 '+esc(f.name)+'（链接被安全策略拦截）</span>';}).join('')+'</div>';
+    }
+    var tUrl=safeUrl(t.url);
+    var src=tUrl?'<div style="margin-top:8px"><a class="src" href="'+esc(tUrl)+'" target="_blank" rel="noopener">查看原文 ↗</a></div>':'';
+    d.innerHTML=head+title+tx+imgs+files+src;
+    return d;
+  }
+
+  function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+  /* URL 安全：外部 API 返回的链接/图片一律过白名单，挡 javascript:/data:text（P0-2） */
+  function safeUrl(u){var s=String(u==null?'':u).trim();if(!s)return '';if(/^(https?:)?\/\//i.test(s))return s;if(/^\.{0,2}\//.test(s)||/^[A-Za-z0-9_\-\/\.\?&#=%]+$/.test(s))return s;return '';}
+  function safeImg(u){var s=String(u==null?'':u).trim();if(/^data:image\/(png|jpe?g|gif|webp|svg\+xml|avif);/i.test(s))return s;return safeUrl(s);}
+  function num(v){var n=Number(v);return isNaN(n)?0:n;}
+
+  // ---- ④ 历史归档 ----
+  document.getElementById('loadArchive').onclick=async function(){
+    var st=document.getElementById('archStatus'); setStatus(st,'拉取中…');
+    try{
+      var r=await fetch(apiBase()+'/api/zsxq-archive?action=list',{headers:authHeaders(),cache:'no-store'});
+      var j=await r.json();
+      if(!r.ok||j.error){setStatus(st,'失败：'+(j.error||r.status),"err");return;}
+      var box=document.getElementById('archDates'); box.innerHTML='';
+      var dates=j.dates||[];
+      if(!dates.length){setStatus(st,'暂无归档（需先跑 zsxq-automation 抓取推送）',"err");return;}
+      dates.forEach(function(d){
+        var chip=document.createElement('span'); chip.className='dateChip'; chip.textContent=d.date;
+        chip.title=(d.groups||[]).map(function(x){return x.name+' · '+x.count+' 条';}).join('\n');
+        chip.onclick=function(){ loadArchiveDay(d); };
+        box.appendChild(chip);
+      });
+      setStatus(st,'共 '+dates.length+' 个归档日，点击日期查看',"ok");
+    }catch(e){setStatus(st,'请求异常：'+e,"err");}
+  };
+
+  async function loadArchiveDay(d){
+    var st=document.getElementById('archStatus'); setStatus(st,'加载 '+d.date+' …');
+    var box=document.getElementById('archBox'); box.innerHTML='';
+    for(var i=0;i<(d.groups||[]).length;i++){
+      var grp=d.groups[i];
+      var sec=document.createElement('div');
+      sec.innerHTML='<div class="grpHead">'+esc(grp.name)+' <span class="badge">'+grp.count+' 条</span></div>';
+      box.appendChild(sec);
+      var list=document.createElement('div');
+      try{
+        var r=await fetch(apiBase()+'/api/zsxq-archive?action=get&date='+encodeURIComponent(d.date)+'&group='+encodeURIComponent(grp.name),{headers:authHeaders(),cache:'no-store'});
+        var j=await r.json();
+        if(r.ok&&!j.error){ (j.topics||[]).forEach(function(t){ list.appendChild(renderTopic(t)); }); }
+        else list.innerHTML='<div class="err">'+esc(j.error||r.status)+'</div>';
+      }catch(e){ list.innerHTML='<div class="err">'+esc(e.message)+'</div>'; }
+      sec.appendChild(list);
+    }
+    setStatus(st,'完成：'+d.date,'ok');
+  }
+})();
+</script>
+</body>
+</html>

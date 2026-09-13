@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RFQ 主表公式细读 · 与默认公式详细对比</title>
+<style>
+  :root{
+    --bg:#0f1419; --panel:#171c23; --panel2:#1d242d; --line:#2a323c;
+    --txt:#d7dee6; --dim:#8b97a3; --accent:#4ea1ff; --green:#3fb950;
+    --red:#f85149; --yellow:#e3b341; --pk:#bc8cff;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,"Segoe UI","Microsoft YaHei",sans-serif;
+    line-height:1.6;font-size:14px}
+  .wrap{max-width:1180px;margin:0 auto;padding:28px 22px 80px}
+  h1{font-size:23px;margin:0 0 4px;color:#fff;letter-spacing:.5px}
+  h2{font-size:18px;margin:38px 0 14px;color:#fff;border-left:4px solid var(--accent);padding-left:10px}
+  h3{font-size:15px;margin:22px 0 10px;color:var(--accent)}
+  .sub{color:var(--dim);font-size:13px;margin-bottom:6px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin:12px 0}
+  .grid{display:grid;gap:12px}
+  .g2{grid-template-columns:1fr 1fr}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  @media(max-width:820px){.g2,.g3{grid-template-columns:1fr}}
+  table{width:100%;border-collapse:collapse;font-size:13px;margin:8px 0}
+  th,td{border:1px solid var(--line);padding:7px 9px;text-align:left;vertical-align:top}
+  th{background:var(--panel2);color:#fff;font-weight:600}
+  tr:nth-child(even) td{background:rgba(255,255,255,.015)}
+  code{background:#0a0d11;color:#9fe0a0;border:1px solid var(--line);
+    border-radius:4px;padding:1px 6px;font-family:"Cascadia Code",Consolas,monospace;font-size:12.5px;white-space:nowrap}
+  .mono{font-family:"Cascadia Code",Consolas,monospace;font-size:12.5px}
+  .tag{display:inline-block;font-size:11px;padding:1px 8px;border-radius:20px;font-weight:600;margin-right:6px}
+  .t-grn{background:rgba(63,185,80,.15);color:var(--green);border:1px solid rgba(63,185,80,.4)}
+  .t-red{background:rgba(248,81,73,.15);color:var(--red);border:1px solid rgba(248,81,73,.4)}
+  .t-yel{background:rgba(227,179,65,.15);color:var(--yellow);border:1px solid rgba(227,179,65,.4)}
+  .t-pk{background:rgba(188,140,255,.15);color:var(--pk);border:1px solid rgba(188,140,255,.4)}
+  .t-blue{background:rgba(78,161,255,.15);color:var(--accent);border:1px solid rgba(78,161,255,.4)}
+  .pill{font-size:12px;color:var(--dim)}
+  .kpi{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;text-align:center}
+  .kpi .n{font-size:26px;font-weight:700;color:#fff}
+  .kpi .l{font-size:12px;color:var(--dim);margin-top:2px}
+  .chain{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:10px 0}
+  .node{background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:6px 10px;font-size:12px}
+  .node b{color:#fff}
+  .op{color:var(--accent);font-weight:700}
+  .arrow{color:var(--dim)}
+  .note{background:rgba(227,179,65,.08);border:1px solid rgba(227,179,65,.35);border-radius:8px;padding:10px 14px;margin:10px 0;font-size:13px}
+  .warn{background:rgba(248,81,73,.08);border:1px solid rgba(248,81,73,.35);border-radius:8px;padding:10px 14px;margin:10px 0;font-size:13px}
+  .ok{background:rgba(63,185,80,.08);border:1px solid rgba(63,185,80,.35);border-radius:8px;padding:10px 14px;margin:10px 0;font-size:13px}
+  ul{margin:6px 0 6px 18px;padding:0} li{margin:3px 0}
+  .small{font-size:12px;color:var(--dim)}
+  .foot{margin-top:40px;padding-top:14px;border-top:1px solid var(--line);color:var(--dim);font-size:12px}
+  .legend{font-size:12px;color:var(--dim);margin:4px 0 0}
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+<div class="wrap">
+
+<h1>RFQ 主表公式细读 · 与默认公式详细对比</h1>
+<div class="sub">主表 = <b>报价物料信息</b> · 对照：模板文件（默认公式，源） vs 7.21 填充文件（结果）</div>
+<div class="sub">读取方式：xlwings 逐单元格 <code>.formula</code> · 主表维度 463→733 行 / 32 列</div>
+
+<!-- ============ 总览 ============ -->
+<h2>1 · 差异总览</h2>
+<div class="grid g3">
+  <div class="kpi"><div class="n">4257</div><div class="l">逐单元格公式差异</div></div>
+  <div class="kpi"><div class="n">15</div><div class="l">含公式的列</div></div>
+  <div class="kpi"><div class="n">2</div><div class="l">真正丢失公式的行(缺陷)</div></div>
+</div>
+
+<div class="card">
+<table>
+  <tr><th style="width:22%">类别</th><th style="width:10%">数量</th><th>说明 / 性质</th></tr>
+  <tr><td><span class="tag t-blue">A 新增行</span></td><td>3989</td>
+    <td>行 464–733（266 行 × 15 列）在 7.21 被填入公式。<b>全部与默认写法一致，无偏差</b>——填充主体工作正确。</td></tr>
+  <tr><td><span class="tag t-yel">B 内容变更</span></td><td>203</td>
+    <td>原始 463 行内公式文本变动：W 列 +Y（171 行）、K 列密度 2.8→7.8（4 行）、K 列语序 J*I*H→H*I*J（28 行）。详见 §3.2。</td></tr>
+  <tr><td><span class="tag t-red">C 公式丢失</span></td><td>30</td>
+    <td><b>缺陷</b>：行 460、462 的全部 15 个公式列，模板有、7.21 却为空。下游 AB/AC/AD/AF 同步为空 → 汇总静默少算。</td></tr>
+  <tr><td><span class="tag t-grn">D 缺口补齐</span></td><td>35</td>
+    <td>AC 列（SHIPPING）行 174–208 在模板本就空白，7.21 已补上 <code>=AB*0.12</code>。<b>属正向修复</b>。</td></tr>
+</table>
+<p class="legend">注：早期“7 个空洞行（460/462/538/539/541/542/571）”经本报告的<b>模板↔填充逐格直接比对</b>已纠正——538/539/541/542/571 两文件完全一致，并非丢失；真正丢失仅 460、462。</p>
+</div>
+
+<!-- ============ 细读 ============ -->
+<h2>2 · 主表公式细读（成本链）</h2>
+<p class="sub">主表是<b>自包含</b>的：无任何跨表引用，全部为同表内单元格运算。输入列（L/O/Q/S/U/Y 等）手填，其余由公式链式推导。</p>
+
+<div class="card">
+<h3>成本推导链</h3>
+<div class="chain">
+  <span class="node"><b>H</b>长 <b>I</b>宽 <b>J</b>厚</span><span class="op">→</span>
+  <span class="node"><b>K</b>=H·I·J·ρ/1e6 重量</span><span class="op">→</span>
+  <span class="node"><b>M</b>=L·K 材料费</span><span class="arrow">·F</span>
+  <span class="node"><b>N</b>=M·F</span>
+</div>
+<div class="chain">
+  <span class="node"><b>O</b>机加工(输)</span><span class="arrow">·F→</span><span class="node"><b>P</b>=O·F</span>
+  <span class="node"><b>Q</b>表处(输)</span><span class="arrow">·F→</span><span class="node"><b>R</b>=Q·F</span>
+  <span class="node"><b>S</b>喷涂(输)</span><span class="arrow">·F→</span><span class="node"><b>T</b>=S·F</span>
+  <span class="node"><b>U</b>五金(输)</span><span class="arrow">·F→</span><span class="node"><b>V</b>=U·F</span>
+</div>
+<div class="chain">
+  <span class="node"><b>W</b>=(M+O+Q+S+U[+Y])·0.1 管理费</span><span class="arrow">·F→</span><span class="node"><b>X</b>=W·F</span>
+  <span class="node"><b>Y</b>包装(输)</span><span class="arrow">·F→</span><span class="node"><b>Z</b>=Y·F</span>
+</div>
+<div class="chain">
+  <span class="node"><b>AA</b>=X·0.03 操作费</span><span class="op">→</span>
+  <span class="node"><b>AB</b>=N+P+R+T+V+X+Z+AA 离岸价</span><span class="op">→</span>
+  <span class="node"><b>AC</b>=AB·0.12 运费</span><span class="op">→</span>
+  <span class="node"><b>AD</b>=AB+AC 到岸总价</span><span class="op">→</span>
+  <span class="node"><b>AF</b>=AD/6.4 美元价</span>
+</div>
+</div>
+
+<div class="card">
+<h3>逐列公式明细（默认 = 模板写法）</h3>
+<table>
+  <tr><th>列</th><th>表头（业务含义）</th><th>类型</th><th>默认公式</th><th>依赖</th></tr>
+  <tr><td><b>K</b></td><td>Material weight (kg) 材料重量</td><td><span class="tag t-pk">公式</span></td><td class="mono">=H*I*J*2.8/1000/1000</td><td>H,I,J + 密度常量</td></tr>
+  <tr><td>L</td><td>Material price (kg/rmb)</td><td>输入</td><td class="small">— 手填</td><td>—</td></tr>
+  <tr><td><b>M</b></td><td>Material Cost 材料费</td><td><span class="tag t-pk">公式</span></td><td class="mono">=L*K</td><td>L,K</td></tr>
+  <tr><td><b>N</b></td><td>Material Cost×F</td><td><span class="tag t-pk">公式</span></td><td class="mono">=M*F</td><td>M,F</td></tr>
+  <tr><td>O</td><td>Machining Cost 机加工费</td><td>输入</td><td class="small">— 手填</td><td>—</td></tr>
+  <tr><td><b>P</b></td><td>Machining×F</td><td><span class="tag t-pk">公式</span></td><td class="mono">=O*F</td><td>O,F</td></tr>
+  <tr><td>Q</td><td>Finish Cost 表面处理</td><td>输入</td><td class="small">— 手填</td><td>—</td></tr>
+  <tr><td><b>R</b></td><td>Finish×F</td><td><span class="tag t-pk">公式</span></td><td class="mono">=Q*F</td><td>Q,F</td></tr>
+  <tr><td>S</td><td>Powdercoat/paint 喷涂</td><td>输入</td><td class="small">— 手填</td><td>—</td></tr>
+  <tr><td><b>T</b></td><td>Powdercoat×F</td><td><span class="tag t-pk">公式</span></td><td class="mono">=S*F</td><td>S,F</td></tr>
+  <tr><td>U</td><td>hardware cost 五金</td><td>输入</td><td class="small">— 手填</td><td>—</td></tr>
+  <tr><td><b>V</b></td><td>hardware×F</td><td><span class="tag t-pk">公式</span></td><td class="mono">=U*F</td><td>U,F</td></tr>
+  <tr><td><b>W</b></td><td>Management Cost 管理费</td><td><span class="tag t-pk">公式</span></td><td class="mono">=(M+O+Q+S+U)*0.1</td><td>M,O,Q,S,U <span class="small">(±Y)</span></td></tr>
+  <tr><td><b>X</b></td><td>Management×F</td><td><span class="tag t-pk">公式</span></td><td class="mono">=W*F</td><td>W,F</td></tr>
+  <tr><td>Y</td><td>Packing Cost 包装费</td><td>输入</td><td class="small">— 手填</td><td>—</td></tr>
+  <tr><td><b>Z</b></td><td>Packing×F</td><td><span class="tag t-pk">公式</span></td><td class="mono">=Y*F</td><td>Y,F</td></tr>
+  <tr><td><b>AA</b></td><td>HANDLING×0.03 操作费</td><td><span class="tag t-pk">公式</span></td><td class="mono">=X*0.03</td><td>X</td></tr>
+  <tr><td><b>AB</b></td><td>FOB SHANGHAI 离岸价</td><td><span class="tag t-pk">公式</span></td><td class="mono">=N+P+R+T+V+X+Z+AA</td><td>前述合计</td></tr>
+  <tr><td><b>AC</b></td><td>SHIPPING 运费</td><td><span class="tag t-pk">公式</span></td><td class="mono">=AB*0.12</td><td>AB</td></tr>
+  <tr><td><b>AD</b></td><td>DAP总价（RMB）</td><td><span class="tag t-pk">公式</span></td><td class="mono">=AB+AC</td><td>AB,AC</td></tr>
+  <tr><td><b>AF</b></td><td>DAP总价（USD）</td><td><span class="tag t-pk">公式</span></td><td class="mono">=AD/6.4</td><td>AD（汇率 6.4）</td></tr>
+</table>
+<p class="legend">F=数量（col 6）；汇率固定 6.4（与下游<code>转换成$</code>、<code>阶梯报价</code>一致）；密度 2.8=铝 / 7.8=钢，为硬编码常量。</p>
+</div>
+
+<!-- ============ 详细对比 ============ -->
+<h2>3 · 详细对比结果</h2>
+
+<h3>3.1 新增行 464–733：填充主体正确</h3>
+<div class="ok">266 行新数据全部获得 15 列公式，且<b>逐字等于默认写法</b>（无一处偏差）。说明从下往上填充的动作本身在“扩展新行”这一段是成功的——问题只出在边界与历史瑕疵，不在批量机制。</div>
+
+<h3>3.2 原始行内公式内容变更（203 处，B 类）</h3>
+<div class="card">
+<table>
+  <tr><th>列</th><th>行范围</th><th>模板（默认）</th><th>7.21（填充后）</th><th>性质</th></tr>
+  <tr>
+    <td><b>W</b></td><td>3–173（171 行）</td>
+    <td class="mono">=(M+O+Q+S+U)*0.1</td>
+    <td class="mono">=(M+O+Q+S+U+<span style="color:var(--yellow)">Y</span>)*0.1</td>
+    <td><span class="tag t-yel">口径分歧</span></td>
+  </tr>
+  <tr>
+    <td><b>K</b></td><td>160,163,427,430（4 行）</td>
+    <td class="mono">=H*I*J*<span style="color:var(--yellow)">2.8</span>/1e6</td>
+    <td class="mono">=H*I*J*<span style="color:var(--green)">7.8</span>/1e6</td>
+    <td><span class="tag t-blue">材料变更</span></td>
+  </tr>
+  <tr>
+    <td><b>K</b></td><td>434–461,463（28 行）</td>
+    <td class="mono">=<span style="color:var(--yellow)">J*I*H</span>*2.8/1e6</td>
+    <td class="mono">=<span style="color:var(--green)">H*I*J</span>*2.8/1e6</td>
+    <td><span class="tag t-grn">纯语序·值不变</span></td>
+  </tr>
+</table>
+</div>
+<div class="note">
+<b>W 列 +Y 再确认</b>：模板 W 列自身就有两种写法——顶部 171 行（3–173）无 Y、底部 290 行（174–463）有 Y，分界恰在 174 行。7.21 把全列统一为“含 Y”。<b>源文件（参考）本身不统一</b>，故“含不含 Y”不能由源判定，需你确认管理费基数是否应含包装费 Y。
+</div>
+<div class="note">
+<b>K 列 28 行语序</b>：<code>=J*I*H</code> 与 <code>=H*I*J</code> 乘法交换律下数值完全相同，仅是模板底部块的历史瑕疵被 7.21 顺手归一化，<b>不影响金额</b>。
+</div>
+
+<h3>3.3 公式丢失（30 处，C 类）—— 真正的缺陷</h3>
+<div class="warn">
+<b>行 460、462</b>：模板中这 2 行的 15 个公式列（K,M,N,P,R,T,V,W,X,Z,AA,AB,AC,AD,AF）<b>全部有公式</b>，但 7.21 填充后<b>全部为空</b>。
+<ul>
+  <li>这 2 行的 AB（离岸价）、AC（运费）、AD（到岸总价）、AF（美元价）因此为 0/空。</li>
+  <li>下游 <code>转换成$</code>、<code>阶梯报价</code> 经 VLOOKUP 取到空值 → 该 2 行在客户侧<b>静默少算</b>。</li>
+  <li>全表 0 个 <code>#REF!</code> 报错——正因为输入格恰好为空，缺陷不跳红、肉眼难查。</li>
+</ul>
+<b>根因</b>：位于原始数据区（≤463）最底部，从下往上填充时该 2 行落在选区断点/边界，被跳过而未补。属“分列+分段手工上拖”边界漏填的典型症状。
+</div>
+
+<h3>3.4 模板缺口补齐（35 处，D 类）—— 正向修复</h3>
+<div class="ok">
+<b>AC 列（SHIPPING=AB*0.12）行 174–208</b> 在模板中本就空白（模板自身的内部缺口），7.21 填充时已补上 <code>=AB*0.12</code>。说明 7.21 的填充不仅扩展了新行，还顺带修掉了模板遗留的中段缺口。
+</div>
+
+<!-- ============ 根因与建议 ============ -->
+<h2>4 · 根因 & 修复建议</h2>
+<div class="card">
+<h3>根因（以“源=参考，非绝对正确”为前提）</h3>
+<ul>
+  <li><b>主因</b>：模板（参考）本身是“两段式分批改写”拼成的——W 在 174 行分界、K 在 434 行分界，内部写法不统一；且底部 460/462 等边界行在填充时成为选区断点被漏填。</li>
+  <li><b>次因</b>：密度 2.8/7.8、汇率 6.4 全部硬编码在公式里，没有“材料类型→密度”的自动判定，依赖手填，易错（如 K 列 4 行 2.8↔7.8）。</li>
+  <li><b>为什么难发现</b>：缺陷行输入恰为空，公式缺失只表现为空/0，无 <code>#REF!</code>，下游汇总静默少算。</li>
+</ul>
+<h3>修复建议</h3>
+<ul>
+  <li><b>补 460/462</b>：按主体公式回填 15 列（K 用对应材料密度；W 口径待定）。</li>
+  <li><b>统一源再填充</b>：先把模板 K 列全部归一为 <code>=H*I*J*ρ/1000/1000</code>、W 列统一一种口径，再整块选中所有公式列 <b>Ctrl+D 自上而下</b>一次性填充，杜绝边界漏填与旧瑕疵扩散。</li>
+  <li><b>确认 W 口径</b>：管理费基数含不含 Y（包装费）需业务拍板，二选一后全表统一。</li>
+  <li><b>密度自动化</b>：用 <code>IF(材料="钢",7.8,2.8)</code> 或查表替代硬编码，根除 2.8/7.8 错填。</li>
+</ul>
+</div>
+
+<div class="foot">
+数据来源：RFQ 物料清单60126-0245.xlsx（模板/默认）与 RFQ 物料清单60126-0245-7.21.xlsx（填充），均经 xlwings 提取主表 报价物料信息 全量公式逐格比对。<br>
+文件名含不间断空格 <code>\xa0</code>，读取时已按字节处理。报告生成于 2026-07-22。
+</div>
+
+</div>
+</body>
+</html>

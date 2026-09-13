@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#f6f3ee">
+<title>招标拆解 · 关键条款提取工作台</title>
+<style>
+:root{
+  --bg:#f6f3ee; --panel:#ffffff; --panel2:#fbf9f5; --ink:#2a2724; --muted:#948b80;
+  --line:#e8e2d8; --line2:#f0ece4; --clay:#c2683f; --clay-soft:#f4e6dc; --clay-ink:#9c4f2c;
+  --sage:#7c9082; --sage-soft:#e9efe9; --gold:#c9a24b; --red:#cf5b4e; --green:#3f9e6f;
+  --indigo:#3a5a8c; --indigo-soft:#e7edf5;
+  --shadow:0 1px 2px rgba(40,30,20,.05),0 6px 20px rgba(40,30,20,.05);
+  --radius:18px; --radius-s:12px;
+  --serif:"Songti SC","STSong",Georgia,"Times New Roman",serif;
+}
+[data-theme="dark"]{
+  --bg:#161310; --panel:#1e1b17; --panel2:#211d18; --ink:#ece6dd; --muted:#9a9186;
+  --line:#2d2823; --line2:#262019; --clay:#d98a5f; --clay-soft:#33241a; --clay-ink:#e3a07c;
+  --sage:#90a597; --sage-soft:#1f2a23; --gold:#d8b25e; --red:#e07a6e; --green:#5bb98c;
+  --indigo:#7fa3d6; --indigo-soft:#1c2533;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased;}
+button{font-family:inherit;}
+::-webkit-scrollbar{height:0;width:0;}
+.shell{display:flex;min-height:100vh;}
+.sidebar{width:212px;flex:none;position:sticky;top:0;height:100vh;padding:22px 13px;border-right:1px solid var(--line);background:var(--panel2);display:flex;flex-direction:column;gap:3px;overflow-y:auto;}
+.brand{display:flex;align-items:center;gap:10px;padding:0 8px 16px;}
+.brand .logo{width:34px;height:34px;border-radius:11px;background:linear-gradient(135deg,var(--clay),var(--indigo));display:flex;align-items:center;justify-content:center;color:#fff;flex:none;}
+.brand .logo svg{width:19px;height:19px;}
+.brand b{font-family:var(--serif);font-size:16px;letter-spacing:.5px;}
+.brand small{display:block;color:var(--muted);font-size:10.5px;font-weight:400;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;cursor:pointer;color:var(--muted);font-weight:600;font-size:14px;transition:.15s;border:1px solid transparent;}
+.nav-item svg{width:18px;height:18px;flex:none;}
+.nav-item:hover{background:var(--panel);color:var(--ink);}
+.nav-item.active{background:var(--clay-soft);color:var(--clay-ink);border-color:var(--line);}
+.nav-item .badge{margin-left:auto;background:var(--clay);color:#fff;font-size:11px;min-width:18px;height:18px;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 5px;font-weight:700;}
+.side-foot{margin-top:auto;padding:10px 8px 0;color:var(--muted);font-size:11px;line-height:1.6;}
+.side-foot button{background:none;border:none;color:var(--clay-ink);cursor:pointer;font-size:11px;padding:0;text-decoration:underline;}
+.main{flex:1;min-width:0;display:flex;flex-direction:column;}
+.topbar{position:sticky;top:0;z-index:15;background:color-mix(in srgb,var(--bg) 86%,transparent);backdrop-filter:blur(12px);padding:15px 22px 11px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px;}
+.topbar h1{font-family:var(--serif);font-size:20px;margin:0;font-weight:700;letter-spacing:.5px;}
+.topbar .date{color:var(--muted);font-size:12px;margin-left:2px;}
+.topbar .spacer{flex:1;}
+.icon-btn{width:38px;height:38px;border-radius:11px;border:1px solid var(--line);background:var(--panel);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink);}
+.icon-btn svg{width:18px;height:18px;}
+.icon-btn:hover{border-color:var(--clay);}
+.wrap{max-width:920px;width:100%;margin:0 auto;padding:20px 22px 120px;}
+.view-head{display:flex;align-items:baseline;gap:10px;margin:0 0 16px;flex-wrap:wrap;}
+.view-head h2{font-family:var(--serif);font-size:22px;margin:0;font-weight:700;}
+.view-head .desc{color:var(--muted);font-size:13px;}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);margin-bottom:16px;}
+.panel.tight{padding:14px;}
+.panel-title{display:flex;align-items:center;justify-content:space-between;margin:0 0 14px;gap:10px;flex-wrap:wrap;}
+.panel-title h3{font-size:15px;margin:0;font-weight:700;display:flex;align-items:center;gap:8px;}
+.panel-title h3 svg{width:17px;height:17px;color:var(--clay);}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+.field{display:flex;flex-direction:column;gap:5px;flex:1;min-width:140px;}
+.field label{font-size:12px;color:var(--muted);font-weight:600;}
+input,select,textarea{font-family:inherit;font-size:14px;color:var(--ink);background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:9px 11px;outline:none;transition:.15s;width:100%;}
+input:focus,select:focus,textarea:focus{border-color:var(--clay);background:var(--panel);}
+textarea{resize:vertical;min-height:42px;line-height:1.6;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:40px;padding:9px 15px;border-radius:11px;border:1px solid var(--line);background:var(--panel);color:var(--ink);font-size:14px;font-weight:600;cursor:pointer;transition:.15s;}
+.btn svg{width:17px;height:17px;}
+.btn:hover{border-color:var(--clay);}
+.btn.primary{background:var(--clay);border-color:var(--clay);color:#fff;}
+.btn.primary:hover{background:var(--clay-ink);}
+.btn.ghost{background:transparent;}
+.btn.sm{min-height:34px;padding:6px 11px;font-size:13px;border-radius:9px;}
+.btn.danger{color:var(--red);}
+.btn.danger:hover{border-color:var(--red);background:var(--panel2);}
+.btn.block{width:100%;}
+.chips{display:flex;gap:7px;flex-wrap:wrap;}
+.chip{padding:6px 12px;border-radius:20px;border:1px solid var(--line);background:var(--panel);color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;transition:.15s;}
+.chip:hover{border-color:var(--clay);color:var(--ink);}
+.chip.on{background:var(--clay);border-color:var(--clay);color:#fff;}
+.hint{font-size:12.5px;color:var(--muted);line-height:1.7;}
+.warn{background:var(--clay-soft);border:1px solid var(--line);border-left:3px solid var(--clay);border-radius:12px;padding:13px 15px;font-size:13px;color:var(--clay-ink);}
+.stat{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:14px 16px;}
+.stat .n{font-family:var(--serif);font-size:26px;font-weight:700;font-variant-numeric:tabular-nums;}
+.stat .l{font-size:12px;color:var(--muted);margin-top:2px;}
+/* clause cards */
+.clause{border:1px solid var(--line);border-left:4px solid var(--muted);border-radius:12px;padding:12px 14px;background:var(--panel);margin-bottom:11px;transition:.15s;}
+.clause.imp{border-left-color:var(--gold);background:linear-gradient(90deg,var(--clay-soft),var(--panel) 40%);}
+.clause .ctop{display:flex;align-items:center;gap:8px;margin-bottom:7px;flex-wrap:wrap;}
+.clause .tag{font-size:11px;font-weight:700;padding:3px 9px;border-radius:8px;color:#fff;letter-spacing:.3px;}
+.clause .star{cursor:pointer;font-size:16px;line-height:1;color:var(--muted);}
+.clause .star.on{color:var(--gold);}
+.clause .del{margin-left:auto;cursor:pointer;color:var(--muted);font-size:13px;}
+.clause .del:hover{color:var(--red);}
+.clause .body{font-size:13.5px;line-height:1.65;white-space:pre-wrap;word-break:break-word;max-height:160px;overflow:auto;}
+.clause .note{margin-top:8px;font-size:12.5px;}
+.rec-item{display:flex;align-items:center;gap:12px;padding:13px 15px;border:1px solid var(--line);border-radius:13px;background:var(--panel);margin-bottom:10px;cursor:pointer;transition:.15s;}
+.rec-item:hover{border-color:var(--clay);}
+.rec-item .meta{flex:1;min-width:0;}
+.rec-item .meta b{font-size:15px;display:block;}
+.rec-item .meta small{color:var(--muted);font-size:12px;}
+.rec-item .cnt{font-size:12px;color:var(--clay-ink);background:var(--clay-soft);padding:4px 10px;border-radius:20px;font-weight:700;}
+.banner{background:var(--clay);color:#fff;border-radius:14px;padding:13px 16px;display:flex;align-items:center;gap:12px;margin-bottom:16px;font-size:13.5px;}
+.banner button{background:#fff;color:var(--clay-ink);border:none;border-radius:9px;padding:7px 13px;font-weight:700;cursor:pointer;}
+.banner .x{margin-left:auto;cursor:pointer;opacity:.85;font-size:18px;}
+.cmp-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.cmp-col h4{font-size:13px;margin:0 0 8px;color:var(--muted);}
+.diff-add{background:var(--sage-soft);border-left-color:var(--sage);}
+.diff-del{background:#fbeae8;border-left-color:var(--red);}
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--bg);padding:11px 20px;border-radius:12px;font-size:13.5px;font-weight:600;opacity:0;pointer-events:none;transition:.25s;z-index:60;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+@media(max-width:760px){.sidebar{position:fixed;left:0;top:0;bottom:0;z-index:40;transform:translateX(-100%);transition:.25s;width:200px;}.sidebar.open{transform:translateX(0);}.menu-btn{display:flex!important;}.grid2,.grid3,.cmp-grid{grid-template-columns:1fr;}.wrap{padding:16px 14px 100px;}}
+.menu-btn{display:none;}
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+<div class="shell">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h6"/></svg></div>
+      <div><b>招标拆解</b><small>关键条款提取工作台</small></div>
+    </div>
+    <div class="nav-item active" onclick="go('parse')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 5h18M3 12h18M3 19h12"/></svg><span>解析</span></div>
+    <div class="nav-item" onclick="go('compare')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3v18M15 3v18"/><path d="M3 8h6M15 8h6M3 16h6M15 16h6"/></svg><span>比对</span></div>
+    <div class="nav-item" onclick="go('history')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 109-9 9 9 0 00-9 9z"/><path d="M12 7v5l3 2"/></svg><span>历史</span><span class="badge" id="navHist">0</span></div>
+    <div class="nav-item" onclick="go('data')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l4-4m-4 4l-4-4"/><path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg><span>数据</span></div>
+    <div class="side-foot">
+      <button onclick="toggleTheme()">切换深浅色</button><br>
+      WorkBuddy · 本地优先
+    </div>
+  </aside>
+  <div class="main">
+    <div class="topbar">
+      <button class="icon-btn menu-btn" onclick="document.getElementById('sidebar').classList.toggle('open')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+      <h1 id="viewTitle">解析</h1>
+      <span class="date" id="topDate"></span>
+      <span class="spacer"></span>
+      <button class="icon-btn" onclick="toggleTheme()" title="深浅色"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19"/></svg></button>
+    </div>
+    <div class="wrap" id="app"></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<input type="file" id="fileInput" accept=".json,application/json" style="display:none" onchange="importJSON(event)">
+
+<script>
+"use strict";
+window.addEventListener('error',function(e){try{var v=document.getElementById('app')||document.getElementById('view')||document.body;if(!v||v.dataset.err)return;v.dataset.err='1';var s=(e.error&&e.error.stack)||e.message||'';var b=document.createElement('div');b.style.cssText='padding:16px;margin:14px;font-family:ui-monospace,monospace;font-size:13px;color:#a33;background:#fdeceb;border:1px solid #f5c6cb;border-radius:12px;line-height:1.5';b.innerHTML='<b>⚠ 页面出错了</b><br><span style="color:#555">'+(e.message||'')+'</span><pre style="white-space:pre-wrap;margin-top:8px;font-size:11px">'+(s||'').slice(0,1000)+'</pre><small style="color:#666">建议 Ctrl+Shift+R 强刷；F12 → Application → Local Storage 清本页缓存后刷新。</small>';v.insertBefore(b,v.firstChild);}catch(_){}});const KEY='bidparser_v1', BAK=KEY+'_bak';
+const TYPES={
+  deadline:{label:'投标/开标时间',color:'#cf5b4e'},
+  deposit:{label:'投标保证金',color:'#c9a24b'},
+  qual:{label:'资质要求',color:'#3a5a8c'},
+  score:{label:'评分标准',color:'#3f9e6f'},
+  reject:{label:'废标/无效条款',color:'#9c3a2c'},
+  term:{label:'工期/期限',color:'#8b7355'},
+  pay:{label:'付款方式',color:'#2f7d8c'},
+  other:{label:'其他要点',color:'#948b80'}
+};
+let DB=null, corrupted=false, UI={tab:'parse', cmpA:null, cmpB:null};
+let current=null; // 当前解析会话 {name,text,clauses}
+
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
+function $(s){return document.querySelector(s);}
+function esc(s){return (s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function today(){return new Date().toISOString().slice(0,10);}
+
+function seed(){
+  const demoText=`第一章 投标须知
+1.1 本项目投标截止时间为 2026 年 09 月 15 日 14 时 30 分，逾期送达的投标文件将被拒收。
+1.2 开标时间：2026 年 09 月 15 日 14 时 30 分，地点为公共资源交易中心第三开标室。
+2.1 投标保证金：人民币 50 万元，须在投标截止前从基本账户汇出。
+3.1 投标人须具备 ISO9001 质量管理体系证书及近三年类似业绩不少于 3 项。
+3.2 注册资本不低于 5000 万元人民币。
+4.1 评分标准：技术部分权重 45%，商务部分权重 25%，投标报价权重 30%。
+5.1 出现下列情形之一的，按废标处理：投标文件未按要求密封的；报价明显低于成本的。
+6.1 合同工期：自合同签订之日起 180 天。
+7.1 付款方式：预付款 10%，进度款按月计量支付至 80%，竣工结算后付至 97%，余 3% 为质保金。`;
+  const rec={id:uid(),name:'示例 · 某市智慧园区信息化项目',text:demoText,clauses:extractClauses(demoText),createdAt:Date.now(),demo:true};
+  return {records:[rec],meta:{updatedAt:Date.now(),lastBackupAt:0,unbacked:1}};
+}
+
+function normalize(d){
+  if(!d||!Array.isArray(d.records)) throw new Error('schema');
+  d.records.forEach(r=>{r.clauses=r.clauses||[]; r.demo=!!r.demo;});
+  d.meta=d.meta||{updatedAt:Date.now(),lastBackupAt:0,unbacked:0};
+  return d;
+}
+
+function load(){
+  try{
+    const raw=localStorage.getItem(KEY);
+    if(!raw){DB=seed();save(true);return;}
+    const d=JSON.parse(raw); DB=normalize(d);
+  }catch(e){
+    corrupted=true;
+    const bak=localStorage.getItem(BAK);
+    if(bak){try{DB=normalize(JSON.parse(bak));}catch(_){DB=seed();}}
+    else DB=seed();
+    setTimeout(()=>showCorrupt(),60);
+  }
+}
+function save(silent){
+  if(corrupted) return;
+  try{
+    localStorage.setItem(BAK,JSON.stringify(DB));
+    localStorage.setItem(KEY,JSON.stringify(DB));
+    if(!silent){DB.meta.updatedAt=Date.now();localStorage.setItem(KEY,JSON.stringify(DB));}
+  }catch(e){ showStorageError(e); }
+}
+function showStorageError(e){
+  toast('存储失败：'+ (e&&e.name==='QuotaExceededError'?'空间已满':'浏览器限制/隐私模式') +'，请用「数据」页导出备份');
+}
+function showCorrupt(){
+  const app=$('#app'); if(!app) return;
+  app.innerHTML=`<div class="banner" style="background:var(--red)">⚠️ 检测到本地数据损坏。已尝试从自动备份恢复；如仍有问题，可前往「数据」页下载原始文件或清空重置。<span class="x" onclick="go('data')">→</span></div>`+app.innerHTML;
+}
+
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2200);}
+function toggleTheme(){const r=document.documentElement;r.setAttribute('data-theme',r.getAttribute('data-theme')==='dark'?'light':'dark');try{localStorage.setItem('bidparser_theme',r.getAttribute('data-theme'));}catch(e){}}
+
+/* ---------- extraction ---------- */
+function ctx(text,idx,len){
+  const s=Math.max(0,idx-40), e=Math.min(text.length,idx+len+40);
+  return (s>0?'…':'')+text.slice(s,e).trim()+(e<text.length?'…':'');
+}
+function extractClauses(text){
+  if(!text||!text.trim()) return [];
+  const out=[];
+  const add=(type,txt,imp)=>{ if(txt&&txt.trim()) out.push({id:uid(),type,label:TYPES[type].label,text:txt.trim().slice(0,600),important:!!imp,note:''}); };
+  // 日期时间
+  const dtRe=/(?:投标截止|开标|递交投标文件|截止时间|投标截止时间|开标时间)[^。\n；;]{0,28}?((?:20\d{2}\s*[-年./]\s*\d{1,2}\s*[-月./]\s*\d{1,2}\s*[日号]?\s*(?:[上下]午)?\s*\d{1,2}\s*[:：]\s*\d{2})|(?:20\d{2}\s*[-年./]\s*\d{1,2}\s*[-月./]\s*\d{1,2}))/g;
+  let m; while((m=dtRe.exec(text))){ add('deadline',ctx(text,m.index,m[1].length),true); }
+  // 保证金
+  const depRe=/(?:投标)?保证金[^。\n；;]{0,40}?(?:人民币)?\s*([\d,]+(?:\.\d+)?)\s*(?:万元|万|元)/g;
+  while((m=depRe.exec(text))){ add('deposit',ctx(text,m.index,m[0].length),true); }
+  // 评分权重
+  const scRe=/(技术|商务|报价|价格|综合|资信|方案)[^。\n；;]{0,18}?(?:权重|占|比例|为)\s*(\d{1,3})\s*%/g;
+  while((m=scRe.exec(text))){ add('score',ctx(text,m.index,m[0].length)); }
+  // 工期/期限（段落正则，兼容无换行大段文本）
+  const termRe=/(?:工期|合同期限|服务期限|交货期|竣工|交货)[^。\n；;]{0,30}?(\d+)\s*(?:个?\s*天|个月|月|年)/g;
+  while((m=termRe.exec(text))){ add('term',ctx(text,m.index,m[0].length)); }
+  // 关键词滑动窗口（全文，兼容无换行）
+  const kw=(type,re,imp)=>{ let k; while((k=re.exec(text))){ add(type,ctx(text,k.index,k[0].length),imp); } };
+  kw('reject',/(?:废标|无效投标|否决投标|视为放弃|取消投标资格|按废标处理)/g,true);
+  kw('qual',/(?:资质|ISO|体系证书|认证证书|类似业绩|注册资金|注册资本|联合体|信用等级)/g,false);
+  kw('pay',/(?:付款|支付|进度款|预付款|尾款|结算|质保金)/g,false);
+  // 去重（同 text）
+  const seen=new Set(); const uniq=[];
+  out.forEach(c=>{const k=c.text;if(!seen.has(k)){seen.add(k);uniq.push(c);}});
+  return uniq;
+}
+
+/* ---------- actions ---------- */
+function runParse(){
+  const text=$('#srcText').value;
+  const name=$('#srcName').value.trim()||('未命名解析 '+today());
+  if(!text.trim()){toast('请先粘贴招标文本');return;}
+  current={name,text,clauses:extractClauses(text)};
+  save(true);
+  UI.tab='parse'; renderParse();
+  toast('已提取 '+current.clauses.length+' 条关键条款');
+}
+function setClauseNote(id,v){ if(!current)return; const c=current.clauses.find(x=>x.id===id); if(c){c.note=v;} }
+function toggleImp(id){ if(!current)return; const c=current.clauses.find(x=>x.id===id); if(c){c.important=!c.important; renderParse();} }
+function delClause(id){ if(!current)return; current.clauses=current.clauses.filter(x=>x.id!==id); renderParse(); }
+function addManual(){
+  const t=$('#manualType').value, txt=$('#manualText').value.trim();
+  if(!txt){toast('请输入条款内容');return;}
+  if(!current) current={name:$('#srcName').value.trim()||'未命名解析',text:$('#srcText').value,clauses:[]};
+  current.clauses.push({id:uid(),type:t,label:TYPES[t].label,text:txt,important:false,note:''});
+  $('#manualText').value=''; renderParse();
+}
+function saveCurrent(){
+  if(!current||!current.clauses.length){toast('暂无可保存的条款');return;}
+  const rec={id:uid(),name:current.name,text:current.text,clauses:current.clauses.map(c=>({...c})),createdAt:Date.now(),demo:false};
+  DB.records.unshift(rec); DB.meta.unbacked=(DB.meta.unbacked||0)+1; save();
+  current=null; toast('已保存为历史记录'); go('history');
+}
+function loadRec(id){ const r=DB.records.find(x=>x.id===id); if(!r)return; current={name:r.name,text:r.text,clauses:r.clauses.map(c=>({...c}))}; go('parse'); toast('已载入：'+r.name); }
+function delRec(id){ DB.records=DB.records.filter(x=>x.id!==id); save(); renderHistory(); toast('已删除记录'); }
+function clearDemo(){ const n=DB.records.filter(r=>r.demo).length; DB.records=DB.records.filter(r=>!r.demo); save(); renderHistory(); toast('已清空 '+n+' 条演示数据'); }
+
+function runCompare(){
+  const ta=$('#cmpA').value, tb=$('#cmpB').value;
+  UI.cmpA=extractClauses(ta); UI.cmpB=extractClauses(tb);
+  renderCompare();
+}
+
+/* ---------- export ---------- */
+function md(rec){
+  let s=`# ${rec.name}\n\n> 提取于 ${new Date(rec.createdAt).toLocaleString('zh-CN')}\n\n`;
+  Object.keys(TYPES).forEach(t=>{
+    const cs=rec.clauses.filter(c=>c.type===t);
+    if(!cs.length) return;
+    s+=`## ${TYPES[t].label}\n`;
+    cs.forEach(c=>{ s+=`- ${c.important?'⭐ ':''}${c.text}${c.note?'\n  - 备注：'+c.note:''}\n`; });
+    s+='\n';
+  });
+  return s;
+}
+function exportJSON(){ const blob=new Blob([JSON.stringify(DB,null,2)],{type:'application/json'}); dl(blob,'招标拆解_备份_'+today()+'.json'); DB.meta.lastBackupAt=Date.now();DB.meta.unbacked=0;save(true);toast('已导出 JSON 备份'); }
+function exportRec(id){ const r=DB.records.find(x=>x.id===id); if(!r)return; const blob=new Blob([md(r)],{type:'text/markdown'}); dl(blob,r.name+'.md'); toast('已导出 Markdown'); }
+function exportCurrentMD(){ if(!current)return; const blob=new Blob([md(current)],{type:'text/markdown'}); dl(blob,current.name+'.md'); }
+function dl(blob,name){ const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),2000); }
+function importJSON(ev){ const f=ev.target.files[0]; if(!f)return; const r=new FileReader(); r.onload=()=>{ try{ const d=normalize(JSON.parse(r.result)); d.records.forEach(x=>x.demo=false); d.meta=d.meta||DB.meta; DB.records=d.records.concat(DB.records); save(); renderHistory(); toast('已导入 '+d.records.length+' 条记录'); }catch(e){ toast('导入失败：文件格式错误'); } ev.target.value=''; }; r.readAsText(f); }
+function wipeAll(){ if(!confirm('确定清空全部解析记录？此操作不可撤销。'))return; DB={records:[],meta:{updatedAt:Date.now(),lastBackupAt:0,unbacked:0}}; save(); current=null; go('history'); toast('已清空全部数据'); }
+
+/* ---------- render ---------- */
+const TABS=[{k:'parse',n:'解析'},{k:'compare',n:'比对'},{k:'history',n:'历史'},{k:'data',n:'数据'}];
+function go(t){UI.tab=t;$('#viewTitle').textContent=TABS.find(x=>x.k===t).n;renderView();window.scrollTo(0,0);document.getElementById('sidebar').classList.remove('open');}
+function renderView(){const h=render[UI.tab]();$('#app').innerHTML=h; if(UI.tab==='parse')renderParse(); if(UI.tab==='history')renderHistory(); if(UI.tab==='compare')renderCompare(); if(UI.tab==='data')renderData(); $('#navHist').textContent=DB.records.length;}
+
+function clauseCard(c){ const col=TYPES[c.type].color; const imp=c.important;
+  return `<div class="clause ${imp?'imp':''}">
+    <div class="ctop">
+      <span class="tag" style="background:${col}">${esc(c.label)}</span>
+      <span class="star ${imp?'on':''}" onclick="toggleImp('${c.id}')">${imp?'★':'☆'}</span>
+      <span class="del" onclick="delClause('${c.id}')">删除</span>
+    </div>
+    <div class="body">${esc(c.text)}</div>
+    <input class="note" placeholder="备注（可选）" value="${esc(c.note)}" onchange="setClauseNote('${c.id}',this.value)" style="margin-top:8px">
+  </div>`;
+}
+function renderParse(){
+  if(UI.tab!=='parse')return;
+  const has=current&&current.clauses&&current.clauses.length;
+  $('#app').innerHTML=`
+  <div class="view-head"><h2>关键条款提取</h2><span class="description desc">粘贴招标公告/招标文件，自动识别时间、保证金、资质、评分、废标、工期、付款等关键条款</span></div>
+  <div class="panel">
+    <div class="field" style="margin-bottom:10px"><label>项目名称</label><input id="srcName" value="${current?esc(current.name):''}" placeholder="如：某市智慧园区信息化项目"></div>
+    <div class="field" style="margin-bottom:12px"><label>招标文本</label><textarea id="srcText" style="min-height:180px" placeholder="在此粘贴招标文件正文…">${current?esc(current.text):''}</textarea></div>
+    <div class="row">
+      <button class="btn primary" onclick="runParse()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3v18l15-9z"/></svg>解析文本</button>
+      <button class="btn" onclick="loadSeed()">载入示例</button>
+      <button class="btn" onclick="current=null;renderParse();toast('已清空')">清空</button>
+    </div>
+  </div>
+  <div class="panel-title" style="margin:18px 0 12px"><h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h10"/></svg>提取结果 ${has?('· '+current.clauses.length+' 条'):''}</h3></div>
+  ${has?current.clauses.map(clauseCard).join(''):'<div class="hint">尚无提取结果。粘贴文本后点击「解析文本」。</div>'}
+  ${has?`<div class="row" style="margin-top:14px">
+    <button class="btn primary" onclick="saveCurrent()">保存到历史</button>
+    <button class="btn" onclick="exportCurrentMD()">导出 Markdown</button>
+  </div>`:''}
+  <div class="panel" style="margin-top:18px">
+    <div class="panel-title"><h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>手动添加条款</h3></div>
+    <div class="row">
+      <select id="manualType" class="field" style="max-width:200px">${Object.keys(TYPES).map(t=>`<option value="${t}">${TYPES[t].label}</option>`).join('')}</select>
+      <input id="manualText" class="field" placeholder="输入条款原文…">
+      <button class="btn primary" onclick="addManual()">添加</button>
+    </div>
+  </div>`;
+}
+function loadSeed(){ $('#srcText').value=seed().records[0].text; $('#srcName').value=seed().records[0].name; toast('已载入示例文本'); }
+
+function renderCompare(){
+  const A=UI.cmpA||[], B=UI.cmpB||[];
+  const onlyA=A.filter(a=>!B.some(b=>b.text===a.text));
+  const onlyB=B.filter(b=>!A.some(a=>a.text===b.text));
+  const col =x=>`<div class="clause ${x.important?'imp':''}" style="margin-bottom:8px"><div class="ctop"><span class="tag" style="background:${TYPES[x.type].color}">${esc(x.label)}</span></div><div class="body">${esc(x.text)}</div></div>`;
+  $('#app').innerHTML=`
+  <div class="view-head"><h2>双文档比对</h2><span class="desc">分别粘贴两份招标文件，自动找出各自独有条款（差异高亮）</span></div>
+  <div class="panel"><div class="cmp-grid">
+    <div><div class="field"><label>文档 A</label><textarea id="cmpA" style="min-height:200px" placeholder="粘贴第一份招标文本…">${esc($('#cmpA')?$('#cmpA').value:'')}</textarea></div></div>
+    <div><div class="field"><label>文档 B</label><textarea id="cmpB" style="min-height:200px" placeholder="粘贴第二份招标文本…">${esc($('#cmpB')?$('#cmpB').value:'')}</textarea></div></div>
+  </div><div class="row" style="margin-top:12px"><button class="btn primary" onclick="runCompare()">开始比对</button></div></div>
+  ${(A.length||B.length)?`<div class="cmp-grid">
+    <div class="cmp-col"><h4>仅 A 独有（${onlyA.length}）</h4>${onlyA.length?onlyA.map(x=>col({...x})).join('').replace('class="clause','class="clause diff-del'):'<div class="hint">无</div>'}</div>
+    <div class="cmp-col"><h4>仅 B 独有（${onlyB.length}）</h4>${onlyB.length?onlyB.map(x=>col({...x})).join('').replace('class="clause','class="clause diff-add'):'<div class="hint">无</div>'}</div>
+  </div>`:'<div class="hint" style="margin-top:14px">填写两份文本后点击「开始比对」。</div>'}`;
+}
+
+function renderHistory(){
+  $('#app').innerHTML=`
+  <div class="view-head"><h2>历史解析</h2><span class="desc">${DB.records.length} 份记录 · 点击载入继续编辑</span></div>
+  ${DB.records.length?DB.records.map(r=>`<div class="rec-item" onclick="loadRec('${r.id}')">
+    <div class="meta"><b>${esc(r.name)}</b><small>${new Date(r.createdAt).toLocaleDateString('zh-CN')} · ${r.clauses.length} 条条款${r.demo?' · 演示':''}</small></div>
+    <span class="cnt">${r.clauses.length}</span>
+    <span class="del" onclick="event.stopPropagation();delRec('${r.id}')" style="margin-left:10px">删除</span>
+  </div>`).join(''):'<div class="warn">暂无记录。去「解析」页粘贴文本开始，或点击「载入示例」。</div>'}
+  ${DB.records.some(r=>r.demo)?`<div class="row" style="margin-top:14px"><button class="btn danger" onclick="clearDemo()">清空演示数据</button></div>`:''}`;
+}
+
+function renderData(){
+  const size=Math.round(JSON.stringify(DB).length/1024);
+  $('#app').innerHTML=`
+  <div class="view-head"><h2>数据管理</h2><span class="desc">本地优先 · 输入即保存</span></div>
+  ${(DB.meta.unbacked||0)>=20?`<div class="banner">⚠️ 已新增 ${DB.meta.unbacked} 条未备份记录，建议导出 JSON 备份。<button onclick="exportJSON()">立即备份</button><span class="x" onclick="this.parentNode.remove()">×</span></div>`:''}
+  <div class="grid3" style="margin-bottom:16px">
+    <div class="stat"><div class="n">${DB.records.length}</div><div class="l">解析记录</div></div>
+    <div class="stat"><div class="n">${DB.records.reduce((a,r)=>a+r.clauses.length,0)}</div><div class="l">提取条款总数</div></div>
+    <div class="stat"><div class="n">${size}KB</div><div class="l">本地存储占用</div></div>
+  </div>
+  <div class="panel">
+    <div class="panel-title"><h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l4-4m-4 4l-4-4"/><path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>备份与恢复</h3></div>
+    <div class="row">
+      <button class="btn primary" onclick="exportJSON()">导出 JSON 备份</button>
+      <button class="btn" onclick="document.getElementById('fileInput').click()">导入合并</button>
+      <button class="btn danger" onclick="wipeAll()">清空全部</button>
+    </div>
+    <div class="hint" style="margin-top:12px">导入会与现有记录合并（按 id 去重）。若本地数据损坏，本页提供下载原始文件与清空重置。</div>
+  </div>`;
+}
+const render={parse:renderParse,compare:renderCompare,history:renderHistory,data:renderData};
+
+/* boot */
+try{const th=localStorage.getItem('bidparser_theme');if(th)document.documentElement.setAttribute('data-theme',th);}catch(e){}
+$('#topDate').textContent=new Date().toLocaleDateString('zh-CN',{month:'long',day:'numeric',weekday:'long'});
+load();
+renderView();</script>
+</body>
+</html>

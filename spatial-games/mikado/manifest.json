@@ -1,0 +1,17 @@
+{
+  "short_name": "Mikado",
+  "version": "0.2.2",
+  "name": "Mikado",
+  "description": "3D Spatial Reasoning Game.",
+  "icons": [
+    {
+      "src": "media/icon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ],
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#151515",
+  "theme_color": "#151515"
+}
