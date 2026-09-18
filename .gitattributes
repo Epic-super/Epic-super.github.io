@@ -1,0 +1,13 @@
+# 全局强制 LF：根治 CRLF/LF 换行符漂移。
+# 背景：core.autocrlf=true 会把仓库内 LF 文件检出为工作树 CRLF，
+# 而脚本/工具按字节读写易产生不一致（曾导致 1.0.144 的 949 行全量 diff 事故）。
+# 公开站（Epic-super.github.io）本就存 LF，统一 LF 后无运行时差异，且 diff 自动收敛为真实改动。
+* text=auto eol=lf
+
+# LFS：自考资料 PDF（二进制约 600MB，走 LFS；-text 标记二进制避免换行符改写）
+materials/408/**/*.pdf filter=lfs diff=lfs merge=lfs -text
+materials/自考/Python课程讲义/**/*.pdf filter=lfs diff=lfs merge=lfs -text
+# 2026-08-28 移除 world/models/**/*.glb 的 LFS 属性：
+# GitHub Pages 不解析 LFS 指针（吐 133B 指针→引导员 NPC 消失），
+# character.glb(34MB) 改普通 blob 入库（<100MB 上限，Pages 可直接服务）。
+# 若未来再有大 glb 需走 LFS，务必记得公开站不可用（或改为 CDN 托管）。

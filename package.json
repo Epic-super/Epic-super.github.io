@@ -1,0 +1,6 @@
+{
+  "name": "workbench",
+  "private": true,
+  "type": "module",
+  "description": "统一指挥台 · 小待 — 原生 ESM 模块化（零构建）"
+}

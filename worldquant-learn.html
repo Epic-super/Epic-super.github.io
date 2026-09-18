@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="app-version" content="1.0.0">
+<title>世坤量化学习台 · 小待</title>
+<style>
+  :root{
+    --bg:#1D1F27; --bg2:#23262F; --card:#2A2E3A; --line:#393E4C;
+    --txt:#E8EAF0; --mut:#9AA0B0; --acc1:#FF6B6B; --acc2:#4ECDC4; --tag:#3A3F4E;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif}
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:980px;margin:0 auto;padding:24px 18px 70px}
+  header{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:6px}
+  .logo{width:42px;height:42px;border-radius:11px;background:linear-gradient(135deg,var(--acc1),var(--acc2));display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+  .logo svg{width:24px;height:24px;fill:#fff}
+  h1{font-size:22px;font-weight:600;letter-spacing:.5px}
+  .sub{color:var(--mut);font-size:13px;margin-top:2px}
+
+  /* 免责声明 */
+  .disclaim{margin:16px 0;background:rgba(255,107,107,.09);border:1px solid rgba(255,107,107,.35);border-left:4px solid var(--acc1);border-radius:12px;padding:13px 15px;font-size:12.5px;color:var(--mut);line-height:1.7}
+  .disclaim b{color:var(--acc1);font-weight:600}
+  .disclaim .tagline{display:block;font-size:13px;font-weight:600;color:var(--txt);margin-bottom:5px}
+
+  .sec{margin-top:26px}
+  .sec h2{font-size:17px;font-weight:600;display:flex;align-items:center;gap:9px;margin-bottom:4px}
+  .sec h2 .n{width:24px;height:24px;border-radius:7px;background:var(--tag);color:var(--acc2);font-size:13px;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+  .sec .hint{color:var(--mut);font-size:12.5px;margin-bottom:14px;line-height:1.6}
+
+  /* 概念库 accordion */
+  details.term{margin-bottom:9px;background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  details.term summary{cursor:pointer;padding:13px 15px;font-size:14px;font-weight:600;display:flex;align-items:center;gap:9px;list-style:none}
+  details.term summary::-webkit-details-marker{display:none}
+  details.term summary .caret{color:var(--mut);transition:.15s;font-size:12px;flex:0 0 auto}
+  details.term[open] summary .caret{transform:rotate(90deg)}
+  details.term summary .en{color:var(--acc2);font-weight:400;font-size:12.5px}
+  details.term .body{padding:2px 15px 14px;color:var(--mut);font-size:13px;line-height:1.75;border-top:1px solid var(--line)}
+
+  /* 学习路径 */
+  .path{display:grid;gap:10px}
+  .step{display:flex;gap:13px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:13px 15px}
+  .step .num{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--acc1),var(--acc2));color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+  .step h3{font-size:14px;font-weight:600;margin-bottom:5px}
+  .step p{font-size:12.5px;color:var(--mut);line-height:1.65}
+  .step ul{margin:7px 0 0;padding-left:17px;display:grid;gap:4px}
+  .step li{font-size:12.5px;color:var(--mut);line-height:1.6}
+  .step li b{color:var(--txt);font-weight:500}
+  .step li.done{color:var(--acc2)}
+  .step li.done::marker{content:"✓ "}
+
+  /* 分栏学习工作台 */
+  .split{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .slot{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column}
+  .slot h3{font-size:14px;font-weight:600;margin-bottom:4px;display:flex;align-items:center;gap:8px}
+  .slot .hint{color:var(--mut);font-size:11.5px;margin-bottom:10px;line-height:1.6}
+  .learnframe{margin-top:12px;border:1px solid var(--line);border-radius:11px;overflow:hidden;background:var(--bg2);min-height:420px;position:relative;flex:1}
+  .learnframe iframe{width:100%;height:100%;border:0;display:block}
+  .embedbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .notice{margin-top:10px;font-size:12px;color:var(--mut);line-height:1.6;background:rgba(78,205,196,.08);border:1px solid rgba(78,205,196,.3);border-radius:10px;padding:9px 12px}
+  .notice b{color:var(--acc2)}
+
+  /* 官方资源 */
+  .links{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+  .link-card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 15px;display:flex;flex-direction:column;gap:7px;transition:.15s}
+  .link-card:hover{border-color:var(--acc2);transform:translateY(-2px)}
+  .link-card .t{font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px}
+  .link-card .badge{font-size:10.5px;color:#10241f;background:var(--acc2);padding:2px 7px;border-radius:9px;font-weight:700}
+  .link-card p{font-size:12.5px;color:var(--mut);line-height:1.6;flex:1}
+  .link-card .goto{font-size:12.5px;color:var(--acc2)}
+
+  /* 学习工具 */
+  .tools{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .tool{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
+  .tool h3{font-size:14px;font-weight:600;margin-bottom:11px;display:flex;align-items:center;gap:8px}
+  label{font-size:12px;color:var(--mut);display:block;margin:9px 0 4px}
+  input,textarea,select{width:100%;padding:9px 11px;background:var(--bg2);border:1px solid var(--line);border-radius:9px;color:var(--txt);font-size:13.5px;outline:none;font-family:inherit}
+  input:focus,textarea:focus,select:focus{border-color:var(--acc2)}
+  textarea{resize:vertical;min-height:56px}
+  .btn{margin-top:10px;padding:9px 14px;border:none;border-radius:9px;background:linear-gradient(135deg,var(--acc1),var(--acc2));color:#fff;font-size:13px;font-weight:600;cursor:pointer}
+  .btn:active{opacity:.85}
+  .btn.ghost{background:var(--bg2);color:var(--mut);border:1px solid var(--line)}
+  .list{display:grid;gap:8px;margin-top:12px}
+  .item{background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:12.5px;line-height:1.55;color:var(--txt);display:grid;gap:3px}
+  .item .meta{color:var(--mut);font-size:11px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .item .del{margin-left:auto;color:var(--acc1);cursor:pointer;font-size:12px;background:none;border:none}
+  .item .del:hover{text-decoration:underline}
+  .count-badge{color:var(--acc2);font-weight:700}
+  .pg{display:grid;gap:8px;margin-top:12px}
+  .pgrow{display:flex;align-items:center;gap:10px;font-size:13px;background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:9px 12px}
+  .pgrow .nm{flex:1}
+  .pgbar{width:130px;height:8px;border-radius:5px;background:var(--tag);overflow:hidden;flex:0 0 auto}
+  .pgbar i{display:block;height:100%;background:linear-gradient(90deg,var(--acc1),var(--acc2));border-radius:5px}
+  .pgrow .pct{width:34px;text-align:right;color:var(--mut);font-size:12px}
+  .pgrow .minus{color:var(--acc1);cursor:pointer;font-size:16px;line-height:1;background:none;border:none}
+  .addrow{display:flex;gap:8px;margin-top:10px}
+  .addrow input{flex:1}
+  .stats{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px;font-size:12.5px;color:var(--mut)}
+  .stats b{color:var(--acc2)}
+
+  .footer{margin-top:32px;font-size:12px;color:var(--mut);text-align:center;line-height:1.7;border-top:1px solid var(--line);padding-top:16px}
+
+  @media(max-width:680px){
+    .tools{grid-template-columns:1fr}
+    h1{font-size:19px}
+    .pgbar{width:80px}
+  }
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo"><svg viewBox="0 0 24 24"><path d="M4 3h2v18H4zM20 3h2v18h-2zM7 12h4v2H7zM13 8h4v2h-4zM13 12h4v2h-4zM7 16h4v2H7z"/></svg></div>
+    <div>
+      <h1>世坤量化学习台</h1>
+      <div class="sub">量化投资与因子研究的个人学习笔记 · 原创整理 · 仅供学习研究</div>
+    </div>
+  </header>
+
+  <div class="disclaim">
+    <span class="tagline">⚠️ 免责声明 · 请先阅读</span>
+    本页面是<b>个人学习笔记</b>，与世坤（WorldQuant）无任何官方关联，未获其背书、许可或赞助。「世坤」「WorldQuant」「BRAIN」等商标归各自所有者所有。<br>
+    页面内所有概念解释、学习路径与方法均<b>为自己的话原创整理</b>，不含任何平台受版权保护的课程、教程或专有数据原文。站内个人工具仅将数据保存在<b>你自己的浏览器</b>（localStorage），不连通任何平台、不自动提交任何因子。<br>
+    涉及外部资源一律为新标签页打开官方公网页面的直达链接，请以官方平台实际条款为准。
+  </div>
+
+  <!-- 基础概念库 -->
+  <section class="sec">
+    <h2><span class="n">1</span>量化基础概念库</h2>
+    <div class="hint">用大白话整理的核心术语，方便零基础入门时随时查。</div>
+    <details class="term" open>
+      <summary><span class="caret">▸</span>什么叫「量化投资」<span class="en">Quantitative Investing</span></summary>
+      <div class="body">就是写规则（通常会成为程序/模型）来做投资决策，而不是靠人的直觉拍脑袋。核心是：用历史数据检验一个「假设」是否真的成立，能重复、能量化地执行，并且少数几次人的主观情绪不太容易干扰它。量化不是「稳赚」，而是「可验证、可回测、有逻辑的一套决策系统」。</div>
+    </details>
+    <details class="term">
+      <summary><span class="caret">▸</span>因子 <span class="en">Factor</span></summary>
+      <div class="body">一个可以「量化衡量某只股票某方面特质」的指标，比如：市盈率（估值）、过去一个月的涨幅（动量）、波动率、成交额排名等。一个因子本身不是交易策略，它只是一个特征：我们假设「在某一方面表现出色的股票，未来更可能涨/跌」，然后用历史数据去验证这个假设。</div>
+    </details>
+    <details class="term">
+      <summary><span class="caret">▸</span>Alpha 与 Alpha 阿尔法</summary>
+      <div class="body">指「相对基准（比如大盘）超出/赚到的超额收益」。说得更日常一点：如果大盘涨了，你的策略涨得更多，那多出来的部分就叫 alpha。在因子研究里，一个可以被验证、能贡献持续超额收益的信号配方，就被称为一个 alpha。做因子研究，本质就是在主动挖掘「有逻辑、且经得起回测」的 alpha 来源。</div>
+    </details>
+    <details class="term">
+      <summary><span class="caret">▸</span>回测 <span class="en">Backtest</span></summary>
+      <div class="body">拿过去一段时间的历史数据，把手里的策略/因子「假装跑一遍」，看看如果当时真这么干，结果会怎样。回测能回答「这个想法到底可不可行」。但要注意：回测结果好 ≠ 实盘好，因为它容易受到「数据偏差」「幸存者偏差」「过拟合」（把规则拟合得太贴合历史反而失去解释能力）的影响。</div>
+    </details>
+    <details class="term">
+      <summary><span class="caret">▸</span>夏普比率 <span class="en">Sharpe Ratio</span></summary>
+      <div class="body">一个常用的「赚钱效率」指标：赚到的超额收益，摊到每一份波动风险头上。公式大致是「超额收益 ÷ 波动率」。夏普越高，通常代表「单位风险换来更多收益」。但它是单一数字，只看它容易忽略回撤、尾部风险，所以一般要结合最大回撤、胜率等一起看。</div>
+    </details>
+    <details class="term">
+      <summary><span class="caret">▸</span>换手率 <span class="en">Turnover</span></summary>
+      <div class="body">描述策略「多久折腾一次持仓」。换手太高，交易成本（手续费、冲击成本）会被吃掉一大截，实盘往往不如回测；换手太低，信号又可能跟不上市场变化。研究因子时要对「看起来很赚但每天大换手」的信号保持警惕，这是最容易被交易成本击穿的一类。</div>
+    </details>
+    <details class="term">
+      <summary><span class="caret">▸</span>选股 vs 择时</summary>
+      <div class="body">选股（cross-section）：在同一时刻，从众多股票里挑出「应该买的」和「应该避开/做空」的——多因子打分、排序就是典型的选股思路。择时（time-series）：决定「现在该进场还是观望」。初学量化，一般建议先从「选股/截面排序」入手，思路更清晰、也更贴近因子研究的常规玩法。</div>
+    </details>
+    <details class="term">
+      <summary><span class="caret">▸</span>过拟合 <span class="en">Overfitting</span></summary>
+      <div class="body">为了让回测曲线好看，把规则雕琢得过于精细、几乎背下了历史走势。后果是「听着很神，换一段数据立刻失灵」。它的典型信号包括：简单逻辑解释不了的超高收益、参数稍微一动结果就崩、换了样本区间就垮。研究时尽量保持信号简洁、逻辑自洽。</div>
+    </details>
+  </section>
+
+  <!-- 因子研究学习路径 -->
+  <section class="sec">
+    <h2><span class="n">2</span>因子研究学习路径</h2>
+    <div class="hint">一条从零到入门的自用方法论，每步都附自检清单，打勾可本地记录进度。</div>
+    <div class="path" id="pathList"></div>
+  </section>
+
+  <!-- 官方资源直达 -->
+  <section class="sec">
+    <h2><span class="n">3</span>官方资源直达</h2>
+    <div class="hint">以下均为世坤官方公网页面的外链，点击在新标签打开；进入平台需遵循其注册与使用条款，本站不代为登录或操作。</div>
+    <div class="links">
+      <a class="link-card" href="https://www.worldquant.com/" target="_blank" rel="noopener noreferrer">
+        <div class="t">世坤官网 <span class="badge">官方</span></div>
+        <p>了解世坤公司、业务与研究方向的官方主页。</p>
+        <div class="goto">worldquant.com ↗</div>
+      </a>
+      <a class="link-card" href="https://platform.worldquantbrain.com/" target="_blank" rel="noopener noreferrer">
+        <div class="t">BRAIN 平台 <span class="badge">官方</span></div>
+        <p>因子研究平台入口：注册后在上面建模、回测、仿真提交 alpha 想法。</p>
+        <div class="goto">platform.worldquantbrain.com ↗</div>
+      </a>
+      <a class="link-card" href="https://platform.worldquantbrain.com/learn" target="_blank" rel="noopener noreferrer">
+        <div class="t">BRAIN Learn <span class="badge">官方 · 课程</span></div>
+        <p>官方在线学习与课程入口，登录后即可按官方指引系统学习。需在其平台内使用。</p>
+        <div class="goto">platform.worldquantbrain.com/learn ↗</div>
+      </a>
+      <a class="link-card" href="https://www.worldquant.com/brain/" target="_blank" rel="noopener noreferrer">
+        <div class="t">BRAIN 介绍 <span class="badge">官方</span></div>
+        <p>关于 BRAIN 全球化因子研究项目与仿真流程的介绍页。</p>
+        <div class="goto">worldquant.com/brain ↗</div>
+      </a>
+      <a class="link-card" href="https://www.worldquant.com/careers/" target="_blank" rel="noopener noreferrer">
+        <div class="t">招聘与项目 <span class="badge">官方</span></div>
+        <p>世坤相关项目与合作机会的官方入口（含量化相关社区性活动）。</p>
+        <div class="goto">worldquant.com/careers ↗</div>
+      </a>
+    </div>
+  </section>
+
+  <!-- BRAIN Learn 学习工作台 -->
+  <section class="sec">
+    <h2><span class="n">4</span>BRAIN Learn 学习工作台</h2>
+    <div class="hint">官方在线课程需在 BRAIN 平台内登录使用；平台通过浏览器安全策略<b>禁止了外部站点嵌入</b>（页面响应头带 <code>frame-ancestors 'self'</code>），因此这里采用「左：本地笔记 + 右：官方窗口」的分栏学习。若右栏被拦截为空白，请用上方按钮在官方页面打开继续学习。</div>
+    <div class="split">
+      <div class="slot left">
+        <h3>📒 我的学习笔记</h3>
+        <div class="hint">边看课程边记，自动保存在本机浏览器。</div>
+        <textarea id="learnNote" rows="10" placeholder="写下这节课的核心知识点、疑问、接下来想验证的方向…"></textarea>
+        <button class="btn ghost" onclick="saveLearnNote()" style="margin-right:8px">保存笔记</button>
+        <div class="hint" id="learnNoteHint" style="margin:8px 0 0;display:none">✓ 已保存到本地</div>
+      </div>
+      <div class="slot right">
+        <div class="embedbar">
+          <a class="btn" href="https://platform.worldquantbrain.com/learn" target="_blank" rel="noopener noreferrer">在新标签页打开官方 BRAIN Learn ↗</a>
+        </div>
+        <div class="learnframe">
+          <iframe id="learnFrame" src="https://platform.worldquantbrain.com/learn" title="BRAIN Learn 官方在线课程页面" sandbox=""></iframe>
+        </div>
+        <div class="notice">
+          若上方区域<b>空白或提示无法显示</b>，是平台禁止第三方嵌入所致（属正常与合规现象），请使用上方按钮<b>在官方页面登录后继续学习</b>；本站不保存你的账号信息、不抓取课程内容、不代替你操作平台。
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 个人学习工具 -->
+  <section class="sec">
+    <h2><span class="n">5</span>我的学习工具</h2>
+    <div class="hint">纯本地工具，数据只保存在你的浏览器（localStorage），不连接任何平台。</div>
+    <div class="tools">
+      <div class="tool">
+        <h3>📝 Alpha 想法记录</h3>
+        <label>想法标题</label>
+        <input id="ideaTitle" maxlength="60" placeholder="例如：低波高息的稳健信号">
+        <label>思路描述（支持几句话）</label>
+        <textarea id="ideaDesc" maxlength="500" placeholder="写下你的因子假设、数据维度、想验证的逻辑…"></textarea>
+        <button class="btn" onclick="addIdea()">保存想法</button>
+        <div class="list" id="ideaList"></div>
+      </div>
+
+      <div class="tool">
+        <h3>📈 仿真提交进度</h3>
+        <label>阶段名（每个 alpha 一条，可拆成多个阶段）</label>
+        <div class="addrow">
+          <input id="stageName" maxlength="40" placeholder="例如：alpha_001 初版回测">
+          <button class="btn" onclick="addStage()">+ 添加</button>
+        </div>
+        <div class="pg" id="stageList"></div>
+        <div class="stats" id="stageStats"></div>
+      </div>
+
+      <div class="tool">
+        <h3>✅ 学习打卡</h3>
+        <label>今天学/做了什么</label>
+        <input id="checkInText" maxlength="80" placeholder="例如：看完动量因子的概念笔记">
+        <button class="btn" onclick="addCheckIn()">打卡</button>
+        <div class="list" id="checkList"></div>
+      </div>
+
+      <div class="tool">
+        <h3>🗓 学习目标</h3>
+        <label>立一条当前阶段目标</label>
+        <input id="goalText" maxlength="80" placeholder="例如：本周完成一个可回测的因子假设">
+        <button class="btn" onclick="setGoal()">设定目标</button>
+        <div class="list" id="goalBox"></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="footer">
+    世坤量化学习台 · 个人原创学习笔记，视本为个人学习研究用途，与世坤（WorldQuant）无任何关联或背书。<br>
+    全部数据仅存于本地浏览器。涉及外部资源一律以官方平台的实际服务条款为准。
+  </div>
+</div>
+
+<script>
+/* ---------------- 常量与存储 ---------------- */
+const KEYS = {ideas:'wqhrn.ideas', stages:'wqhrn.stages', checks:'wqhrn.checks', goal:'wqhrn.goal', path:'wqhrn.path'};
+const now = () => new Date().toLocaleString('zh-CN', {hour12:false});
+function load(k, def){
+  try{return JSON.parse(localStorage.getItem(k)) ?? def;}catch(e){return def;}
+}
+function save(k, v){
+  localStorage.setItem(k, JSON.stringify(v));
+}
+
+/* ---------------- 第 2 节：学习路径（含自检打卡） ---------------- */
+const PATHS = [
+  {t:'理解市场与数据', p:'先明白股票数据长什么样：价格、成交量、市值、行业分类。学会用一张表格看多只股票在同一时刻的横截面排列。', c:['知道宽/窄、时间序列 vs 横截面的区别','能说出开盘价/收盘价/成交额的含义']},
+  {t:'理解因子与信号', p:'掌握「因子=可量化的特征、信号=我们想让市场怎么反应」。用真实直觉提出一个假设，例如「低波动股票往往更稳」。', c:['能举出 3 个常见因子类别','能写出一个自己的假设句式']},
+  {t:'掌握回测与评估', p:'学会如何把假设在历史数据上跑一遍，读懂收益、夏普、最大回撤、换手这几个数字，逐步建立「数值不行就换思路」的习惯。', c:['能说清夏普和最大回撤分别说明什么','能解释为什么高换手信号要提高警惕']},
+  {t:'警惕过拟合与数据缺陷', p:'养成统计洁癖：警惕幸存者偏差、参数雕花、样本外失灵。保持信号简洁、逻辑自洽、能用一句话讲清楚它是基于什么。', c:['能识别 2 个过拟合的典型信号','能解释幸存者偏差会怎样骗人']},
+  {t:'组合与提交实践', p:'把多个成熟信号组合起来、确定权重与换手，循序渐进地在目标研究平台实践，并把每次提交当作一次可复盘的学习实验。', c:['能讲清单个信号为什么不够','给自己定一个可衡量的学习里程碑']}
+];
+function renderPath(){
+  const done = load(KEYS.path, {});
+  document.getElementById('pathList').innerHTML = PATHS.map((s,i)=>{
+    const checks = s.c.map((c,j)=>{
+      const kd = !!done[i] && done[i][j];
+      return `<li class="${kd?'done':''}" onclick="togglePathCheck(${i},${j})" style="cursor:pointer">${c}</li>`;
+    }).join('');
+    return `<div class="step">
+      <div class="num">${i+1}</div>
+      <div><h3>${s.t}</h3><p>${s.p}</p><ul>${checks}</ul></div>
+    </div>`;
+  }).join('');
+}
+function togglePathCheck(i,j){
+  const done = load(KEYS.path, {});
+  done[i] = done[i] || {};
+  done[i][j] = !done[i][j];
+  save(KEYS.path, done);
+  renderPath();
+}
+
+/* ---------------- Alpha 想法记录 ---------------- */
+function renderIdeas(){
+  const list = load(KEYS.ideas, []);
+  const el = document.getElementById('ideaList');
+  if(!list.length){ el.innerHTML = `<div class="item" style="color:var(--mut)">还没有想法，从一个小假设开始吧。</div>`; return; }
+  el.innerHTML = list.map((it,i)=>`<div class="item">
+    <div style="font-weight:600;color:var(--txt)">${escapeHtml(it.t)}</div>
+    <div>${escapeHtml(it.d)}</div>
+    <div class="meta"><span>⏱ ${it.ts}</span><button class="del" onclick="delIdea(${i})">删除</button></div>
+  </div>`).join('');
+}
+function addIdea(){
+  const t = document.getElementById('ideaTitle').value.trim();
+  const d = document.getElementById('ideaDesc').value.trim();
+  if(!t){ alert('请先填写想法标题'); return; }
+  const list = load(KEYS.ideas, []);
+  list.unshift({t, d, ts:now()});
+  save(KEYS.ideas, list.slice(0,200));
+  document.getElementById('ideaTitle').value='';
+  document.getElementById('ideaDesc').value='';
+  renderIdeas();
+}
+function delIdea(i){
+  const list = load(KEYS.ideas, []);
+  list.splice(i,1);
+  save(KEYS.ideas, list);
+  renderIdeas();
+}
+
+/* ---------------- 仿真提交进度 ---------------- */
+function renderStages(){
+  const list = load(KEYS.stages, []);
+  const el = document.getElementById('stageList');
+  if(!list.length){ el.innerHTML = `<div class="item" style="color:var(--mut)">暂无阶段。添加一个研究阶段开始追踪。</div>`; }
+  else{
+    el.innerHTML = list.map((s,i)=>{
+      const pct = Math.max(0, Math.min(100, s.p||0));
+      return `<div class="pgrow">
+        <button class="minus" onclick="decStage(${i})" title="退一步">−</button>
+        <span class="nm">${escapeHtml(s.n)}</span>
+        <div class="pgbar"><i style="width:${pct}%"></i></div>
+        <span class="pct">${pct}%</span>
+        <button class="del" onclick="delStage(${i})" title="删除该阶段">✕</button>
+      </div>`;
+    }).join('');
+  }
+  const total = list.reduce((a,s)=>a+Math.max(0,Math.min(100,s.p||0)),0);
+  const avg = list.length ? Math.round(total/list.length) : 0;
+  const statEl = document.getElementById('stageStats');
+  statEl.innerHTML = `<span>阶段数 <b>${list.length}</b></span><span>平均进度 <b>${avg}%</b></span>`;
+}
+function addStage(){
+  const n = document.getElementById('stageName').value.trim();
+  if(!n){ alert('请先填写阶段名'); return; }
+  const list = load(KEYS.stages, []);
+  list.push({n, p:0});
+  save(KEYS.stages, list);
+  document.getElementById('stageName').value='';
+  renderStages();
+}
+function decStage(i){
+  const list = load(KEYS.stages, []);
+  list[i].p = Math.max(0, (list[i].p||0) - 10);
+  save(KEYS.stages, list);
+  renderStages();
+}
+function delStage(i){
+  const list = load(KEYS.stages, []);
+  list.splice(i,1);
+  save(KEYS.stages, list);
+  renderStages();
+}
+
+/* ---------------- 学习打卡 ---------------- */
+function renderChecks(){
+  const list = load(KEYS.checks, []);
+  const el = document.getElementById('checkList');
+  if(!list.length){ el.innerHTML = `<div class="item" style="color:var(--mut)">今天还没打卡。</div>`; return; }
+  el.innerHTML = list.slice(0,50).map((c,i)=>`<div class="item">
+    <div>${escapeHtml(c.t)}</div>
+    <div class="meta"><span>⏱ ${c.ts}</span><button class="del" onclick="delCheck(${i})">删除</button></div>
+  </div>`).join('');
+}
+function addCheckIn(){
+  const t = document.getElementById('checkInText').value.trim();
+  if(!t){ alert('先写一句今天学了什么'); return; }
+  const list = load(KEYS.checks, []);
+  list.unshift({t, ts:now()});
+  save(KEYS.checks, list.slice(0,300));
+  document.getElementById('checkInText').value='';
+  renderChecks();
+}
+function delCheck(i){
+  const list = load(KEYS.checks, []);
+  list.splice(i,1);
+  save(KEYS.checks, list);
+  renderChecks();
+}
+
+/* ---------------- 学习目标 ---------------- */
+function renderGoal(){
+  const g = load(KEYS.goal, []);
+  const el = document.getElementById('goalBox');
+  if(!g.length){ el.innerHTML = `<div class="item" style="color:var(--mut)">还没设定目标。</div>`; return; }
+  el.innerHTML = g.map((x,i)=>`<div class="item">
+    <div style="font-weight:600;color:var(--txt)">${escapeHtml(x.t)}</div>
+    <div class="meta"><span>⏱ ${x.ts}</span><button class="del" onclick="delGoal(${i})">删除</button></div>
+  </div>`).join('');
+}
+function setGoal(){
+  const t = document.getElementById('goalText').value.trim();
+  if(!t){ alert('先写一条目标'); return; }
+  const list = load(KEYS.goal, []);
+  list.unshift({t, ts:now()});
+  save(KEYS.goal, list.slice(0,100));
+  document.getElementById('goalText').value='';
+  renderGoal();
+}
+function delGoal(i){
+  const list = load(KEYS.goal, []);
+  list.splice(i,1);
+  save(KEYS.goal, list);
+  renderGoal();
+}
+
+/* ---------------- 安全输出 ---------------- */
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+/* ---------------- BRAIN Learn 本地笔记 ---------------- */
+const NOTE_KEY = 'wqhrn.learnnote';
+function saveLearnNote(){
+  const v = document.getElementById('learnNote').value;
+  localStorage.setItem(NOTE_KEY, v);
+  const hint = document.getElementById('learnNoteHint');
+  hint.style.display = 'block';
+  clearTimeout(saveLearnNote._t);
+  saveLearnNote._t = setTimeout(()=>{ hint.style.display='none'; }, 1800);
+}
+
+/* ---------------- 初始化 ---------------- */
+function init(){
+  renderPath();
+  renderIdeas();
+  renderStages();
+  renderChecks();
+  renderGoal();
+  const note = localStorage.getItem(NOTE_KEY);
+  if(note){
+    document.getElementById('learnNote').value = note;
+  }
+}
+init();
+</script>
+</body>
+</html>

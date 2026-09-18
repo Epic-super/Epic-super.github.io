@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FOLOTOY 配网</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 24px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #888;
+            margin-bottom: 32px;
+            font-size: 14px;
+        }
+        .step {
+            display: none;
+        }
+        .step.active {
+            display: block;
+        }
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 16px;
+        }
+        .btn-primary {
+            background: #007AFF;
+            color: #fff;
+        }
+        .btn-primary:hover {
+            background: #0056CC;
+        }
+        .btn-primary:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.2s;
+        }
+        input:focus {
+            outline: none;
+            border-color: #007AFF;
+        }
+        .status {
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 14px;
+            text-align: center;
+            display: none;
+        }
+        .status.show {
+            display: block;
+        }
+        .status.info {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        .status.success {
+            background: #e8f5e9;
+            color: #388e3c;
+        }
+        .status.error {
+            background: #ffebee;
+            color: #d32f2f;
+        }
+        .device-list {
+            margin-top: 16px;
+        }
+        .device-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 16px;
+            background: #f8f8f8;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .device-item:hover {
+            background: #e8e8e8;
+        }
+        .device-name {
+            font-weight: 500;
+            color: #333;
+        }
+        .device-rssi {
+            font-size: 12px;
+            color: #888;
+        }
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+    <div class="container">
+        <h1>FOLOTOY 配网</h1>
+        <p class="subtitle">通过蓝牙为设备配置 WiFi</p>
+
+        <div id="step1" class="step active">
+            <p style="color:#666; margin-bottom:16px; font-size:14px;">
+                请确保设备已进入配网模式（蓝灯闪烁），然后点击下方按钮扫描设备。
+            </p>
+            <button class="btn btn-primary" id="scanBtn">扫描 BLE 设备</button>
+            <div class="status" id="scanStatus"></div>
+            <div class="device-list" id="deviceList"></div>
+        </div>
+
+        <div id="step2" class="step">
+            <div class="form-group">
+                <label for="ssid">WiFi 名称</label>
+                <input type="text" id="ssid" placeholder="请输入 WiFi 名称" autocomplete="off">
+            </div>
+            <div class="form-group">
+                <label for="password">WiFi 密码</label>
+                <input type="password" id="password" placeholder="请输入 WiFi 密码">
+            </div>
+            <button class="btn btn-primary" id="connectBtn">连接 WiFi</button>
+            <div class="status" id="connectStatus"></div>
+        </div>
+
+        <div id="step3" class="step">
+            <div style="text-align:center; padding: 20px 0;">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#4caf50" stroke-width="2">
+                    <path d="M20 6L9 17l-5-5"/>
+                </svg>
+                <h2 style="margin-top:16px; color:#333;">配网成功</h2>
+                <p style="color:#888; margin-top:8px; font-size:14px;">设备已连接 WiFi，即将进入正常模式。</p>
+            </div>
+        </div>
+
+        <div id="step4" class="step">
+            <div style="text-align:center; padding: 20px 0;">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#f44336" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="8" x2="12" y2="12"/>
+                    <line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+                <h2 style="margin-top:16px; color:#333;">配网失败</h2>
+                <p style="color:#888; margin-top:8px; font-size:14px;" id="errorMsg">请检查 WiFi 信息后重试。</p>
+                <button class="btn btn-secondary" id="retryBtn">重新配网</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SERVICE_UUID = 0xFFFF;
+        const CHAR_SSID_UUID = 0xFF01;
+        const CHAR_PASS_UUID = 0xFF02;
+        const CHAR_STAT_UUID = 0xFF03;
+
+        let device = null;
+        let server = null;
+        let ssidChar = null;
+        let passChar = null;
+        let statChar = null;
+
+        function showStep(n) {
+            document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
+            document.getElementById('step' + n).classList.add('active');
+        }
+
+        function setStatus(id, type, message) {
+            const el = document.getElementById(id);
+            el.className = 'status show ' + type;
+            el.textContent = message;
+        }
+
+        async function scanDevices() {
+            const btn = document.getElementById('scanBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span>扫描中...';
+            setStatus('scanStatus', 'info', '正在搜索 FOLOTOY 设备...');
+
+            try {
+                device = await navigator.bluetooth.requestDevice({
+                    filters: [{ namePrefix: 'FOLOTOY_' }],
+                    optionalServices: [SERVICE_UUID]
+                });
+
+                device.addEventListener('gattserverdisconnected', () => {
+                    setStatus('scanStatus', 'error', '设备已断开连接');
+                    btn.disabled = false;
+                    btn.textContent = '扫描 BLE 设备';
+                });
+
+                setStatus('scanStatus', 'info', '正在连接设备...');
+                server = await device.gatt.connect();
+
+                const service = await server.getPrimaryService(SERVICE_UUID);
+                ssidChar = await service.getCharacteristic(CHAR_SSID_UUID);
+                passChar = await service.getCharacteristic(CHAR_PASS_UUID);
+                statChar = await service.getCharacteristic(CHAR_STAT_UUID);
+
+                await statChar.startNotifications();
+                statChar.addEventListener('characteristicvaluechanged', (e) => {
+                    const msg = new TextDecoder().decode(e.target.value);
+                    setStatus('connectStatus', 'info', msg);
+                });
+
+                showStep(2);
+            } catch (err) {
+                setStatus('scanStatus', 'error', '扫描失败: ' + err.message);
+                btn.disabled = false;
+                btn.textContent = '扫描 BLE 设备';
+            }
+        }
+
+        async function connectWifi() {
+            const ssid = document.getElementById('ssid').value.trim();
+            const password = document.getElementById('password').value;
+
+            if (!ssid) {
+                setStatus('connectStatus', 'error', '请输入 WiFi 名称');
+                return;
+            }
+
+            const btn = document.getElementById('connectBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span>连接中...';
+            setStatus('connectStatus', 'info', '正在发送 WiFi 信息...');
+
+            try {
+                await ssidChar.writeValue(new TextEncoder().encode(ssid));
+                await passChar.writeValue(new TextEncoder().encode(password));
+
+                setTimeout(() => {
+                    if (device && device.gatt.connected) {
+                        showStep(3);
+                        setTimeout(() => {
+                            device.gatt.disconnect();
+                        }, 3000);
+                    }
+                }, 5000);
+            } catch (err) {
+                setStatus('connectStatus', 'error', '连接失败: ' + err.message);
+                btn.disabled = false;
+                btn.textContent = '连接 WiFi';
+            }
+        }
+
+        document.getElementById('scanBtn').addEventListener('click', scanDevices);
+        document.getElementById('connectBtn').addEventListener('click', connectWifi);
+        document.getElementById('retryBtn').addEventListener('click', () => {
+            showStep(1);
+            document.getElementById('scanStatus').className = 'status';
+            document.getElementById('ssid').value = '';
+            document.getElementById('password').value = '';
+        });
+
+        if (!navigator.bluetooth) {
+            setStatus('scanStatus', 'error', '当前浏览器不支持 Web Bluetooth，请使用 Chrome/Edge。');
+            document.getElementById('scanBtn').disabled = true;
+        }
+    </script>
+</body>
+</html>

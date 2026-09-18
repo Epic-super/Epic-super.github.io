@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>How to Do Great Work · 方法论精华</title>
+<style>
+  :root{
+    --red:#C8102E;
+    --ink:#1A1A1A;
+    --muted:#6B6B6B;
+    --line:#ECECEC;
+    --bg:#FFFFFF;
+    --serif:Georgia,"Times New Roman","Songti SC","Noto Serif SC","Source Han Serif SC",serif;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei","Helvetica Neue",Arial,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--sans);
+    font-size:16px;
+    line-height:1.75;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+  }
+  .wrap{max-width:1060px;margin:0 auto;padding:0 24px;}
+
+  /* Header */
+  header{padding:64px 0 40px;border-bottom:1px solid var(--line);}
+  .kicker{
+    font-size:12px;letter-spacing:.28em;text-transform:uppercase;
+    color:var(--red);font-weight:600;margin-bottom:14px;
+  }
+  h1{
+    font-family:var(--serif);font-weight:600;font-size:clamp(30px,5vw,46px);
+    line-height:1.12;margin:0 0 12px;letter-spacing:.5px;
+  }
+  .sub{color:var(--muted);font-size:15px;}
+  .sub b{color:var(--ink);font-weight:600;}
+
+  /* Layout */
+  .layout{display:flex;gap:52px;align-items:flex-start;padding:48px 0 96px;}
+
+  /* TOC */
+  .toc{
+    position:sticky;top:32px;align-self:flex-start;
+    width:190px;flex:none;
+  }
+  .toc .toc-title{
+    font-size:11px;letter-spacing:.22em;text-transform:uppercase;
+    color:var(--muted);margin-bottom:14px;font-weight:600;
+  }
+  .toc button{
+    display:block;width:100%;text-align:left;background:none;border:0;
+    font-family:var(--sans);font-size:14px;color:var(--muted);
+    padding:9px 12px 9px 14px;margin:2px 0;cursor:pointer;
+    border-left:2px solid transparent;transition:color .18s,border-color .18s,background .18s;
+    line-height:1.35;
+  }
+  .toc button:hover{color:var(--ink);}
+  .toc button.active{color:var(--red);border-left-color:var(--red);font-weight:600;}
+
+  /* Main */
+  .main{flex:1;min-width:0;max-width:680px;}
+  section{padding:8px 0 56px;scroll-margin-top:24px;}
+  section > .sec-head{display:flex;align-items:center;gap:12px;margin-bottom:6px;}
+  .icon{width:22px;height:22px;flex:none;stroke:var(--red);fill:none;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;}
+  h2{
+    font-family:var(--serif);font-weight:600;font-size:26px;
+    margin:0;letter-spacing:.3px;
+  }
+  .sec-num{
+    font-family:var(--serif);font-size:13px;color:var(--red);
+    font-weight:600;letter-spacing:.05em;margin-bottom:18px;display:block;
+  }
+  p.lead{color:var(--ink);margin:14px 0 22px;}
+
+  /* Core statement */
+  .core-statement{
+    font-family:var(--serif);font-size:clamp(20px,3.2vw,27px);
+    line-height:1.5;color:var(--red);font-weight:600;
+    border-top:2px solid var(--red);border-bottom:2px solid var(--red);
+    padding:26px 0;margin:18px 0 8px;letter-spacing:.3px;
+  }
+
+  /* Practices list */
+  ul.pract{list-style:none;margin:18px 0 0;padding:0;}
+  ul.pract li{
+    position:relative;padding:14px 0 14px 26px;
+    border-top:1px solid var(--line);
+  }
+  ul.pract li:first-child{border-top:0;}
+  ul.pract li::before{
+    content:"";position:absolute;left:2px;top:21px;
+    width:8px;height:8px;background:var(--red);transform:rotate(45deg);
+  }
+  ul.pract li b{font-weight:600;}
+  ul.pract li .mech{display:block;color:var(--muted);font-size:14px;margin-top:3px;}
+
+  /* Traps table-ish */
+  .trap{
+    display:flex;gap:14px;padding:16px 0;border-top:1px solid var(--line);
+  }
+  .trap:first-of-type{border-top:0;}
+  .trap .ticon{flex:none;margin-top:2px;}
+  .trap .t-body strong{color:var(--ink);font-weight:600;}
+  .trap .t-body .bad{color:var(--red);font-weight:600;}
+  .trap .t-body .fix{color:#2E7D32;font-weight:600;}
+  .trap .t-body .muted{color:var(--muted);font-size:14.5px;}
+
+  /* Limits */
+  ul.limits{list-style:none;margin:18px 0 0;padding:0;}
+  ul.limits li{
+    position:relative;padding:12px 0 12px 24px;border-top:1px solid var(--line);
+    font-size:15px;
+  }
+  ul.limits li:first-child{border-top:0;}
+  ul.limits li::before{
+    content:"—";position:absolute;left:2px;top:11px;color:var(--red);font-weight:700;
+  }
+  ul.limits li b{font-weight:600;}
+
+  /* Takeaways */
+  .takeaways{
+    counter-reset:t;margin:20px 0 0;
+  }
+  .take{
+    position:relative;padding:20px 0 20px 56px;border-top:1px solid var(--line);
+    font-family:var(--serif);font-size:18px;line-height:1.6;
+  }
+  .take:first-child{border-top:0;}
+  .take::before{
+    counter-increment:t;content:counter(t);
+    position:absolute;left:0;top:18px;
+    width:36px;height:36px;border:1.5px solid var(--red);color:var(--red);
+    border-radius:50%;display:flex;align-items:center;justify-content:center;
+    font-family:var(--serif);font-weight:600;font-size:16px;
+  }
+
+  footer{
+    border-top:1px solid var(--line);padding:28px 0 56px;
+    color:var(--muted);font-size:13px;line-height:1.7;
+  }
+  footer b{color:var(--ink);font-weight:600;}
+
+  /* Mobile */
+  @media (max-width:860px){
+    .wrap{padding:0 18px;}
+    header{padding:40px 0 28px;}
+    .layout{display:block;padding:0 0 64px;}
+    .toc{
+      position:sticky;top:0;z-index:20;width:auto;margin:0 -18px;
+      background:rgba(255,255,255,.96);backdrop-filter:saturate(180%) blur(8px);
+      border-bottom:1px solid var(--line);padding:10px 18px;
+      display:flex;gap:6px;overflow-x:auto;white-space:nowrap;
+      -webkit-overflow-scrolling:touch;scrollbar-width:none;
+    }
+    .toc::-webkit-scrollbar{display:none;}
+    .toc .toc-title{display:none;}
+    .toc button{
+      display:inline-block;width:auto;border-left:0;border-bottom:2px solid transparent;
+      padding:8px 12px;margin:0;font-size:13.5px;
+    }
+    .toc button.active{border-left:0;border-bottom-color:var(--red);}
+    .main{max-width:none;}
+    section{scroll-margin-top:64px;}
+    .core-statement{font-size:21px;}
+  }
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="kicker">方法论精华 · Method Essence</div>
+    <h1>How to Do Great Work</h1>
+    <div class="sub">Paul Graham 长文蒸馏 · 一份<strong>可执行</strong>的版本，去掉散文，只留动作</div>
+  </header>
+
+  <div class="layout">
+
+    <!-- Sticky TOC -->
+    <nav class="toc" aria-label="目录">
+      <div class="toc-title">目录</div>
+      <button data-target="core">内核</button>
+      <button data-target="direction">选对方向</button>
+      <button data-target="frontier">进入前沿</button>
+      <button data-target="friction">抵御摩擦</button>
+      <button data-target="traps">陷阱与反例</button>
+      <button data-target="limits">局限与边界</button>
+      <button data-target="takeaways">带走三句话</button>
+    </nav>
+
+    <main class="main">
+
+      <!-- CORE -->
+      <section id="core">
+        <div class="sec-head">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+          <h2>一句话内核</h2>
+        </div>
+        <div class="core-statement">
+          伟大工作没有秘方，但有配方：找到你既有天赋又极度好奇的领域，学到知识前沿，发现缺口并深入探索——让好奇心全程掌舵。
+        </div>
+        <p class="lead">若真要浓缩成一个词，作者押注的是 <b>curiosity（好奇心）</b>。能力、兴趣、努力、运气四者交汇处才有伟大工作；运气你控制不了，你能掌控的，是找到能力与兴趣的交集，并让好奇心一直领着你走。</p>
+      </section>
+
+      <!-- DIRECTION -->
+      <section id="direction">
+        <span class="sec-num">论点一</span>
+        <div class="sec-head">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+          <h2>选对方向</h2>
+        </div>
+        <p class="lead">方向选错，后面全是无用功。选方向靠的不是"热门"或"别人说好"，而是你自己的天赋与好奇心的交集。</p>
+        <ul class="pract">
+          <li><b>用三问筛方向：</b>①我有天赋能做好吗？②我学得越深越上瘾吗？③这领域还有做出伟大工作的空间吗？<span class="mech">第三项往往不必担心——真有前两者，空间几乎总在。只找前两者的交集。</span></li>
+          <li><b>不知道做什么就猜，但先动手：</b>方向是"做"出来的，不是"想"出来的。<span class="mech">多试几个领域，交叉点常出大发现。别等想清楚再开始。</span></li>
+          <li><b>别让"工作"等于别人叫你做的事：</b>own your projects。<span class="mech">伟大工作大多是自己的项目，不是被分配的任务。</span></li>
+          <li><b>用"过度好奇"当指南针：</b>什么是你好奇到别人觉得无聊的程度？那才是你的方向。<span class="mech">这种"别人嫌无聊、你却着迷"的信号，比任何职业测评都准。</span></li>
+          <li><b>年轻无方向时，做"大运气靶子"：</b>广泛读书、见人、提问、保持好奇。<span class="mech">你不主动找方向，就让自己容易被运气击中。</span></li>
+        </ul>
+      </section>
+
+      <!-- FRONTIER -->
+      <section id="frontier">
+        <span class="sec-num">论点二</span>
+        <div class="sec-head">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2"/><path d="M9.6 4.6A2 2 0 1 1 11 8H2"/><path d="M12.6 19.4A2 2 0 1 0 14 16H2"/></svg>
+          <h2>进入前沿 · Stay Upwind</h2>
+        </div>
+        <p class="lead">"保持逆风"——别规划一条固定路线，而是每阶段都做"最有意思、且给未来最多选项"的事。前沿的缺口会自己浮现。</p>
+        <ul class="pract">
+          <li><b>跑通四步循环：</b>选领域 → 学到前沿 → 注意缺口 → 探索有希望的缺口。<span class="mech">画家到物理学家，几乎所有伟大工作者都走这路子。</span></li>
+          <li><b>相信知识是分形扩张的：</b>远看边缘平滑，逼近后发现满是裂缝——缺口就在前沿。<span class="mech">你不必发明新领域，只需走到边缘，裂缝自然出现。</span></li>
+          <li><b>不要强行规划路线：</b>每阶段只做"最有趣 + 未来选项最多"的事，作者称之为 staying upwind（逆风航行）。<span class="mech">自然选择式的发现，无法用"列计划"得到——你没法那样发现自然选择。</span></li>
+          <li><b>让好奇心同时当引擎和舵：</b>别用别人的议程替代它。<span class="mech">好奇心指向哪，就往哪走；它既是动力，也是方向。</span></li>
+          <li><b>训练自己"抛火花"：</b>原创者像角磨机，对新问题抛火花。<span class="mech">被一个问题点燃后，顺手点亮相邻问题——这就是原创的来源。</span></li>
+        </ul>
+      </section>
+
+      <!-- FRICTION -->
+      <section id="friction">
+        <span class="sec-num">论点三</span>
+        <div class="sec-head">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg>
+          <h2>抵御摩擦</h2>
+        </div>
+        <p class="lead">伟大工作最大的敌人不是难题，而是摩擦：起步的惰性、分心、假装忙碌的拖延。守住你的注意力供给。</p>
+        <ul class="pract">
+          <li><b>工作有"活化能"：开始比坚持难。</b>允许对自己说一个"相应大小的谎言"骗过起步。<span class="mech">比如"只读一遍"——一旦开始，惯性会接手。</span></li>
+          <li><b>守住"走神思考"的珍贵时段：</b>散步、洗澡时的发散思维极有价值。<span class="mech">别让分心把工作挤出脑海首位——保护那段什么都不做的空白。</span></li>
+          <li><b>每日高强度专注有上限（约 4–5 小时）：</b>疲劳会变蠢，别用加班堆时长。<span class="mech">质量随时长递减，到顶就该停。</span></li>
+          <li><b>警惕"项目级拖延"：</b>用忙别的事伪装，逃避真正的雄心项目。<span class="mech">定期问自己："我此刻在做我最想做的工作吗？"</span></li>
+          <li><b>注意力按幂律分布：</b>少数事投入绝大多数精力，别平均撒。<span class="mech">把最好的脑力和时段，留给最重要的一两件事。</span></li>
+        </ul>
+      </section>
+
+      <!-- TRAPS -->
+      <section id="traps">
+        <div class="sec-head">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+          <h2>常见陷阱与反例</h2>
+        </div>
+        <p class="lead">作者明确警告的这些模式，几乎每一个都有对应的"反例做法"。</p>
+
+        <div class="trap">
+          <svg class="icon ticon" viewBox="0 0 24 24" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+          <div class="t-body"><strong>被动漂流</strong> <span class="bad">×</span> 年轻无方向时，假定问题会自己解开。<br><span class="fix">→</span> <span class="muted">主动做"大运气靶子"：读书、见人、提问、保持好奇。</span></div>
+        </div>
+        <div class="trap">
+          <svg class="icon ticon" viewBox="0 0 24 24" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+          <div class="t-body"><strong>装腔（affectation）</strong> <span class="bad">×</span> 摆假人设、模仿别人说话做事。<br><span class="fix">→</span> <span class="muted">"装腔等于假装是别人在做这份工作。"做你自己，人设会自然长出来。</span></div>
+        </div>
+        <div class="trap">
+          <svg class="icon ticon" viewBox="0 0 24 24" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+          <div class="t-body"><strong>追时髦问题</strong> <span class="bad">×</span> 连最不赶时髦的人，也会被"时髦问题"吸进去——选问题比解问题更易从众。<br><span class="fix">→</span> <span class="muted">按好奇心而非声望选问题。</span></div>
+        </div>
+        <div class="trap">
+          <svg class="icon ticon" viewBox="0 0 24 24" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+          <div class="t-body"><strong>为想象中的"高级受众"做东西</strong> <span class="bad">×</span> 一旦走上这条路就迷失了。<br><span class="fix">→</span> <span class="muted">做你自己想要的东西，而不是你以为"更高级的人"想要的。</span></div>
+        </div>
+        <div class="trap">
+          <svg class="icon ticon" viewBox="0 0 24 24" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+          <div class="t-body"><strong>学校的误导</strong> <span class="bad">×</span> 被动、考题必可解、刷分捷径——这些都不是伟大工作之道。<br><span class="fix">→</span> <span class="muted">"你骗不了上帝，别找那种捷径。"真实的前沿问题往往没有标准答案。</span></div>
+        </div>
+        <div class="trap">
+          <svg class="icon ticon" viewBox="0 0 24 24" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+          <div class="t-body"><strong>无意识复制 / 才华混蛋错觉</strong> <span class="bad">×</span> 做别人轨道上的火车；以为当混蛋是才华的一部分。<br><span class="fix">→</span> <span class="muted">做自己；混蛋不是才华的配件。</span></div>
+        </div>
+      </section>
+
+      <!-- LIMITS -->
+      <section id="limits">
+        <div class="sec-head">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0Z"/><circle cx="12" cy="12" r="3"/></svg>
+          <h2>作者的局限与适用边界</h2>
+        </div>
+        <p class="lead">这份方法论不是万能钥匙。作者自己多处留了注脚，诚实地标出它失效的地方。</p>
+        <ul class="limits">
+          <li><b>运气被刻意忽略，但确实存在。</b>方法论能放大能力与好奇心，复制不了运气。</li>
+          <li><b>"伟大工作"无精确定义（注1）。</b>只看是否拓展了可能性，阈值无法客观划定——别用它当 KPI。</li>
+          <li><b>系统计划对"自然选择式发现"无效。</b>"你没法用列计划的方式发现自然选择。"强规划型人格需警惕。</li>
+          <li><b>管理型大项目非人人适合（注27）。</b>若无管理才能，要么学、要么避开，别硬扛。</li>
+          <li><b>某些领域的"前沿"是时代性的（注26）。</b>物理等同优势可能随时代改变，别把一时地利当永恒真理。</li>
+          <li><b>原创需专长配合。</b>无知的原创只是"彩色"而非"好"（文中离婚友谈恋爱之喻）。</li>
+          <li><b>青年"无知优势"易浪费（注23）。</b>须"略肆意"地探索，而非纯浪费在无意义的事上。</li>
+          <li><b>个别领域例外。</b>演员等需"装假人设"的行业，避免非故意装腔即可（注12），不必照搬"别装腔"。</li>
+        </ul>
+      </section>
+
+      <!-- TAKEAWAYS -->
+      <section id="takeaways">
+        <div class="sec-head">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
+          <h2>立刻带走的三句话</h2>
+        </div>
+        <div class="takeaways">
+          <div class="take">伟大工作 = 能力 × 兴趣 × 前沿缺口 × 好奇心驱动。你能掌控的，是找到前两者的交集，并让好奇心一直掌舵。</div>
+          <div class="take">别规划固定路线，要"保持逆风"——每步做最有趣、且留给未来最多选项的事，缺口自会浮现。</div>
+          <div class="take">开始比坚持难；守住走神思考、按幂律投注意力、别让"忙别的事"伪装成拖延。</div>
+        </div>
+      </section>
+
+      <footer>
+        <b>关于这份蒸馏：</b>内容提炼自 Paul Graham《How to Do Great Work》（paulgraham.com/greatwork.html，2023）。结构方法借鉴「仓颉」长内容蒸馏的 RIA 思路——保留可执行动作（Execution）、标注边界（Boundary）、剔除散文与读后感。本页为单文件、零外部依赖；导航用按钮 + scrollIntoView 实现，目录随滚动高亮。
+      </footer>
+
+    </main>
+  </div>
+</div>
+
+<script>window.addEventListener('error',function(e){try{var v=document.getElementById('app')||document.getElementById('view')||document.body;if(!v||v.dataset.err)return;v.dataset.err='1';var s=(e.error&&e.error.stack)||e.message||'';var b=document.createElement('div');b.style.cssText='padding:16px;margin:14px;font-family:ui-monospace,monospace;font-size:13px;color:#a33;background:#fdeceb;border:1px solid #f5c6cb;border-radius:12px;line-height:1.5';b.innerHTML='<b>⚠ 页面出错了</b><br><span style="color:#555">'+(e.message||'')+'</span><pre style="white-space:pre-wrap;margin-top:8px;font-size:11px">'+(s||'').slice(0,1000)+'</pre><small style="color:#666">建议 Ctrl+Shift+R 强刷；F12 → Application → Local Storage 清本页缓存后刷新。</small>';v.insertBefore(b,v.firstChild);}catch(_){}});
+(function(){
+    var btns = Array.prototype.slice.call(document.querySelectorAll('.toc button'));
+    var sections = btns.map(function(b){ return document.getElementById(b.dataset.target); });
+
+    // Click → smooth scroll (no hash anchors)
+    btns.forEach(function(b){
+      b.addEventListener('click', function(){
+        var el = document.getElementById(b.dataset.target);
+        if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
+      });
+    });
+
+    // Scroll highlight via IntersectionObserver
+    var current = null;
+    function setActive(id){
+      if(id === current) return;
+      current = id;
+      btns.forEach(function(b){
+        b.classList.toggle('active', b.dataset.target === id);
+      });
+    }
+
+    var observer = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if(e.isIntersecting){
+          setActive(e.target.id);
+          // keep active item visible in mobile horizontal TOC
+          var active = document.querySelector('.toc button.active');
+          if(active && window.innerWidth <= 860){
+            active.scrollIntoView({block:'nearest', inline:'center'});
+          }
+        }
+      });
+    }, { rootMargin: '-12% 0px -72% 0px', threshold: 0 });
+
+    sections.forEach(function(s){ if(s) observer.observe(s); });
+
+    // init first
+    setActive('core');
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,67 @@
+_chrome_profile/
+_chrome_profile2/
+_check.js
+_check_*.js
+_test_*.js
+*.tmp
+*.bak
+*.log
+dist/
+.DS_Store
+Thumbs.db
+deploy.bat
+test_*.js
+check*.js
+games-local-config.local.js
+games/.edgeone/
+games/fps-tactical/.edgeone/
+games/fps-tactical/.github/
+games/fps-tactical/.vscode/
+games/fps-tactical/.env
+.env
+.edgeone/
+_scratch/
+games/.env
+
+# airline-experience Python backend
+__pycache__/
+*.pyc
+
+# 本地工具资源（junction 软链目录，不入库；如 <本地路径> 2.4G）
+hacker/tools/
+
+# 3D 模型不入库：character.glb 真实实体仅保留在 _master/_private 工作树与 _private 运行副本，
+# 仓库/公开站不携带（公开站 world 引导员走 GLTFLoader onerror 兜底，不影响游玩）。
+# 历史教训：push_via_api 走 base64，>1MB 文件有截断事故；LFS 指针 Pages 又不解析。
+world/models/*.glb
+
+# ===== 本地敏感数据 / 微信隐私（红线：绝不入 git，仅本地留存）=====
+wechat_decrypted/
+PASSPHRASE.txt
+PASS*.txt
+
+# pipeline 输出结果（构建产物，不入库）
+lab/products/airline-experience/pipeline/results/*.json
+
+# ===== 自考/学习资料素材（大体积二进制，本地 serve 用，不进 git；本仓未配 LFS，进仓会胀爆）=====
+# 同时排除误生成的异常前缀目录（如 \uf022materials），防 git 长路径报错 + 误 add
+materials/
+**/*materials*/
+
+# 蕾娜语音本地配置（含 API key，不入库）
+pet/pet-voice-config.js
+
+# 调试/接口响应残留（不入库、不进公开站）
+asr.json
+clone2.json
+clone2_resp.json
+
+# ZCode 会话计划（含本机绝对路径与临时计划，非项目内容，不入库）
+.zcode/
+
+# 上游参考仓库（amadeus-pet 带独立 .git 的嵌套克隆，本地参考用，不入库；
+# 网页版复用的 Live2D 模型/框架/开机素材已复制进 amadeus/ 随组件提交）
+amadeus-pet/
+
+# 红莉栖官方语音 OGG（44/45 条，参考自上游 fetch-voices，版权素材，本地播放用不入库）
+amadeus/voices/
