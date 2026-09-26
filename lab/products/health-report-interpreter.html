@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>体检报告智能解读 · 自定义工具</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:#eceff2;color:#1f262c;line-height:1.7;padding:26px 16px 80px}
+.wrap{max-width:1020px;margin:0 auto}
+.mast{background:#fff;border:1px solid #e2e7eb;border-radius:14px;padding:22px 28px;margin-bottom:16px}
+.mast .k{font-family:ui-monospace,Menlo,monospace;font-size:10.5px;letter-spacing:.13em;color:#2EAD82;font-weight:600}
+.mast h1{font-size:25px;font-weight:800;letter-spacing:-.02em;margin:10px 0 7px;color:#141a20}
+.mast .sub{font-size:13.6px;color:#67737e}
+.tip{background:#EAF7F1;border-left:4px solid #2EAD82;border-radius:0 10px 10px 0;padding:12px 18px;font-size:13.4px;color:#41545c;margin:14px 0 0}
+.tip b{color:#155E43}
+.pnl{background:#fff;border:1px solid #e2e7eb;border-radius:12px;margin-bottom:14px;overflow:hidden}
+.pnl-h{display:flex;align-items:center;gap:11px;padding:15px 22px 13px;border-bottom:1px solid #eef2f4}
+.pn{font-family:ui-monospace,Menlo,monospace;font-size:11.5px;color:#2EAD82;font-weight:700;letter-spacing:.1em}
+.pnl-h h2{font-size:16.5px;font-weight:700;color:#141a20}
+.pnl-b{padding:17px 22px 20px}
+label{font-size:13px;color:#4a5560;font-weight:600;display:block;margin-bottom:5px}
+.hint{font-size:11.8px;color:#8c979f;margin:4px 0 0}
+.row{display:grid;gap:12px}
+.g2{grid-template-columns:1fr 1fr}
+@media(max-width:680px){.g2{grid-template-columns:1fr}}
+.in{width:100%;padding:9px 12px;border:1px solid #d7dee3;border-radius:8px;font-size:14px;background:#fbfcfd;color:#1f262c}
+.in:focus{outline:none;border-color:#2EAD82;background:#fff}
+.btn{border:0;border-radius:8px;padding:11px 20px;font-size:14.5px;font-weight:700;cursor:pointer;transition:.15s}
+.btn.primary{background:linear-gradient(135deg,#2EAD82,#1F8B68);color:#fff}
+.btn.primary:hover{filter:brightness(1.05)}
+.btn.ghost{background:#f1f4f6;color:#33414c}
+.btn.ghost:hover{background:#e6ebef}
+.btn.sm{padding:7px 13px;font-size:12.5px}
+.acts{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+table{border-collapse:collapse;width:100%;margin:12px 0;font-size:13px}
+th{background:#f7f9fb;color:#155E43;border:0;border-bottom:1.5px solid #2EAD82;font-weight:700;text-align:left;padding:9px 10px;font-size:12.3px}
+td{border:0;border-bottom:1px solid #eef1f4;padding:9px 10px;vertical-align:middle;font-variant-numeric:tabular-nums}
+tr.hl-up td{background:#FFF6F1}
+tr.hl-down td{background:#F0F7FF}
+.tag{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px}
+.tag.up{background:#FBEAE4;color:#C2410C}
+.tag.down{background:#E3EFFD;color:#1A63C7}
+.tag.ok{background:#EAF7F1;color:#1B7A5A}
+.tag.imp{background:#FFF3E0;color:#9A5B00}
+.deg{font-size:11.7px;color:#8c979f}
+.del{cursor:pointer;color:#c0392b;font-size:16px;background:none;border:0;line-height:1}
+.addrow{color:#2EAD82;font-weight:700;background:none;border:1px dashed #b9d9cc;border-radius:8px;padding:9px;width:100%;font-size:13.5px;cursor:pointer;margin-top:6px}
+/* 输出区 */
+#out{display:none}
+.prio{background:#FFF5E6;border:1px solid #DD850033;border-left:7px solid #DD8500;border-radius:12px;padding:18px 22px;margin-bottom:16px}
+.prio .kv{font-size:23px;font-weight:800;color:#8A5300;letter-spacing:-.02em;line-height:1.3;margin-bottom:8px}
+.prio .kn{font-size:13.6px;color:#4a5560;line-height:1.7}
+.prio .badge{background:#DD8500;color:#fff;padding:3px 10px;border-radius:20px;font-size:10.5px;letter-spacing:.12em;font-weight:700;margin-right:8px}
+.blockquote-side{background:#EAF7F1;border-left:4px solid #2EAD82;padding:11px 16px;margin:13px 0;color:#3d4f57;font-size:13.6px;border-radius:0 8px 8px 0}
+.cause{font-family:ui-monospace,Menlo,monospace;background:#f7f9fb;border:1px solid #e6ebef;border-radius:8px;padding:13px 16px;margin:12px 0;font-size:12.8px;line-height:1.9;color:#2b3a44;white-space:pre;overflow:auto}
+.problem{background:#fff;border:1px solid #e6ebef;border-radius:10px;padding:13px 16px;margin:9px 0}
+.problem h3{font-size:14.5px;color:#155E43;font-weight:700;margin-bottom:6px}
+.lev{font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;margin-left:6px}
+.lev.l2{background:#d32f2f22;color:#B71C1C}
+.lev.l3{background:#9A5B0022;color:#8A5300}
+.lev.l4{background:#EAF7F1;color:#1B7A5A}
+.foot{margin-top:26px;text-align:center;font-size:12.5px;color:#93a0aa}
+@media print{body{background:#fff;padding:0} .no-print{display:none!important} .pnl,.prio,.mast{box-shadow:none;border:1px solid #ccc}}
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+<div class="wrap">
+  <div class="mast">
+    <div class="k">体检报告智能解读 · 自定义工具</div>
+    <h1>体检报告智能解读</h1>
+    <div class="sub">输入异常指标，自动完成：异常标注 → 危急值闸门 → 问题归纳 → 关联分析 → 分级随访 + 生活指导</div>
+    <div class="tip"><b>用法</b>：在下表录入本次报告里标了箭头的指标（可增减行）；年龄/性别/腰围/血压可帮助关联分析。点击「生成智能解读」。本工具为健康科普，<b>不替代执业医师诊断</b>。</div>
+  </div>
+
+  <!-- 输入区 -->
+  <div class="pnl no-print">
+    <div class="pnl-h"><span class="pn">IN</span><h2>录入指标</h2></div>
+    <div class="pnl-b">
+      <div class="row g2">
+        <div><label>年龄</label><input id="age" class="in" type="number" placeholder="如 45"><div class="hint">用于关联分析、部分目标值</div></div>
+        <div><label>性别</label><select id="sex" class="in"><option value="">未填</option><option>男</option><option>女</option></select></div>
+      </div>
+      <div class="row g2" style="margin-top:12px">
+        <div><label>腰围 (cm)</label><input id="waist" class="in" type="number" placeholder="如 90"><div class="hint">中国标准：男≥90 / 女≥85 为腹型肥胖</div></div>
+        <div><label>血压 (mmHg)</label><input id="bp" class="in" type="text" placeholder="如 136/86"><div class="hint">高压/低压</div></div>
+      </div>
+      <table id="tbl">
+        <thead><tr><th style="width:22%">指标</th><th style="width:16%">数值</th><th style="width:20%">单位</th><th style="width:26%">参考区间</th><th style="width:10%">状态</th><th style="width:6%"></th></tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+      <button class="addrow" onclick="addRow()">+ 添加一行指标</button>
+      <div class="acts">
+        <button class="btn primary" onclick="gen()">生成智能解读</button>
+        <button class="btn ghost" onclick="loadExample()">载入本次示例</button>
+        <button class="btn ghost" onclick="clearRows()">清空</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 输出区 -->
+  <div id="out"></div>
+
+  <div class="foot">本工具为健康科普示例，所有解读仅供就医准备参考，不替代执业医师诊断。</div>
+</div>
+
+<script>
+/* ---------- 内置指标库 ----------
+   key, label, 单位, 参考区间 [hi最低, =null则仅上限], 上限hi, 所属项目, 个体目标说明, 医学含义, 生活指导, 科室, 档位 */
+const DB = {
+  glu:{label:"空腹血糖 GLU",unit:"mmol/L",low:3.9,hi:6.1,exam:"生化全项 · 血糖",target:"一般<7.0；糖尿病者视医嘱",
+       mean:"空腹血糖反映即时血糖水平；≥7.0 达糖尿病诊断阈值，需内分泌科结合 OGTT/糖化确诊",
+       life:"控精制碳水与含糖饮料；先吃菜和蛋白质再吃主食；饭后散步 20 分钟",
+       dep:"内分泌科",lev:"l2"},
+  hba1c:{label:"糖化血红蛋白 HbA1c",unit:"%",low:4,hi:6,exam:"糖化血红蛋白",target:"一般<7.0%（糖尿病者）",
+       mean:"反映近 2-3 个月平均血糖，比单次血糖更能代表整体控制水平；≥6.5% 达糖尿病诊断阈值",
+       life:"规律饮食与作息，监测并记录血糖走势",
+       dep:"内分泌科",lev:"l2"},
+  tc:{label:"总胆固醇 TC",unit:"mmol/L",low:null,hi:5.2,exam:"血脂四项",target:"<5.2；ASCVD 高危者 <3.4~<2.6",
+       mean:"血中胆固醇总量；升高增加动脉粥样硬化风险",
+       life:"减少油炸、肥肉、酒精；增加深海鱼、燕麦、豆类、绿叶菜",
+       dep:"心内科/内分泌科",lev:"l3"},
+  ldl:{label:"低密度脂蛋白 LDL-C",unit:"mmol/L",low:null,hi:3.4,exam:"血脂四项",target:"低危<3.4；高危<2.6；极高危<1.8",
+       mean:"「坏胆固醇」，堵血管的主要元凶；越靠近血管壁沉积，需按危险分层压目标",
+       life:"控饱和脂肪与反式脂肪；规律有氧运动；戒烟",
+       dep:"心内科/内分泌科",lev:"l3"},
+  hdl:{label:"高密度脂蛋白 HDL-C",unit:"mmol/L",low:1.0,hi:999,exam:"血脂四项",target:"男≥1.0 / 女≥1.3",
+       mean:"「好胆固醇」，血管清道夫；偏低说明代谢负担在积累",
+       life:"规律运动可提升；戒烟、减重；适量坚果",
+       dep:"心内科",lev:"l4"},
+  tg:{label:"甘油三酯 TG",unit:"mmol/L",low:null,hi:1.7,exam:"血脂四项",target:"<1.7；>5.6 需防急性胰腺炎",
+       mean:"受饮食饮酒影响最大的一类血脂；单项显著升高（>5.6）有急性胰腺炎风险",
+       life:"严格限酒；控糖控油；TG 对饮食尤其敏感，减重效果明显",
+       dep:"内分泌科",lev:"l3"},
+  alt:{label:"谷丙转氨酶 ALT",unit:"U/L",low:9,hi:50,exam:"肝功能",target:"<50",
+       mean:"肝细胞受损时漏出的酶；轻度升高常与脂肪肝、饮酒、药物相关",
+       life:"戒酒/严格限酒；禁止自行服保健品与不必要的药；减重减轻肝脏负担",
+       dep:"消化内科/肝病科",lev:"l3"},
+  ast:{label:"谷草转氨酶 AST",unit:"U/L",low:15,hi:40,exam:"肝功能",target:"<40",
+       mean:"肝细胞/心肌酶；升高可见于肝损伤、脂肪肝、近期运动、肌肉问题",
+       life:"同 ALT；避免剧烈运动前 3 天采血",
+       dep:"消化内科/肝病科",lev:"l3"},
+  ggt:{label:"γ-谷氨酰转肽酶 GGT",unit:"U/L",low:10,hi:60,exam:"肝功能",target:"<60",
+       mean:"对酒精、胆道较敏感；升高常与饮酒相关，也见于脂肪肝、胆道问题",
+       life:"严格限酒是关键；控脂饮食",
+       dep:"消化内科/肝病科",lev:"l3"},
+  ua:{label:"血尿酸 UA",unit:"umol/L",low:208,hi:428,exam:"生化全项 · 肾功能",target:"<420；痛风者<360",
+       mean:"嘌呤代谢废料；轻度升高为早期信号，堆到一定程度可结晶引发痛风/肾损伤",
+       life:"少动物内脏、浓肉汤、海鲜、啤酒；每日饮水 1500-2000mL",
+       dep:"风湿免疫科/内分泌科",lev:"l3"},
+  cr:{label:"肌酐 Cr",unit:"umol/L",low:57,hi:97,exam:"生化全项 · 肾功能",target:"男57-97 / 女41-73",
+       mean:"反映肾脏过滤能力；需结合 eGFR 判读，单看肌酐可能漏诊",
+       life:"规律运动、充足饮水；控制血压血糖保护肾脏",
+       dep:"肾内科",lev:"l3"},
+  bmi:{label:"体重指数 BMI",unit:"kg/m²",low:18.5,hi:23.9,exam:"计算得出",target:"18.5-23.9；超重24-27.9；肥胖≥28",
+       mean:"体重÷身高²；超重/肥胖是血糖血脂肝酶的共同推手",
+       life:"减重是核心杠杆：先减 5%，六项代谢指标可同时受益",
+       dep:"营养科",lev:"l3"},
+  waist:{label:"腰围",unit:"cm",low:null,hi:90,exam:"一般体格检查",target:"男<90 / 女<85（中国标准）",
+       mean:"中心型(腹型)肥胖指标，对心血管预测优于 BMI",
+       life:"减腹部脂肪优先，HIIT/快走等有氧结合",
+       dep:"营养科",lev:"l3"},
+  pl:{label:"血小板 PLT",unit:"×10⁹/L",low:125,hi:350,exam:"血常规",target:"125-350",
+       mean:"参与止血；显著降低需血液科评估",
+       life:"先排除 EDTA 依赖假性减少；复查确认",
+       dep:"血液科",lev:"l3"},
+  hb:{label:"血红蛋白 Hb",unit:"g/L",low:130,hi:175,exam:"血常规",target:"男130-175 / 女115-150",
+       mean:"携氧细胞；降低提示贫血，需进一步分型找原因",
+       life:"若贫血需明确类型，排查失血/营养原因",
+       dep:"血液科/内科",lev:"l3"}
+};
+const DBNAMES = Object.keys(DB);
+
+/* ---------- 表格渲染 ---------- */
+let rows = [];
+function addRow(pre){
+  const r = pre || {key:"",val:"",exam:"",unit:"",low:"",hi:""};
+  rows.push(r);
+  renderRows();
+}
+function clearRows(){rows=[];renderRows();}
+function loadExample(){
+  rows=[
+    {key:"glu",val:"7.8",exam:"",unit:"",low:"",hi:""},
+    {key:"hba1c",val:"7.1",exam:"",unit:"",low:"",hi:""},
+    {key:"tc",val:"6.4",exam:"",unit:"",low:"",hi:""},
+    {key:"tg",val:"2.9",exam:"",unit:"",low:"",hi:""},
+    {key:"alt",val:"68",exam:"",unit:"",low:"",hi:""}
+  ];
+  document.getElementById('age').value="";
+  document.getElementById('sex').value="";
+  document.getElementById('waist').value="";
+  document.getElementById('bp').value="";
+  renderRows();
+}
+function onKeyChange(i){
+  const k=rows[i].key;
+  if(k && DB[k]){
+    rows[i].unit=DB[k].unit; rows[i].low=DB[k].low??""; rows[i].hi=DB[k].hi===999?"(仅下界)":DB[k].hi;
+  }
+  renderRows();
+}
+function renderRows(){
+  const tb=document.getElementById('tbody');
+  tb.innerHTML=rows.map((r,i)=>{
+    const opts=['<option value="">自定义</option>'].concat(DBNAMES.map(k=>`<option ${r.key===k?'selected':''} value="${k}">${DB[k].label}</option>`)).join('');
+    return `<tr>
+      <td><select class="in" style="padding:7px" onchange="rows[${i}].key=this.value;onKeyChange(${i})">${opts}</select></td>
+      <td><input class="in" style="padding:7px" type="number" step="any" value="${r.val}" oninput="rows[${i}].val=this.value"></td>
+      <td><input class="in" style="padding:7px" value="${r.unit||''}" oninput="rows[${i}].unit=this.value"></td>
+      <td><input class="in" style="padding:7px" placeholder="下限-上限 或 <上限" value="${(r.low&&r.hi)?r.low+'—'+r.hi:(r.hi?('&lt;'+r.hi):'')}" oninput="rows[${i}].lowraw=this.value"></td>
+      <td id="mark-${i}">—</td>
+      <td><button class="del" onclick="rows.splice(${i},1);renderRows()">✕</button></td>
+    </tr>`;
+  }).join('');
+  // 状态标记
+  rows.forEach((r,i)=>{
+    const el=document.getElementById('mark-'+i); if(!el) return;
+    if(!r.val || !r.key || !DB[r.key]){el.innerHTML='';return}
+    const v=parseFloat(r.val),d=DB[r.key];
+    let st='',cls='';
+    if(v!==null&&!isNaN(v)){
+      if(d.low && v<d.low){st='低 ↓';cls='down'}
+      else if(d.hi && d.hi<999 && v>d.hi){st='高 ↑';cls='up'}
+      else if(DB[r.key].mean){st='正常';cls='ok'}
+    }
+    el.innerHTML=st?`<span class="tag ${cls}">${st}</span>`:'';
+  });
+}
+addRow();addRow();addRow();addRow();addRow();
+renderRows();
+
+/* ---------- 智能解读引擎 ---------- */
+function getMeta(r){
+  const m={};
+  if(r.lowraw){
+    const m2=r.lowraw.replace(/[，,]/g,'—').split('—');
+    if(m2.length==2){m.low=parseFloat(m2[0]);m.hi=parseFloat(m2[1])}
+    else {const x=parseFloat(r.lowraw.replace(/</,''));m.hi=x;m.low=null}
+  } else if(DB[r.key]){m.low=DB[r.key].low;m.hi=DB[r.key].hi}
+  return m;
+}
+function gen(){
+  const out=document.getElementById('out');
+  out.style.display='block';
+  const age=document.getElementById('age').value||null;
+  const sex=document.getElementById('sex').value;
+  const waist=parseFloat(document.getElementById('waist').value);
+  const bp=document.getElementById('bp').value;
+
+  // 1. 解析有效行
+  const eff=rows.filter(r=>r.key && r.val && r.val!=='');
+  const items=[];
+  eff.forEach(r=>{
+    const v=parseFloat(r.val); if(isNaN(v)) return;
+    const d=DB[r.key]; const meta=getMeta(r);
+    const state = (meta.low && v<meta.low)?'low':((meta.hi && meta.hi<999 && v>meta.hi)?'high':'ok');
+    const dev = meta.hi&&meta.hi<999&&v>meta.hi ? `超上限 ${((v-meta.hi)/meta.hi*100).toFixed(0)}%` : (meta.low&&v<meta.low?`低 ${((meta.low-v)/meta.low*100).toFixed(0)}%`:'');
+    items.push({key:r.key,d,v,state,dev,meta,name:d.label,unit:d.unit||'',orgMetas:r});
+  });
+  const abnormal=items.filter(x=>x.state!=='ok');
+
+  // 2. 危急值闸门
+  let critical=[];
+  items.forEach(x=>{
+    if(x.d.hi>900 || x.d.low<3.9){} // 血小板上限高，跳过
+    const isGlu = x.name.includes('血糖');
+    if((x.d.hi>500&&x.d.hi<900)||x.name.includes('ALT')||x.name.includes('AST')){
+      if(x.state==='high' && x.v>1000) critical.push(`${x.name} ${x.v} ${x.unit}`);
+    }
+  });
+
+  // 3. 问题层归纳
+  const probs=[];
+  function has(k){return items.some(x=>x.key===k&&x.state!=='ok')}
+  function valOf(k){const it=items.find(x=>x.key===k);return it?it.v:''}
+
+  const dGluc = (has('glu')&&valOf('glu')>=7.0)||(has('hba1c')&&valOf('hba1c')>=6.5);
+  const gGluc = has('glu')&&valOf('glu')>=6.1&&valOf('glu')<7.0;
+  if(dGluc) probs.push({name:"血糖升高（糖尿病可能）",lev:"l2",dep:"内分泌科",
+     why:(has('glu')?"空腹血糖 "+valOf('glu'):"")+(has('glu')&&has('hba1c')?" 与/或 ":"")+(has('hba1c')?"糖化血红蛋白 "+valOf('hba1c')+"%":"")+" 达糖尿病诊断阈值（空腹≥7.0 或 糖化≥6.5%）。两项联合提示血糖持续处于糖尿病区间，不只是偶尔偏高。",
+     next:"建议两周内内分泌科就诊：OGTT 糖耐量试验 + 糖化血红蛋白确诊分级，并做并发症筛查（眼底、尿微量白蛋白UACR、神经、足部）。"});
+  else if(gGluc) probs.push({name:"血糖偏高（糖尿病前期）",lev:"l3",dep:"内分泌科",
+     why:"空腹血糖 "+valOf('glu')+" 处于糖尿病前期区间（6.1-6.9）。",
+     next:"一至三月复查，建议 OGTT + 糖化确认；同步生活方式干预。"});
+
+  const tg=valOf('tg'),tc=valOf('tc'),ldl=valOf('ldl'),hdl=valOf('hdl');
+  if(has('tg')||has('tc')||has('ldl')||has('hdl')){
+    const parts=[];
+    if(tc&&tc>=5.2)parts.push('总胆固醇偏高');
+    if(ldl&&ldl>=3.4)parts.push('坏胆固醇 LDL-C 偏高');
+    if(tg&&tg>=1.7)parts.push('甘油三酯偏高');
+    if(hdl&&hdl<1.0)parts.push('好胆固醇 HDL-C 偏低');
+    if(parts.length){
+      const risky = tg>=5.6;
+      probs.push({name:"血脂异常（"+parts.join(' + ')+"）",lev:risky?"l2":"l3",dep:"心内科/内分泌科",
+        why:parts.join('；')+(has('tg')&&tg>=1.7?("; 其中甘油三酯 "+valOf('tg')+" 超上限"+(tg>=5.6?"，已达急性胰腺炎风险阈值":"")):"")+".",
+        next: risky?"建议两周内内分泌科就诊评估（防急性胰腺炎）":"一至三月复查血脂四项；查 Lp(a)、颈动脉超声，评估心血管风险等级以定 LDL-C 目标。"});
+    }
+  }
+
+  if(has('alt')||has('ast')||has('ggt')){
+    const alt=valOf('alt'),ast=valOf('ast');
+    const big = (alt&&alt>3*50)||(ast&&ast>3*40);
+    probs.push({name:"肝功能异常（肝酶升高"+(big?"":"，需排除脂肪肝/饮酒/药物")+"）",lev:big?"l2":"l3",dep:"消化内科/肝病科",
+      why:[has('alt')?'ALT '+valOf('alt'):'',has('ast')?'AST '+valOf('ast'):'',has('ggt')?'GGT '+valOf('ggt'):''].filter(Boolean).join('、')+"; 轻度升高常与脂肪肝、饮酒、药物相关。",
+      next: big?"两周内肝病科查明原因（病毒标志物、自身抗体、腹部影像）":"停可疑药物/限酒 1 月后复查肝功能 + 腹部超声 + FIB-4；若合并脂肪肝重点减重。"});
+  }
+
+  if(has('ua')) probs.push({name:"尿酸升高（无症状高尿酸血症）",lev:"l3",dep:"风湿免疫科/内分泌科",
+    why:"血尿酸 "+valOf('ua')+" 。目前未见关节症状，属早期信号。",
+    next:"低嘌呤饮食 + 多饮水；6 个月复查。"});
+  if(has('cr')) probs.push({name:"肾功能异常",lev:"l3",dep:"肾内科",
+    why:"肌酐 "+valOf('cr')+" 。需结合 eGFR（由肌酐+年龄+性别计算）判读。",
+    next:"肾内科评估，加查 eGFR、UACR、尿沉渣。"});
+  if(has('bmi')) probs.push({name:"体重超标（BMI "+valOf('bmi')+"）",lev:"l3",dep:"营养科",
+    why:"BMI 属超重范围。是血糖/血脂/肝酶异常的共同推手。",
+    next:"减重为首要杠杆：目标先减 5%。"});
+  if(has('hb')) probs.push({name:"血红蛋白降低（贫血可能）",lev:"l3",dep:"血液科/内科",
+    why:"Hb "+valOf('hb')+" 。需进一步分型明确贫血原因。",
+    next:"查铁代谢四项、B12、叶酸、网织红；男性需排除消化道失血。"});
+  if(has('pl')) probs.push({name:"血小板异常",lev:"l3",dep:"血液科",
+    why:"PLT "+valOf('pl')+" 。",
+    next:"复查确认，必要时血涂片排除假性减少。"});
+
+  // 代谢综合征判定（中国标准 ≥3 项）
+  let ms=0,msParts=[];
+  if(has('glu')&&valOf('glu')>=6.1)ms++,msParts.push('高血糖');
+  if(waist){const wL=sex==='女'?85:90;if(waist>=wL)ms++,msParts.push('腰围/中心肥胖');}
+  if(bp){const b=bp.split('/');if(parseFloat(b[0])>=130||parseFloat(b[1])>=85)ms++,msParts.push('血压偏高');}
+  if(tg&&tg>=1.7)ms++,msParts.push('甘油三酯高');
+  if(hdl&&hdl<1.04)ms++,msParts.push('好胆固醇低');
+  const metaSym = ms>=3;
+
+  // 关联分析 - 因果链
+  const chain=[];
+  if(has('glu')||has('hba1c')||tg>=1.7||has('alt')){
+    chain.push('内脏脂肪堆积 / 胰岛素抵抗（若腰围超标或 BMI 高则命中）');
+    if(has('glu')||has('hba1c'))chain.push('  → 血糖升高');
+    if(tg>=1.7)chain.push('  → 甘油三酯升高');
+    if(hdl&&hdl<1.0)chain.push('  → 好胆固醇下降');
+    if(has('alt')&&chain.length)chain.push('  → 脂肪堆积在肝脏 → 肝酶(ALT)升高');
+  }
+
+  /* ---------- 渲染 ---------- */
+  let html='';
+  // 优先级横幅
+  if(critical.length){
+    html+=`<div class="prio"><div class="kv"><span class="badge">紧急</span>建议立即前往急诊</div><div class="kn">本次报告检出危急值：<b>${critical.join('；')}</b>，已达需即刻医疗处置的范围，不建议等待或自行观察。</div></div>`;
+  }
+  if(abnormal.length){
+    const l2count=probs.filter(p=>p.lev==='l2').length;
+    if(!critical.length){
+      const head = l2count? `两周内挂 ${probs.filter(p=>p.lev==='l2').map(p=>p.dep).join(' 或 ')}` : '一至三月复查随访';
+      html+=`<div class="prio"><div class="kv"><span class="badge">注意</span>${head}</div><div class="kn">本次检出 <b>${abnormal.length}</b> 项异常，归纳为 <b>${probs.length}</b> 个问题。${l2count?'其中血糖等多项已达需就医确认的程度，优先处理。':'多为轻度偏离，可在生活方式干预后按档复查。'}</div></div>`;
+    }
+    // 异常清单表
+    html+=`<div class="pnl"><div class="pnl-h"><span class="pn">01</span><h2>异常指标一览</h2></div><div class="pnl-b">`;
+    html+='<table><thead><tr><th>指标</th><th>结果</th><th>参考</th><th>偏离</th><th>状态</th></tr></thead><tbody>';
+    abnormal.forEach(x=>{html+=`<tr class="${x.state==='high'?'hl-up':'hl-down'}"><td>${x.name}${x.unit?`<div class="deg">${x.d.exam||''}</div>`:''}</td><td>${x.v} ${x.unit||''}</td><td class="deg">${x.meta.low?x.meta.low+'—'+(x.meta.hi>900?'(下界)':x.meta.hi):(x.meta.hi?'&lt;'+x.meta.hi:'')}</td><td>${x.dev}</td><td><span class="tag ${x.state==='high'?'up':'down'}">${x.state==='high'?'高 ↑':'低 ↓'}</span></td></tr>`});
+    html+='</tbody></table></div></div>';
+    // 问题归纳
+    html+=`<div class="pnl"><div class="pnl-h"><span class="pn">02</span><h2>问题归纳</h2></div><div class="pnl-b">`;
+    probs.forEach(p=>{
+      html+=`<div class="problem"><h3>${p.name}<span class="lev ${p.lev}">${p.lev==='l2'?'两周内就诊':p.lev==='l3'?'复查随访':'随访'}</span></h3><p>${p.why}</p><p style="margin-top:6px"><b>下一步</b>：${p.next}</p></div>`;
+    });
+    if(metaSym) html+=`<div class="problem"><h3>代谢综合征（命中 ${ms} 项）<span class="lev l2">整体风险</span></h3><p>${msParts.join('、')} 联合出现，达到代谢综合征判定标准（中国标准满足 ≥3 项）。<b>这不是 N 个独立问题，而是一个综合征的多个侧面</b>，会显著放大心血管与糖尿病风险。</p></div>`;
+    html+='</div></div>';
+    // 关联分析
+    html+=`<div class="pnl"><div class="pnl-h"><span class="pn">03</span><h2>关联性分析</h2></div><div class="pnl-b">`;
+    if(chain.length){html+='<p><b>推理链条</b>（共同上游决定了生活指导该先做哪件事）：</p><div class="cause">'+chain.join('\n')+'</div>';}
+    html+=`<p style="margin-top:8px"><b>共同推手</b>：本份异常的血糖 / 血脂 / 肝酶（及若存在的腰围、血压、BMI），指向<b>胰岛素抵抗 → 代谢综合征</b> 这一共同上游。减重和运动优先，多数指标会同步改善。</p>`;
+    // 陷阱排查
+    html+=`<div class="blockquote-side"><b>请先排除干扰</b>：① 甘油三酯判读依赖空腹 8-12h，非空腹测可能虚高 30-50%；② ALT/AST 升高前三天的剧烈运动、饮酒、某些保健品（红曲/中药）也可致升高；③ 高嘌呤饮食/饮酒可使尿酸偏高。排除后仍异常的项目，才进入正式分级复查。</div>`;
+    html+='</div></div>';
+    // 下一步
+    html+=`<div class="pnl"><div class="pnl-h"><span class="pn">04</span><h2>随访与复查</h2></div><div class="pnl-b">`;
+    const seen={};
+    probs.forEach(p=>{
+      html+=`<div class="problem" style="border-left:4px solid ${p.lev==='l2'?'#D32F2F':'#2EAD82'}"><h3>${p.name}</h3>${p.next}</div>`;
+    });
+    // 就诊携带
+    html+=`<div class="blockquote-side"><b>就诊携带</b>：本次完整报告原件 + 既往同类报告（医生看趋势）+ 正在服用的药物与保健品清单（含剂量）+ 家族史要点。<b>若出现</b> 明显口渴多饮多尿、视物模糊、不明原因体重下降、剧烈关节疼痛等症状，<b>提前线下就医，不要等复查时间</b>。</div>`;
+    html+='</div></div>';
+    // 生活指导（按问题聚合去重）
+    html+=`<div class="pnl"><div class="pnl-h"><span class="pn">05</span><h2>生活指导</h2></div><div class="pnl-b"><ol style="margin:0 0 0 20px">`;
+    const guides=[];
+    abnKeys=abnormal.map(x=>x.d.key);
+    if(abnKeys.some(k=>['glu','hba1c','tc','ldl','tg'].includes(k))||has('bmi'))guides.push('减重是核心杠杆：目标先减 5%（约 4-5 kg）；血糖 / 血脂 / 肝酶 / 尿酸 / 血压多项同时受益。');
+    if(abnKeys.some(k=>['glu','hba1c'].includes(k)))guides.push('主食结构：白米白面替换 1/3 为杂粮杂豆；每餐先吃菜和蛋白质，主食放最后。');
+    if(abnKeys.some(k=>['alt','ggt','tg','ua'].includes(k)))guides.push('严格限酒：GGT 升高、脂肪肝、甘油三酯、尿酸四项都与酒精直接相关。');
+    if(abnKeys.length)guides.push('每周 150 分钟中等强度运动（快走/游泳/骑车，分 5 次），饭后散步对餐后血糖尤其有效。');
+    if(has('ua'))guides.push('每天饮水 1500-2000 mL，帮助尿酸排出；少动物内脏、浓肉汤、海鲜、啤酒。');
+    guides.push('规律作息：熬夜会同时干扰血糖调节和肝脏修复。');
+    guides.forEach(g=>html+=`<li style="margin-bottom:8px">${g}</li>`);
+    html+='</ol></div></div>';
+    // 参考指南
+    html+=`<div class="pnl"><div class="pnl-h"><span class="pn">06</span><h2>判读依据</h2></div><div class="pnl-b"><table><thead><tr><th>指南</th><th>本次用于判定</th></tr></thead><tbody>
+      <tr><td>《中国 2 型糖尿病防治指南》</td><td>空腹血糖≥7.0 / 糖化≥6.5% 的糖尿病诊断阈值</td></tr>
+      <tr><td>《中国血脂管理指南 2023》</td><td>TC/TG/LDL-C 参考区间与分层目标值</td></tr>
+      <tr><td>《全国临床检验操作规程》(第4版)</td><td>肝功能、肾功能参考区间</td></tr>
+      <tr><td>《中国成人代谢综合征防治指南》</td><td>代谢综合征判定五组分阈值</td></tr>
+    </tbody></table><div class="blockquote-side"><b>免责声明</b>：本解读依据所填数值与内置参考区间整理，仅作健康科普与就医准备参考，<b>不替代执业医师的诊断与治疗建议</b>。个体目标值因危险分层而异，需由医生结合完整病史确定。</div></div></div>`;
+    html+='<div class="acts no-print"><button class="btn ghost sm" onclick="window.print()">打印 / 存为 PDF</button><button class="btn ghost sm" onclick="document.getElementById(\'out\').scrollIntoView({behavior:\'smooth\'})">回到顶部</button></div>';
+  } else {
+    html=`<div class="pnl"><div class="pnl-b"><p>未录入任何可判读的异常指标。请在上方输入有箭头的指标后重试。</p></div></div>`;
+  }
+  out.innerHTML=html;
+}
+</script>
+</body>
+</html>

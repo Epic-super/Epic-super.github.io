@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="media/favicon.ico" type="image/x-icon" />
+    <title>Mikado - 3D Matching Game</title>
+    <script src="libs/three.min.js"></script>
+    <link href="fonts/inter.css" rel="stylesheet" />
+    <link href="fonts/sixtyfour.css" rel="stylesheet" />
+    <link href="style.css" rel="stylesheet" />
+    <link rel="manifest" href="./manifest.json" />
+  <script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+  <body>
+    <div id="game-wrapper">
+      <div id="intro-screen" class="fullscreen-overlay">
+        <h1 class="title">Mikado</h1>
+        <div class="mode-selection">
+          <button id="start-pair-game-btn" data-mode="pair">
+            Pair Matching
+          </button>
+          <button id="start-nback-game-btn" data-mode="n-back">
+            2-Back Mode
+          </button>
+        </div>
+        <div class="n-level-selector">
+          <label for="n-level-input">N-Back Level:</label>
+          <input type="number" id="n-level-input" value="2" min="1" max="9" />
+        </div>
+        <p class="cta" style="display: none">Tap to Start</p>
+      </div>
+
+      <div id="end-screen" class="fullscreen-overlay hidden">
+        <h1 class="title">Time's Up!</h1>
+        <p class="subtitle">
+          Your final score: <span id="final-score">0</span>
+        </p>
+        <p class="cta">Tap to Play Again</p>
+      </div>
+
+      <div id="pause-overlay" class="fullscreen-overlay hidden">
+        <p>Paused</p>
+        <p class="cta" style="font-size: 1rem; margin-top: 20px">
+          Tap anywhere to resume
+        </p>
+      </div>
+
+      <div id="game-ui" class="hidden">
+        <div id="top-bar">
+          <div id="level-display">L1</div>
+          <div id="timer">1:00</div>
+          <div id="score-display">0</div>
+        </div>
+
+        <div id="pair-matching-game" class="hidden">
+          <div id="figures-grid"></div>
+        </div>
+
+        <div id="n-back-game" class="hidden">
+          <div id="n-back-container">
+            <div id="n-back-figure" class="figure-container"></div>
+            <div id="response-timer-bar" class="hidden"></div>
+          </div>
+          <div id="n-back-seeding-overlay" class="hidden">
+            <p>Get Ready...</p>
+          </div>
+          <div id="n-back-controls" class="hidden">
+            <button id="no-match-btn">No Match</button>
+            <button id="match-btn">Match</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script type="module" src="mikado.js"></script>
+        <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", function () {
+          navigator.serviceWorker.register("./sw.js").then(
+            function (registration) {
+              console.log(
+                "ServiceWorker registration successful with scope: ",
+                registration.scope,
+              );
+            },
+            function (err) {
+              console.log("ServiceWorker registration failed: ", err);
+            },
+          );
+        });
+      } else {
+        console.info("Service workers not available on this device");
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RFQ 物料清单 · 公式差异与"从下往上填充"问题分析报告</title>
+<style>
+  :root{
+    --bg:#f5f6f8; --card:#ffffff; --ink:#1f2430; --sub:#5b6472;
+    --line:#e3e7ee; --brand:#2563eb; --brand-soft:#eef4ff;
+    --red:#d92d20; --red-soft:#fef3f2; --amber:#b54708; --amber-soft:#fffaeb;
+    --green:#067647; --green-soft:#ecfdf3; --mono:"Cascadia Code",Consolas,"Courier New",monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,"Segoe UI","Microsoft YaHei",sans-serif;line-height:1.65;font-size:15px}
+  .wrap{max-width:960px;margin:0 auto;padding:32px 24px 80px}
+  header.hero{background:linear-gradient(135deg,#1e293b,#334155);color:#fff;border-radius:16px;padding:30px 32px;margin-bottom:26px}
+  header.hero h1{margin:0 0 8px;font-size:24px;letter-spacing:.5px}
+  header.hero .meta{font-size:13px;opacity:.85}
+  header.hero .meta code{background:rgba(255,255,255,.15);padding:1px 6px;border-radius:4px;font-family:var(--mono)}
+  h2{font-size:19px;margin:34px 0 14px;padding-left:11px;border-left:4px solid var(--brand)}
+  h3{font-size:15.5px;margin:20px 0 8px;color:var(--ink)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px 22px;margin:14px 0;
+    box-shadow:0 1px 2px rgba(16,24,40,.04)}
+  p{margin:8px 0}
+  .sub{color:var(--sub);font-size:14px}
+  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:14px}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+  th{background:#f8fafc;font-weight:600}
+  td.num,th.num{text-align:center;white-space:nowrap}
+  code,.mono{font-family:var(--mono);font-size:13px}
+  .pill{display:inline-block;padding:2px 9px;border-radius:20px;font-size:12px;font-weight:600}
+  .p-red{background:var(--red-soft);color:var(--red)}
+  .p-amber{background:var(--amber-soft);color:var(--amber)}
+  .p-green{background:var(--green-soft);color:var(--green)}
+  .p-blue{background:var(--brand-soft);color:var(--brand)}
+  .callout{border-radius:10px;padding:14px 16px;margin:14px 0;border:1px solid}
+  .c-red{background:var(--red-soft);border-color:#fecdca}
+  .c-amber{background:var(--amber-soft);border-color:#fde3a7}
+  .c-green{background:var(--green-soft);border-color:#abefc6}
+  .c-blue{background:var(--brand-soft);border-color:#c7ddff}
+  .callout b{color:inherit}
+  .fx{background:#0f172a;color:#e2e8f0;border-radius:8px;padding:10px 12px;font-family:var(--mono);font-size:13px;overflow-x:auto;margin:6px 0}
+  .fx .hi{color:#fbbf24}
+  .fx .del{color:#f87171}
+  ul{margin:8px 0 8px 4px;padding-left:20px}
+  li{margin:5px 0}
+  .kpi{display:flex;gap:14px;flex-wrap:wrap;margin:10px 0}
+  .kpi .box{flex:1;min-width:150px;background:#f8fafc;border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+  .kpi .box .n{font-size:24px;font-weight:700;color:var(--brand)}
+  .kpi .box .n.bad{color:var(--red)}
+  .kpi .box .l{font-size:12.5px;color:var(--sub);margin-top:2px}
+  .foot{margin-top:40px;color:var(--sub);font-size:12.5px;text-align:center}
+  .tag{font-family:var(--mono);background:#eef2f7;padding:1px 5px;border-radius:4px;font-size:12.5px}
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <h1>RFQ 物料清单 · 公式差异与"从下往上批量填充"问题分析</h1>
+  <div class="meta">
+    模板/源文件：<code>RFQ 物料清单60126-0245.xlsx</code>　·　已填充文件：<code>RFQ 物料清单60126-0245-7.21.xlsx</code><br>
+    读取工具：xlwings 0.36.2（COM 直读，保留真实公式）　·　报告日期：2026-07-22
+  </div>
+</header>
+
+<div class="card">
+  <h2 style="margin-top:6px">一、结论先行（TL;DR）</h2>
+  <div class="callout c-red">
+    <b>根本原因：</b>本次批量填充<b>不是"整块、多列对齐、一次性"完成的，而是"分列、分段"手工向上拖拽</b>。
+    结果导致 <b>7 处公式缺陷</b>——其中 <b>6 行整行公式被漏填</b>（空洞行），<b>1 行仅 K 列漏填</b>（列间选区不一致的铁证）。
+    此外模板<b>本身就存在"双轨公式"</b>（主体 <span class="mono">H*I*J</span> / 底部 30 行 <span class="mono">J*I*H</span>），
+    是历史上分两次、不同源拼接的产物，继续从底部向上填充会把不一致进一步扩散。
+  </div>
+  <div class="kpi">
+    <div class="box"><div class="n">463 → 733</div><div class="l">主表行数（新增约 270 行）</div></div>
+    <div class="box"><div class="n">6880 → 10874</div><div class="l">主表公式数量</div></div>
+    <div class="box"><div class="n bad">7</div><div class="l">填充缺陷行（6 空洞 + 1 列缺）</div></div>
+    <div class="box"><div class="n bad">0</div><div class="l">#REF!/#VALUE! 报错（问题更隐蔽）</div></div>
+  </div>
+  <p class="sub">注意：全表<b>未出现</b> <span class="tag">#REF!</span> <span class="tag">#VALUE!</span> 等显式报错，
+  所以问题不会"跳红"，只会让相关行的成本静默计成 0 / 空——比报错更危险。</p>
+</div>
+
+<h2>二、两份文件整体差异</h2>
+<div class="card">
+  <table>
+    <tr><th>工作表</th><th class="num">模板 行×列</th><th class="num">模板 公式数</th><th class="num">已填充 行×列</th><th class="num">已填充 公式数</th><th>差异</th></tr>
+    <tr><td><b>报价物料信息</b>（主表）</td><td class="num">463×32</td><td class="num">6880</td><td class="num">733×32</td><td class="num">10874</td><td><span class="pill p-red">填充发生地</span> +270 行 / +3994 公式</td></tr>
+    <tr><td>阶梯报价</td><td class="num">58×34</td><td class="num">990</td><td class="num">58×34</td><td class="num">990</td><td><span class="pill p-green">一致</span></td></tr>
+    <tr><td>漆计算</td><td class="num">492×26</td><td class="num">790</td><td class="num">492×26</td><td class="num">790</td><td><span class="pill p-green">一致</span></td></tr>
+    <tr><td>材料</td><td class="num">1322×8</td><td class="num">68</td><td class="num">1322×8</td><td class="num">68</td><td><span class="pill p-green">一致</span></td></tr>
+    <tr><td>转换成$</td><td class="num">211×26</td><td class="num">3156</td><td class="num">211×26</td><td class="num">3156</td><td><span class="pill p-green">一致</span></td></tr>
+    <tr><td>客户模板Cost Break Down</td><td class="num">213×61</td><td class="num">5679</td><td class="num">213×61</td><td class="num">5679</td><td><span class="pill p-green">一致</span></td></tr>
+    <tr><td>钣金 / 预测 / quantity</td><td class="num">—</td><td class="num">0</td><td class="num">—</td><td class="num">0</td><td><span class="pill p-green">无公式，一致</span></td></tr>
+  </table>
+  <p class="sub">→ 差异<b>全部集中在主表「报价物料信息」</b>，其余表结构与公式完全一致。下文只聚焦主表。</p>
+</div>
+
+<h2>三、核心发现：填充缺陷定位</h2>
+
+<div class="card">
+  <h3>发现 1 ｜ 6 行"整行公式空洞"　<span class="pill p-red">高危</span></h3>
+  <p>模板中<b>本有完整公式</b>的行，在已填充文件里整行 15 个公式列<b>全部为空</b>；且这些行被上下有公式的行夹住，属于"填充时被跳过"的空洞。</p>
+  <table>
+    <tr><th class="num">缺陷行</th><th>上一行</th><th>该行（已填充）</th><th>下一行</th><th>模板原状</th></tr>
+    <tr><td class="num">460</td><td>459 有公式</td><td><span class="pill p-red">整行空白</span></td><td>461 有公式</td><td>K460=<span class="mono">=J460*I460*H460*…</span> 等 15 列齐全</td></tr>
+    <tr><td class="num">462</td><td>461 有公式</td><td><span class="pill p-red">整行空白</span></td><td>463 有公式</td><td>K462 等 15 列齐全</td></tr>
+    <tr><td class="num">538–539</td><td>537 有公式</td><td><span class="pill p-red">连续 2 行空白</span></td><td>540 有公式</td><td>（新增区）应连续填充</td></tr>
+    <tr><td class="num">541–542</td><td>540 有公式</td><td><span class="pill p-red">连续 2 行空白</span></td><td>543 有公式</td><td>（新增区）应连续填充</td></tr>
+  </table>
+  <p class="sub">这些行的输入列（H/I/J 等）也为空，所以 Excel 不报错，但只要后续有汇总/小计跨越这些行，数据链就断了。</p>
+</div>
+
+<div class="card">
+  <h3>发现 2 ｜ 行 571：仅 K 列缺公式，其余 14 列齐全　<span class="pill p-red">铁证</span></h3>
+  <div class="callout c-red">
+    这是判定"<b>分列填充、列间选区不一致</b>"的决定性证据。若是整块（多列一起）从下往上填充，绝不可能只漏掉某一列。
+  </div>
+  <div class="fx">
+行571（已填充）：<br>
+&nbsp;&nbsp;<span class="del">K571 = 空 &nbsp;← 唯独漏填</span><br>
+&nbsp;&nbsp;M571 = =L571*K571 ✔　N571 = =M571*F571 ✔　P571 = =O571*F571 ✔<br>
+&nbsp;&nbsp;R/T/V/W/X/Z/AA/AB/AC/AD/AF 571 …… <span class="hi">全部有公式 ✔</span>
+  </div>
+  <p>说明 K 列那一次向上填充的选区，上边界没盖到第 571 行，而其它 14 列的填充盖到了。<b>各列是一列一列分开拖的，起止行没对齐。</b></p>
+</div>
+
+<div class="card">
+  <h3>发现 3 ｜ "双轨公式"：H*I*J 与 J*I*H 并存　<span class="pill p-amber">维护隐患</span></h3>
+  <p>K 列（重量 = 长×宽×高×密度）在两份文件里都存在<b>两种书写顺序</b>，结果值相同，但暴露了"多源拼接"的历史：</p>
+  <table>
+    <tr><th>文件</th><th>H*I*J 顺序</th><th>J*I*H 顺序</th><th>顺序切换边界</th></tr>
+    <tr><td>模板</td><td class="num">431 行（行 3–433）</td><td class="num">30 行（行 434–463）</td><td>行 434 起切换为 J*I*H</td></tr>
+    <tr><td>已填充</td><td class="num">694 行（行 3–703）</td><td class="num">30 行（行 704–733）</td><td>行 704 起切换为 J*I*H</td></tr>
+  </table>
+  <div class="fx">
+主体：K3 &nbsp;= =<span class="hi">H</span>3*<span class="hi">I</span>3*<span class="hi">J</span>3*2.8/1000/1000<br>
+底部：K733 = =<span class="hi">J</span>733*<span class="hi">I</span>733*<span class="hi">H</span>733*2.8/1000/1000　←顺序相反（结果相同）
+  </div>
+  <p>底部这 30 行 <span class="mono">J*I*H</span> 是历史遗留的"另一段"。<b>若下次仍从底部这 30 行作为源向上填充，会把 J*I*H 顺序（及其潜在的引用错位）继续往上带</b>，越填越乱。</p>
+</div>
+
+<h2>四、根因分析：为什么"从下往上填充"会出问题</h2>
+<div class="card">
+  <p>Excel 的"向上填充/向上拖拽"本身逻辑没错——以选区最底行为源，相对引用随行递减。真正把它变成雷区的是<b>下面三个叠加因素</b>：</p>
+
+  <div class="callout c-red">
+    <b>根因① 分列 + 分段操作，选区不统一（主因）</b><br>
+    没有一次性选中"整个数据块的所有公式列"往上填，而是<b>一列一列、一段一段</b>手工拖。
+    只要某一列/某一段的选区上下边界没对齐，就会出现：① 整行空洞（460/462/538-542），② 单列漏填（571 只缺 K）。
+  </div>
+
+  <div class="callout c-amber">
+    <b>根因② 空行成为填充断点</b><br>
+    数据里夹着完全空白的行（无零件的分隔/残留行）。从下往上拖拽时，人眼常在空行处"松手分段"或用多区域选择跳过空行，
+    导致这些空行没被覆盖到公式——正好对应 460、462、538-539、541-542。
+  </div>
+
+  <div class="callout c-amber">
+    <b>根因③ 源行公式与主体不一致（双轨）</b><br>
+    底部 30 行是 <span class="mono">J*I*H</span>，主体是 <span class="mono">H*I*J</span>。
+    从底部往上填充 = 用"非标准写法的行"当模板复制，把不一致扩散到上方；反复几次后顺序、甚至列引用就会错位。
+  </div>
+
+  <div class="callout c-blue">
+    <b>为什么没报错却更危险：</b>这些缺陷行的输入格（长宽高/单价）恰好为空，公式缺失后单元格只是"空/0"，
+    <span class="tag">#REF!</span> 之类<b>一个都不会跳</b>。汇总、阶梯报价、转换成$、客户 Cost Break Down 若跨这些行取数，会<b>静默少算成本</b>。
+  </div>
+</div>
+
+<h2>五、修复建议</h2>
+<div class="card">
+  <h3>立即修复（针对本文件）</h3>
+  <ul>
+    <li><b>补齐 7 处缺陷行公式</b>：460、462、538、539、541、542（整行 15 列）+ 571（仅 K 列）。
+      直接从相邻正常行向这些行"选择性粘贴公式"即可。</li>
+    <li><b>统一 K 列写法</b>：把底部行 704–733 的 <span class="mono">J*I*H</span> 全部改成主体的 <span class="mono">H*I*J</span>，消除双轨。</li>
+    <li><b>校验汇总链</b>：检查阶梯报价 / 转换成$ / 客户 Cost Break Down 三个表引用主表的区间，确认没有跨过原空洞行漏取数。</li>
+  </ul>
+  <h3>正确的批量填充方法（杜绝再犯）</h3>
+  <ul>
+    <li><b>整块一次填，不要分列</b>：选中"最底行完整一整行的所有公式列"→ 连同要填充的全部目标行一起选中 → <span class="tag">Ctrl+D</span>（向下）统一填充。方向优先用<b>从上往下</b>，源行取<b>标准写法的主体行</b>，别取底部双轨行。</li>
+    <li><b>不要用多区域/跳空行选择</b>去填公式；先把公式填满整个连续区间，空数据行留空的是"输入格"而非"公式格"。</li>
+    <li><b>填后自检</b>：用 <span class="tag">Ctrl+`</span>（显示公式）快速目视，或在旁边加一列 <span class="mono">=COUNTA</span> 校验每行公式列数是否一致（本报告即用此思路，逐行统计 15 个公式列的完整度）。</li>
+  </ul>
+</div>
+
+<div class="foot">
+  分析方法：xlwings 以 COM 直读两份 .xlsx 的真实公式（非缓存值），逐单元格提取后按列归一化相对引用、比对行覆盖范围与列间一致性。<br>
+  证据数据：主表 15 个公式列 × 733 行全量扫描。
+</div>
+
+</div>
+</body>
+</html>

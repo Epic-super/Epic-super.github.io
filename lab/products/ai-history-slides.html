@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>人工智能编年史 · AI Chronicle</title>
+<style>
+  :root{
+    --bg0:#04060d;
+    --bg1:#0a0f1e;
+    --ink:#e8edff;
+    --muted:#8a96b8;
+    --line:rgba(120,150,220,.18);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%;background:#000;overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",Roboto,Helvetica,Arial,sans-serif;
+    color:var(--ink);-webkit-font-smoothing:antialiased;}
+
+  /* 16:9 stage centered, letterboxed by black */
+  .stage{
+    position:relative;
+    width:min(100vw, 177.78vh);
+    height:min(56.25vw, 100vh);
+    margin:auto;
+    top:50%;transform:translateY(-50%);
+    background:
+      radial-gradient(120% 90% at 12% 8%, rgba(56,189,248,.10), transparent 55%),
+      radial-gradient(120% 90% at 88% 95%, rgba(168,85,247,.12), transparent 55%),
+      linear-gradient(160deg, var(--bg1), var(--bg0));
+    overflow:hidden;
+    container-type:size;
+    box-shadow:0 0 0 1px rgba(120,150,220,.10), 0 30px 120px rgba(0,0,0,.6);
+  }
+  /* subtle starfield grid — always behind content */
+  .stage::before{
+    content:"";position:absolute;inset:0;
+    background-image:
+      linear-gradient(rgba(120,150,220,.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(120,150,220,.06) 1px, transparent 1px);
+    background-size:6cqw 6cqw;
+    mask-image:radial-gradient(circle at 50% 40%, #000 30%, transparent 85%);
+    opacity:.5;pointer-events:none;z-index:0;
+  }
+  /* moving glow blob — always behind content */
+  .stage::after{
+    content:"";position:absolute;width:40cqw;height:40cqw;border-radius:50%;
+    background:radial-gradient(circle, rgba(56,189,248,.18), transparent 70%);
+    filter:blur(20px);left:-10cqw;top:-10cqw;pointer-events:none;z-index:0;
+    animation:float 14s ease-in-out infinite alternate;
+  }
+  @keyframes float{to{transform:translate(20cqw,16cqh)}}
+
+  .track{position:absolute;inset:0;display:flex;width:100%;height:100%;
+    transition:transform .7s cubic-bezier(.7,.02,.18,1);will-change:transform;}
+  .slide{flex:0 0 100%;width:100%;height:100%;position:relative;
+    display:flex;align-items:center;padding:7cqh 8cqw;overflow:hidden;}
+
+  /* ---------- content slide layout ---------- */
+  .year{font-family:"SF Mono",ui-monospace,Menlo,Consolas,monospace;
+    font-size:11cqh;font-weight:800;line-height:.95;letter-spacing:-.01em;
+    color:transparent;-webkit-text-stroke:1.2px var(--accent);
+    text-shadow:0 0 24px color-mix(in srgb, var(--accent) 55%, transparent);
+    opacity:.96;}
+  .rail{position:relative;flex:0 0 28cqw;display:flex;align-items:center;justify-content:center;}
+  .node{width:3.4cqh;height:3.4cqh;border-radius:50%;
+    background:var(--accent);box-shadow:0 0 0 6px color-mix(in srgb,var(--accent) 18%,transparent),
+      0 0 26px 4px color-mix(in srgb,var(--accent) 70%,transparent);
+    position:relative;z-index:2;animation:pulse 2.6s ease-in-out infinite;}
+  @keyframes pulse{50%{box-shadow:0 0 0 10px color-mix(in srgb,var(--accent) 10%,transparent),0 0 34px 8px color-mix(in srgb,var(--accent) 80%,transparent)}}
+  .rail .stitch{position:absolute;left:50%;top:-40cqh;bottom:-40cqh;width:2px;
+    transform:translateX(-50%);background:linear-gradient(var(--accent),transparent 12%,transparent 88%,var(--accent));
+    opacity:.35;}
+  .body{flex:1;padding-left:4cqw;max-width:66cqw;overflow-wrap:break-word;word-break:break-word;}
+  .tag{display:inline-block;font-size:1.9cqh;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--accent);border:1px solid color-mix(in srgb,var(--accent) 45%,transparent);
+    padding:.4cqh 1.2cqh;border-radius:99px;margin-bottom:2cqh;
+    background:color-mix(in srgb,var(--accent) 10%,transparent);}
+  .title{font-size:4.8cqh;font-weight:800;line-height:1.15;margin-bottom:2.2cqh;
+    background:linear-gradient(90deg,#fff,color-mix(in srgb,var(--accent) 80%,#fff));
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    overflow-wrap:break-word;word-break:break-word;}
+  .desc{font-size:2.5cqh;line-height:1.62;color:var(--muted);
+    overflow-wrap:break-word;word-break:break-word;}
+  .desc b{color:#cdd7ff;font-weight:600}
+  .meta{margin-top:2.2cqh;font-family:ui-monospace,Menlo,monospace;font-size:1.9cqh;color:var(--accent);
+    opacity:.85;letter-spacing:.03em;overflow-wrap:break-word;}
+
+  /* ---------- cover & end ---------- */
+  .center{flex-direction:column;align-items:center;justify-content:center;text-align:center;flex:1}
+  .center .kicker,.center .big,.center .sub,.center .hint{position:relative;z-index:2}
+  .kicker{font-size:2.4cqh;letter-spacing:.5em;text-transform:uppercase;color:var(--muted);margin-bottom:3cqh}
+  .big{font-size:11cqh;font-weight:900;letter-spacing:-.01em;line-height:1.04;
+    background:linear-gradient(100deg,#7dd3fc,#a855f7 60%,#f0abfc);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    text-shadow:0 0 60px rgba(168,85,247,.25);}
+  .sub{font-size:3cqh;color:#c6cffb;margin-top:3cqh;font-weight:600}
+  .hint{margin-top:5cqh;font-size:2.1cqh;color:var(--muted);letter-spacing:.05em}
+  .hint kbd{font-family:ui-monospace,monospace;border:1px solid var(--line);border-radius:6px;
+    padding:.3cqh .9cqh;color:#cdd7ff;margin:0 .4cqh}
+  .ring{position:absolute;width:62cqw;height:62cqw;border-radius:50%;border:1px solid var(--line);
+    top:50%;left:50%;transform:translate(-50%,-50%);opacity:.6;z-index:0}
+  .ring.r2{width:42cqw;height:42cqw;border-color:rgba(168,85,247,.25)}
+  .ring.r3{width:24cqw;height:24cqw;border-color:rgba(56,189,248,.35);
+    box-shadow:0 0 50px rgba(56,189,248,.18) inset}
+
+  /* ---------- nav / chrome ---------- */
+  .progress{position:absolute;top:0;left:0;height:.7cqh;z-index:30;
+    background:linear-gradient(90deg,#38bdf8,#a855f7);
+    box-shadow:0 0 14px rgba(168,85,247,.6);transition:width .6s ease}
+  .nav{position:absolute;top:50%;transform:translateY(-50%);z-index:25;
+    width:7cqw;height:14cqh;border:none;cursor:pointer;background:transparent;
+    color:var(--muted);display:flex;align-items:center;justify-content:center;
+    transition:color .2s, background .2s;}
+  .nav:hover{color:#fff;background:rgba(120,150,220,.08)}
+  .nav.prev{left:0}.nav.next{right:0}
+  .nav svg{width:3.4cqw;height:3.4cqw;fill:none;stroke:currentColor;stroke-width:2.4}
+  .dots{position:absolute;bottom:3.4cqh;left:50%;transform:translateX(-50%);z-index:25;
+    display:flex;gap:1.1cqw;}
+  .dot{width:1.1cqh;height:1.1cqh;border-radius:50%;border:none;cursor:pointer;padding:0;
+    background:rgba(140,160,210,.3);transition:all .3s}
+  .dot.on{background:linear-gradient(90deg,#38bdf8,#a855f7);width:3.4cqw;border-radius:99px;
+    box-shadow:0 0 12px rgba(168,85,247,.7)}
+  .counter{position:absolute;bottom:3.2cqh;right:4cqw;z-index:25;
+    font-family:ui-monospace,monospace;font-size:2.1cqh;color:var(--muted);letter-spacing:.1em}
+  .counter b{color:#cdd7ff}
+
+  /* ---------- tools (top-left) ---------- */
+  #tools{position:absolute;top:2.4cqh;left:2.4cqw;z-index:35;display:flex;gap:.9cqw;flex-wrap:wrap}
+  #tools button{font:inherit;cursor:pointer;color:var(--muted);
+    background:rgba(10,15,30,.6);border:1px solid var(--line);border-radius:8px;
+    padding:.7cqh 1.2cqw;font-size:1.7cqh;letter-spacing:.03em;transition:.2s;display:flex;gap:.5cqw;align-items:center}
+  #tools button:hover{color:#fff;border-color:rgba(120,150,220,.5);background:rgba(20,28,52,.85)}
+  #tools b{color:#7dd3fc;font-family:ui-monospace,monospace;font-size:1.5cqh}
+
+  /* ---------- speaker notes (inside slide, hidden on screen) ---------- */
+  .notes{display:none}
+
+  /* ---------- on-screen notes panel ---------- */
+  #notePanel{position:fixed;left:0;right:0;bottom:0;z-index:70;max-height:44vh;
+    background:linear-gradient(0deg,rgba(6,9,18,.98),rgba(6,9,18,.92));
+    border-top:1px solid var(--line);backdrop-filter:blur(10px);
+    transform:translateY(102%);transition:transform .35s cubic-bezier(.4,0,.2,1);
+    padding:2.4vh 4vw;overflow:auto}
+  #notePanel.open{transform:translateY(0)}
+  .np-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2vh}
+  .np-head h3{font-size:1.9vh;letter-spacing:.14em;color:#7dd3fc;text-transform:uppercase}
+  .np-close{cursor:pointer;background:transparent;border:1px solid var(--line);color:var(--muted);
+    border-radius:6px;padding:.4vh 1vw;font-size:1.5vh}
+  .np-close:hover{color:#fff}
+  .np-body{font-size:2.1vh;line-height:1.65;color:#c6cffb}
+  .np-body p{margin:.7vh 0}
+
+  /* ---------- presenter view ---------- */
+  #presenter{position:fixed;inset:0;z-index:90;background:#05060d;display:none;
+    grid-template-columns:1fr 30vw;grid-template-rows:1fr auto;gap:1.6vh;
+    padding:2vh 2vw;font-family:inherit}
+  #presenter.open{display:grid}
+  #presenter .stage{position:absolute!important;inset:0;width:100%!important;height:100%!important;
+    top:0!important;transform:none!important;margin:0!important;box-shadow:none;container-type:size}
+  .p-current{grid-row:1;grid-column:1;position:relative;overflow:hidden;border:1px solid var(--line);border-radius:12px}
+  .p-side{grid-row:1 / span 2;grid-column:2;display:flex;flex-direction:column;gap:1.4vh;overflow:hidden;min-height:0}
+  .p-nextwrap{flex:0 0 auto;display:flex;flex-direction:column;gap:.5vh}
+  .p-label{font-size:1.6vh;letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
+  .p-next{flex:0 0 24vh;position:relative;overflow:hidden;border:1px solid var(--line);border-radius:10px}
+  .p-notes{flex:1;min-height:0;overflow:auto;background:rgba(255,255,255,.03);border:1px solid var(--line);
+    border-radius:10px;padding:1.6vh 1.4vw;font-size:1.9vh;line-height:1.6;color:#cdd7ff}
+  .p-notes p{margin:.7vh 0}
+  .p-bar{grid-row:2;grid-column:1;display:flex;align-items:center;gap:2.4vw;
+    font-family:ui-monospace,monospace;color:var(--muted);font-size:1.9vh}
+  .p-bar .p-timer{color:#7dd3fc;font-size:2.4vh}
+  .p-bar .p-exit{cursor:pointer;border:1px solid var(--line);border-radius:6px;padding:.4vh 1vw;color:#cdd7ff}
+  .p-bar .p-exit:hover{color:#fff}
+
+  /* ---------- notes-only handout (screen hidden) ---------- */
+  #notesHandout{display:none}
+  #notesHandout .nh-title{font-size:20pt;font-weight:800;margin-bottom:14pt;color:#0b1f3a}
+  .nh-item{margin-bottom:12pt;padding-bottom:10pt;border-bottom:1px solid #d4dae6;page-break-inside:avoid;break-inside:avoid}
+  .nh-head{font-size:13pt;font-weight:700;color:#10243f;margin-bottom:5pt}
+  .nh-body{font-size:10.5pt;line-height:1.65;color:#1c2733}
+  .nh-body p{margin:3pt 0}
+
+  @media (max-aspect-ratio:16/9){
+    .stage{width:100vw;height:56.25vw}
+    .stage{top:0;transform:none;margin:calc((100vh - 56.25vw)/2) auto 0}
+  }
+
+  /* ---------- page sizes ---------- */
+  @page{ size: 16in 9in; margin:0; }              /* default: slide print */
+  @page notes{ size: A4 portrait; margin:16mm 15mm; }  /* notes-only handout */
+  #notesHandout{ page: notes; }
+
+  /* ---------- print / export PDF ---------- */
+  @media print{
+    html,body{height:auto;overflow:visible;background:#000;}
+    .stage{position:static;top:auto;transform:none;width:16in;height:9in;margin:0;
+      container-type:size;box-shadow:none;overflow:visible;}
+    .track{display:block;transform:none!important;transition:none;}
+    .slide{position:relative;width:100%;height:100%;page-break-after:always;break-after:page;
+      display:flex!important;overflow:visible;}
+    .slide:last-child{page-break-after:auto;break-after:auto;}
+    .nav,.dots,.counter,.progress,#tools,#notePanel,#presenter{display:none!important;}
+    .notes{display:block!important;position:absolute;left:8cqw;right:8cqw;bottom:3cqh;max-height:24cqh;
+      overflow:hidden;font-size:1.9cqh;line-height:1.5;color:#aeb9dd;
+      background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:8px;padding:1.4cqh 2cqw;}
+    .notes p{margin:.5cqh 0}
+    .stage::before{opacity:.25}
+
+    /* notes-only handout overrides */
+    body.print-notes{background:#fff!important}
+    body.print-notes .stage,
+    body.print-notes #tools,
+    body.print-notes .nav,
+    body.print-notes .dots,
+    body.print-notes .counter,
+    body.print-notes .progress,
+    body.print-notes #notePanel,
+    body.print-notes #presenter{display:none!important;}
+    body.print-notes #notesHandout{display:block!important;background:#fff;color:#111}
+  }
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+<div class="stage" id="stage">
+  <div class="progress" id="progress"></div>
+
+  <!-- tool bar -->
+  <div id="tools">
+    <button id="btnNotes"><b>N</b> 备注</button>
+    <button id="btnPres"><b>P</b> 演讲者</button>
+    <button id="btnPrint">⤓ 导出 PDF</button>
+    <button id="btnNotesPdf">⤓ 备注讲义</button>
+  </div>
+
+  <div class="track" id="track">
+
+    <!-- 1 · COVER -->
+    <section class="slide center" style="--accent:#7dd3fc">
+      <div class="ring"></div><div class="ring r2"></div><div class="ring r3"></div>
+      <div class="kicker">A Chronicle of Artificial Intelligence</div>
+      <div class="big">人工智能<br>编年史</div>
+      <div class="sub">从图灵测试到 Agent 时代 · 1950 → 2026</div>
+      <div class="hint">使用 <kbd>←</kbd> <kbd>→</kbd> 或点击屏幕两侧翻页</div>
+      <aside class="notes">
+        <p>· 欢迎与开场，点明主题：一条贯穿 70 余年的智能进化主线。</p>
+        <p>· 说明今天用「时间轴 + 发光节点」串起关键拐点，从思想实验到能行动的智能体。</p>
+        <p>· 可抛问题暖场：「如果图灵活到今天，他会怎么看 ChatGPT？」</p>
+      </aside>
+    </section>
+
+    <!-- 2 · 1950 -->
+    <section class="slide" style="--accent:#f4b740">
+      <div class="rail"><span class="stitch"></span><span class="node"></span></div>
+      <div class="body">
+        <div class="year">1950</div>
+        <span class="tag">思想实验 · 起点</span>
+        <h2 class="title">图灵测试：机器能思考吗？</h2>
+        <p class="desc">艾伦·图灵发表划时代论文《Computing Machinery and Intelligence》，提出用<b>「模仿游戏」（Imitation Game）</b>替代「机器能否思考」这一难以定义的问题。
+        这一思想实验成为衡量机器智能的基石，也点燃了后世七十余年的追寻。</p>
+        <div class="meta">▸ Alan Turing · Mind, 1950</div>
+      </div>
+      <aside class="notes">
+        <p>· 核心：图灵把「机器能否思考」这个哲学难题，转化为可操作的行为测试。</p>
+        <p>· 「模仿游戏」= 让机器伪装成人类，远程文字对话，裁判分辨不出即通过。</p>
+        <p>· 强调：这不是定义智能，而是给出可判定的判据——影响至今。</p>
+      </aside>
+    </section>
+
+    <!-- 3 · 1956 -->
+    <section class="slide" style="--accent:#fb923c">
+      <div class="rail"><span class="stitch"></span><span class="node"></span></div>
+      <div class="body">
+        <div class="year">1956</div>
+        <span class="tag">学科诞生</span>
+        <h2 class="title">达特茅斯会议：AI 正式命名</h2>
+        <p class="desc">在达特茅斯学院的夏季研讨会上，<b>约翰·麦卡锡（John McCarthy）</b>首次提出「Artificial Intelligence（人工智能）」一词。
+        与会者包括麦卡锡、明斯基、香农、罗切斯特、纽厄尔、西蒙等，标志着 AI 作为一门独立学科正式诞生。</p>
+        <div class="meta">▸ Dartmouth Workshop · 1956 夏</div>
+      </div>
+      <aside class="notes">
+        <p>· 关键事实：「Artificial Intelligence」这个词就是在这次会议上被麦卡锡定名。</p>
+        <p>· 参会阵容：McCarthy、Minsky、Shannon、Rochester、Newell、Simon。</p>
+        <p>· 意义：AI 从零散研究变成一门有名字、有共同体的学科。</p>
+      </aside>
+    </section>
+
+    <!-- 4 · Perceptron -->
+    <section class="slide" style="--accent:#f472b6">
+      <div class="rail"><span class="stitch"></span><span class="node"></span></div>
+      <div class="body">
+        <div class="year" style="font-size:8cqh">1958</div>
+        <span class="tag">神经网络 · 第一次热潮</span>
+        <h2 class="title">感知机：会学习的机器</h2>
+        <p class="desc">弗兰克·罗森布拉特（Frank Rosenblatt）提出<b>感知机（Perceptron）</b>——史上首个可学习的神经网络模型，并用硬件 Mark I 实现。
+        它能从数据中自动调整权重进行分类，掀起了第一次神经网络研究热潮，也埋下了此后符号主义与连接主义的路线之争。</p>
+        <div class="meta">▸ F. Rosenblatt · The Perceptron, 1958</div>
+      </div>
+      <aside class="notes">
+        <p>· Rosenblatt 的感知机是连接主义最早的实用模型，用硬件 Mark I 实现。</p>
+        <p>· 它能从数据自动调权重做分类——「学习」概念的雏形。</p>
+        <p>· 伏笔：1969 年 Minsky & Papert《Perceptrons》指出单层局限，浇灭第一波热潮。</p>
+      </aside>
+    </section>
+
+    <!-- 5 · Expert systems & winters -->
+    <section class="slide" style="--accent:#a78bfa">
+      <div class="rail"><span class="stitch"></span><span class="node"></span></div>
+      <div class="body">
+        <div class="year" style="font-size:7.5cqh">1970s<br>–80s</div>
+        <span class="tag">繁荣与寒冬</span>
+        <h2 class="title">专家系统兴起，AI 两度入冬</h2>
+        <p class="desc"><b>专家系统</b>将领域专家知识编码为规则：DENDRAL（1965）、MYCIN（1976）、XCON（1980）走��商用。
+        但算力、数据与理论的瓶颈导致<b>两次 AI 寒冬</b>：1974–1980 与 1987–1993（Lisp 机器市场崩塌），研究经费骤减。</p>
+        <div class="meta">▸ 符号主义的高光与低谷</div>
+      </div>
+      <aside class="notes">
+        <p>· 黄金期：专家系统把专家知识写成规则（DENDRAL / MYCIN / XCON 商用）。</p>
+        <p>· 寒冬一：1974–1980，理论+算力+数据三重受限，经费大砍。</p>
+        <p>· 寒冬二：1987–1993，Lisp 机器市场崩塌，维护成本高、难扩展。</p>
+        <p>· 教训：单一技术路线过热易泡沫，基础研究要与工程落地平衡。</p>
+      </aside>
+    </section>
+
+    <!-- 6 · 1997 Deep Blue -->
+    <section class="slide" style="--accent:#38bdf8">
+      <div class="rail"><span class="stitch"></span><span class="node"></span></div>
+      <div class="body">
+        <div class="year">1997</div>
+        <span class="tag">符号主义里程碑</span>
+        <h2 class="title">深蓝击败国际象棋世界冠军</h2>
+        <p class="desc">IBM <b>深蓝（Deep Blue）</b>以 3.5 : 2.5 的总比分击败卫冕世界冠军<b>加里·卡斯帕罗夫</b>。
+        它用海量并行搜索（每秒 2 亿步）与手工评估函数证明：在特定复杂博弈中，机器可以超越人类顶级智力。</p>
+        <div class="meta">▸ IBM Deep Blue vs. G. Kasparov</div>
+      </div>
+      <aside class="notes">
+        <p>· Deep Blue 是符号主义 + 暴力搜索的巅峰：每秒 2 亿步枚举。</p>
+        <p>· 它不是「学习」，但证明在明确定义的领域机器可超人。</p>
+        <p>· 卡斯帕罗夫赛后坦言承受巨大心理压力——人机博弈象征意义大于技术。</p>
+      </aside>
+    </section>
+
+    <!-- 7 · 2012 AlexNet -->
+    <section class="slide" style="--accent:#22d3ee">
+      <div class="rail"><span class="stitch"></span><span class="node"></span></div>
+      <div class="body">
+        <div class="year">2012</div>
+        <span class="tag">深度学习革命</span>
+        <h2 class="title">AlexNet 引爆深度学习</h2>
+        <p class="desc">Krizhevsky、Sutskever 与 Hinton 凭 <b>AlexNet</b> 在 ImageNet（ILSVRC）夺冠，Top-5 错误率从约 26% 骤降至 <b>15.3%</b>。
+        深度卷积神经网络 + GPU 训练的胜利，正式开启现代深度学习时代。</p>
+        <div class="meta">▸ Krizhevsky, Sutskever, Hinton · NeurIPS 2012</div>
+      </div>
+      <aside class="notes">
+        <p>· 三要素同时就位：ImageNet 大数据 + GPU 算力 + 深度 CNN。</p>
+        <p>· Top-5 错误率从 ~26% 直降到 15.3%，断崖式领先。</p>
+        <p>· 深度学习黄金十年的起点，也是学术界风向的转折点。</p>
+      </aside>
+    </section>
+
+    <!-- 8 · 2016 AlphaGo -->
+    <section class="slide" style="--accent:#34d399">
+      <div class="rail"><span class="stitch"></span><span class="node"></span></div>
+      <div class="body">
+        <div class="year">2016</div>
+        <span class="tag">强化学习封神</span>
+        <h2 class="title">AlphaGo 战胜李世石</h2>
+        <p class="desc">DeepMind 的 <b>AlphaGo</b> 以 4 : 1 击败围棋世界冠军<b>李世石</b>。
+        它将深度学习、强化学习与蒙特卡洛树搜索结合，攻克了曾被普遍认为机器「百年内无法企及」的复杂博弈，震动全球。</p>
+        <div class="meta">▸ DeepMind AlphaGo · Seoul, 2016</div>
+      </div>
+      <aside class="notes">
+        <p>· AlphaGo = 深度学习 + 强化学习 + 蒙特卡洛树搜索（MCTS）。</p>
+        <p>· 4:1 胜李世石，攻克公认的「直觉型」复杂博弈。</p>
+        <p>· 彩蛋：第 4 局「神之一手」（第 37 手）仍让 AI 失误——不确定性仍在。</p>
+      </aside>
+    </section>
+
+    <!-- 9 · 2017 Transformer -->
+    <section class="slide" style="--accent:#818cf8">
+      <div class="rail"><span class="stitch"></span><span class="node"></span></div>
+      <div class="body">
+        <div class="year">2017</div>
+        <span class="tag">架构基石</span>
+        <h2 class="title">Transformer：注意力即一切</h2>
+        <p class="desc">谷歌论文《Attention Is All You Need》提出 <b>Transformer</b> 架构与<b>自注意力机制</b>，
+        取代 RNN/CNN 的序列建模方式，可并行训练且能捕捉长程依赖。它成为此后几乎所有大语言模型的共同基石。</p>
+        <div class="meta">▸ Vaswani et al. · Google, 2017</div>
+      </div>
+      <aside class="notes">
+        <p>· Transformer 用自注意力替换 RNN/CNN，可并行、长程依赖更强。</p>
+        <p>· BERT(2018)、GPT 系列都建立在此之上——真正的架构地基。</p>
+        <p>· 一句话：今天所有主流大模型，血管里流的都是 Attention。</p>
+      </aside>
+    </section>
+
+    <!-- 10 · GPT & GPT-3 -->
+    <section class="slide" style="--accent:#c084fc">
+      <div class="rail"><span class="stitch"></span><span class="node"></span></div>
+      <div class="body">
+        <div class="year" style="font-size:7.5cqh">2018<br>–2020</div>
+        <span class="tag">规模化的涌现</span>
+        <h2 class="title">GPT 预训练范式与 GPT-3</h2>
+        <p class="desc"><b>2018</b> OpenAI 提出 GPT，验证「生成式预训练 + 下游微调」范式；<b>2020</b> 发布的 <b>GPT-3</b> 拥有 <b>1750 亿</b>参数，
+        展现出惊人的少样本 / 零样本能力，证明「规模化（Scale）」能带来能力的质的飞跃。</p>
+        <div class="meta">▸ GPT (2018) → GPT-3 (May 2020)</div>
+      </div>
+      <aside class="notes">
+        <p>· 2018 GPT 验证「预训练 + 微调」范式；2019 GPT-2；2020 GPT-3（175B）。</p>
+        <p>· GPT-3 展现少样本 / 零样本——不微调也能做任务。</p>
+        <p>· 背后是 Scaling Law（Kaplan 2020）：模型越大，能力越涌现。</p>
+      </aside>
+    </section>
+
+    <!-- 11 · 2022 ChatGPT -->
+    <section class="slide" style="--accent:#f0abfc">
+      <div class="rail"><span class="stitch"></span><span class="node"></span></div>
+      <div class="body">
+        <div class="year">2022</div>
+        <span class="tag">生成式 AI 大众化</span>
+        <h2 class="title">ChatGPT 引爆全球</h2>
+        <p class="desc"><b>2022 年 11 月 30 日</b>，OpenAI 发布基于 GPT-3.5 + <b>RLHF（人类反馈强化学习）</b>的 ChatGPT。
+        它 <b>5 天</b>破百万用户、<b>2 个月</b>破亿，成为史上增长最快的消费级应用，把生成式 AI 推向大众视野。</p>
+        <div class="meta">▸ ChatGPT launched: 2022-11-30</div>
+      </div>
+      <aside class="notes">
+        <p>· 2022-11-30 发布，底座是 GPT-3.5 + RLHF（来自 InstructGPT, 2022.3）。</p>
+        <p>· 5 天破百万、2 个月破亿——史上增长最快的消费应用。</p>
+        <p>· 直接引爆全球大模型军备竞赛，AI 从实验室走向大众。</p>
+      </aside>
+    </section>
+
+    <!-- 12 · Present -->
+    <section class="slide" style="--accent:#5eead4">
+      <div class="rail"><span class="stitch"></span><span class="node"></span></div>
+      <div class="body">
+        <div class="year" style="font-size:5.5cqh">NOW</div>
+        <span class="tag">当下与前沿</span>
+        <h2 class="title">Agent · 多模态 · 端侧 AI</h2>
+        <p class="desc">
+        <b>智能体（Agent）</b>：能自主规划、调用工具、完成任务的系统（Function Calling / MCP）。<br>
+        <b>多模态</b>：文本、图像、音频、视频统一建模（GPT-4V、Sora、Gemini）。<br>
+        <b>端侧 AI</b>：经蒸馏 / 量化后在手机与 PC 本地运行（Apple Intelligence、高通 NPU）。</p>
+        <div class="meta">▸ 从「会对话」走向「能行动」</div>
+      </div>
+      <aside class="notes">
+        <p>· Agent：能规划 + 调工具 + 自主完成任务（Function Calling 2023、MCP 2024）。</p>
+        <p>· 多模态：文本 / 图像 / 音频 / 视频统一建模（GPT-4V、Sora、Gemini）。</p>
+        <p>· 端侧 AI：量化 / 蒸馏后跑在手机 PC（Apple Intelligence、高通 NPU）。</p>
+        <p>· 一句话：从「会对话」迈向「能行动、随身走」。</p>
+      </aside>
+    </section>
+
+    <!-- 13 · END -->
+    <section class="slide center" style="--accent:#a855f7">
+      <div class="ring"></div><div class="ring r2"></div><div class="ring r3"></div>
+      <div class="kicker">The Future Is Now</div>
+      <div class="big">未来<br>已来</div>
+      <div class="sub">从模仿游戏到通用智能，进化仍在加速</div>
+      <div class="hint">编年史 · 未完待续 — 感谢观看</div>
+      <aside class="notes">
+        <p>· 收束：从图灵的「模仿游戏」到今天能行动的 Agent，形成闭环。</p>
+        <p>· 提醒观众：这是进行时，不是终章。</p>
+        <p>· 结尾互动：「下一个拐点会在哪一年？」留白收场，谢谢观看。</p>
+      </aside>
+    </section>
+
+  </div>
+
+  <button class="nav prev" id="prev" aria-label="上一页">
+    <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>
+  </button>
+  <button class="nav next" id="next" aria-label="下一页">
+    <svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+  </button>
+  <div class="dots" id="dots"></div>
+  <div class="counter"><b id="cur">01</b> / 13</div>
+</div>
+
+<!-- on-screen speaker notes panel -->
+<div id="notePanel">
+  <div class="np-head"><h3>讲者备注 · Speaker Notes</h3><span class="np-close" id="npClose">关闭 ✕</span></div>
+  <div class="np-body" id="npBody"></div>
+</div>
+
+<!-- presenter view -->
+<div id="presenter">
+  <div class="p-current"></div>
+  <div class="p-side">
+    <div class="p-nextwrap">
+      <div class="p-label">下一页预览</div>
+      <div class="p-next"></div>
+    </div>
+    <div class="p-notes" id="pNotes"></div>
+  </div>
+  <div class="p-bar">
+    <span class="p-timer" id="pTimer">00:00</span>
+    <span class="p-page" id="pPage">01 / 13</span>
+    <span class="p-exit" id="pExit">退出演讲者视图 (Esc)</span>
+  </div>
+</div>
+
+<!-- notes-only handout (filled by JS, hidden on screen) -->
+<div id="notesHandout"></div>
+
+<script>window.addEventListener('error',function(e){try{var v=document.getElementById('app')||document.getElementById('view')||document.body;if(!v||v.dataset.err)return;v.dataset.err='1';var s=(e.error&&e.error.stack)||e.message||'';var b=document.createElement('div');b.style.cssText='padding:16px;margin:14px;font-family:ui-monospace,monospace;font-size:13px;color:#a33;background:#fdeceb;border:1px solid #f5c6cb;border-radius:12px;line-height:1.5';b.innerHTML='<b>⚠ 页面出错了</b><br><span style="color:#555">'+(e.message||'')+'</span><pre style="white-space:pre-wrap;margin-top:8px;font-size:11px">'+(s||'').slice(0,1000)+'</pre><small style="color:#666">建议 Ctrl+Shift+R 强刷；F12 → Application → Local Storage 清本页缓存后刷新。</small>';v.insertBefore(b,v.firstChild);}catch(_){}});
+(function(){
+  const stage=document.getElementById('stage');
+  const track=document.getElementById('track');
+  const slides=track.children;
+  const total=slides.length;
+  let i=0;
+  const dots=document.getElementById('dots');
+  const counter=document.getElementById('cur');
+  const progress=document.getElementById('progress');
+
+  for(let s=0;s<total;s++){
+    const b=document.createElement('button');
+    b.className='dot'+(s===0?' on':'');
+    b.setAttribute('aria-label','第'+(s+1)+'页');
+    b.addEventListener('click',()=>go(s));
+    dots.appendChild(b);
+  }
+  function pad(n){return (n+1<10?'0':'')+(n+1);}
+  function render(){
+    track.style.transform='translateX('+(-i*100)+'%)';
+    progress.style.width=((i+1)/total*100)+'%';
+    counter.textContent=pad(i);
+    [...dots.children].forEach((d,idx)=>d.classList.toggle('on',idx===i));
+    if(notesOpen) noteBody.innerHTML=curNotes();
+    syncPresenter();
+  }
+  function go(n){i=Math.max(0,Math.min(total-1,n));render();}
+  function next(){go(i+1);} function prev(){go(i-1);}
+
+  // ---------- speaker notes ----------
+  const notePanel=document.getElementById('notePanel');
+  const noteBody=document.getElementById('npBody');
+  let notesOpen=false;
+  function curNotes(){const n=slides[i].querySelector('.notes');return n?n.innerHTML:'<p>（本页无备注）</p>';}
+  function toggleNotes(force){
+    notesOpen=(force===undefined)?!notesOpen:force;
+    notePanel.classList.toggle('open',notesOpen);
+    if(notesOpen) noteBody.innerHTML=curNotes();
+  }
+
+  // ---------- presenter view ----------
+  const presenter=document.getElementById('presenter');
+  let presOpen=false,curClone=null,nextClone=null,pStart=0,pInt=null;
+  function buildPresenter(){
+    curClone=stage.cloneNode(true);
+    nextClone=stage.cloneNode(true);
+    [curClone,nextClone].forEach(c=>{
+      c.removeAttribute('id');
+      c.querySelectorAll('[id]').forEach(e=>e.removeAttribute('id'));
+      c.querySelectorAll('.nav,.dots,.counter,.progress,#tools').forEach(e=>e.remove());
+    });
+    presenter.querySelector('.p-current').appendChild(curClone);
+    presenter.querySelector('.p-next').appendChild(nextClone);
+  }
+  function syncPresenter(){
+    if(!presOpen||!curClone)return;
+    curClone.querySelector('.track').style.transform='translateX('+(-i*100)+'%)';
+    const ni=Math.min(i+1,total-1);
+    nextClone.querySelector('.track').style.transform='translateX('+(-ni*100)+'%)';
+    document.getElementById('pNotes').innerHTML=curNotes();
+    document.getElementById('pPage').textContent=pad(i)+' / '+pad(total-1);
+  }
+  function togglePresenter(force){
+    presOpen=(force===undefined)?!presOpen:force;
+    presenter.classList.toggle('open',presOpen);
+    if(presOpen){
+      if(!curClone) buildPresenter();
+      syncPresenter();
+      pStart=Date.now();
+      clearInterval(pInt);
+      pInt=setInterval(()=>{
+        const s=Math.floor((Date.now()-pStart)/1000);
+        const mm=String(Math.floor(s/60)).padStart(2,'0'),ss=String(s%60).padStart(2,'0');
+        document.getElementById('pTimer').textContent=mm+':'+ss;
+      },1000);
+    } else clearInterval(pInt);
+  }
+
+  // ---------- notes-only handout ----------
+  const handout=document.getElementById('notesHandout');
+  function buildHandout(){
+    let html='<h1 class="nh-title">人工智能编年史 · 讲者备注讲义</h1>';
+    for(let s=0;s<total;s++){
+      const sl=slides[s];
+      const head=sl.querySelector('.title')?.textContent
+             || sl.querySelector('.big')?.textContent
+             || sl.querySelector('.kicker')?.textContent
+             || ('幻灯片 '+(s+1));
+      const n=sl.querySelector('.notes');
+      const body=n?n.innerHTML:'<p>（本页无备注）</p>';
+      html+='<div class="nh-item"><div class="nh-head">'+pad(s)+' · '+head+'</div><div class="nh-body">'+body+'</div></div>';
+    }
+    handout.innerHTML=html;
+  }
+  buildHandout();
+  function printNotes(){
+    document.body.classList.add('print-notes');
+    window.print();
+  }
+  window.onafterprint=()=>document.body.classList.remove('print-notes');
+
+  // ---------- events ----------
+  document.getElementById('next').addEventListener('click',next);
+  document.getElementById('prev').addEventListener('click',prev);
+  document.getElementById('btnNotes').addEventListener('click',()=>toggleNotes());
+  document.getElementById('btnPres').addEventListener('click',()=>togglePresenter());
+  document.getElementById('btnPrint').addEventListener('click',()=>window.print());
+  document.getElementById('btnNotesPdf').addEventListener('click',printNotes);
+  document.getElementById('npClose').addEventListener('click',()=>toggleNotes(false));
+  document.getElementById('pExit').addEventListener('click',()=>togglePresenter(false));
+
+  window.addEventListener('keydown',e=>{
+    if(e.key==='ArrowRight'||e.key==='PageDown'){next();}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){prev();}
+    else if(e.key==='Home'){go(0);} else if(e.key==='End'){go(total-1);}
+    else if(e.key==='n'||e.key==='N'){toggleNotes();}
+    else if(e.key==='p'||e.key==='P'){togglePresenter();}
+    else if(e.key==='Escape'){ if(presOpen)togglePresenter(false); else if(notesOpen)toggleNotes(false); }
+  });
+  // click left/right thirds (ignore chrome)
+  stage.addEventListener('click',e=>{
+    if(e.target.closest('.nav')||e.target.closest('.dot')||e.target.closest('#tools'))return;
+    const x=e.clientX,w=window.innerWidth;
+    if(x<w*0.22)prev(); else if(x>w*0.78)next();
+  });
+  // touch swipe
+  let sx=0,sy=0;
+  track.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY;},{passive:true});
+  track.addEventListener('touchend',e=>{
+    const dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;
+    if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)){dx<0?next():prev();}
+  },{passive:true});
+
+  render();
+})();
+</script>
+</body>
+</html>

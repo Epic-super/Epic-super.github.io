@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<!-- 人际·恋爱台 | 单文件 HTML，全内联零外链，数据存 localStorage -->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#B0306A">
+<title>人际·恋爱台 · 关系成长</title>
+<style>
+:root{
+  --main:#B0306A; --main-d:#8E2350; --main-l:#FBEAF1; --main-x:#F3D2E1;
+  --violet:#6D28D9; --violet-l:#F1EAFC; --violet-x:#E2D6FA;
+  --green:#137A4B; --green-l:#E7F4EE; --amber:#B4690E; --amber-l:#FDF1DF; --navy:#1B3A57; --navy-l:#EAF0F5;
+  --bg:#F4F1F4; --card:#FFFFFF; --line:#EFE6EA; --line-s:#F6F0F3;
+  --t1:#1A1320; --t2:#6A5C66; --t3:#9A8C95;
+  --r:14px; --r-sm:10px; --r-lg:18px; --r-f:999px;
+  --sh:0 1px 2px rgba(40,16,30,.04),0 1px 3px rgba(40,16,30,.045);
+  --sh-md:0 2px 5px rgba(40,16,30,.05),0 6px 16px rgba(40,16,30,.06);
+  --sh-lg:0 10px 30px rgba(40,16,30,.10),0 3px 8px rgba(40,16,30,.05);
+  --ease:cubic-bezier(.32,.72,0,1);
+  --tf:.16s var(--ease); --tm:.3s var(--ease);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI Variable Display","Segoe UI",Roboto,"Helvetica Neue","PingFang SC","HarmonyOS Sans SC","MiSans","Microsoft YaHei",sans-serif;
+  background:var(--bg);color:var(--t1);font-size:15px;line-height:1.55;
+  padding-bottom:calc(72px + env(safe-area-inset-bottom));
+  -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
+  text-rendering:optimizeLegibility;letter-spacing:-.003em;
+}
+.star b,.cd .nm,.cs .cc,.bar+*{font-variant-numeric:tabular-nums}
+button,input,select,textarea{font-family:inherit;font-size:16px}
+button{cursor:pointer;border:none;background:none;color:inherit}
+.wrap{max-width:1120px;margin:0 auto;padding:0 14px}
+
+/* 顶栏 */
+.top{
+  position:relative;color:#fff;padding:16px 0 18px;padding-top:calc(16px + env(safe-area-inset-top));
+  background:
+    radial-gradient(120% 140% at 8% -10%,rgba(255,255,255,.16) 0%,rgba(255,255,255,0) 46%),
+    radial-gradient(90% 120% at 92% 0%,rgba(109,40,217,.55) 0%,rgba(109,40,217,0) 60%),
+    linear-gradient(134deg,#8E2350 0%,#B0306A 44%,#9B2C8C 72%,#6D28D9 132%);
+  box-shadow:0 1px 0 rgba(255,255,255,.10) inset,0 6px 20px rgba(40,16,30,.12);overflow:hidden;
+}
+.top::after{content:'';position:absolute;left:0;right:0;bottom:0;height:1px;background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.28) 30%,rgba(255,255,255,.28) 70%,rgba(255,255,255,0))}
+.top-row{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.brand{flex:1;min-width:200px}
+.brand h1{margin:0;font-size:19.5px;font-weight:700;letter-spacing:-.01em;display:flex;align-items:center;gap:8px;text-shadow:0 1px 2px rgba(0,0,0,.12)}
+.brand p{margin:4px 0 0;font-size:12.5px;opacity:.84;letter-spacing:.005em}
+.top-acts{display:flex;gap:7px;flex-wrap:wrap}
+.tbtn{background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.22);color:#fff;padding:7px 12px;border-radius:var(--r-sm);font-size:13px;font-weight:500;min-height:36px;display:inline-flex;align-items:center;gap:5px;
+  -webkit-backdrop-filter:blur(10px) saturate(1.4);backdrop-filter:blur(10px) saturate(1.4);transition:background var(--tf),border-color var(--tf),transform var(--tf)}
+.tbtn:hover{background:rgba(255,255,255,.22);border-color:rgba(255,255,255,.4)}
+.tbtn:active{background:rgba(255,255,255,.3);transform:scale(.96)}
+.store-chip{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.16);border-radius:var(--r-f);padding:4.5px 11px;margin-top:9px;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.dot{width:7px;height:7px;border-radius:50%;background:#5BD48A;display:inline-block;box-shadow:0 0 0 0 rgba(91,212,138,.7);animation:pulse 2.4s ease-out infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(91,212,138,.55)}70%{box-shadow:0 0 0 6px rgba(91,212,138,0)}100%{box-shadow:0 0 0 0 rgba(91,212,138,0)}}
+
+/* 通用卡片 */
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh);padding:16px;margin-top:13px;transition:box-shadow var(--tm),border-color var(--tm)}
+.card:hover{box-shadow:var(--sh-md);border-color:#EBDDE4}
+.ch{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.ch h2{margin:0;font-size:15.5px;font-weight:700;display:flex;align-items:center;gap:8px;flex:1;letter-spacing:-.012em}
+.ch .hint{font-size:12px;color:var(--t3);font-weight:450}
+.ico{width:17px;height:17px;flex:none}
+
+/* 今天要处理 */
+.today{border-left:4px solid var(--main)}
+.tl{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.ti{display:flex;align-items:flex-start;gap:10px;padding:11px 12px;border:1px solid var(--line-s);border-radius:12px;background:#FCFCFD;transition:background var(--tf),border-color var(--tf),box-shadow var(--tf),opacity var(--tm)}
+.ti:hover{background:#fff;border-color:var(--line);box-shadow:var(--sh)}
+.ti.od{background:var(--main-l);border-color:var(--main-x)}
+.ti.dn{opacity:.45}
+.tb{flex:1;min-width:0}
+.tt{font-size:14.5px;font-weight:600;word-break:break-word}
+.tm{font-size:11.5px;color:var(--t2);margin-top:3px;display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+.tag{display:inline-block;padding:2px 8px;border-radius:var(--r-f);font-size:10.5px;font-weight:650;white-space:nowrap}
+.tag.rj{background:var(--main-l);color:var(--main)}
+.tag.lo{background:var(--violet-l);color:var(--violet)}
+.tag.el{background:#EEF0F3;color:var(--t2)}
+.tag.od{background:var(--main);color:#fff}
+.tag.k8{background:var(--amber-l);color:var(--amber)}
+.tag.ok{background:var(--green-l);color:var(--green)}
+.xbtn{width:32px;height:32px;flex:none;border-radius:9px;display:flex;align-items:center;justify-content:center;color:var(--t3);transition:background var(--tf),color var(--tf),transform var(--tf)}
+.xbtn:hover{background:var(--main-l);color:var(--main)}
+.xbtn:active{transform:scale(.9)}
+.empty{text-align:center;padding:22px 10px;color:var(--t3);font-size:13.5px}
+.empty svg{width:34px;height:34px;opacity:.35;display:block;margin:0 auto 7px}
+
+/* Tab */
+.tabs{display:flex;gap:5px;margin-top:15px;background:#EFE7EC;padding:4px;border-radius:13px;overflow-x:auto;position:sticky;top:0;z-index:50}
+.tab{flex:1;min-width:90px;padding:9px 8px;border-radius:10px;font-size:13.5px;font-weight:600;color:var(--t2);white-space:nowrap;text-align:center;min-height:40px;transition:background var(--tf),color var(--tf),box-shadow var(--tf),transform var(--tf)}
+.tab:hover:not(.on){color:var(--t1);background:rgba(255,255,255,.55)}
+.tab:active{transform:scale(.97)}
+.tab.on{background:#fff;color:var(--main);box-shadow:0 1px 2px rgba(40,16,30,.06),0 2px 6px rgba(40,16,30,.07)}
+.pane{display:none}
+.pane.on{display:block;animation:panein .34s var(--ease)}
+@keyframes panein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* 表单 */
+.form{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.form input[type=text],.form input[type=date],.form input[type=number],.form select,.fld input,.fld select{
+  border:1px solid var(--line);border-radius:var(--r-sm);padding:10px 12px;background:#fff;min-height:44px;color:var(--t1);transition:border-color var(--tf),box-shadow var(--tf)}
+.form input:focus,.fld input:focus,.fld select:focus{border-color:var(--main);outline:none;box-shadow:0 0 0 3.5px rgba(176,48,106,.12)}
+.form input[type=text]{flex:1;min-width:140px}
+.form input[type=number]{width:84px}
+.btn{background:linear-gradient(180deg,#C53C77 0%,var(--main) 55%,#A12A61 100%);color:#fff;padding:11px 17px;border-radius:var(--r-sm);font-weight:600;font-size:14.5px;min-height:44px;display:inline-flex;align-items:center;gap:6px;justify-content:center;
+  box-shadow:0 1px 2px rgba(176,48,106,.22),0 2px 8px rgba(176,48,106,.18),0 1px 0 rgba(255,255,255,.16) inset;transition:transform var(--tf),box-shadow var(--tf),filter var(--tf)}
+.btn:hover{filter:brightness(1.06);box-shadow:0 2px 4px rgba(176,48,106,.22),0 6px 16px rgba(176,48,106,.26),0 1px 0 rgba(255,255,255,.2) inset;transform:translateY(-1px)}
+.btn:active{transform:translateY(0) scale(.975);filter:brightness(.96)}
+.btn.g{background:linear-gradient(180deg,#F6F2F5,#ECE6EA);color:var(--t1);box-shadow:0 1px 2px rgba(40,16,30,.06),0 1px 0 #fff inset}
+.btn.g:hover{filter:none;background:linear-gradient(180deg,#FBF8FA,#E6DFE4)}
+.btn.v{background:linear-gradient(180deg,#7C3AED,var(--violet) 55%,#5B21B6 100%);box-shadow:0 1px 2px rgba(109,40,217,.24),0 2px 8px rgba(109,40,217,.2),0 1px 0 rgba(255,255,255,.14) inset}
+.btn.v:hover{box-shadow:0 2px 4px rgba(109,40,217,.24),0 6px 16px rgba(109,40,217,.28),0 1px 0 rgba(255,255,255,.18) inset}
+.btn.sm{padding:7px 13px;min-height:36px;font-size:13px}
+
+/* 统计 */
+.stat{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin:12px 0}
+.st{background:linear-gradient(180deg,#FBFCFD,#F6F2F5);border:1px solid var(--line-s);border-radius:12px;padding:10px 8px;text-align:center;transition:transform var(--tf),box-shadow var(--tf),border-color var(--tf)}
+.st:hover{transform:translateY(-2px);box-shadow:var(--sh);border-color:var(--line);background:#fff}
+.st b{display:block;font-size:20px;font-weight:750;letter-spacing:-.03em}
+.st span{font-size:11px;color:var(--t2)}
+.ring{display:flex;align-items:center;gap:14px;padding:12px;background:linear-gradient(180deg,#FBFCFD,#F8F2F6);border:1px solid var(--line-s);border-radius:13px;margin-bottom:12px}
+.ring .info{flex:1;min-width:0}
+.ring .info b{font-size:15px}
+.ring .info p{margin:3px 0 0;font-size:12px;color:var(--t2)}
+
+/* 社交复盘列表 */
+.log{border:1px solid var(--line);border-radius:13px;padding:13px;background:#fff;margin-bottom:9px;transition:transform var(--tf),box-shadow var(--tf),border-color var(--tf)}
+.log:hover{transform:translateY(-1px);box-shadow:var(--sh)}
+.log .lh{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.log .le{font-size:14.5px;font-weight:650;line-height:1.4;margin:8px 0 2px}
+.log .lr{font-size:12.5px;color:var(--t2);line-height:1.55}
+.log .lf{font-size:12px;color:var(--main-d);background:var(--main-l);border-radius:9px;padding:7px 10px;margin-top:8px;line-height:1.55}
+.logstars{display:inline-flex;gap:1px}
+.logstars svg{width:15px;height:15px}
+.slotbar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.sf{padding:6px 12px;border:1px solid var(--line);border-radius:var(--r-f);font-size:12.5px;font-weight:500;background:#fff;color:var(--t2);min-height:34px;transition:background var(--tf),color var(--tf),border-color var(--tf),transform var(--tf)}
+.sf:hover:not(.on){border-color:var(--main);color:var(--main);background:var(--main-l)}
+.sf:active{transform:scale(.96)}
+.sf.on{background:linear-gradient(180deg,#B8306C,var(--main));color:#fff;border-color:var(--main);box-shadow:0 2px 8px rgba(176,48,106,.24)}
+.bars{margin-top:4px}
+.bar{display:flex;align-items:center;gap:9px;margin-bottom:8px;font-size:12.5px}
+.bar .bl{width:62px;flex:none;color:var(--t2)}
+.bar .bt{flex:1;height:11px;background:#EFE7EC;border-radius:var(--r-f);overflow:hidden;box-shadow:0 1px 2px rgba(40,16,30,.06) inset}
+.bar .bt i{display:block;height:100%;border-radius:var(--r-f);background:linear-gradient(90deg,var(--main),var(--violet));transition:width .5s var(--ease)}
+.bar .bv{width:30px;flex:none;text-align:right;color:var(--t1);font-variant-numeric:tabular-nums}
+
+/* 关系花园 */
+.rel{border:1px solid var(--line);border-radius:13px;padding:13px;background:#fff;margin-bottom:9px;position:relative;transition:transform var(--tf),box-shadow var(--tf),border-color var(--tf)}
+.rel:hover{transform:translateY(-1px);box-shadow:var(--sh-md)}
+.rel.od{border-color:var(--main);background:var(--main-l)}
+.rel .rn{font-size:14.5px;font-weight:650;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.rel .rstars{display:inline-flex;gap:1px;margin-left:auto}
+.rel .rstars svg{width:14px;height:14px}
+.rel .rmeta{font-size:12px;color:var(--t2);margin-top:6px;display:flex;gap:10px;flex-wrap:wrap}
+.rel .rnote{font-size:12.5px;color:var(--t2);margin-top:6px;line-height:1.5}
+.rel .ract{display:flex;gap:6px;margin-top:9px;flex-wrap:wrap}
+.rstar{color:#E2B8CD}
+.rstar.on{color:var(--main)}
+
+/* 恋爱状态 + 约会 + 心法 */
+.lovegrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px;margin-bottom:12px}
+.lovcard{border:1px solid var(--line);border-radius:13px;padding:13px;background:#fff}
+.lovcard .lk{font-size:11.5px;color:var(--t3);font-weight:600;letter-spacing:.02em}
+.lovcard .lv{font-size:22px;font-weight:800;letter-spacing:-.03em;margin-top:3px;color:var(--main)}
+.lovcard .lv.s{color:var(--violet)}
+.datecard{border:1px solid var(--line);border-radius:11px;padding:10px 12px;background:#fff;margin-bottom:8px;display:flex;align-items:center;gap:10px;transition:border-color var(--tf),box-shadow var(--tf)}
+.datecard:hover{border-color:var(--line);box-shadow:var(--sh)}
+.datecard.done{opacity:.5}
+.datecard.done .dt{text-decoration:line-through;text-decoration-color:var(--t3)}
+.dc{width:22px;height:22px;flex:none;border:2px solid #C7CDD6;border-radius:7px;display:flex;align-items:center;justify-content:center;background:#fff}
+.dc.on{background:var(--violet);border-color:var(--violet)}
+.dc svg{width:13px;height:13px;display:none}
+.dc.on svg{display:block}
+.dt{flex:1;font-size:14px;font-weight:550}
+.dcat{font-size:10.5px;font-weight:650;padding:2px 8px;border-radius:var(--r-f);background:var(--violet-l);color:var(--violet);white-space:nowrap}
+.princ{border:1px solid var(--line);border-radius:13px;padding:13px;background:linear-gradient(180deg,#FCFBFE,#F6F2F9);margin-bottom:9px;position:relative;transition:transform var(--tf),box-shadow var(--tf)}
+.princ:hover{transform:translateY(-1px);box-shadow:var(--sh-md)}
+.princ .pf{font-size:10.5px;font-weight:700;color:var(--violet);letter-spacing:.03em;margin-bottom:4px}
+.princ .pt{font-size:15px;font-weight:700;letter-spacing:-.01em}
+.princ .pd{font-size:13px;color:var(--t2);margin-top:6px;line-height:1.62}
+.pfav{position:absolute;top:11px;right:11px;width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;color:var(--t3);transition:background var(--tf),color var(--tf),transform var(--tf)}
+.pfav:hover{background:var(--violet-l);color:var(--violet)}
+.pfav.on{color:var(--violet)}
+.pfav:active{transform:scale(.9)}
+.profnote{background:linear-gradient(102deg,#FDF6FB,#FBEAF1);border-left:4px solid var(--main);border-radius:11px;padding:11px 13px;font-size:13px;color:var(--t2);line-height:1.6;margin-bottom:12px}
+
+/* 弹窗 */
+.mask{position:fixed;inset:0;background:rgba(26,12,22,.46);display:none;align-items:center;justify-content:center;padding:18px;z-index:80;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.mask.on{display:flex;animation:mkin .22s var(--ease)}
+@keyframes mkin{from{opacity:0}to{opacity:1}}
+.modal{background:#fff;border-radius:var(--r-lg);padding:20px;max-width:460px;width:100%;max-height:86vh;overflow:auto;box-shadow:0 24px 60px rgba(26,12,22,.28),0 4px 12px rgba(26,12,22,.14);animation:mdin .32s var(--ease)}
+@keyframes mdin{from{opacity:0;transform:translateY(14px) scale(.97)}to{opacity:1;transform:none}}
+.modal h3{margin:0 0 10px;font-size:17px;letter-spacing:-.015em}
+.modal p{margin:0 0 15px;font-size:13.5px;color:var(--t2);line-height:1.62}
+.mact{display:flex;gap:9px;justify-content:flex-end;flex-wrap:wrap}
+.toast{position:fixed;left:50%;bottom:88px;background:rgba(26,19,28,.94);color:#fff;padding:12px 18px;border-radius:12px;font-size:13.5px;z-index:99;opacity:0;pointer-events:none;max-width:88%;text-align:center;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);box-shadow:0 10px 30px rgba(26,12,22,.3);border:1px solid rgba(255,255,255,.08);transform:translateX(-50%) translateY(8px);transition:opacity var(--tm),transform var(--tm)}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.note{font-size:11.5px;color:var(--t3);line-height:1.6;margin-top:11px}
+.fld{margin-bottom:12px}
+.fld label{display:block;font-size:12.5px;color:var(--t2);margin-bottom:5px;font-weight:600}
+.fld input,.fld select,.ratepick{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px 11px;min-height:44px}
+.ratepick{display:flex;gap:6px;align-items:center}
+.ratepick button{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:#fff;display:flex;align-items:center;justify-content:center;color:#E2B8CD;transition:background var(--tf),color var(--tf),border-color var(--tf),transform var(--tf)}
+.ratepick button.on{color:var(--main);border-color:var(--main);background:var(--main-l)}
+.ratepick button:active{transform:scale(.92)}
+
+/* 底部导航（移动端） */
+.bnav{display:none;pointer-events:none}
+@media(max-width:768px){
+  .wrap{padding:0 11px}
+  .stat{grid-template-columns:repeat(2,1fr)}
+  .tabs{display:none}
+  .bnav{display:flex;position:fixed;left:0;right:0;bottom:0;background:rgba(255,255,255,.86);border-top:1px solid var(--line);z-index:60;padding-bottom:env(safe-area-inset-bottom);pointer-events:auto;-webkit-backdrop-filter:blur(18px) saturate(1.6);backdrop-filter:blur(18px) saturate(1.6);box-shadow:0 -2px 14px rgba(40,16,30,.06)}
+  .bn{flex:1;padding:8px 2px 7px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10.5px;color:var(--t3);min-height:52px;position:relative;z-index:1;pointer-events:auto;transition:color var(--tf),transform var(--tf)}
+  .bn:active{transform:scale(.94)}
+  .bn.on{color:var(--main);font-weight:600}
+  .bn.on::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:26px;height:2.5px;border-radius:0 0 3px 3px;background:var(--main)}
+  .bn svg{width:21px;height:21px;pointer-events:none}
+  .brand h1{font-size:17px}
+  .top-acts .tbtn span{display:none}
+  .tbtn{padding:8px 10px}
+  .modal{border-radius:16px;padding:17px}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}.card:hover,.log:hover,.rel:hover,.princ:hover,.st:hover,.btn:hover,.ti:hover{transform:none}}
+::selection{background:rgba(176,48,106,.16);color:var(--t1)}
+:focus-visible{outline:2.5px solid rgba(176,48,106,.5);outline-offset:2px;border-radius:6px}
+*{scrollbar-width:thin;scrollbar-color:#D8CBD2 transparent}
+::-webkit-scrollbar{width:9px;height:9px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#D8CBD2;border-radius:var(--r-f);border:2.5px solid transparent;background-clip:content-box}
+::-webkit-scrollbar-thumb:hover{background:#C2AEB8;background-clip:content-box}
+
+/* ============ 情话文案库（p4） ============ */
+.qhero{background:linear-gradient(134deg,#FBEAF1 0%,#F1EAFC 100%);border:1px solid var(--main-x);border-radius:var(--r);padding:18px 17px;position:relative;overflow:hidden}
+.qhero::after{content:'❝';position:absolute;right:12px;top:-2px;font-size:60px;color:rgba(176,48,106,.10);line-height:1;pointer-events:none}
+.qhero .qh-t{font-size:16.5px;line-height:1.72;color:var(--t1);font-weight:600;letter-spacing:-.005em;min-height:1.72em;position:relative;z-index:1;word-break:break-word}
+.qhero .qh-m{display:flex;align-items:center;gap:7px;margin-top:12px;flex-wrap:wrap}
+.qhero .qh-c{font-size:11px;font-weight:700;color:var(--main);background:rgba(255,255,255,.72);border:1px solid var(--main-x);border-radius:var(--r-f);padding:3px 10px}
+.qsearchrow{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.qsearchrow input{flex:1;min-width:150px;border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-height:44px;background:#fff}
+.qsearchrow input:focus{outline:none;border-color:var(--main);box-shadow:0 0 0 3px rgba(176,48,106,.10)}
+.qchips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.qchip{font-size:12px;font-weight:600;padding:6px 12px;border-radius:var(--r-f);border:1px solid var(--line);background:#fff;color:var(--t2);min-height:32px;transition:background var(--tf),color var(--tf),border-color var(--tf),transform var(--tf)}
+.qchip:hover{border-color:var(--main-x);color:var(--main)}
+.qchip:active{transform:scale(.94)}
+.qchip.on{background:var(--main);border-color:var(--main);color:#fff}
+.qchip.fav.on{background:var(--violet);border-color:var(--violet)}
+.qchip b{font-weight:700;opacity:.62;margin-left:3px;font-size:11px}
+.qstat{font-size:11.5px;color:var(--t3);margin-bottom:9px}
+.qlist{display:flex;flex-direction:column;gap:8px}
+.qitem{display:flex;gap:10px;align-items:flex-start;padding:12px 13px;border:1px solid var(--line);border-radius:var(--r-sm);background:#fff;transition:border-color var(--tf),box-shadow var(--tf)}
+.qitem:hover{border-color:var(--main-x);box-shadow:var(--sh)}
+.qitem .qt{flex:1;min-width:0;font-size:14px;line-height:1.68;color:var(--t1);word-break:break-word;white-space:pre-wrap}
+.qitem .qc{flex:none;font-size:10.5px;font-weight:700;color:var(--main);background:var(--main-l);border-radius:var(--r-f);padding:2.5px 8px;margin-top:1px}
+.qacts{flex:none;display:flex;gap:5px}
+.qacts button{width:32px;height:32px;border-radius:9px;border:1px solid var(--line);background:#fff;display:flex;align-items:center;justify-content:center;color:var(--t3);transition:background var(--tf),color var(--tf),border-color var(--tf),transform var(--tf)}
+.qacts button:hover{color:var(--main);border-color:var(--main-x);background:var(--main-l)}
+.qacts button:active{transform:scale(.9)}
+.qacts button.on{color:var(--violet);border-color:var(--violet-x);background:var(--violet-l)}
+.qacts svg{width:15px;height:15px}
+.qmore{width:100%;margin-top:11px;padding:11px;border:1px dashed var(--main-x);border-radius:var(--r-sm);background:var(--main-l);color:var(--main);font-size:13px;font-weight:600;min-height:44px;transition:background var(--tf)}
+.qmore:hover{background:var(--main-x)}
+.qload{text-align:center;padding:26px 12px;color:var(--t3);font-size:13px}
+.qload .spin{display:inline-block;width:18px;height:18px;border:2.5px solid var(--main-x);border-top-color:var(--main);border-radius:50%;animation:qspin .7s linear infinite;vertical-align:-4px;margin-right:8px}
+@keyframes qspin{to{transform:rotate(360deg)}}
+@media(max-width:560px){
+  .qitem{padding:11px}
+  .qitem .qt{font-size:13.5px}
+  .qacts button{width:30px;height:30px}
+  .qhero .qh-t{font-size:15.5px}
+}
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <div class="top-row">
+      <div class="brand">
+        <h1>
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          关系成长台
+        </h1>
+        <p>人际·恋爱子系统 · 社会学 × 心理学视角的软实力训练场</p>
+        <div class="store-chip"><i class="dot" id="storeDot"></i><span id="storeTxt">本地存储模式 · 数据仅存在这台设备</span></div>
+      </div>
+      <div class="top-acts">
+        <button class="tbtn" onclick="exportJSON()"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg><span>导出备份</span></button>
+        <button class="tbtn" onclick="document.getElementById('impFile').click()"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg><span>导入恢复</span></button>
+        <button class="tbtn" onclick="askReset()"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9 9 0 0 0-9 9z"/><path d="M3 3v6h6M3 12l3-3"/></svg><span>重置</span></button>
+      </div>
+    </div>
+    <input type="file" id="impFile" accept=".json" style="display:none" onchange="importJSON(this)">
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- 今天要处理 -->
+  <section class="card today">
+    <div class="ch">
+      <h2><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="var(--main)" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>今天要处理</h2>
+      <span class="hint" id="todayHint"></span>
+    </div>
+    <div id="todayBox"></div>
+    <div class="note" id="backupTip" style="display:none"></div>
+  </section>
+
+  <!-- Tab -->
+  <nav class="tabs">
+    <button class="tab on" data-p="p1" onclick="go('p1')">社交复盘</button>
+    <button class="tab" data-p="p2" onclick="go('p2')">关系花园</button>
+    <button class="tab" data-p="p3" onclick="go('p3')">恋爱·心法</button>
+    <button class="tab" data-p="p4" onclick="go('p4')">情话文案库</button>
+  </nav>
+
+  <!-- 社交复盘 -->
+  <section class="pane on" id="p1">
+    <div class="card">
+      <div class="ch"><h2><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="var(--main)" stroke-width="2" stroke-linecap="round"><path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>记录一次社交复盘</h2></div>
+      <div class="form">
+        <select id="lScene">
+          <option>同学</option><option>同事</option><option>朋友</option><option>长辈</option><option>聚会</option><option>线上</option><option>陌生人</option><option>恋人</option>
+        </select>
+        <input type="text" id="lEvent" placeholder="发生了什么？例：组会主动承担总结，气氛轻松" onkeydown="if(event.key==='Enter')addLog()">
+      </div>
+      <div class="form" style="margin-top:8px">
+        <span style="font-size:12.5px;color:var(--t2);flex:none">我的表现</span>
+        <div class="ratepick" id="lRate" style="flex:1;min-width:200px">
+          <button type="button" data-v="1" onclick="setRate(1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 2l3 7 7 .5-5.3 4.6L18 21l-6-3.6L6 21l1.3-6.9L2 9.5 9 9z"/></svg></button>
+          <button type="button" data-v="2" onclick="setRate(2)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 2l3 7 7 .5-5.3 4.6L18 21l-6-3.6L6 21l1.3-6.9L2 9.5 9 9z"/></svg></button>
+          <button type="button" data-v="3" onclick="setRate(3)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 2l3 7 7 .5-5.3 4.6L18 21l-6-3.6L6 21l1.3-6.9L2 9.5 9 9z"/></svg></button>
+          <button type="button" data-v="4" onclick="setRate(4)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 2l3 7 7 .5-5.3 4.6L18 21l-6-3.6L6 21l1.3-6.9L2 9.5 9 9z"/></svg></button>
+          <button type="button" data-v="5" onclick="setRate(5)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 2l3 7 7 .5-5.3 4.6L18 21l-6-3.6L6 21l1.3-6.9L2 9.5 9 9z"/></svg></button>
+        </div>
+        <button class="btn" onclick="addLog()">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>记录
+        </button>
+      </div>
+      <div class="form" style="margin-top:8px">
+        <input type="text" id="lReact" placeholder="对方反应（可留空）" style="flex:1;min-width:140px">
+        <input type="text" id="lReflect" placeholder="复盘要点 / 学到的（可留空）" style="flex:1;min-width:140px">
+      </div>
+    </div>
+
+        <div class="card">
+      <div class="ch"><h2><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="var(--main)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>推荐阅读 · 真话与沟通</h2><span class="hint">西风付费文</span></div>
+      <div class="note" style="font-size:13px;line-height:1.7">《如果不能说真话，那也就无所谓正确》—— 关于表达、求真与人际沟通的犀利思考。建议在「社交复盘」里对照自省：哪些互动里我选择了含糊，哪些场合该把话挑明。</div>
+      <a class="btn g sm" href="https://epic-super.github.io/renji/assets/xifeng-truth.pdf?v=2" target="_blank" rel="noopener" style="text-decoration:none;display:inline-block;margin-top:8px">📄 打开 PDF 阅读</a>
+      <div style="font-size:11px;color:var(--muted);margin-top:6px">打不开？按 <kbd>Ctrl+F5</kbd> 强制刷新本页后再试。</div>
+    </div>
+<div class="card">
+      <div class="ch"><h2>全部复盘</h2><span class="hint" id="logStat"></span></div>
+      <div class="slotbar" id="logFilt"></div>
+      <div id="logBox"></div>
+    </div>
+
+    <div class="card">
+      <div class="ch"><h2><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="var(--violet)" stroke-width="2" stroke-linecap="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg>复盘数据</h2><span class="hint">本月表现概览</span></div>
+      <div class="ring">
+        <svg width="82" height="82" viewBox="0 0 82 82" style="flex:none">
+          <circle cx="41" cy="41" r="34" fill="none" stroke="#F0E6EC" stroke-width="9"/>
+          <circle id="rateArc" cx="41" cy="41" r="34" fill="none" stroke="#B0306A" stroke-width="9" stroke-linecap="round" stroke-dasharray="213.6" stroke-dashoffset="213.6" transform="rotate(-90 41 41)"/>
+          <text id="rateTxt" x="41" y="46" text-anchor="middle" font-size="18" font-weight="700" fill="#1A1320">0</text>
+        </svg>
+        <div class="info">
+          <b id="rateAvg">平均自评 —</b>
+          <p id="rateSub">记录越多，越能看见自己的社交节奏</p>
+        </div>
+      </div>
+      <div class="stat">
+        <div class="st"><b id="sM" style="color:var(--main)">0</b><span>本月互动</span></div>
+        <div class="st"><b id="sAll" style="color:var(--violet)">0</b><span>累计复盘</span></div>
+        <div class="st"><b id="sTop" style="color:var(--green)">0</b><span>高分(≥4)</span></div>
+        <div class="st"><b id="sLow" style="color:var(--amber)">0</b><span>待提升(≤2)</span></div>
+      </div>
+      <div class="bars" id="sceneBars"></div>
+    </div>
+  </section>
+
+  <!-- 关系花园 -->
+  <section class="pane" id="p2">
+    <div class="card">
+      <div class="ch"><h2><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="var(--main)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.5 0 4.5 1 6 2.5"/><path d="M21 4v5h-5"/><circle cx="12" cy="12" r="3"/></svg>添加一段关系</h2></div>
+      <div class="form">
+        <input type="text" id="rName" placeholder="称呼，例：小林（室友）" onkeydown="if(event.key==='Enter')addRel()">
+        <select id="rType">
+          <option>家人</option><option>朋友</option><option>恋人</option><option>暧昧</option><option>同事</option><option>同学</option><option>导师/前辈</option><option>其他</option>
+        </select>
+        <input type="date" id="rNext" title="下次计划联系 / 见面">
+        <button class="btn" onclick="addRel()">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>添加
+        </button>
+      </div>
+      <div class="form" style="margin-top:8px">
+        <span style="font-size:12.5px;color:var(--t2);flex:none">亲密度</span>
+        <div class="ratepick" id="rRate" style="flex:1;min-width:200px">
+          <button type="button" data-v="1" onclick="setRRate(1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 2l3 7 7 .5-5.3 4.6L18 21l-6-3.6L6 21l1.3-6.9L2 9.5 9 9z"/></svg></button>
+          <button type="button" data-v="2" onclick="setRRate(2)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 2l3 7 7 .5-5.3 4.6L18 21l-6-3.6L6 21l1.3-6.9L2 9.5 9 9z"/></svg></button>
+          <button type="button" data-v="3" onclick="setRRate(3)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 2l3 7 7 .5-5.3 4.6L18 21l-6-3.6L6 21l1.3-6.9L2 9.5 9 9z"/></svg></button>
+          <button type="button" data-v="4" onclick="setRRate(4)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 2l3 7 7 .5-5.3 4.6L18 21l-6-3.6L6 21l1.3-6.9L2 9.5 9 9z"/></svg></button>
+          <button type="button" data-v="5" onclick="setRRate(5)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 2l3 7 7 .5-5.3 4.6L18 21l-6-3.6L6 21l1.3-6.9L2 9.5 9 9z"/></svg></button>
+        </div>
+      </div>
+      <div class="form" style="margin-top:8px">
+        <input type="text" id="rNote" placeholder="备注（可留空），例：常一起备考" style="flex:1;min-width:160px">
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch"><h2>关系列表</h2><span class="hint" id="relStat"></span>
+        <select id="relTypeFilt" onchange="filtRel(this.value)" style="min-height:36px;padding:6px 10px;border:1px solid var(--line);border-radius:9px;font-size:13px">
+          <option value="all">全部类型</option><option>家人</option><option>朋友</option><option>恋人</option><option>暧昧</option><option>同事</option><option>同学</option><option>导师/前辈</option><option>其他</option>
+        </select>
+      </div>
+      <div id="relBox"></div>
+    </div>
+
+    <div class="card">
+      <div class="ch"><h2><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="var(--violet)" stroke-width="2" stroke-linecap="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg>关系概览</h2></div>
+      <div class="stat">
+        <div class="st"><b id="rNum" style="color:var(--main)">0</b><span>关系数</span></div>
+        <div class="st"><b id="rAvg" style="color:var(--violet)">0</b><span>平均亲密</span></div>
+        <div class="st"><b id="rOd" style="color:var(--amber)">0</b><span>该联系了</span></div>
+        <div class="st"><b id="rClose" style="color:var(--green)">0</b><span>亲密(≥4)</span></div>
+      </div>
+      <div class="bars" id="typeBars"></div>
+    </div>
+  </section>
+
+  <!-- 恋爱·心法 -->
+  <section class="pane" id="p3">
+    <div class="profnote">教授寄语：亲密关系不是"找对的人"就一劳永逸，而是两个完整的人练习把差异变成默契。下面这些卡片不是鸡汤，是社会科学反复验证过的机制——看懂它们，你会在很多时刻少一点内耗。</div>
+
+    <div class="card">
+      <div class="ch"><h2><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="var(--violet)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>恋爱状态</h2>
+        <button class="btn g sm" onclick="editLove()">编辑</button></div>
+      <div class="lovegrid" id="loveBox"></div>
+    </div>
+
+    <div class="card">
+      <div class="ch"><h2><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="var(--main)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.4 8.4 0 0 1-3.9-.9L3 21l1.9-4.1A8.4 8.4 0 1 1 21 11.5z"/></svg>约会灵感库</h2>
+        <button class="btn v sm" onclick="drawDate()">🎲 抽一个</button></div>
+      <div class="form" style="margin-bottom:11px">
+        <input type="text" id="dTitle" placeholder="一个想一起做的事，例：夜骑看城市夜景" onkeydown="if(event.key==='Enter')addDate()">
+        <select id="dCat">
+          <option>深度聊</option><option>活动</option><option>惊喜</option><option>日常</option>
+        </select>
+        <button class="btn" onclick="addDate()">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>添加
+        </button>
+      </div>
+      <div id="dateBox"></div>
+    </div>
+
+    <div class="card">
+      <div class="ch"><h2><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="var(--violet)" stroke-width="2" stroke-linecap="round"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.3h6c0-1 .4-1.8 1-2.3A7 7 0 0 0 12 2z"/></svg>社会学·心理学心法卡</h2>
+        <button class="btn v sm" onclick="randPrinc()">🎲 随机抽一张</button></div>
+      <div class="note" style="margin-top:0;margin-bottom:8px">收藏的卡片会排在前。点右上角星标可收藏；这些机制来自社会交换理论、依恋理论、非暴力沟通等经典研究。</div>
+      <div id="princBox"></div>
+    </div>
+  </section>
+
+  <!-- 情话文案库 -->
+  <section class="pane" id="p4">
+    <div class="profnote">教授提醒：文案是<b>破冰的道具，不是关系的地基</b>。真正让人心动的从来不是句子多妙，而是「你为我特意想过」这件事本身。用法建议——挑一条改成你俩才懂的细节（共同回忆、内部梗），比原封不动发出去强十倍。</div>
+
+    <div class="card">
+      <div class="ch"><h2><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="var(--main)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21c0-4 2-6 6-6M21 3c0 4-2 6-6 6"/><path d="M14.5 3H21v6.5"/><path d="M3 14.5V21h6.5"/></svg>随手抽一条</h2>
+        <button class="btn v sm" onclick="qDraw()">🎲 换一条</button></div>
+      <div class="qhero">
+        <div class="qh-t" id="qHeroT">点「换一条」，从两万条文案里随机抽一句</div>
+        <div class="qh-m">
+          <span class="qh-c" id="qHeroC">待抽取</span>
+          <button class="btn g sm" style="padding:5px 12px;min-height:32px;font-size:12px" onclick="qCopyHero()">复制</button>
+          <button class="btn g sm" style="padding:5px 12px;min-height:32px;font-size:12px" onclick="qFavHero()">收藏</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch"><h2><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="var(--main)" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>检索文案库</h2>
+        <span class="hint" id="qTotal"></span></div>
+      <div class="qsearchrow">
+        <input type="text" id="qKw" placeholder="搜关键词，例：星星 / 早安 / 对不起" oninput="qOnInput()">
+        <button class="btn g" onclick="qClearKw()">清空</button>
+      </div>
+      <div class="qchips" id="qChips"></div>
+      <div class="qstat" id="qStat"></div>
+      <div id="qBox"><div class="qload"><span class="spin"></span>正在载入文案库…</div></div>
+    </div>
+  </section>
+
+  <div class="note" style="text-align:center;padding:14px 0 4px">
+    数据保存在这台设备的浏览器里，清缓存 / 换设备会丢 —— 记得定期点右上角「导出备份」。
+  </div>
+</main>
+
+<nav class="bnav">
+  <button class="bn on" data-p="p1" onclick="go('p1')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>社交复盘</button>
+  <button class="bn" data-p="p2" onclick="go('p2')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.5 0 4.5 1 6 2.5"/><circle cx="12" cy="12" r="3"/></svg>关系花园</button>
+  <button class="bn" data-p="p3" onclick="go('p3')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>恋爱·心法</button>
+  <button class="bn" data-p="p4" onclick="go('p4')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 8h10M7 12h7"/><path d="M21 15a2 2 0 0 1-2 2H8l-4 4V5a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2z"/></svg>文案库</button>
+</nav>
+
+<div class="mask" id="mask" onclick="if(event.target===this)closeM()">
+  <div class="modal" id="modal"></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============ 常量 ============ */
+var K='wb_renji_v1';
+var SCENES=['同学','同事','朋友','长辈','聚会','线上','陌生人','恋人'];
+var REL_TYPES=['家人','朋友','恋人','暧昧','同事','同学','导师/前辈','其他'];
+var DATE_CATS=['深度聊','活动','惊喜','日常'];
+
+/* 心法卡：社会学 × 心理学视角，教授精选 */
+var PRINCIPLES=[
+ {id:'p1',f:'社会学 · 交换理论',t:'互惠规范',d:'人际关系像隐形账户，长期看给予与索取需大致平衡。一味索取会被疏远，一味付出会委屈。健康往来是"你帮我、我记着、有机会回"。'},
+ {id:'p2',f:'社会心理学',t:'曝光效应',d:'人倾向于更喜欢经常见到的对象（单纯接触效应）。适度、不招厌的出现频率，能悄悄积累好感——但前提是初次印象不差。'},
+ {id:'p3',f:'社会心理学',t:'自我表露的相互性',d:'我们倾向于以同等程度的自我暴露回应对方。想让关系深入，先适度、安全地分享一点真实的自己，常能换来对面的打开。'},
+ {id:'p4',f:'沟通学 · NVC',t:'非暴力沟通',d:'表达四步：观察（不加评判）→ 感受 → 需要 → 请求。少说"你总是…"，多说"我感到…因为我需要…"。把指责换成具体的请求。'},
+ {id:'p5',f:'发展心理学',t:'依恋类型',d:'安全 / 焦虑 / 回避三种依恋模式影响亲密关系。了解自己与对方，能把"他是不是不在乎我"换成"他的回避是老脚本在起作用"，少内耗。'},
+ {id:'p6',f:'社会学 · 戈夫曼',t:'拟剧理论',d:'人在不同场合扮演不同"前台"：职场专业、朋友放松、恋人亲密。理解彼此都有后台真实面，能包容对方偶尔的"人设崩塌"。'},
+ {id:'p7',f:'关系心理学',t:'情感账户',d:'每次肯定、帮助、陪伴是"存款"；每次批评、忽视、失信是"取款"。账户见底关系就脆。日常多存小钱，别等危机才大额补救。'},
+ {id:'p8',f:'社会心理学',t:'积极错觉',d:'幸福伴侣常对对方有适度理想化（把小缺点看成可爱）。完全"看透"未必更好，保留一点温柔滤镜，关系更耐耗。'},
+ {id:'p9',f:'情绪心理学',t:'吊桥效应',d:'生理唤起（紧张、刺激）易被误归因成"心动"。一起做带点紧张感的活动（密室、过山车、夜路）会假性升温——善用，但别骗自己。'},
+ {id:'p10',f:'社会心理学',t:'相似性吸引',d:'态度、价值观、兴趣相似的人更易亲近（同质性原理）。找共同点是捷径，但适度差异也能制造新鲜感。'},
+ {id:'p11',f:'人本心理学',t:'被看见的需要',d:'人深层渴望"被准确理解"。认真记住对方说过的小事、复述他的感受，比送贵礼更拉近距离。'},
+ {id:'p12',f:'心理学 · 阿德勒',t:'课题分离',d:'分清"这是谁的课题"：你可以关心，但不必为对方的情绪负责到底。边界清晰的关系反而更轻松、长久。'}
+];
+
+/* ============ 状态 ============ */
+var S=null, curLogFilt='all', curRelFilt='all', _lRate=0, _rRate=0, CUR='p1';
+
+function today(){var d=new Date();return fmt(d);}
+function fmt(d){return d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate());}
+function p2(n){return n<10?'0'+n:''+n;}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
+function days(to){var a=new Date(today()+'T00:00:00'),b=new Date(to+'T00:00:00');return Math.round((b-a)/86400000);}
+function addDays(ds,n){var d=new Date(ds+'T00:00:00');d.setDate(d.getDate()+n);return fmt(d);}
+
+function seed(){
+  var t=today(), d=new Date(); d.setDate(d.getDate()-3); var ago=fmt(d);
+  var d2=new Date(); d2.setDate(d2.getDate()+2); var soon=fmt(d2);
+  return {
+    v:1,
+    logs:[
+      {id:uid(),date:ago,scene:'同学',event:'组会汇报，主动承担了收尾总结',rating:4,reaction:'组员说总结很清楚，老师点头',reflect:'提前列了要点，条理好很多',learn:'结构化表达让人更信任'},
+      {id:uid(),date:t,scene:'同事',event:'午饭和新同事聊了兴趣爱好',rating:3,reaction:'还算自然，但有点怕冷场',reflect:'可以备两个开放式问题',learn:'开放式提问更破冰'},
+      {id:uid(),date:t,scene:'线上',event:'认真回复了朋友一段长语音',rating:5,reaction:'对方说被认真听了很舒服',reflect:'先共情再给建议',learn:'倾听本身就是礼物'}
+    ],
+    rels:[
+      {id:uid(),name:'小林（室友）',type:'朋友',rate:4,last:ago,next:ago,note:'一起备考，常互相打气'},
+      {id:uid(),name:'王学姐',type:'导师/前辈',rate:3,last:t,next:soon,note:'请教考研与就业经验'},
+      {id:uid(),name:'妈妈',type:'家人',rate:5,last:t,next:t,note:'每周视频'},
+      {id:uid(),name:'阿哲（暧昧中）',type:'暧昧',rate:3,last:t,next:soon,note:'多聊共同兴趣，别急着推进'}
+    ],
+    love:{status:'暧昧',since:'',anniversary:'',milestone:'找准节奏，先做好朋友再谈进一步'},
+    dates:[
+      {id:uid(),title:'一起去独立书店 + 喝手冲',cat:'深度聊',done:false},
+      {id:uid(),title:'做一顿饭（或一起做）',cat:'日常',done:false},
+      {id:uid(),title:'夜骑城市绿道看夜景',cat:'活动',done:false},
+      {id:uid(),title:'写一封手写信说说心里话',cat:'惊喜',done:false}
+    ],
+    fav:[],
+    qfav:[]
+  };
+}
+function load(){
+  try{
+    var r=localStorage.getItem(K);
+    if(r){var o=JSON.parse(r);
+      if(o&&Array.isArray(o.logs)&&Array.isArray(o.rels)){
+        if(!o.love)o.love={status:'暧昧',since:'',anniversary:'',milestone:''};
+        if(!Array.isArray(o.dates))o.dates=[];
+        if(!Array.isArray(o.fav))o.fav=[];
+        return o;
+      }
+    }
+  }catch(e){}
+  return seed();
+}
+function save(){try{localStorage.setItem(K,JSON.stringify(S));}catch(e){toast('保存失败：本地存储可能已满');}}
+
+/* ============ UI 工具 ============ */
+function toast(m){var t=document.getElementById('toast');t.textContent=m;t.classList.add('on');clearTimeout(t._t);t._t=setTimeout(function(){t.classList.remove('on');},2000);}
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function closeM(){document.getElementById('mask').classList.remove('on');}
+function openM(h){document.getElementById('modal').innerHTML=h;document.getElementById('mask').classList.add('on');}
+function starSVG(on){return '<svg viewBox="0 0 24 24" fill="'+(on?'currentColor':'none')+'" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 2l3 7 7 .5-5.3 4.6L18 21l-6-3.6L6 21l1.3-6.9L2 9.5 9 9z"/></svg>';}
+function stars(n){var h='<span class="logstars">';for(var i=1;i<=5;i++)h+='<span style="color:'+(i<=n?'var(--main)':'#E2B8CD')+'">'+starSVG(i<=n)+'</span>';return h+'</span>';}
+function go(p){
+  CUR=p;
+  if(p==='p4')qEnsure();
+  ['p1','p2','p3','p4'].forEach(function(x){var el=document.getElementById(x);if(el)el.classList.toggle('on',x===p);});
+  Array.prototype.forEach.call(document.querySelectorAll('.tab,.bn'),function(b){b.classList.toggle('on',b.dataset.p===p);});
+  var target=document.getElementById(p);if(!target)return;
+  var tabs=document.querySelector('.tabs');
+  var offset=tabs?tabs.getBoundingClientRect().height+12:0;
+  var rect=target.getBoundingClientRect();
+  var vh=window.innerHeight||document.documentElement.clientHeight;
+  if(rect.top<offset-8||rect.top>vh){
+    var y=rect.top+window.pageYOffset-offset;
+    window.scrollTo({top:Math.max(0,y),behavior:'smooth'});
+  }
+}
+
+/* ============ 今天要处理 ============ */
+function renderToday(){
+  var t=today(),box=document.getElementById('todayBox');
+  var items=[];
+  S.rels.forEach(function(r){
+    if(r.next){
+      if(r.next<t)items.push({od:true,ti:'该联系「'+r.name+'」了（已逾期 '+(-days(r.next))+' 天）',tag:'rj',relId:r.id});
+      else if(r.next===t)items.push({ti:'今天计划联系「'+r.name+'」',tag:'rj',relId:r.id});
+    }
+  });
+  if(S.love&&S.love.anniversary===t)items.push({ti:'今天是你们的纪念日 💗 安排点什么吧',tag:'lo'});
+  if(S.love&&S.love.status==='恋爱中'&&S.love.since){
+    var d=days(S.love.since);
+    if(d>=0&&d<=7)items.push({ti:'恋爱第 '+d+' 天 · 趁热打铁，今天做件小事让对方被看见',tag:'lo'});
+  }
+  var lastLog=S.logs.length?S.logs.map(function(x){return x.date;}).sort().pop():null;
+  if(!lastLog||days(lastLog)>7)items.push({ti:'最近 7 天没写社交复盘了，记一条练练手感',tag:'el',go:'p1'});
+  if(!S.dates.length)items.push({ti:'约会灵感库还是空的，去加几个想一起做的事',tag:'lo',go:'p3'});
+
+  var h='';
+  if(!items.length){
+    h='<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg>关系都打理得不错，今天可以放松一下</div>';
+  }else{
+    h='<ul class="tl">';
+    items.forEach(function(x){
+      h+='<li class="ti'+(x.od?' od':'')+'"'+(x.go?' onclick="go(\''+x.go+'\')" style="cursor:pointer"':'')+'>'+
+        '<div class="ck" style="border:none;background:'+(x.tag==='lo'?'var(--violet-l)':x.tag==='rj'?'var(--main-l)':'#EEF0F3')+'">'+
+        '<svg viewBox="0 0 24 24" fill="none" stroke="'+(x.tag==='lo'?'#6D28D9':x.tag==='rj'?'#B0306A':'#8B94A3')+'" stroke-width="2.5" stroke-linecap="round" style="display:block;width:13px;height:13px"><path d="M12 8v5M12 16h.01"/></svg></div>'+
+        '<div class="tb"><div class="tt" style="font-weight:600">'+esc(x.ti)+'</div></div>'+
+        (x.relId?'<button class="btn g sm" style="padding:4px 11px;min-height:30px;font-size:12px" onclick="event.stopPropagation();contactRel(\''+x.relId+'\')">记一笔联系</button>':'')+
+        '</li>';
+    });
+    h+='</ul>';
+  }
+  box.innerHTML=h;
+  document.getElementById('todayHint').textContent='待办 '+items.length+' 项';
+  var n=S.logs.length+S.rels.length+S.dates.length;
+  var bt=document.getElementById('backupTip');
+  if(n>=30){bt.style.display='block';bt.innerHTML='数据已积累 '+n+' 条，建议点右上角「导出备份」存一份到网盘或微信收藏。';}
+  else bt.style.display='none';
+}
+
+/* ============ 社交复盘 ============ */
+function setRate(v){_lRate=v;Array.prototype.forEach.call(document.querySelectorAll('#lRate button'),function(b){b.classList.toggle('on',parseInt(b.dataset.v)===v);});}
+function addLog(){
+  var ev=document.getElementById('lEvent').value.trim();
+  if(!ev){toast('先写点发生了什么');return;}
+  if(!_lRate){toast('给这次表现打个分');return;}
+  S.logs.unshift({id:uid(),date:today(),scene:document.getElementById('lScene').value,
+    event:ev,rating:_lRate,
+    reaction:document.getElementById('lReact').value.trim(),
+    reflect:document.getElementById('lReflect').value.trim(),learn:''});
+  document.getElementById('lEvent').value='';document.getElementById('lReact').value='';document.getElementById('lReflect').value='';
+  setRate(0);_lRate=0;
+  save();renderAll();toast('已记录');
+}
+function delLog(id){S.logs=S.logs.filter(function(x){return x.id!==id;});save();renderAll();}
+function filtLog(f){curLogFilt=f;Array.prototype.forEach.call(document.querySelectorAll('#logFilt .sf'),function(b){b.classList.toggle('on',b.dataset.f===f);});renderLogs();}
+function renderLogFilt(){
+  var sb=document.getElementById('logFilt');
+  var cats=['all'].concat(SCENES);
+  sb.innerHTML=cats.map(function(c){var n=c==='all'?S.logs.length:S.logs.filter(function(x){return x.scene===c;}).length;return '<button class="sf'+(curLogFilt===c?' on':'')+'" data-f="'+c+'" onclick="filtLog(\''+c+'\')">'+c+' '+n+'</button>';}).join('');
+}
+function renderLogs(){
+  var ls=S.logs.slice();
+  if(curLogFilt!=='all')ls=ls.filter(function(x){return x.scene===curLogFilt;});
+  ls.sort(function(a,b){return a.date<b.date?1:-1;});
+  document.getElementById('logBox').innerHTML=ls.length?ls.map(function(x){
+    return '<div class="log">'+
+      '<div class="lh"><span class="tag rj">'+esc(x.scene)+'</span><span style="font-size:11.5px;color:var(--t3)">'+x.date+'</span>'+stars(x.rating)+
+      '<button class="xbtn" style="margin-left:auto" onclick="delLog(\''+x.id+'\')" aria-label="删除"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:15px;height:15px"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>'+
+      '<div class="le">'+esc(x.event)+'</div>'+
+      (x.reaction?'<div class="lr"><b style="color:var(--t1)">对方反应：</b>'+esc(x.reaction)+'</div>':'')+
+      (x.reflect?'<div class="lf">复盘：'+esc(x.reflect)+'</div>':'')+
+      '</div>';
+  }).join(''):'<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>还没有复盘记录，从今天的一次对话开始</div>';
+  var done=S.logs.filter(function(x){return x.done;}).length;
+  document.getElementById('logStat').textContent='共 '+S.logs.length+' 条';
+  renderLogStats();
+}
+function renderLogStats(){
+  var t=today().slice(0,7);
+  var month=S.logs.filter(function(x){return x.date.slice(0,7)===t;});
+  var avg=month.length?Math.round(month.reduce(function(a,b){return a+(b.rating||0);},0)/month.length*10)/10:0;
+  var C=2*Math.PI*34,pc=avg/5*100;
+  var arc=document.getElementById('rateArc');
+  arc.setAttribute('stroke-dasharray',C.toFixed(1));
+  arc.setAttribute('stroke-dashoffset',(C*(1-pc/100)).toFixed(1));
+  document.getElementById('rateTxt').textContent=avg||'0';
+  document.getElementById('rateAvg').textContent='平均自评 '+avg+' / 5';
+  document.getElementById('rateSub').textContent=month.length?('本月已记录 '+month.length+' 次互动'):'本月还没记录，写一条吧';
+  document.getElementById('sM').textContent=month.length;
+  document.getElementById('sAll').textContent=S.logs.length;
+  document.getElementById('sTop').textContent=S.logs.filter(function(x){return x.rating>=4;}).length;
+  document.getElementById('sLow').textContent=S.logs.filter(function(x){return x.rating<=2;}).length;
+  // 场景分布
+  var cnt={};SCENES.forEach(function(s){cnt[s]=0;});S.logs.forEach(function(x){if(cnt[x.scene]!==undefined)cnt[x.scene]++;});
+  var max=Math.max(1,Math.max.apply(null,SCENES.map(function(s){return cnt[s];})));
+  var h='';
+  SCENES.forEach(function(s){if(cnt[s]>0)h+='<div class="bar"><span class="bl">'+s+'</span><span class="bt"><i style="width:'+(cnt[s]/max*100)+'%"></i></span><span class="bv">'+cnt[s]+'</span></div>';});
+  document.getElementById('sceneBars').innerHTML=h||'<div class="empty" style="padding:10px">暂无分布</div>';
+}
+
+/* ============ 关系花园 ============ */
+function setRRate(v){_rRate=v;Array.prototype.forEach.call(document.querySelectorAll('#rRate button'),function(b){b.classList.toggle('on',parseInt(b.dataset.v)===v);});}
+function addRel(){
+  var nm=document.getElementById('rName').value.trim();
+  if(!nm){toast('先写称呼');return;}
+  if(!_rRate){toast('给亲密度打个分');return;}
+  S.rels.unshift({id:uid(),name:nm,type:document.getElementById('rType').value,rate:_rRate,
+    last:today(),next:document.getElementById('rNext').value||'',note:document.getElementById('rNote').value.trim()});
+  document.getElementById('rName').value='';document.getElementById('rNext').value='';document.getElementById('rNote').value='';
+  setRRate(0);_rRate=0;
+  save();renderAll();toast('已添加');
+}
+function delRel(id){S.rels=S.rels.filter(function(x){return x.id!==id;});save();renderAll();}
+function contactRel(id,silent){
+  var r=S.rels.filter(function(x){return x.id===id;})[0];if(!r)return;
+  r.last=today();r.next=addDays(today(),14);
+  save();renderAll();if(!silent)toast('已记一笔联系');else toast('已记一笔联系');
+}
+function filtRel(f){curRelFilt=f;renderRels();}
+function renderRels(){
+  var ls=S.rels.slice();
+  if(curRelFilt!=='all')ls=ls.filter(function(x){return x.type===curRelFilt;});
+  ls.sort(function(a,b){var ra=a.next?days(a.next):999,rb=b.next?days(b.next):999;return ra-rb;});
+  document.getElementById('relBox').innerHTML=ls.length?ls.map(function(x){
+    var od=x.next&&x.next<today();
+    var st='';for(var i=1;i<=5;i++)st+='<span class="rstar'+(i<=x.rate?' on':'')+'">'+starSVG(i<=x.rate)+'</span>';
+    return '<div class="rel'+(od?' od':'')+'">'+
+      '<div class="rn"><span>'+esc(x.name)+'</span><span class="tag '+(x.type==='恋人'||x.type==='暧昧'?'lo':x.type==='家人'?'ok':'rj')+'">'+esc(x.type)+'</span><span class="rstars">'+st+'</span></div>'+
+      '<div class="rmeta"><span>最近联系 '+(x.last||'—')+'</span>'+(x.next?('<span class="'+(od?'tag od':'')+'">'+ (od?'逾期 '+ (-days(x.next)) +' 天联系':'计划 '+x.next)+'</span>'):'')+'</div>'+
+      (x.note?'<div class="rnote">'+esc(x.note)+'</div>':'')+
+      '<div class="ract"><button class="btn g sm" onclick="contactRel(\''+x.id+'\')">今天联系了</button>'+
+      '<button class="xbtn" style="width:30px;height:30px" onclick="delRel(\''+x.id+'\')" aria-label="删除"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:15px;height:15px"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>'+
+      '</div>';
+  }).join(''):'<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 12a9 9 0 1 1-9-9c2.5 0 4.5 1 6 2.5"/><circle cx="12" cy="12" r="3"/></svg>关系列表还是空的，加一个最重要的人</div>';
+  var t=S.rels.length,avg=t?Math.round(S.rels.reduce(function(a,b){return a+(b.rate||0);},0)/t*10)/10:0;
+  var od=S.rels.filter(function(x){return x.next&&x.next<today();}).length;
+  var close=S.rels.filter(function(x){return x.rate>=4;}).length;
+  document.getElementById('relStat').textContent='共 '+t+' 段';
+  document.getElementById('rNum').textContent=t;
+  document.getElementById('rAvg').textContent=avg;
+  document.getElementById('rOd').textContent=od;
+  document.getElementById('rClose').textContent=close;
+  // 类型分布
+  var cnt={};REL_TYPES.forEach(function(s){cnt[s]=0;});S.rels.forEach(function(x){if(cnt[x.type]!==undefined)cnt[x.type]++;});
+  var max=Math.max(1,Math.max.apply(null,REL_TYPES.map(function(s){return cnt[s];})));
+  var h='';
+  REL_TYPES.forEach(function(s){if(cnt[s]>0)h+='<div class="bar"><span class="bl">'+s+'</span><span class="bt"><i style="width:'+(cnt[s]/max*100)+'%"></i></span><span class="bv">'+cnt[s]+'</span></div>';});
+  document.getElementById('typeBars').innerHTML=h||'<div class="empty" style="padding:10px">暂无分布</div>';
+}
+
+/* ============ 恋爱状态 ============ */
+function renderLove(){
+  var L=S.love||{status:'暧昧',since:'',anniversary:'',milestone:''};
+  var d='';
+  if(L.status==='恋爱中'&&L.since){
+    var dd=days(L.since);
+    d+='<div class="lovcard"><div class="lk">在一起</div><div class="lv s">'+(dd<0?'—':dd)+'</div><span style="font-size:11px;color:var(--t3)"> 天（自 '+L.since+'）</span></div>';
+  }else{
+    d+='<div class="lovcard"><div class="lk">当前状态</div><div class="lv s">'+esc(L.status)+'</div><span style="font-size:11px;color:var(--t3)"> '+(L.status==='单身'?'享受独处也是充电':L.status==='暧昧'?'慢慢来':L.status==='稳定'?'稳稳的幸福':'')+'</span></div>';
+  }
+  d+='<div class="lovcard"><div class="lk">纪念日</div><div class="lv">'+(L.anniversary||'未设')+'</div></div>';
+  d+='<div class="lovcard" style="grid-column:1/-1"><div class="lk">当前里程碑 / 目标</div><div style="font-size:13.5px;color:var(--t1);line-height:1.55;margin-top:3px">'+esc(L.milestone||'—')+'</div></div>';
+  document.getElementById('loveBox').innerHTML=d;
+}
+function editLove(){
+  var L=S.love||{status:'暧昧',since:'',anniversary:'',milestone:''};
+  openM('<h3>编辑恋爱状态</h3>'+
+    '<div class="fld"><label>当前状态</label><select id="lvS" style="width:100%">'+
+      ['单身','暧昧','恋爱中','稳定'].map(function(o){return '<option'+(L.status===o?' selected':'')+'>'+o+'</option>';}).join('')+
+    '</select></div>'+
+    '<div class="fld"><label>在一起日期（恋爱中/稳定填）</label><input type="date" id="lvSince" value="'+(L.since||'')+'"></div>'+
+    '<div class="fld"><label>纪念日</label><input type="date" id="lvAn" value="'+(L.anniversary||'')+'"></div>'+
+    '<div class="fld"><label>当前里程碑 / 目标</label><input type="text" id="lvM" value="'+esc(L.milestone||'')+'" placeholder="例：找准节奏，先做好朋友"></div>'+
+    '<div class="mact"><button class="btn g" onclick="closeM()">取消</button><button class="btn v" onclick="saveLove()">保存</button></div>');
+}
+function saveLove(){
+  S.love={status:document.getElementById('lvS').value,
+    since:document.getElementById('lvSince').value||'',
+    anniversary:document.getElementById('lvAn').value||'',
+    milestone:document.getElementById('lvM').value.trim()};
+  save();closeM();renderAll();toast('已保存');
+}
+
+/* ============ 约会灵感 ============ */
+function addDate(){
+  var ti=document.getElementById('dTitle').value.trim();
+  if(!ti){toast('写点想一起做的事');return;}
+  S.dates.unshift({id:uid(),title:ti,cat:document.getElementById('dCat').value,done:false});
+  document.getElementById('dTitle').value='';
+  save();renderDates();toast('已添加');
+}
+function toggleDate(id){var d=S.dates.filter(function(x){return x.id===id;})[0];if(d){d.done=!d.done;save();renderDates();}}
+function delDate(id){S.dates=S.dates.filter(function(x){return x.id!==id;});save();renderDates();}
+function drawDate(){
+  var pool=S.dates.length?S.dates:[];
+  if(!pool.length){toast('灵感库空的，先加几个');return;}
+  var pick=pool[Math.floor(Math.random()*pool.length)];
+  openM('<h3>🎲 今天试试这个</h3><p style="font-size:15px;line-height:1.7">'+esc(pick.title)+'</p><div class="mact"><button class="btn g" onclick="closeM()">先记着</button>'+(pick.done?'':'<button class="btn v" onclick="toggleDate(\''+pick.id+'\');closeM()">标记为已做</button>')+'</div>');
+}
+function renderDates(){
+  var ls=S.dates.slice();
+  document.getElementById('dateBox').innerHTML=ls.length?ls.map(function(x){
+    return '<div class="datecard'+(x.done?' done':'')+'">'+
+      '<button class="dc'+(x.done?' on':'')+'" onclick="toggleDate(\''+x.id+'\')" aria-label="完成"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></button>'+
+      '<div class="dt">'+esc(x.title)+'</div>'+
+      '<span class="dcat">'+esc(x.cat)+'</span>'+
+      '<button class="xbtn" onclick="delDate(\''+x.id+'\')" aria-label="删除"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:15px;height:15px"><path d="M18 6L6 18M6 6l12 12"/></svg></button>'+
+      '</div>';
+  }).join(''):'<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.4 8.4 0 0 1-3.9-.9L3 21l1.9-4.1A8.4 8.4 0 1 1 21 11.5z"/></svg>灵感库空空，加几个想一起做的事</div>';
+}
+
+/* ============ 心法卡 ============ */
+function toggleFav(id){var i=S.fav.indexOf(id);if(i>=0)S.fav.splice(i,1);else S.fav.push(id);save();renderPrinc();}
+function randPrinc(){
+  var p=PRINCIPLES[Math.floor(Math.random()*PRINCIPLES.length)];
+  openM('<h3 style="color:var(--violet)">🎲 '+esc(p.t)+'</h3><div class="pf" style="color:var(--violet);font-weight:700;font-size:11.5px;margin-bottom:8px">'+esc(p.f)+'</div><p style="font-size:14.5px;line-height:1.7;color:var(--t1)">'+esc(p.d)+'</p><div class="mact"><button class="btn g" onclick="closeM()">收下</button><button class="btn v" onclick="toggleFav(\''+p.id+'\');closeM()">'+(S.fav.indexOf(p.id)>=0?'取消收藏':'收藏这张')+'</button></div>');
+}
+function renderPrinc(){
+  var favSet={};S.fav.forEach(function(id){favSet[id]=1;});
+  var ordered=PRINCIPLES.slice().sort(function(a,b){return (favSet[b.id]?1:0)-(favSet[a.id]?1:0);});
+  document.getElementById('princBox').innerHTML=ordered.map(function(p){
+    var on=favSet[p.id];
+    return '<div class="princ">'+
+      '<button class="pfav'+(on?' on':'')+'" onclick="toggleFav(\''+p.id+'\')" aria-label="收藏">'+
+      '<svg viewBox="0 0 24 24" fill="'+(on?'currentColor':'none')+'" stroke="currentColor" stroke-width="2" stroke-linejoin="round" style="width:18px;height:18px"><path d="M12 2l3 7 7 .5-5.3 4.6L18 21l-6-3.6L6 21l1.3-6.9L2 9.5 9 9z"/></svg></button>'+
+      '<div class="pf">'+esc(p.f)+'</div>'+
+      '<div class="pt">'+esc(p.t)+'</div>'+
+      '<div class="pd">'+esc(p.d)+'</div>'+
+      '</div>';
+  }).join('');
+}
+
+/* ============ 备份 ============ */
+function exportJSON(){
+  var blob=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='人际恋爱台备份_'+today()+'.json';a.click();
+  setTimeout(function(){URL.revokeObjectURL(a.href);},1000);
+  toast('已导出，建议存到网盘或发给自己');
+}
+function importJSON(inp){
+  var f=inp.files[0];if(!f)return;
+  var r=new FileReader();
+  r.onload=function(){
+    try{
+      var o=JSON.parse(r.result);
+      if(!o||!Array.isArray(o.logs)||!Array.isArray(o.rels))throw 0;
+      openM('<h3>确认导入</h3><p>将用备份覆盖当前数据：复盘 '+(o.logs.length)+' 条、关系 '+(o.rels.length)+' 段、约会 '+(o.dates?o.dates.length:0)+' 个。当前数据会被替换，确定吗？</p><div class="mact"><button class="btn g" onclick="closeM()">取消</button><button class="btn v" onclick="doImport()">确认导入</button></div>');
+      window._imp=o;
+    }catch(e){toast('文件格式不对，请选本工作台导出的 JSON');}
+  };
+  r.readAsText(f);inp.value='';
+}
+function doImport(){
+  S=window._imp;
+  if(!S.love)S.love={status:'暧昧',since:'',anniversary:'',milestone:''};
+  if(!S.dates)S.dates=[];if(!S.fav)S.fav=[];
+  save();closeM();renderAll();toast('导入完成');
+}
+function askReset(){
+  openM('<h3 style="color:var(--main)">确认清空全部数据？</h3><p>复盘、关系、恋爱状态、约会灵感将<b>全部删除</b>并恢复为示例数据，此操作不可撤销。<br><br>强烈建议先点「导出备份」。</p><div class="mact"><button class="btn g" onclick="closeM()">我再想想</button><button class="btn g" onclick="exportJSON()">先导出</button><button class="btn" onclick="doReset()">确认清空</button></div>');
+}
+function doReset(){localStorage.removeItem(K);S=seed();save();closeM();renderAll();toast('已重置为示例数据');}
+
+/* ============ 情话文案库（懒加载 · 2 万+ 条） ============ */
+var Q_PAGE=60;          /* 每页渲染条数，避免一次塞 2 万条进 DOM */
+var _qState='idle';     /* idle | loading | ready | error */
+var _qCat='全部';
+var _qKw='';
+var _qShown=Q_PAGE;
+var _qCur=[];           /* 当前筛选结果，复制/收藏按索引取值 */
+var _qHero=null;
+var _qTimer=null;
+
+function qEnsure(){
+  if(_qState==='ready'||_qState==='loading')return;
+  _qState='loading';
+  var s=document.createElement('script');
+  s.src='qinggan.js';
+  s.onload=function(){
+    if(!window.QINGAN||!Array.isArray(window.QINGAN)){qFail('数据文件格式异常');return;}
+    _qState='ready';
+    qBuildChips();
+    renderQ();
+    qDraw();
+  };
+  s.onerror=function(){qFail('找不到 qinggan.js，请确认它和本页在同一目录');};
+  document.head.appendChild(s);
+}
+function qFail(msg){
+  _qState='error';
+  var box=document.getElementById('qBox');
+  if(box)box.innerHTML='<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>文案库载入失败：'+esc(msg)+'</div>';
+}
+function qFavList(){return Array.isArray(S.qfav)?S.qfav:[];}
+function qCats(){
+  var c={};
+  window.QINGAN.forEach(function(x){c[x.cat]=(c[x.cat]||0)+1;});
+  return Object.keys(c).sort(function(a,b){return c[b]-c[a];}).map(function(k){return {k:k,n:c[k]};});
+}
+function qBuildChips(){
+  var box=document.getElementById('qChips');if(!box)return;
+  var h='<button class="qchip'+(_qCat==='全部'?' on':'')+'" onclick="qSetCat(\'全部\')">全部<b>'+window.QINGAN.length+'</b></button>';
+  h+='<button class="qchip fav'+(_qCat==='收藏'?' on':'')+'" onclick="qSetCat(\'收藏\')">★ 我的收藏<b>'+qFavList().length+'</b></button>';
+  qCats().forEach(function(c){
+    h+='<button class="qchip'+(_qCat===c.k?' on':'')+'" onclick="qSetCat(\''+esc(c.k)+'\')">'+esc(c.k)+'<b>'+c.n+'</b></button>';
+  });
+  box.innerHTML=h;
+  var tt=document.getElementById('qTotal');
+  if(tt)tt.textContent='共 '+window.QINGAN.length.toLocaleString('en-US')+' 条';
+}
+function qSetCat(c){_qCat=c;_qShown=Q_PAGE;qBuildChips();renderQ();}
+function qClearKw(){var i=document.getElementById('qKw');if(i)i.value='';_qKw='';_qShown=Q_PAGE;renderQ();}
+function qOnInput(){
+  clearTimeout(_qTimer);
+  _qTimer=setTimeout(function(){
+    var i=document.getElementById('qKw');
+    _qKw=i?i.value.trim():'';
+    _qShown=Q_PAGE;
+    renderQ();
+  },200);
+}
+function qFilter(){
+  if(_qState!=='ready')return [];
+  var src;
+  if(_qCat==='收藏'){
+    var fav=qFavList();
+    src=fav.map(function(t){return {cat:'收藏',t:t};});
+  }else{
+    src=window.QINGAN;
+    if(_qCat!=='全部')src=src.filter(function(x){return x.cat===_qCat;});
+  }
+  if(_qKw){
+    var kw=_qKw.toLowerCase();
+    src=src.filter(function(x){return x.t.toLowerCase().indexOf(kw)>=0;});
+  }
+  return src;
+}
+function renderQ(){
+  if(_qState!=='ready')return;
+  var box=document.getElementById('qBox');if(!box)return;
+  _qCur=qFilter();
+  var favMap={};qFavList().forEach(function(t){favMap[t]=1;});
+  var st=document.getElementById('qStat');
+  if(st){
+    st.textContent=_qCur.length
+      ? '筛出 '+_qCur.length.toLocaleString('en-US')+' 条'+(_qCur.length>_qShown?'，已显示前 '+Math.min(_qShown,_qCur.length)+' 条':'')
+      : '';
+  }
+  if(!_qCur.length){
+    box.innerHTML='<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>'
+      +(_qCat==='收藏'?'还没收藏任何文案，点条目右侧 ★ 收藏':'没找到匹配的文案，换个关键词试试')+'</div>';
+    return;
+  }
+  var list=_qCur.slice(0,_qShown),h='<div class="qlist">';
+  list.forEach(function(x,i){
+    var on=favMap[x.t]?' on':'';
+    h+='<div class="qitem">'
+      +'<span class="qc">'+esc(x.cat)+'</span>'
+      +'<div class="qt">'+esc(x.t)+'</div>'
+      +'<div class="qacts">'
+      +'<button title="复制" onclick="qCopy('+i+')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>'
+      +'<button class="'+(on?'on':'')+'" title="收藏" onclick="qFav('+i+')"><svg viewBox="0 0 24 24" fill="'+(on?'currentColor':'none')+'" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 2l3 7 7 .5-5.3 4.6L18 21l-6-3.6L6 21l1.3-6.9L2 9.5 9 9z"/></svg></button>'
+      +'</div></div>';
+  });
+  h+='</div>';
+  if(_qCur.length>_qShown)h+='<button class="qmore" onclick="qMore()">再看 '+Math.min(Q_PAGE,_qCur.length-_qShown)+' 条（剩余 '+(_qCur.length-_qShown).toLocaleString('en-US')+'）</button>';
+  box.innerHTML=h;
+}
+function qMore(){_qShown+=Q_PAGE;renderQ();}
+
+/* 复制：优先 Clipboard API，失败回退 execCommand（iframe / http 环境更稳） */
+function qWrite(text){
+  function fallback(){
+    try{
+      var ta=document.createElement('textarea');
+      ta.value=text;
+      ta.setAttribute('readonly','');
+      ta.style.cssText='position:fixed;top:0;left:0;opacity:0;pointer-events:none';
+      document.body.appendChild(ta);
+      ta.select();ta.setSelectionRange(0,text.length);
+      var ok=document.execCommand('copy');
+      document.body.removeChild(ta);
+      toast(ok?'已复制':'复制失败，请长按手动选择');
+    }catch(e){toast('复制失败，请长按手动选择');}
+  }
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(function(){toast('已复制');},fallback);
+  }else fallback();
+}
+function qCopy(i){var x=_qCur[i];if(x)qWrite(x.t);}
+function qFav(i){
+  var x=_qCur[i];if(!x)return;
+  if(!Array.isArray(S.qfav))S.qfav=[];
+  var k=S.qfav.indexOf(x.t);
+  if(k>=0){S.qfav.splice(k,1);toast('已取消收藏');}
+  else{S.qfav.push(x.t);toast('已收藏');}
+  save();qBuildChips();renderQ();
+}
+function qDraw(){
+  if(_qState!=='ready'){qEnsure();return;}
+  var pool=qFilter();
+  if(!pool.length)pool=window.QINGAN;
+  if(!pool.length)return;
+  _qHero=pool[Math.floor(Math.random()*pool.length)];
+  var t=document.getElementById('qHeroT'),c=document.getElementById('qHeroC');
+  if(t)t.textContent=_qHero.t;
+  if(c)c.textContent=_qHero.cat;
+}
+function qCopyHero(){if(!_qHero){toast('先抽一条');return;}qWrite(_qHero.t);}
+function qFavHero(){
+  if(!_qHero){toast('先抽一条');return;}
+  if(!Array.isArray(S.qfav))S.qfav=[];
+  var k=S.qfav.indexOf(_qHero.t);
+  if(k>=0){S.qfav.splice(k,1);toast('已取消收藏');}
+  else{S.qfav.push(_qHero.t);toast('已收藏');}
+  save();qBuildChips();renderQ();
+}
+
+/* ============ 启动 ============ */
+function renderAll(){
+  renderToday();renderLogFilt();renderLogs();renderRels();renderLove();renderDates();renderPrinc();
+}
+S=load();
+renderAll();
+save();
+</script>
+</body>
+</html>

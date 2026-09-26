@@ -1,0 +1,46 @@
+{
+  "name": "塔台 Tower · 个人指挥台",
+  "short_name": "塔台 Tower",
+  "description": "小待的个人指挥台：自研项目 + 外部工具，一个入口统管 · 本地存储不丢失 · 支持离线访问",
+  "id": "/",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0f1311",
+  "theme_color": "#0f9d77",
+  "lang": "zh-CN",
+  "dir": "ltr",
+  "categories": ["productivity", "personalization", "utilities"],
+  "icons": [
+    { "src": "assets/pwa/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "assets/pwa/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "assets/pwa/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    {
+      "name": "今日要处理",
+      "short_name": "今日",
+      "url": "./#sec-today",
+      "icons": [{ "src": "assets/pwa/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "考研 / 自考",
+      "short_name": "考研自考",
+      "url": "./#sec-dual",
+      "icons": [{ "src": "assets/pwa/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "项目",
+      "short_name": "项目",
+      "url": "./#sec-projects",
+      "icons": [{ "src": "assets/pwa/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "游戏架",
+      "short_name": "游戏",
+      "url": "./#sec-games",
+      "icons": [{ "src": "assets/pwa/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    }
+  ]
+}

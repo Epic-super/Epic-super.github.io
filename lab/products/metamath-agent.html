@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>MetaMath-Agent · 数学建模论文工作台（Trae 大赛作品）</title>
+<style>
+  :root{
+    --bg:#0f1117; --panel:#171a21; --panel2:#1f232c; --ink:#e8ecf2; --muted:#8b93a3;
+    --line:#262b35; --primary:#818cf8; --primary-soft:#20203a; --accent:#7dd3fc;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    line-height:1.7;font-size:15px;-webkit-font-smoothing:antialiased}
+  a{color:var(--accent);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .bar{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:10px;padding:10px 16px;
+    border-bottom:1px solid var(--line);background:rgba(23,26,33,.92);backdrop-filter:blur(8px)}
+  .back{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:10px;border:1px solid var(--line);
+    background:var(--panel);color:var(--ink);font-size:13px;font-weight:700}
+  .back:hover{border-color:var(--primary);text-decoration:none}
+  .title{font-size:14px;font-weight:800;opacity:.92}
+  .wrap{max-width:880px;margin:0 auto;padding:22px 18px 80px}
+  .hero{background:linear-gradient(135deg,#20203a,#1b2a3a);border:1px solid var(--line);
+    border-radius:var(--radius);padding:20px 22px;margin-bottom:22px}
+  .hero h1{font-size:23px;margin:0 0 6px;background:linear-gradient(90deg,#818cf8,#7dd3fc);
+    -webkit-background-clip:text;background-clip:text;color:transparent}
+  .hero p{color:var(--muted);font-size:13.5px;margin:0}
+  .acts{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .btn{display:inline-flex;align-items:center;gap:7px;padding:11px 16px;border-radius:11px;font-weight:700;font-size:14px;cursor:pointer}
+  .btn.primary{background:var(--primary);color:#10131f;border:none}
+  .btn.ghost{background:var(--panel2);color:var(--ink);border:1px solid var(--line)}
+  .btn:hover{filter:brightness(1.08);text-decoration:none}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;margin:16px 0}
+  .card h2{font-size:17px;margin:0 0 10px;color:var(--primary);display:flex;align-items:center;gap:8px}
+  .card h3{font-size:14px;margin:14px 0 6px;color:var(--accent)}
+  .kv{font-size:13.5px;margin:5px 0;display:flex;gap:8px}
+  .kv b{color:#fff;min-width:96px;flex-shrink:0}
+  .kv span{color:var(--muted)}
+  ul{margin:8px 0 4px 20px;font-size:13.5px;color:#cdd8e8}
+  li{margin:4px 0}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px}
+  @media(max-width:640px){.grid{grid-template-columns:1fr}}
+  .box{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+  .box h4{margin:0 0 6px;font-size:13.5px;color:var(--primary)}
+  .box p{margin:0;font-size:12.5px;color:#cdd8e8}
+  .tag{display:inline-block;background:var(--primary-soft);color:var(--primary);border:1px solid #2d2d52;
+    border-radius:20px;padding:2px 10px;font-size:12px;margin:3px 4px 3px 0}
+  .note{font-size:13px;color:var(--muted);border-left:3px solid var(--primary);padding:8px 12px;margin:10px 0;background:var(--panel2)}
+  .foot{margin-top:30px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:12.5px}
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+  <div class="bar">
+    <a class="back" href="../index.html" target="_top">← 返回指挥台</a>
+    <div class="title">📐 MetaMath-Agent · 数学建模论文工作台</div>
+  </div>
+
+  <div class="wrap">
+    <div class="hero">
+      <h1>MetaMath-Agent：把数学建模论文变成可编排的 AI 工作台</h1>
+      <p>TRAE 2026 创造力大赛 · 学习工作赛道 · 初赛作品 · 作者「u1910280530432825」· 发布于 7 月 6 日（初赛帖 topic/73828，报名帖 topic/68007）</p>
+      <div class="acts">
+        <a class="btn primary" href="https://metamath-agent-demo-metamath-agent-d8giy2oro06ec343b.webapps.tcloudbase.com/" target="_blank" rel="noopener">▶ 在线体验 Demo（外部）</a>
+        <a class="btn ghost" href="https://forum.trae.cn/t/topic/73828" target="_blank" rel="noopener">ⓘ 大赛初赛原帖</a>
+        <a class="btn ghost" href="https://forum.trae.cn/t/topic/68007" target="_blank" rel="noopener">📋 报名帖</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>① 作品简介</h2>
+      <div class="kv"><b>是什么</b><span>面向数学建模竞赛、科研写作与复杂技术报告生产的 AI 工作台。不是单纯聊天机器人，也不是只生成一段论文文本的工具，而是把一次建模任务拆成<strong>可执行工作流</strong>：赛题理解 → 模型设计 → Python 绘图 → LaTeX/PDF/Word 论文处理 → 文献检索 → 人工检查点 → 成果复盘。</span></div>
+      <div class="kv"><b>面向谁</b><span>参加数学建模竞赛的学生、需要写技术报告的研究者，以及希望把复杂 AI 任务流程化的人。</span></div>
+      <div class="kv"><b>作者背景</b><span>自称「被数学建模虐过好几轮的普通大学生」，国赛、亚太杯都打过；痛点来自一次次赛后复盘——时间不够用、流程散乱。</span></div>
+      <div class="kv"><b>本届提交</b><span>作者明确说明：<strong>「这次初赛提交的是 MetaMath-Agent 数学建模论文生成系统的可体验 Demo」</strong>。真实产品主体已基本完成，公开链接是面向初赛评审与社区体验的轻量静态演示版，不开放真实后端密钥与完整运行环境。</span></div>
+      <div class="kv"><b>体验地址</b><span><a href="https://metamath-agent-demo-metamath-agent-d8giy2oro06ec343b.webapps.tcloudbase.com/" target="_blank" rel="noopener">metamath-agent-demo-…webapps.tcloudbase.com</a>（原生 HTML/CSS/JS，零外部依赖）</span></div>
+    </div>
+
+    <div class="card">
+      <h2>② 核心功能（7 块）</h2>
+      <div class="grid">
+        <div class="box">
+          <h4>1 · 工作流编排</h4>
+          <p>把建模任务拆成多个阶段而非塞进一个大 Prompt，适合长任务，也方便中途修正。</p>
+        </div>
+        <div class="box">
+          <h4>2 · PDF / LaTeX 编辑器</h4>
+          <p>复刻本地工作台式编辑：左侧资源管理器、中间 LaTeX 编辑区、右侧 PDF 预览与日志区，AI 生成的论文可继续被检查和修订。</p>
+        </div>
+        <div class="box">
+          <h4>3 · 嵌入式 AI 助手</h4>
+          <p>嵌在论文工作台里（非独立聊天框），围绕当前论文 / LaTeX 片段 / 编译日志 / 检查点给解释与修改建议，像随时在旁的建模队友。</p>
+        </div>
+        <div class="box">
+          <h4>4 · 文献搜索</h4>
+          <p>展示检索条件、AI 阅读计划、结果卡片与历史记录，为后续真实检索接口预留空间，让论文不只写、还能补来源。</p>
+        </div>
+        <div class="box">
+          <h4>5 · 成果展示</h4>
+          <p>集中放 AI 原理图、流程图、draw.io 技术路线图、Python 绘图样例与优秀作品图集，证明它不只「写文字」。</p>
+        </div>
+        <div class="box">
+          <h4>6 · 模型通道设置</h4>
+          <p>真实系统区分文本 / 生图 / 视觉 / 编辑模型；Demo 仅展示 masked 安全配置，不含真实密钥。</p>
+        </div>
+        <div class="box">
+          <h4>7 · 实验室模块（测试中）</h4>
+          <p>绘境实验室（科研配图 / 局部重做 / 转 SVG·PPTX）+ 文璧实验室（LaTeX·PDF→Word 严谨转换、版式质检、参考文献与附录检查）。</p>
+        </div>
+        <div class="box">
+          <h4>新建流程入口</h4>
+          <p>模拟从赛题、模型、语言、论文风格到执行参数的完整配置；首页工作台展示任务状态、流程轨道、关键指标与最近工作流。</p>
+        </div>
+      </div>
+      <div class="note">建议进入 Demo 优先点：① 新建流程 ② PDF 编辑 ③ 文献搜索 ④ 成果展示。Demo 为静态展示版，不开放真实后端运行。</div>
+    </div>
+
+    <div class="card">
+      <h2>③ 创作思路</h2>
+      <div class="kv"><b>灵感来源</b><span>数学建模难点不在「写出答案」，而在完整链路太长：题目读完分析与建模脱节；代码跑出但图表/论文/附录对不上；论文能生成但格式、图题、参考文献、代码附录与 Word/PDF 兼容性易出问题；AI 每次给答案但过程不可追踪，错也不知道错在哪。</span></div>
+      <div class="kv"><b>想解决的问题</b><span>把数学建模论文从「手搓流程」，变成可编排、可追踪、可检查、可复盘的 AI 工作台。</span></div>
+      <div class="kv"><b>设计原则</b><span>① 流程透明（每阶段看状态/日志/产物/下一步）；② 人能介入（关键节点保留检查点）；③ 产物可追溯（图表/PDF/Word/代码附录回到对应任务）；④ 质量门优先（能检查格式/结构/可编辑性）；⑤ 可扩展（后续接不同文本/生图/视觉/编辑模型与本地工具）。</span></div>
+      <div class="kv"><b>为何做静态版</b><span>让评审与社区直接打开浏览，无需本地安装依赖，也不暴露真实 API Key、数据库或后端源码。</span></div>
+    </div>
+
+    <div class="card">
+      <h2>④ TRAE 实践过程</h2>
+      <p>通过 TRAE 多轮推进（非一次性生成完）：① 梳理真实产品结构，抽象成适合初赛展示的静态 Demo；② 复刻核心页面（工作台/新建流程/PDF 编辑器/文献搜索/成果展示/设置）；③ 加入真实成果样例；④ 多轮 UI/交互修复（移动端横向溢出、筛选条换行、灯箱焦点恢复、PDF 编辑器布局、导航状态）；⑤ 部署前安全检查（ZIP 内无 .env、后端源码、数据库、日志、source map 或真实密钥）；⑥ 腾讯云 CloudBase 部署为公开链接；⑦ 修复品牌图标后重新打包部署。</p>
+      <div class="kv"><b>关键 Session</b><span>6a48f744061cbc983ee4501f / 6a48ff83061cbc983ee451a1 / 6a49045e061cbc983ee45275 / 6a490d86061cbc983ee4531e / 019f2c2d-255b-7231-bd10-b3f3272b3b4a（供评委核验由 TRAE 开发）。</span></div>
+      <div class="kv"><b>作者感言</b><span>「TRAE 帮我跨过的不是哪一行代码，而是把一个比赛里真实遇到过的痛点，从『脑子里想过很多次』变成了一个真能打开、真能点、真能给别人看的 Demo。」</span></div>
+    </div>
+
+    <div class="card">
+      <h2>⑤ 为什么值得继续做</h2>
+      <p>数学建模不是「单点生成」问题，而是长链路工程问题。真正上比赛、上论文、上交付时会变成：这个模型怎么来的？这张图对应哪个数据和代码？论文里的公式/图题/参考文献/附录是否一致？Word/PDF 能不能交？出错后能不能定位到具体阶段而非整篇重来？MetaMath-Agent 想做这条链路的工作台，让 AI 不只是回答问题，而是参与一个可管理的生产流程。</p>
+      <div class="kv"><b>复赛计划</b><span>接入真实后端运行链路（静态体验 → 可执行任务）；增强质量门（模型假设/数据来源/图表一致性/论文结构）；完善绘境 & 文璧两个实验室；增强多人复盘与作品展示沉淀。</span></div>
+    </div>
+
+    <div class="card">
+      <h2>⑥ 体验地址 & 报名信息</h2>
+      <div class="kv"><b>Demo 体验</b><span><a href="https://metamath-agent-demo-metamath-agent-d8giy2oro06ec343b.webapps.tcloudbase.com/" target="_blank" rel="noopener">metamath-agent-demo-metamath-agent-d8giy2oro06ec343b.webapps.tcloudbase.com</a></span></div>
+      <div class="kv"><b>初赛提交帖</b><span><a href="https://forum.trae.cn/t/topic/73828" target="_blank" rel="noopener">topic/73828</a>（〖学习工作赛道〗MetaMath-Agent：把数学建模论文从「手搓流程」变成可编排的 AI 工作台）</span></div>
+      <div class="kv"><b>报名帖</b><span><a href="https://forum.trae.cn/t/topic/68007" target="_blank" rel="noopener">topic/68007</a>（标题：国赛评委看了都沉默——AI 用 7 步流水线，把 3 天论文压缩到 2 小时；报名时误发两份，均同一项目，以初赛帖为准）</span></div>
+      <div class="note">注：本页为作品资料卡（全量收录初赛原帖要点），实际体验请点上方「在线体验 Demo」跳转作者部署的在线应用；完整说明与截图见大赛原帖。</div>
+    </div>
+
+    <div class="foot">
+      来源：TRAE 官方中文社区初赛帖 <a href="https://forum.trae.cn/t/topic/73828" target="_blank" rel="noopener">topic/73828</a> + 报名帖 <a href="https://forum.trae.cn/t/topic/68007" target="_blank" rel="noopener">topic/68007</a>。
+      在线 Demo：<a href="https://metamath-agent-demo-metamath-agent-d8giy2oro06ec343b.webapps.tcloudbase.com/" target="_blank" rel="noopener">metamath-agent-demo-…webapps.tcloudbase.com</a>。
+      本页为站内资料卡，纯静态，file:// 直接可开。
+    </div>
+  </div>
+</body>
+</html>

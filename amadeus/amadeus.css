@@ -1,0 +1,186 @@
+/* ===========================================================
+   网页版 Amadeus 桌宠样式 · 独立浮层，自包含
+   配色沿用 amadeus-pet 的《命运石之门 0》主题：
+   近黑深青底 + 薄荷/翠绿荧光 + 玫粉点缀 + 薄荷白文字
+   不触碰主样式；位置默认贴在蕾娜桌宠右侧
+   =========================================================== */
+#amadeusWidget{
+  position:fixed; right:16px; bottom:78px; z-index:61;
+  width:264px; max-width:calc(100vw - 32px);
+  background:linear-gradient(180deg, rgba(6,14,20,.96) 0%, rgba(3,12,17,.97) 100%);
+  color:#e6fff4;
+  border:1px solid rgba(124,240,199,.30);
+  border-radius:18px;
+  box-shadow:0 12px 34px -12px rgba(0,0,0,.6), 0 0 22px -8px rgba(124,240,199,.22);
+  font-family:inherit; user-select:none; overflow:hidden;
+  transition:opacity .2s ease, transform .2s ease;
+}
+#amadeusWidget:not([hidden]){animation:amaWidgetIn .42s cubic-bezier(.2,.8,.2,1) both;}
+@keyframes amaWidgetIn{from{opacity:0;transform:translateY(18px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+#amadeusWidget[hidden]{display:none;}
+#amadeusWidget.dragging{transition:none;}
+
+.ama-header{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:9px 12px; cursor:grab;
+  color:#effff9;
+  background:linear-gradient(135deg,#0a1a20 0%,#12303a 55%,#0f3a30 100%);
+  border-bottom:1px solid rgba(124,240,199,.22);
+}
+.ama-header:active{cursor:grabbing;}
+.ama-title{
+  font-size:13px; font-weight:700; letter-spacing:.3px;
+  display:inline-flex; align-items:center; gap:6px;
+  text-shadow:0 0 10px rgba(112,255,196,.45);
+}
+.ama-logo{width:18px; height:18px; border-radius:5px; object-fit:contain; flex-shrink:0;}
+.ama-title .ama-tsg{color:#65eabf; font-size:10px; font-weight:600; margin-left:6px; letter-spacing:.8px;}
+
+/* 底部导航使用真实 Amadeus 图标（来自上游项目 icon-src.png） */
+.tabbar #navAmadeus img.nav-ama-icon{
+  width:22px; height:22px; flex-shrink:0; border-radius:6px; object-fit:contain;
+}
+.ama-actions{display:flex; gap:6px;}
+.ama-btn{
+  border:1px solid rgba(112,255,196,.35); border-radius:9px; padding:4px 9px;
+  font-size:12px; font-weight:600; cursor:pointer; font-family:inherit;
+  background:rgba(112,255,196,.10); color:#8effd6;
+  transition:background .15s, box-shadow .15s;
+}
+.ama-btn:hover{background:rgba(112,255,196,.22); box-shadow:0 0 12px -2px rgba(112,255,196,.5);}
+.ama-btn.on{background:#70ffc4; color:#04121a; border-color:#70ffc4;}
+
+.ama-stage{
+  position:relative; min-height:300px; height:auto; padding:0 10px 6px;
+  display:flex; flex-direction:column; align-items:stretch; overflow:visible;
+}
+.ama-l2d-wrap{position:relative; flex:0 0 236px; height:236px; display:block; margin-top:2px;}
+.ama-l2d-wrap[hidden]{display:none;}
+#amaL2d{display:block; width:100%; height:100%;}
+.ama-avatar-fallback{
+  position:relative; width:126px; height:126px; margin:16px auto 4px;
+  border-radius:50%; overflow:hidden;
+  animation:amaFloat 3.4s ease-in-out infinite;
+  transform-origin:center bottom;
+}
+.ama-avatar-fallback[hidden]{display:none;}
+.ama-avatar-fallback .ama-svg-body{display:block; width:100%; height:100%;}
+#amadeusWidget.speaking .ama-avatar-fallback{
+  animation:amaFloat 3.4s ease-in-out infinite, amaTalk .4s ease-in-out 2;
+}
+@keyframes amaFloat{
+  0%,100%{transform:translateY(0) rotate(-1.2deg);}
+  50%{transform:translateY(-7px) rotate(1.2deg);}
+}
+@keyframes amaTalk{
+  0%,100%{transform:translateY(0) scale(1);}
+  50%{transform:translateY(-3px) scale(1.05);}
+}
+.ama-bubble{
+  position:relative; margin-top:10px; max-width:100%;
+  max-height:108px; overflow-y:auto; overflow-x:hidden;
+  background:rgba(4,14,18,.9); border:1px solid rgba(124,240,199,.28);
+  color:#dffff3; border-radius:12px;
+  padding:8px 11px; font-size:12.5px; line-height:1.5; text-align:center;
+  min-height:20px; word-break:break-word; overflow-wrap:anywhere;
+  scrollbar-width:thin; scrollbar-color:rgba(124,240,199,.45) transparent;
+}
+.ama-bubble::-webkit-scrollbar{width:5px;}
+.ama-bubble::-webkit-scrollbar-thumb{background:rgba(124,240,199,.45); border-radius:5px;}
+.ama-bubble[hidden]{display:none;}
+.ama-bubble::after{
+  content:""; position:absolute; top:-7px; left:50%; transform:translateX(-50%);
+  border:7px solid transparent; border-bottom-color:rgba(124,240,199,.28);
+}
+.ama-foot{
+  font-size:10.5px; color:rgba(140,200,185,.75); text-align:center;
+  padding:6px 10px 10px; letter-spacing:.3px;
+}
+.ama-foot b{color:#ff5a83; font-weight:700;}
+
+/* 表情组：默认隐藏，按 data-mood 切换可见 */
+.ama-face{display:none;}
+.ama-body[data-mood="neutral"]  .face-neutral  {display:block;}
+.ama-body[data-mood="happy"]    .face-happy    {display:block;}
+.ama-body[data-mood="sad"]      .face-sad      {display:block;}
+.ama-body[data-mood="angry"]    .face-angry    {display:block;}
+.ama-body[data-mood="surprised"].face-surprised{display:block;}
+.ama-body[data-mood="annoyed"]  .face-annoyed  {display:block;}
+.ama-body[data-mood="blush"]    .face-blush    {display:block;}
+
+/* 小屏适配 */
+@media (max-width:420px){
+  #amadeusWidget{right:10px; bottom:72px; width:min(264px,calc(100vw - 20px));}
+}
+
+/* ===== 开机界面（移植上游 amadeus-pet boot.css 的布局与配色） ===== */
+.ama-boot{
+  position:absolute; inset:0; z-index:2; overflow:hidden;
+  background:linear-gradient(135deg,#11110c 0%,#050600 50%,#231e00 100%);
+  font-family:'Courier New','Noto Sans Mono CJK SC',monospace;
+}
+.ama-boot[hidden]{display:none;}
+.ama-boot-logo{
+  position:absolute; top:8px; left:0; width:100%; height:150px;
+  object-fit:contain; object-position:center;
+  pointer-events:none; user-select:none;
+}
+.ama-boot-status{
+  position:absolute; left:18px; bottom:124px;
+  color:#dec752; font-family:'Courier New','Noto Sans Mono CJK SC',monospace;
+  font-size:16px; line-height:1.2; white-space:nowrap; text-shadow:0 1px 1px #000;
+}
+.ama-boot-btns{
+  position:absolute; left:50%; bottom:14px; width:150px;
+  display:flex; flex-direction:column; gap:7px; transform:translateX(-50%);
+}
+.ama-boot-btn{
+  position:relative; width:150px; height:32px; padding:0; border:0; outline:0;
+  background:transparent; cursor:pointer;
+}
+.ama-boot-btn img{
+  position:absolute; inset:0; width:150px; height:32px;
+  object-fit:fill; pointer-events:none; user-select:none;
+}
+.ama-boot-btn .s{opacity:0;}
+.ama-boot-btn:hover .n, .ama-boot-btn:focus-visible .n, .ama-boot-btn:active .n{opacity:0;}
+.ama-boot-btn:hover .s, .ama-boot-btn:focus-visible .s, .ama-boot-btn:active .s{opacity:1;}
+
+/* ===== 聊天栏 + 设置面板 ===== */
+.ama-chat{display:flex;flex-direction:column;gap:6px;padding:2px 10px 8px;}
+.ama-chat[hidden]{display:none;}
+.ama-chat-row{display:flex;gap:6px;}
+.ama-coach-badge{align-self:flex-start;padding:3px 7px;border:1px solid rgba(112,255,196,.42);border-radius:999px;color:#8effd6;font-size:10px;letter-spacing:.3px;}
+.ama-correct{align-self:flex-start;padding:4px 8px;border:1px solid rgba(112,255,196,.28);border-radius:8px;background:rgba(112,255,196,.08);color:#a7e7d7;font-size:10px;cursor:pointer;}
+.ama-correct[hidden]{display:none;}
+.ama-chat input{
+  flex:1; min-width:0; padding:7px 10px; font-size:12.5px; font-family:inherit;
+  color:#dffff3; background:rgba(4,14,18,.9);
+  border:1px solid rgba(124,240,199,.3); border-radius:10px; outline:0;
+  transition:border-color .15s;
+}
+.ama-chat input:focus{border-color:#70ffc4;}
+.ama-chat input::placeholder{color:rgba(140,200,185,.6);}
+.ama-chat .ama-btn{padding:7px 12px;}
+
+.ama-settings{padding:4px 10px 8px; display:flex; flex-direction:column; gap:6px; border-top:1px solid rgba(124,240,199,.18);}
+.ama-settings[hidden]{display:none;}
+.ama-set-row{display:flex; align-items:center; gap:8px; font-size:12px;}
+.ama-set-row label{width:64px; flex-shrink:0; color:#8bd8c4;}
+.ama-set-row input{
+  flex:1; min-width:0; padding:6px 8px; font-size:12px; font-family:inherit;
+  color:#dffff3; background:rgba(4,14,18,.9);
+  border:1px solid rgba(124,240,199,.3); border-radius:8px; outline:0;
+}
+.ama-set-row input:focus{border-color:#70ffc4;}
+.ama-set-row select{
+  flex:1; min-width:0; padding:6px 8px; font-size:12px; font-family:inherit;
+  color:#dffff3; background:rgba(4,14,18,.9);
+  border:1px solid rgba(124,240,199,.3); border-radius:8px; outline:0;
+}
+.ama-set-row select:focus{border-color:#70ffc4;}
+.ama-check{display:inline-flex; align-items:center; gap:6px; color:#dffff3; cursor:pointer; user-select:none;}
+.ama-check input{accent-color:#70ffc4; width:15px; height:15px;}
+.ama-set-actions{display:flex; gap:6px;}
+.ama-set-actions .ama-btn{flex:1; padding:5px 8px;}
+.ama-set-status{font-size:11px; color:#ff8ba3; min-height:16px; line-height:1.4; word-break:break-all;}
