@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CityGo · 城市打卡社交</title>
+<meta name="description" content="CityGo — 面向年轻人的城市打卡社交，Y2K 复古未来风，地图打卡气泡 + 涂鸦贴纸发布。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0A0A12; --panel:#1F1430; --panel2:#2A1B45; --panel3:#150E26;
+    --ink:#FFFFFF; --muted:#A0A0AC; --line:#2A1B4D;
+    --neon:#39FF14; --purple:#B026FF; --yellow:#FFE500;
+    --pink:#FF2FA2; --cyan:#19E3FF;
+    --r-lg:28px; --r-pill:999px;
+    --sh-neon:0 8px 32px rgba(57,255,20,.28);
+    --sh-pink:0 8px 32px rgba(255,47,162,.35);
+    --sh-purple:0 0 40px rgba(176,38,255,.45);
+    --sh-yellow:0 0 26px rgba(255,229,0,.30);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{
+    background:
+      radial-gradient(900px 500px at 12% -8%, rgba(176,38,255,.30), transparent 60%),
+      radial-gradient(800px 500px at 110% 12%, rgba(57,255,20,.16), transparent 55%),
+      radial-gradient(700px 600px at 50% 120%, rgba(255,229,0,.12), transparent 60%),
+      var(--bg);
+    color:var(--ink);
+    font-family:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+    min-height:100vh; display:flex; flex-direction:column; align-items:center;
+    padding:0 12px 40px;
+  }
+  /* ---------- 顶部子系统返回导航 ---------- */
+  .topbar{
+    width:100%; max-width:860px; display:flex; align-items:center; gap:12px;
+    padding:14px 6px 10px; position:relative; z-index:20;
+  }
+  .topbar .back{
+    display:inline-flex; align-items:center; gap:8px; color:var(--ink); text-decoration:none;
+    font-size:13px; font-weight:800; letter-spacing:.3px;
+    padding:8px 14px; border-radius:var(--r-pill);
+    background:rgba(31,20,48,.7); border:1px solid var(--line);
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .topbar .back:hover{transform:translateX(-2px); box-shadow:var(--sh-neon)}
+  .topbar .brand{font-family:'Orbitron',sans-serif; font-weight:900; font-size:16px; letter-spacing:.6px;
+    background:linear-gradient(90deg,var(--neon),var(--purple),var(--yellow));
+    -webkit-background-clip:text; background-clip:text; color:transparent}
+  .topbar .tag{margin-left:auto; font-size:11px; color:var(--muted); letter-spacing:.5px;
+    border:1px solid var(--line); padding:6px 12px; border-radius:var(--r-pill)}
+  /* ---------- 手机框 ---------- */
+  .phone{
+    width:404px; max-width:96vw; height:824px; position:relative; border-radius:44px;
+    background:#05030c; border:1px solid var(--line);
+    box-shadow:0 30px 80px rgba(0,0,0,.6), 0 0 60px rgba(176,38,255,.18);
+    overflow:hidden; display:flex; flex-direction:column;
+  }
+  .screen{position:absolute; inset:0; display:none; flex-direction:column; overflow:hidden}
+  .screen.active{display:flex; animation:screenIn .35s cubic-bezier(.22,1,.36,1)}
+  @keyframes screenIn{from{opacity:0; transform:translateY(10px) scale(.985)}to{opacity:1; transform:none}}
+  /* ---------- 状态栏 ---------- */
+  .statusbar{height:44px; flex:0 0 44px; display:flex; align-items:flex-end; justify-content:space-between;
+    padding:0 24px 6px; font-size:14px; font-weight:600; letter-spacing:.4px}
+  .statusbar .sicons{display:flex; gap:6px; align-items:center}
+  .statusbar .dot{width:14px; height:14px; border-radius:50%}
+  /* ---------- 头部 ---------- */
+  .apphead{flex:0 0 auto; padding:6px 20px 14px}
+  .headrow{display:flex; align-items:center; justify-content:space-between; gap:12px}
+  .logo{display:flex; align-items:center; gap:8px}
+  .logo .lgo{font-family:'Orbitron',sans-serif; font-weight:900; font-size:26px; letter-spacing:.4px;
+    background:linear-gradient(90deg,var(--neon),var(--purple),var(--yellow));
+    -webkit-background-clip:text; background-clip:text; color:transparent}
+  .logo svg{filter:drop-shadow(0 0 6px rgba(57,255,20,.5))}
+  .h-actions{display:flex; gap:9px; align-items:center}
+  .hbtn{width:36px; height:36px; display:grid; place-items:center; border-radius:18px;
+    background:var(--panel); border:1px solid var(--line); position:relative}
+  .hbtn.grn{border-color:rgba(57,255,20,.55)}
+  .hbtn svg{width:16px; height:16px}
+  .hbtn .bdg{position:absolute; top:2px; right:2px; width:9px; height:9px; border-radius:50%; background:var(--neon);
+    box-shadow:0 0 6px var(--neon)}
+  .av{width:38px; height:38px; border-radius:50%; background:linear-gradient(135deg,var(--neon),var(--purple));
+    display:grid; place-items:center; border:2px solid transparent}
+  .av .in{width:33px; height:33px; border-radius:50%; background:radial-gradient(circle at 50% 30%,var(--yellow),var(--purple));
+    display:grid; place-items:center; font-size:15px; color:#0A0A12; font-weight:900}
+  .locrow{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:14px}
+  .pill{display:inline-flex; align-items:center; gap:7px; padding:8px 14px; border-radius:var(--r-pill);
+    font-size:13px; font-weight:700; background:var(--panel); border:1px solid var(--line)}
+  .pill.grn{border-color:rgba(57,255,20,.7)}
+  .pill.ylw{background:var(--yellow); color:#0A0A12; border:none; font-weight:800}
+  .pill svg{width:14px; height:14px}
+  /* ---------- 地图 ---------- */
+  .map{position:relative; flex:1; overflow:hidden;
+    background:
+      linear-gradient(180deg,rgba(16,10,34,.92),rgba(34,20,66,.9) 62%,rgba(22,20,50,.92)),
+      repeating-linear-gradient(0deg,transparent 0 58px,rgba(42,27,77,.35) 58px 60px),
+      repeating-linear-gradient(90deg,transparent 0 58px,rgba(42,27,77,.35) 58px 60px)}
+  .map svg.mapart{position:absolute; inset:0; width:100%; height:100%; opacity:.9}
+  .bubble{position:absolute; transform:translate(-50%,-50%); cursor:pointer; transition:transform .18s cubic-bezier(.34,1.56,.64,1)}
+  .bubble:hover{transform:translate(-50%,-50%) scale(1.14)}
+  .bubble .ring{width:52px; height:52px; border-radius:50%; display:grid; place-items:center; position:relative}
+  .bubble .ring .ph{width:42px; height:42px; border-radius:50%; border:3px solid #0A0A12; overflow:hidden; background-size:cover; background-position:center}
+  .bubble .stem{width:2px; height:16px; background:rgba(255,255,255,.4); margin:2px auto 0; border-radius:2px}
+  .bubble .ct{position:absolute; top:-4px; right:-4px; min-width:20px; height:20px; padding:0 5px; border-radius:11px;
+    font-size:11px; font-weight:900; display:grid; place-items:center; color:#0A0A12}
+  .bubble .lab{position:absolute; left:50%; bottom:100%; transform:translateX(-50%) translateY(-2px); margin-bottom:6px;
+    font-size:11px; font-weight:800; white-space:nowrap; padding:4px 9px; border-radius:10px; background:rgba(10,10,18,.72);
+    border:1px solid var(--line); backdrop-filter:blur(6px)}
+  .bubble.purple .ring{background:linear-gradient(135deg,var(--purple),#6B21E8); box-shadow:var(--sh-purple)}
+  .bubble.green .ring{background:linear-gradient(135deg,var(--neon),#1f9e0e); box-shadow:var(--sh-neon)}
+  .bubble.yellow .ring{background:linear-gradient(135deg,var(--yellow),#e3a800); box-shadow:var(--sh-yellow)}
+  .bubble.green .ct,.bubble.yellow .ct{background:var(--ink)}
+  .bubble.purple .ct{background:var(--cyan)}
+  .youhere{position:absolute; transform:translate(-50%,-50%)}
+  .youhere .pulse{position:absolute; inset:-16px; border-radius:50%; border:2px solid var(--neon); opacity:.5;
+    animation:pulse 2.2s ease-out infinite}
+  .youhere .core{width:16px; height:16px; border-radius:50%; background:var(--neon); box-shadow:0 0 12px var(--neon)}
+  @keyframes pulse{0%{transform:scale(.5); opacity:.7}100%{transform:scale(1.6); opacity:0}}
+  /* 地图浮标按钮 */
+  .fab{position:absolute; left:50%; bottom:18px; transform:translateX(-50%); z-index:5;
+    display:inline-flex; align-items:center; gap:9px; padding:15px 26px; border-radius:var(--r-pill);
+    background:linear-gradient(120deg,var(--purple),var(--pink)); color:#fff; font-weight:900; font-size:16px;
+    box-shadow:0 12px 30px rgba(255,47,162,.45), 0 0 40px rgba(176,38,255,.35);
+    cursor:pointer; border:none}
+  .fab:hover{transform:translateX(-50%) scale(1.04)}
+  .fab:active{animation:pop .3s cubic-bezier(.34,1.56,.64,1)}
+  /* ---------- 九宫格照片墙弹层 ---------- */
+  .modal{position:absolute; inset:0; background:rgba(5,3,12,.82); backdrop-filter:blur(8px); z-index:30;
+    display:flex; align-items:center; justify-content:center; padding:22px; opacity:0; pointer-events:none; transition:opacity .22s ease}
+  .modal.open{opacity:1; pointer-events:auto}
+  .photowall{width:100%; max-width:340px; border-radius:28px; background:var(--panel3);
+    border:1px solid var(--line); box-shadow:var(--sh-purple); overflow:hidden;
+    transform:scale(.92) translateY(14px); transition:transform .28s cubic-bezier(.22,1,.36,1)}
+  .modal.open .photowall{transform:none}
+  .pw-head{display:flex; align-items:center; gap:10px; padding:14px 16px; border-bottom:1px solid var(--line)}
+  .pw-head .av{width:34px; height:34px; font-size:13px}
+  .pw-head .av .in{width:29px; height:29px; font-size:12px}
+  .pw-head .tt{font-size:14px; font-weight:800; line-height:1.2}
+  .pw-head .sub{font-size:11px; color:var(--muted); font-weight:600}
+  .pw-head .x{margin-left:auto; width:28px; height:28px; display:grid; place-items:center; border-radius:50%;
+    background:var(--panel); cursor:pointer; color:var(--muted); font-size:14px}
+  .pw-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:4px; padding:4px}
+  .pw-grid .cell{aspect-ratio:1/1; border-radius:12px; background-size:cover; background-position:center; position:relative}
+  .pw-grid .cell .plus{position:absolute; inset:0; display:grid; place-items:center; background:rgba(10,10,18,.5);
+    font-weight:900; font-size:20px; color:#fff; border-radius:12px}
+  .pw-foot{display:flex; align-items:center; gap:16px; padding:12px 16px 16px; color:var(--muted); font-size:13px; font-weight:600}
+  .pw-foot .it{display:inline-flex; align-items:center; gap:6px}
+  .pw-foot .it.hot{color:var(--pink)}
+  .pw-foot svg{width:16px; height:16px}
+  /* ---------- 发布 ---------- */
+  .pub-scroll{flex:1; overflow-y:auto; padding:0 20px 130px}
+  .photo{position:relative; width:100%; aspect-ratio:4/5; border-radius:26px; overflow:hidden; margin-bottom:16px;
+    background:
+      linear-gradient(160deg,rgba(255,47,162,.35),rgba(176,38,255,.55) 50%,rgba(19,227,255,.30)),
+      radial-gradient(circle at 70% 30%, rgba(255,229,0,.5), transparent 45%);
+    border:1px solid var(--line); box-shadow:0 16px 40px rgba(0,0,0,.45)}
+  .photo::before{content:""; position:absolute; inset:0; pointer-events:none;
+    background:repeating-linear-gradient(0deg,transparent 0 4px,rgba(0,0,0,.12) 4px 5px)}
+  .photo .glitch{position:absolute; inset:0; opacity:0; pointer-events:none; mix-blend-mode:screen;
+    background:linear-gradient(90deg,transparent, rgba(57,255,20,.4) 50%, transparent)}
+  .photo .glitch::before,.photo .glitch::after{content:""; position:absolute; inset:0; background:var(--panel); mix-blend-mode:screen}
+  .photo .glitch::before{left:-6px; background:var(--cyan); opacity:.25; transform:translateX(-4px)}
+  .photo .glitch::after{left:6px; background:var(--pink); opacity:.25; transform:translateX(4px)}
+  .photo.on .glitch{opacity:1; animation:glitch 2.4s steps(2) infinite}
+  @keyframes glitch{0%,100%{transform:none}20%{transform:translateX(3px) skewX(-2deg)}40%{transform:translateX(-3px)}60%{transform:translateX(2px)}}
+  .photo canvas.draw{position:absolute; inset:0; width:100%; height:100%; touch-action:none}
+  .photo .sticker{position:absolute; width:56px; height:56px; display:grid; place-items:center; filter:drop-shadow(0 4px 10px rgba(0,0,0,.4))}
+  .photo .sticker svg{width:100%; height:100%}
+  .photo .cap{position:absolute; left:16px; right:16px; bottom:16px; font-family:'Inter',sans-serif;
+    font-weight:900; font-size:22px; line-height:1.15; color:#fff; text-shadow:0 2px 10px rgba(0,0,0,.6);
+    background:linear-gradient(90deg,var(--yellow),var(--pink),var(--cyan));
+    -webkit-background-clip:text; background-clip:text; color:transparent; letter-spacing:.5px}
+  .photo .cap.solid{background:none; -webkit-background-clip:initial; background-clip:initial; color:#fff}
+  .swatches{display:flex; gap:10px; margin:0 0 18px; justify-content:center}
+  .sw{width:34px; height:34px; border-radius:50%; cursor:pointer; border:3px solid transparent; transition:transform .15s ease}
+  .sw.on{border-color:#fff; transform:scale(1.18); box-shadow:0 0 12px rgba(255,255,255,.4)}
+  .toolbar{display:grid; grid-template-columns:repeat(5,1fr); gap:10px; margin-bottom:18px}
+  .tool{display:flex; flex-direction:column; align-items:center; gap:7px; padding:12px 6px; border-radius:18px;
+    background:var(--panel); border:1px solid var(--line); cursor:pointer; transition:transform .15s ease, box-shadow .15s ease}
+  .tool:hover{transform:translateY(-2px)}
+  .tool.on{border-color:var(--neon); box-shadow:var(--sh-neon)}
+  .tool svg{width:22px; height:22px}
+  .tool span{font-size:11px; font-weight:700; color:var(--muted)}
+  .tool.on span{color:var(--neon)}
+  .caption{width:100%; padding:15px 18px; border-radius:18px; background:var(--panel); border:1px solid var(--line);
+    color:var(--ink); font-size:14px; font-weight:600; outline:none; resize:none; height:54px; font-family:'Inter',sans-serif}
+  .caption::placeholder{color:var(--muted)}
+  .pub-actions{position:absolute; left:20px; right:20px; bottom:0; padding:16px 0 22px; z-index:6;
+    display:flex; gap:12px; align-items:center; justify-content:space-between;
+    background:linear-gradient(180deg,transparent,var(--bg) 40%)}
+  .btn-draft{padding:15px 22px; border-radius:var(--r-pill); background:var(--panel); border:1px solid var(--line);
+    color:var(--ink); font-weight:800; font-size:15px; cursor:pointer}
+  .btn-pub{flex:1; max-width:230px; text-align:center; padding:15px 26px; border-radius:var(--r-pill); border:none;
+    background:linear-gradient(120deg,var(--neon),var(--cyan)); color:#0A0A12; font-weight:900; font-size:17px; cursor:pointer;
+    box-shadow:0 12px 30px rgba(57,255,20,.4); position:relative}
+  .btn-pub:active,.btn-draft:active,.tool:active,.pill:active,.hbtn:active{animation:pop .3s cubic-bezier(.34,1.56,.64,1)}
+  @keyframes pop{0%{transform:scale(1)}45%{transform:scale(1.16)}100%{transform:scale(1)}}
+  /* ---------- 探索 / 消息 / 我的 ---------- */
+  .sub-scroll{flex:1; overflow-y:auto; padding:16px 20px 130px}
+  .sticker-card{display:flex; align-items:center; gap:14px; padding:14px; border-radius:22px; background:var(--panel);
+    border:1px solid var(--line); margin-bottom:12px}
+  .sticker-card .n{width:44px; height:44px; border-radius:14px; display:grid; place-items:center; font-size:20px; flex:0 0 44px}
+  .sticker-card .t b{display:block; font-size:14px; font-weight:800}
+  .sticker-card .t i{font-style:normal; font-size:11px; color:var(--muted); font-weight:600}
+  .sticker-card .go{margin-left:auto; font-size:18px; color:var(--muted)}
+  .card-title{font-family:'Orbitron',sans-serif; font-weight:900; font-size:17px; letter-spacing:.3px; margin:18px 0 12px}
+  .profile{display:flex; align-items:center; gap:16px; padding:20px; border-radius:26px; background:var(--panel);
+    border:1px solid var(--line); margin-bottom:16px}
+  .profile .av{width:64px; height:64px; font-size:26px}
+  .profile .av .in{width:57px; height:57px; font-size:22px}
+  .profile .nm b{font-size:18px; font-weight:900; display:block}
+  .profile .nm i{font-style:normal; font-size:12px; color:var(--muted); font-weight:600}
+  .stat{display:flex; gap:26px; margin:16px 0}
+  .stat .n{font-family:'Orbitron',sans-serif; font-weight:900; font-size:22px}
+  .stat .l{font-size:11px; color:var(--muted); font-weight:600}
+  /* ---------- 底部胶囊 tabbar ---------- */
+  .tabbar{position:absolute; left:14px; right:14px; bottom:14px; z-index:10;
+    height:62px; border-radius:36px; border:1px solid var(--line);
+    background:rgba(21,14,38,.88); backdrop-filter:blur(16px);
+    display:flex; align-items:center; padding:4px}
+  .tab{flex:1; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px;
+    border-radius:26px; cursor:pointer; color:var(--muted); transition:all .22s cubic-bezier(.34,1.56,.64,1)}
+  .tab svg{width:20px; height:20px}
+  .tab span{font-size:9px; font-weight:700; letter-spacing:.8px}
+  .tab.on{background:linear-gradient(120deg,var(--neon),#1f9e0e); color:#0A0A12; box-shadow:0 6px 18px rgba(57,255,20,.4)}
+  .tab.big{background:linear-gradient(135deg,var(--purple),var(--pink)); color:#fff; box-shadow:0 8px 20px rgba(255,47,162,.4)}
+  .tab.big svg{width:24px; height:24px}
+  .foot{width:100%; max-width:860px; margin-top:18px; text-align:center; color:var(--muted); font-size:12px; line-height:1.8}
+  @media(max-width:520px){.topbar .tag{display:none}.phone{border-radius:34px}}
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+
+  <!-- 顶部：子系统返回导航 -->
+  <div class="topbar">
+    <a class="back" href="../index.html" target="_top">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="#39FF14" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      返回指挥台
+    </a>
+    <div class="brand">CITYGO</div>
+    <div class="tag">Y2K · 城市打卡</div>
+  </div>
+
+  <!-- 手机框 -->
+  <div class="phone" id="phone">
+
+    <!-- ============ 首页 · 地图 ============ -->
+    <section class="screen active" id="scr-map">
+      <div class="statusbar">
+        <span>23:06</span>
+        <div class="sicons">
+          <svg viewBox="0 0 24 24" width="16" height="14" fill="none"><path d="M2.5 9a14 14 0 0119 0" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/><path d="M5.5 13a9.5 9.5 0 0113 0" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="17.5" r="1.8" fill="#fff"/></svg>
+          <svg viewBox="0 0 24 14" width="22" height="13" fill="none"><rect x="1" y="1" width="19" height="12" rx="3" stroke="#fff" stroke-width="1.6"/><rect x="3" y="3" width="13" height="8" rx="1.5" fill="#39FF14"/><path d="M22 5v4" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg>
+        </div>
+      </div>
+
+      <div class="apphead">
+        <div class="headrow">
+          <div class="logo">
+            <svg viewBox="0 0 24 24" width="26" height="26" fill="none"><path d="M12 2l2.6 7.4L22 12l-7.4 2.6L12 22l-2.6-7.4L2 12l7.4-2.6L12 2z" fill="#39FF14"/><path d="M12 7l1.2 3.8L17 12l-3.8 1.2L12 17l-1.2-3.8L7 12l3.8-1.2L12 7z" fill="#B026FF"/></svg>
+            <span class="lgo">CityGo</span>
+          </div>
+          <div class="h-actions">
+            <div class="hbtn grn"><svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="6" stroke="#fff" stroke-width="2"/><path d="M15.5 15.5L20 20" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg></div>
+            <div class="hbtn"><svg viewBox="0 0 24 24" fill="none"><path d="M6 9a6 6 0 0112 0c0 5 2 6 2 6H4s2-1 2-6z" stroke="#fff" stroke-width="2" stroke-linejoin="round"/><path d="M10 19a2 2 0 003 0" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg><span class="bdg"></span></div>
+            <div class="av"><div class="in">G</div></div>
+          </div>
+        </div>
+        <div class="locrow">
+          <div class="pill grn"><svg viewBox="0 0 24 24" fill="none"><path d="M12 21s-6-5.1-6-10a6 6 0 0112 0c0 4.9-6 10-6 10z" fill="#39FF14"/><circle cx="12" cy="11" r="2.4" fill="#0A0A12"/></svg>上海市 · 徐汇区
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none"><path d="M9 6l6 6-6 6" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="pill ylw"><svg viewBox="0 0 24 24" width="12" height="12" fill="none"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z" fill="#0A0A12"/></svg>打卡榜</div>
+        </div>
+      </div>
+
+      <!-- 地图 -->
+      <div class="map" id="map">
+        <svg class="mapart" viewBox="0 0 404 640" preserveAspectRatio="xMidYMid slice" fill="none">
+          <path d="M0 120H404M0 260H404M0 400H404M0 540H404" stroke="rgba(42,27,77,.5)" stroke-width="2"/>
+          <path d="M70 0V640M200 0V640M330 0V640" stroke="rgba(42,27,77,.5)" stroke-width="2"/>
+          <path d="M0 60L404 470" stroke="rgba(30,20,64,.8)" stroke-width="6" stroke-linecap="round"/>
+          <path d="M404 90L0 430" stroke="rgba(30,20,64,.8)" stroke-width="6" stroke-linecap="round"/>
+          <path d="M0 180C90 120 200 150 300 100S404 90 404 120" stroke="rgba(25,227,255,.35)" stroke-width="3" stroke-linecap="round"/>
+          <path d="M40 0C60 80 40 200 90 300S120 450 110 640" stroke="rgba(255,47,162,.3)" stroke-width="3" stroke-linecap="round"/>
+          <rect x="130" y="120" width="80" height="44" rx="10" fill="rgba(36,26,71,.6)" stroke="rgba(42,27,77,.6)"/>
+          <rect x="240" y="300" width="120" height="54" rx="10" fill="rgba(34,24,63,.6)" stroke="rgba(42,27,77,.6)"/>
+        </svg>
+
+        <!-- 当前位置 -->
+        <div class="youhere" style="left:52%; top:44%">
+          <div class="pulse"></div><div class="core"></div>
+        </div>
+        <div style="position:absolute; left:54.5%; top:43%; font-size:10px; font-weight:800; color:var(--neon)">我在</div>
+
+        <!-- 打卡气泡 -->
+        <div class="bubble green" data-name="武康大楼 · 徐汇" data-count="128" style="left:24%; top:24%">
+          <div class="lab">武康大楼 ✦ 128</div>
+          <div class="ring"><div class="ph" style="background-image:linear-gradient(135deg,#6b21e8,#39FF14)"></div></div>
+          <div class="ct">128</div>
+          <div class="stem"></div>
+        </div>
+        <div class="bubble purple" data-name="安福路小店 · 徐汇" data-count="56" style="left:70%; top:36%">
+          <div class="lab">安福路 · 街拍 56</div>
+          <div class="ring"><div class="ph" style="background-image:linear-gradient(135deg,#FF2FA2,#B026FF)"></div></div>
+          <div class="ct">56</div>
+          <div class="stem"></div>
+        </div>
+        <div class="bubble yellow" data-name="外滩夜景 · 黄浦" data-count="89" style="left:30%; top:60%">
+          <div class="lab">外滩 · 夜景 89</div>
+          <div class="ring"><div class="ph" style="background-image:linear-gradient(135deg,#FFE500,#FF2FA2)"></div></div>
+          <div class="ct">89</div>
+          <div class="stem"></div>
+        </div>
+        <div class="bubble green" data-name="大学路咖啡 · 杨浦" data-count="43" style="left:66%; top:72%">
+          <div class="lab">大学路 · 咖啡 43</div>
+          <div class="ring"><div class="ph" style="background-image:linear-gradient(135deg,#39FF14,#19E3FF)"></div></div>
+          <div class="ct">43</div>
+          <div class="stem"></div>
+        </div>
+
+        <button class="fab">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none"><path d="M4 8a2 2 0 012-2h3l1.5-2h3L15 6h3a2 2 0 012 2v9a2 2 0 01-2 2H6a2 2 0 01-2-2V8z" stroke="#fff" stroke-width="2" stroke-linejoin="round"/><circle cx="12" cy="13" r="3.2" stroke="#fff" stroke-width="2"/></svg>
+          拍照打卡
+        </button>
+      </div>
+
+      <!-- 九宫格照片墙弹层 -->
+      <div class="modal" id="pw-modal">
+        <div class="photowall">
+          <div class="pw-head">
+            <div class="av"><div class="in">K</div></div>
+            <div><div class="tt" id="pw-name">武康大楼</div><div class="sub" id="pw-sub">KAIKAI · 上海市徐汇区</div></div>
+            <div class="x" id="pw-close">✕</div>
+          </div>
+          <div class="pw-grid" id="pw-grid"></div>
+          <div class="pw-foot">
+            <span class="it hot"><svg viewBox="0 0 24 24" fill="none"><path d="M12 21s-6-4.7-6-10a4.5 4.5 0 019-2 4.5 4.5 0 019 2c0 5.3-6 10-6 10z" fill="#FF2FA2"/></svg><span id="pw-like">128</span></span>
+            <span class="it"><svg viewBox="0 0 24 24" fill="none"><path d="M21 12c0 4-4 6.5-9 6.5-1 0-2-.1-2.9-.4L4 20l1.6-4.2C4 14.5 3 13 3 12c0-4 4-6.5 9-6.5s9 2.5 9 6.5z" stroke="#A0A0AC" stroke-width="2" stroke-linejoin="round"/></svg><span>23</span></span>
+            <span class="it"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3v18M6 9l6-6 6 6" stroke="#A0A0AC" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>收藏</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 发布 ============ -->
+    <section class="screen" id="scr-pub">
+      <div class="statusbar">
+        <span>23:06</span>
+        <div class="sicons"><span style="font-size:12px;color:#A0A0AC">草稿已保存</span></div>
+      </div>
+      <div class="apphead" style="padding-top:6px">
+        <div class="headrow">
+          <div class="hbtn" id="pub-cancel"><svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/></svg></div>
+          <div class="logo"><span class="lgo" style="font-size:19px">发布打卡</span></div>
+          <div class="hbtn grn"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        </div>
+      </div>
+
+      <div class="pub-scroll">
+        <div class="photo" id="photo">
+          <div class="glitch"></div>
+          <canvas class="draw" id="draw" width="640" height="800"></canvas>
+          <div class="sticker" id="st-layer" style="top:14%; left:12%">
+            <svg viewBox="0 0 64 64" fill="none"><path d="M32 4l7 21 21 7-21 7-7 21-7-21-21-7 21-7z" fill="#FFE500"/><path d="M32 18l4 14 14 4-14 4-4 14-4-14-14-4 14-4z" fill="#B026FF"/></svg>
+          </div>
+          <div class="sticker" style="top:22%; right:10%">
+            <svg viewBox="0 0 64 64" fill="none"><path d="M34 6L14 36h12l-3 22 20-30H31z" fill="#39FF14"/></svg>
+          </div>
+          <div class="cap" id="cap" contenteditable="true" spellcheck="false">外滩的夜，等我</div>
+        </div>
+
+        <div class="swatches" id="swatches">
+          <div class="sw on" data-c="#39FF14" style="background:#39FF14"></div>
+          <div class="sw" data-c="#B026FF" style="background:#B026FF"></div>
+          <div class="sw" data-c="#FFE500" style="background:#FFE500"></div>
+          <div class="sw" data-c="#FF2FA2" style="background:#FF2FA2"></div>
+          <div class="sw" data-c="#19E3FF" style="background:#19E3FF"></div>
+        </div>
+
+        <div class="toolbar" id="toolbar">
+          <div class="tool on" data-tool="doodle"><svg viewBox="0 0 24 24" fill="none"><path d="M3 21l4-1L19 8a2.8 2.8 0 00-4-4L3 16v5z" stroke="#fff" stroke-width="2" stroke-linejoin="round"/><path d="M15 5l4 4" stroke="#fff" stroke-width="2"/></svg><span>涂鸦</span></div>
+          <div class="tool" data-tool="sticker"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3l2 6 6 2-6 2-2 6-2-6-6-2 6-2z" fill="#FFE500"/></svg><span>贴纸</span></div>
+          <div class="tool" data-tool="glitch"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="3" rx="1" fill="#19E3FF"/><rect x="3" y="11" width="13" height="3" rx="1" fill="#FF2FA2"/><rect x="8" y="18" width="13" height="3" rx="1" fill="#39FF14"/></svg><span>故障</span></div>
+          <div class="tool" data-tool="text"><svg viewBox="0 0 24 24" fill="none"><path d="M4 6V5h16v1M12 5v15M9 20h6" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg><span>文字</span></div>
+          <div class="tool" data-tool="crop"><svg viewBox="0 0 24 24" fill="none"><path d="M7 3v11a3 3 0 003 3h11M3 7h11a3 3 0 013 3v11" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>裁剪</span></div>
+        </div>
+
+        <textarea class="caption" placeholder="说点什么，给这座城打个卡…" id="caption">今晚的外滩，随手拍就很出片 ✦</textarea>
+      </div>
+
+      <div class="pub-actions">
+        <button class="btn-draft">保存草稿</button>
+        <button class="btn-pub">发布 ✦</button>
+      </div>
+    </section>
+
+    <!-- ============ 探索 ============ -->
+    <section class="screen" id="scr-exp">
+      <div class="statusbar"><span>23:06</span><div class="sicons"></div></div>
+      <div class="apphead">
+        <div class="headrow"><div class="logo"><span class="lgo" style="font-size:19px">探索</span></div></div>
+        <div class="locrow"><div class="pill grn"><svg viewBox="0 0 24 24" fill="none"><path d="M12 21s-6-5.1-6-10a6 6 0 0112 0c0 4.9-6 10-6 10z" fill="#39FF14"/><circle cx="12" cy="11" r="2.4" fill="#0A0A12"/></svg>热门打卡地</div></div>
+      </div>
+      <div class="sub-scroll">
+        <div class="card-title">🔥 本周 HIT</div>
+        <div class="sticker-card"><div class="n" style="background:linear-gradient(135deg,#39FF14,#19E3FF)">01</div><div class="t"><b>武康大楼</b><i>徐汇 · 1.2k 人打过卡</i></div><div class="go">→</div></div>
+        <div class="sticker-card"><div class="n" style="background:linear-gradient(135deg,#FF2FA2,#B026FF)">02</div><div class="t"><b>安福路小店</b><i>徐汇 · 856 人</i></div><div class="go">→</div></div>
+        <div class="sticker-card"><div class="n" style="background:linear-gradient(135deg,#FFE500,#FF2FA2)">03</div><div class="t"><b>大学路咖啡街</b><i>杨浦 · 632 人</i></div><div class="go">→</div></div>
+        <div class="card-title">✦ 附近新打卡</div>
+        <div class="sticker-card"><div class="n" style="background:linear-gradient(135deg,#B026FF,#19E3FF)">04</div><div class="t"><b>M50 创意园</b><i>普陀 · 30 分钟前</i></div><div class="go">→</div></div>
+        <div class="sticker-card"><div class="n" style="background:linear-gradient(135deg,#19E3FF,#39FF14)">05</div><div class="t"><b>西岸美术馆</b><i>徐汇 · 45 分钟前</i></div><div class="go">→</div></div>
+      </div>
+    </section>
+
+    <!-- ============ 消息 ============ -->
+    <section class="screen" id="scr-msg">
+      <div class="statusbar"><span>23:06</span><div class="sicons"></div></div>
+      <div class="apphead"><div class="headrow"><div class="logo"><span class="lgo" style="font-size:19px">消息</span></div></div></div>
+      <div class="sub-scroll">
+        <div class="sticker-card"><div class="av"><div class="in">K</div></div><div class="t"><b>KAIKAI 赞了你的打卡</b><i>“武康大楼也太出片了” · 5 分钟前</i></div></div>
+        <div class="sticker-card"><div class="av" style="background:linear-gradient(135deg,#FFE500,#FF2FA2)"><div class="in" style="background:radial-gradient(circle,#FF2FA2,#B026FF);color:#fff">M</div></div><div class="t"><b>MINO 邀请你去外滩</b><i>今晚 21:00 · 1 小时前</i></div></div>
+        <div class="sticker-card"><div class="av" style="background:linear-gradient(135deg,#19E3FF,#39FF14)"><div class="in" style="background:radial-gradient(circle,#39FF14,#19E3FF);color:#0A0A12">A</div></div><div class="t"><b>阿紫 关注了你</b><i>你们都在上海打卡 · 3 小时前</i></div></div>
+      </div>
+    </section>
+
+    <!-- ============ 我的 ============ -->
+    <section class="screen" id="scr-me">
+      <div class="statusbar"><span>23:06</span><div class="sicons"></div></div>
+      <div class="sub-scroll">
+        <div class="profile">
+          <div class="av"><div class="in">G</div></div>
+          <div class="nm"><b>GREENLIGHT_00</b><i>📍 上海 · 城市收藏家 · 37 枚徽章</i></div>
+        </div>
+        <div class="stat">
+          <div><div class="n">23</div><div class="l">打卡</div></div>
+          <div><div class="n">1.2k</div><div class="l">粉丝</div></div>
+          <div><div class="n">368</div><div class="l">获赞</div></div>
+        </div>
+        <div class="card-title">✦ 我的城市徽章</div>
+        <div class="sticker-card"><div class="n" style="background:linear-gradient(135deg,#39FF14,#19E3FF)">✦</div><div class="t"><b>夜行侠</b><i>夜间打卡 10 次</i></div></div>
+        <div class="sticker-card"><div class="n" style="background:linear-gradient(135deg,#FF2FA2,#B026FF)">✦</div><div class="t"><b>街角侦探</b><i>发现 5 个隐藏小店</i></div></div>
+        <div class="sticker-card"><div class="n" style="background:linear-gradient(135deg,#FFE500,#FF2FA2)">✦</div><div class="t"><b>第一张照片</b><i>已解锁 2026.09</i></div></div>
+      </div>
+    </section>
+
+    <!-- 底部胶囊 tabbar -->
+    <nav class="tabbar">
+      <div class="tab on" data-tab="map"><svg viewBox="0 0 24 24" fill="none"><path d="M12 21s-6-5.1-6-10a6 6 0 0112 0c0 4.9-6 10-6 10z" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="11" r="2.4" stroke="currentColor" stroke-width="2"/></svg><span>地图</span></div>
+      <div class="tab" data-tab="exp"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M15.5 8.5l-1.5 5-5 1.5 1.5-5z" fill="currentColor"/></svg><span>探索</span></div>
+      <div class="tab big" data-tab="pub"><svg viewBox="0 0 24 24" fill="none"><path d="M4 8a2 2 0 012-2h3l1.5-2h3L15 6h3a2 2 0 012 2v9a2 2 0 01-2 2H6a2 2 0 01-2-2V8z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="12" cy="13" r="3.2" stroke="currentColor" stroke-width="2"/></svg><span>发布</span></div>
+      <div class="tab" data-tab="msg"><svg viewBox="0 0 24 24" fill="none"><path d="M21 12c0 4-4 6.5-9 6.5-1 0-2-.1-2.9-.4L4 20l1.6-4.2C4 14.5 3 13 3 12c0-4 4-6.5 9-6.5s9 2.5 9 6.5z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><span>消息</span></div>
+      <div class="tab" data-tab="me"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="2"/><path d="M4 20c1.5-4 5-5 8-5s6.5 1 8 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>我的</span></div>
+    </nav>
+  </div>
+
+  <div class="foot">
+    CityGo · 面向年轻人的城市打卡社交 — 交互原型：点地图气泡看九宫格照片墙 · 发布页可涂鸦 / 贴纸 / 故障滤镜。<br>
+    纯前端单文件子系统 · Y2K 复古未来风 · 荧光绿 × 电光紫 × 亮黄
+  </div>
+
+<script>
+(function(){
+  // ---- Tab 切换 ----
+  var tabs=document.querySelectorAll('.tab');
+  var screens={
+    map:'scr-map', exp:'scr-exp', pub:'scr-pub', msg:'scr-msg', me:'scr-me'
+  };
+  tabs.forEach(function(t){
+    t.addEventListener('click',function(){
+      tabs.forEach(function(x){x.classList.remove('on')});
+      t.classList.add('on');
+      var key=t.getAttribute('data-tab');
+      document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active')});
+      document.getElementById(screens[key]).classList.add('active');
+    });
+  });
+
+  // ---- 九宫格照片墙 ----
+  var grids=['#6b21e8,#39FF14','#FF2FA2,#B026FF','#FFE500,#FF2FA2','#39FF14,#19E3FF','#B026FF,#19E3FF','#19E3FF,#39FF14','#FFE500,#B026FF','#FF2FA2,#19E3FF','#39FF14,#FF2FA2'];
+  var modal=document.getElementById('pw-modal');
+  var gridEl=document.getElementById('pw-grid');
+  var likeEl=document.getElementById('pw-like');
+  function openWall(name,count){
+    document.getElementById('pw-name').textContent=name;
+    document.getElementById('pw-sub').textContent='KAIKAI · 上海市徐汇区';
+    likeEl.textContent=count;
+    gridEl.innerHTML='';
+    grids.forEach(function(g,i){
+      var c=document.createElement('div');
+      c.className='cell';
+      c.style.background='linear-gradient(135deg,'+g+')';
+      if(i===8){c.innerHTML='<span class="plus">+6</span>';}
+      gridEl.appendChild(c);
+    });
+    modal.classList.add('open');
+  }
+  document.querySelectorAll('.bubble').forEach(function(b){
+    b.addEventListener('click',function(){openWall(b.dataset.name,b.dataset.count)});
+  });
+  document.getElementById('pw-close').addEventListener('click',function(){modal.classList.remove('open')});
+  modal.addEventListener('click',function(e){if(e.target===modal){modal.classList.remove('open')}});
+
+  // ---- 发布：涂鸦 ----
+  var photo=document.getElementById('photo');
+  var canvas=document.getElementById('draw');
+  var ctx=canvas.getContext('2d');
+  var curColor='#39FF14', drawing=false, tool='doodle';
+  var cur=canvas.getBoundingClientRect();
+  function sizeCanvas(){
+    cur=canvas.getBoundingClientRect();
+    canvas.width=cur.width*2; canvas.height=cur.height*2;
+    ctx.setTransform(2,0,0,2,0,0);
+    ctx.lineWidth=5; ctx.lineCap='round'; ctx.lineJoin='round';
+  }
+  sizeCanvas(); window.addEventListener('resize',sizeCanvas);
+  function pos(e){var r=cur; return {x:e.clientX-r.left, y:e.clientY-r.top}}
+  canvas.addEventListener('mousedown',function(e){if(tool!=='doodle')return; drawing=true; var p=pos(e); ctx.beginPath(); ctx.moveTo(p.x,p.y); ctx.strokeStyle=curColor});
+  canvas.addEventListener('mousemove',function(e){if(!drawing||tool!=='doodle')return; var p=pos(e); ctx.lineTo(p.x,p.y); ctx.stroke()});
+  window.addEventListener('mouseup',function(){drawing=false});
+  canvas.addEventListener('touchstart',function(e){if(tool!=='doodle')return; drawing=true; var p=pos(e.touches[0]); ctx.beginPath(); ctx.moveTo(p.x,p.y); ctx.strokeStyle=curColor; e.preventDefault()},{passive:false});
+  canvas.addEventListener('touchmove',function(e){if(!drawing||tool!=='doodle')return; var p=pos(e.touches[0]); ctx.lineTo(p.x,p.y); ctx.stroke(); e.preventDefault()},{passive:false});
+  canvas.addEventListener('touchend',function(){drawing=false});
+
+  // 色板
+  document.querySelectorAll('.sw').forEach(function(s){
+    s.addEventListener('click',function(){
+      document.querySelectorAll('.sw').forEach(function(x){x.classList.remove('on')});
+      s.classList.add('on'); curColor=s.dataset.c;
+    });
+  });
+
+  // 工具栏
+  var stickers=[
+    '<svg viewBox="0 0 64 64" fill="none"><path d="M32 4l7 21 21 7-21 7-7 21-7-21-21-7 21-7z" fill="#FFE500"/><path d="M32 18l4 14 14 4-14 4-4 14-4-14-14-4 14-4z" fill="#B026FF"/></svg>',
+    '<svg viewBox="0 0 64 64" fill="none"><path d="M34 6L14 36h12l-3 22 20-30H31z" fill="#39FF14"/></svg>',
+    '<svg viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="26" fill="#FF2FA2"/><circle cx="23" cy="25" r="3.6" fill="#0A0A12"/><circle cx="41" cy="25" r="3.6" fill="#0A0A12"/><path d="M23 40c4 3 14 3 18 0" stroke="#0A0A12" stroke-width="3" stroke-linecap="round"/></svg>',
+    '<svg viewBox="0 0 64 64" fill="none"><path d="M32 8c-7 0-11 5-11 10 0 8 11 16 11 16s11-8 11-16c0-5-4-10-11-10z" fill="#19E3FF"/></svg>'
+  ];
+  var tools=document.querySelectorAll('.tool');
+  tools.forEach(function(t){
+    t.addEventListener('click',function(){
+      tools.forEach(function(x){x.classList.remove('on')});
+      t.classList.add('on'); tool=t.dataset.tool;
+      if(tool==='sticker'){
+        var st=stickers[Math.floor(Math.random()*stickers.length)];
+        var d=document.createElement('div');
+        d.className='sticker'; d.style.top=(8+Math.random()*40)+'%'; d.style.left=(8+Math.random()*52)+'%';
+        d.innerHTML=st;
+        d.addEventListener('click',function(){d.remove()});
+        photo.appendChild(d);
+      }
+      if(tool==='glitch'){photo.classList.toggle('on')}
+      if(tool==='text'){var cap=document.getElementById('cap'); cap.classList.toggle('solid')}
+      if(tool==='crop'){canvas.style.cursor='move'}
+    });
+  });
+
+  // 发布 / 草稿 / 取消
+  document.getElementById('pub-cancel').addEventListener('click',function(){switchTab('map')});
+  function switchTab(key){tabs.forEach(function(x){x.classList.toggle('on',x.dataset.tab===key)});document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active')});document.getElementById(screens[key]).classList.add('active')}
+  document.querySelector('.btn-draft').addEventListener('click',function(){var b=this; b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop'); });
+  document.querySelector('.btn-pub').addEventListener('click',function(){
+    var b=this; b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop');
+    var c=document.getElementById('caption'); if(c.value) c.value='已发布 ✦ 去地图看看你的新坐标吧';
+  });
+})();
+</script>
+</body>
+</html>

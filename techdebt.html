@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="app-version" content="1.0.167">
+<title>技术债清算台</title>
+<style>
+  :root{
+    --bg:#14161c; --panel:#1e212b; --panel2:#262a36;
+    --text:#e8eaef; --muted:#9aa3b5; --line:rgba(255,255,255,.09);
+    --code:#4ecdc4; --arch:#ff6b6b; --test:#ffd93d; --doc:#8b9df0; --dep:#ff8c42; --obs:#b477f5;
+    --ok:#3fd48b; --warn:#ff8c42; --danger:#ff6b6b; --blue:#5aa2ff;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:"PingFang SC","Microsoft YaHei",system-ui,sans-serif;padding:20px;min-height:100vh}
+  .wrap{max-width:1080px;margin:0 auto}
+  header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:18px}
+  header h1{font-size:22px;background:linear-gradient(90deg,#ff6b6b,#4ecdc4);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  header .sub{color:var(--muted);font-size:12px;margin-top:4px}
+  .hdrbtns{display:flex;gap:8px;flex-wrap:wrap}
+  .btn{padding:8px 14px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--text);cursor:pointer;font-size:13px;min-height:40px}
+  .btn:hover{border-color:var(--blue)}
+  .btn.primary{background:linear-gradient(90deg,#ff6b6b,#4ecdc4);border:none;color:#fff;font-weight:600}
+  .btn.danger{color:var(--danger)}
+  .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;text-align:center}
+  .card .num{font-size:26px;font-weight:700}
+  .card .lbl{font-size:12px;color:var(--muted);margin-top:4px}
+  .card.good .num{color:var(--ok)} .card.warn .num{color:var(--warn)} .card.bad .num{color:var(--danger)}
+  /* 今天要处理 */
+  .today{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:16px}
+  .today h2{font-size:15px;margin-bottom:10px;color:var(--warn)}
+  .today .list{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .today .ti{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:10px;display:flex;align-items:center;gap:10px;min-height:44px}
+  .today .ti .code{font-weight:700;font-size:13px;min-width:52px}
+  .today .ti .name{font-size:13px;flex:1}
+  .today .ti button{background:var(--ok);border:none;color:#04140c;border-radius:6px;padding:6px 10px;font-size:12px;cursor:pointer;min-height:36px}
+  .empty{color:var(--muted);font-size:13px}
+  /* 雷达图 */
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:16px}
+  .panel h2{font-size:15px;margin-bottom:12px}
+  .legend{display:flex;gap:16px;font-size:12px;color:var(--muted);margin-bottom:8px;flex-wrap:wrap}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+  svg{display:block;margin:0 auto;max-width:100%}
+  .dim-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
+  .dim{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px}
+  .dim .rh{display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:600;margin-bottom:6px}
+  .dim .meter{height:7px;background:rgba(255,255,255,.08);border-radius:4px;overflow:hidden}
+  .dim .meter>div{height:100%;border-radius:4px}
+  .dim .val{font-size:20px;font-weight:700}
+  /* 债务清单 */
+  .debt-list{display:flex;flex-direction:column;gap:10px}
+  .debt{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:12px;display:flex;gap:12px;align-items:flex-start}
+  .debt .toggle{width:22px;height:22px;flex:0 0 22px;border-radius:6px;border:2px solid var(--line);cursor:pointer;margin-top:2px;display:flex;align-items:center;justify-content:center;font-size:14px}
+  .debt.done .toggle{background:var(--ok);border-color:var(--ok);color:#04140c}
+  .debt.done .bname{text-decoration:line-through;color:var(--muted)}
+  .debt.done{opacity:.7}
+  .debt .body{flex:1}
+  .debt .bname{font-size:14px;font-weight:600;margin-bottom:3px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .debt .bdesc{font-size:12px;color:var(--muted);line-height:1.5}
+  .debt .bmeta{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;font-size:11px;align-items:center}
+  .chip{padding:2px 8px;border-radius:4px;font-size:11px;background:rgba(255,255,255,.08)}
+  .chip.p0{background:rgba(255,107,107,.2);color:#ff9c9c}
+  .chip.p1{background:rgba(255,140,66,.2);color:#ffb27a}
+  .chip.p2{background:rgba(255,217,61,.15);color:#ffe27a}
+  .chip.p3{background:rgba(154,163,181,.15);color:#c3cad9}
+  .chip.done-chip{background:rgba(63,212,139,.15);color:#6fe3a8}
+  .chip.pri{background:rgba(90,162,255,.15);color:#8fc0ff}
+  .tag-done{background:var(--ok);color:#04140c;border-radius:4px;padding:2px 8px;font-size:11px;cursor:pointer;min-height:30px;border:none}
+  .debt .act{display:flex;flex-direction:column;gap:6px}
+  .del{background:none;border:none;color:var(--danger);cursor:pointer;font-size:12px;min-height:32px}
+  /* 筛选 */
+  .filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+  .filter{padding:7px 14px;border-radius:20px;border:1px solid var(--line);background:var(--panel);color:var(--muted);cursor:pointer;font-size:12px;min-height:38px}
+  .filter.on{color:#fff;border-color:var(--blue)}
+  .count{font-size:12px;color:var(--muted);margin-bottom:10px}
+  /* 新增 */
+  .addform{display:grid;grid-template-columns:1fr 120px 120px 100px auto;gap:10px;margin-bottom:16px}
+  .addform input,.addform select{padding:10px;border-radius:8px;border:1px solid var(--line);background:var(--panel2);color:var(--text);font-size:13px;min-height:42px}
+  .addform input:focus,.addform select:focus{outline:none;border-color:var(--blue)}
+  footer{text-align:center;color:var(--muted);font-size:12px;margin-top:24px}
+  @media(max-width:760px){
+    .cards{grid-template-columns:repeat(2,1fr)}
+    .dim-grid{grid-template-columns:repeat(2,1fr)}
+    .today .list{grid-template-columns:1fr}
+    .addform{grid-template-columns:1fr 1fr}
+    header{flex-direction:column;align-items:flex-start}
+  }
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div>
+      <h1>🔧 技术债清算台</h1>
+      <div class="sub">workbench 单体 · 40 万行级前端 · 六维债务跟踪 · 数据本地持久化</div>
+    </div>
+    <div class="hdrbtns">
+      <button class="btn" id="btnExport" type="button">⬇ 导出备份</button>
+      <button class="btn" id="btnImport" type="button">⬆ 导入</button>
+      <button class="btn danger" id="btnClear" type="button">🗑 清空</button>
+      <input type="file" id="importFile" accept="application/json" style="display:none">
+    </div>
+  </header>
+
+  <!-- 今日要处理：跨维度逾期 + 高优先待处理聚合 -->
+  <div class="today" id="todayBox">
+    <h2>⚡ 今天要处理（逾期 + P0 待办）</h2>
+    <div class="list" id="todayList"></div>
+  </div>
+
+  <!-- 整体健康度 -->
+  <div class="cards">
+    <div class="card warn" id="cardHealth"><div class="num" id="healthNum">-</div><div class="lbl">整体健康度（100 健康）</div></div>
+    <div class="card" id="cardTotal"><div class="num" id="totalNum">-</div><div class="lbl">债务总项</div></div>
+    <div class="card good" id="cardDone"><div class="num" id="doneNum">-</div><div class="lbl">已结清</div></div>
+    <div class="card bad" id="cardOpen"><div class="num" id="openNum">-</div><div class="lbl">待清算</div></div>
+  </div>
+
+  <!-- 六维雷达图 -->
+  <div class="panel">
+    <h2>📡 六维技术债雷达</h2>
+    <div class="legend">
+      <span><i class="dot" style="background:#ff6b6b"></i>当前健康度</span>
+      <span><i class="dot" style="background:#9aa3b5"></i>合格基线 60</span>
+      <span><i class="dot" style="background:#4ecdc4"></i>目标 90</span>
+    </div>
+    <svg id="radar" viewBox="0 0 520 470" role="img" aria-label="六维技术债雷达图"></svg>
+    <div class="dim-grid" id="dimGrid"></div>
+  </div>
+
+  <!-- 债务清单 -->
+  <div class="panel">
+    <h2>📋 债务清单（按优先级清算）</h2>
+    <div class="filters" id="filters"></div>
+    <div class="count" id="debtCount"></div>
+    <div class="addform">
+      <input id="newName" placeholder="债务名称（如：抽取统一状态机）" autocomplete="off">
+      <input id="newDue" type="text" placeholder="截止 2026-12-31" autocomplete="off">
+      <select id="newDim"></select>
+      <select id="newPrio">
+        <option value="P0">P0(立即)</option>
+        <option value="P1">P1(1-3月)</option>
+        <option value="P2">P2(3-6月)</option>
+        <option value="P3">P3(长期)</option>
+      </select>
+      <button class="btn primary" id="btnAdd" type="button">＋ 添加</button>
+    </div>
+    <div class="debt-list" id="debtList"></div>
+  </div>
+
+  <footer>数据走 lib/store.js 统一数据层（app.techdebt.*），刷新/重开不丢失 · workbench 技术债清算台</footer>
+
+</div>
+
+<script src="../lib/store.js"></script>
+<script>
+(function(){
+  var NS = 'app.techdebt.';
+  // 六维配置：代码债/依赖债/架构债/测试债/文档债/可观测
+  var DIMS = [
+    {id:'code', name:'代码债', color:'#4ecdc4'},
+    {id:'dep',  name:'依赖债', color:'#ff8c42'},
+    {id:'arch', name:'架构债', color:'#ff6b6b'},
+    {id:'test', name:'测试债', color:'#ffd93d'},
+    {id:'doc',  name:'文档债', color:'#8b9df0'},
+    {id:'obs',  name:'可观测', color:'#b477f5'}
+  ];
+  var DIM_COLOR = {}; DIMS.forEach(function(d){ DIM_COLOR[d.id]=d.color; });
+  var DIM_HEALTH = {code:72, dep:95, arch:60, test:15, doc:30, obs:50}; // 基线快照（沿用盘点报告）
+  var TARGET = {code:85, dep:97, arch:88, test:75, doc:80, obs:85};
+
+  // 预置债务（来自 2026-09-21 实测定制盘点）
+  var SEED = [
+    {id:'t1', dim:'test', name:'sanitize.mjs 单元测试 + 行数/哈希自动校验', desc:'防 8-25 sanitize 被三方合并破坏 125 行致公开站静默停更的事故重演', prio:'P0', due:'2026-12-31', done:false, created:'2026-09-21'},
+    {id:'t2', dim:'test', name:'store.js 读写/升级/损坏降级测试', desc:'统一数据层 三层防护需有测试兜底', prio:'P0', due:'2026-12-31', done:false, created:'2026-09-21'},
+    {id:'t3', dim:'obs', name:'接入 lib/errorlog.js 到 window.onerror', desc:'当前为死模块未接入，接入后异常可见', prio:'P0', due:'2026-12-31', done:false, created:'2026-09-21'},
+    {id:'t4', dim:'doc', name:'架构地图 + 发布 Runbook 落库 docs/', desc:'架构模块边界、三端同步/SSH-443/脱敏发布流程文档化，治知识孤岛', prio:'P0', due:'2026-12-31', done:false, created:'2026-09-21'},
+    {id:'t5', dim:'arch', name:'share-hub-seed.js 敏感数据评估', desc:'5.2MB 种子含个人内容全量暴露公开站，需评估脱敏/私有化', prio:'P1', due:'2027-03-31', done:false, created:'2026-09-21'},
+    {id:'t6', dim:'code', name:'c2-bank.html / zk-ky.html 巨型单页拆 JS 模块', desc:'281KB / 194KB 上帝单页，按功能拆 ESM', prio:'P1', due:'2027-06-30', done:false, created:'2026-09-21'},
+    {id:'t7', dim:'obs', name:'公开站健康监控脚本化', desc:'index 版本 meta / 新功能锚点 / 产品页 200 三连自动检查', prio:'P1', due:'2027-03-31', done:false, created:'2026-09-21'},
+    {id:'t8', dim:'test', name:'lib/errorlog.js 测试 + verify.yml 接入 node --test', desc:'CI 增加测试 job，让每版合入有护栏', prio:'P1', due:'2027-12-31', done:false, created:'2026-09-21'},
+    {id:'t9', dim:'doc', name:'补 ADR + CHANGELOG', desc:'零构建架构/脱敏发布/三层数据防护 3 条历史 ADR + 版本沿革 CHANGELOG', prio:'P2', due:'2027-06-30', done:false, created:'2026-09-21'},
+    {id:'t10',dim:'arch', name:'单页应用统一走 lib/store.js API', desc:'避免绕过统一数据层的双写保护', prio:'P2', due:'2027-12-31', done:false, created:'2026-09-21'}
+  ];
+
+  var debts = [];
+  var filterDim = 'all';
+  var filterDone = 'all'; // all / open / done
+
+  function load(){
+    var saved = WBStore.get(NS + 'debts', null);
+    if(saved && Array.isArray(saved)){
+      var out=[]; for(var i=0;i<saved.length && out.length<500;i++){ try{ var s=sanitizeDebt(saved[i]); if(s) out.push(s); }catch(x){} }
+      debts=out;
+    } else {
+      debts=JSON.parse(JSON.stringify(SEED)).map(sanitizeDebt);
+      // 首次写入种子
+      WBStore.set(NS + 'debts', debts, {silent:true});
+    }
+  }
+  function save(){
+    WBStore.set(NS + 'debts', debts);
+    render();
+  }
+  function todayStr(){
+    var d = new Date(), m = d.getMonth()+1;
+    return d.getFullYear() + '-' + (m<10?'0'+m:m) + '-' + (d.getDate()<10?'0'+d.getDate():d.getDate());
+  }
+  function isOverdue(it){ return it && !it.done && it.due && it.due < todayStr(); }
+
+  // ---- 雷达图 ----
+  function drawRadar(){
+    var health = dimHealth();
+    var svg = document.getElementById('radar');
+    var cx=260, cy=235, R=160, N=6; var NSs='http://www.w3.org/2000/svg';
+    function pt(i,r){ var a=-Math.PI/2 + i*2*Math.PI/N; return [cx+r*Math.cos(a), cy+r*Math.sin(a)]; }
+    function poly(vals){
+      var pts=[]; for(var i=0;i<N;i++){ var p=pt(i,R*vals[i]/100); pts.push(p[0].toFixed(1)+','+p[1].toFixed(1)); } return pts.join(' ');
+    }
+    svg.innerHTML='';
+    function addPoly(pts,fill,fo,stroke,sw,dash){ var el=document.createElementNS(NSs,'polygon'); el.setAttribute('points',pts); el.setAttribute('fill',fill); if(fo)el.setAttribute('fill-opacity',fo); el.setAttribute('stroke',stroke); el.setAttribute('stroke-width',sw); if(dash)el.setAttribute('stroke-dasharray',dash); svg.appendChild(el); }
+    for(var ring=1;ring<=4;ring++){ var rn=R*ring/4, pts=[]; for(var i=0;i<N;i++){var p=pt(i,rn);pts.push(p[0].toFixed(1)+','+p[1].toFixed(1));} var g=document.createElementNS(NSs,'polygon'); g.setAttribute('points',pts.join(' ')); g.setAttribute('fill','none'); g.setAttribute('stroke','rgba(255,255,255,.10)'); svg.appendChild(g); }
+    for(var i=0;i<N;i++){
+      var p=pt(i,R), p0=pt(i,0);
+      var ln=document.createElementNS(NSs,'line'); ln.setAttribute('x1',p0[0]);ln.setAttribute('y1',p0[1]);ln.setAttribute('x2',p[0]);ln.setAttribute('y2',p[1]);ln.setAttribute('stroke','rgba(255,255,255,.13)');ln.setAttribute('stroke-width','1'); svg.appendChild(ln);
+      var lp=pt(i,R+28); var t=document.createElementNS(NSs,'text'); t.setAttribute('x',lp[0]);t.setAttribute('y',lp[1]);t.setAttribute('text-anchor','middle');t.setAttribute('dominant-baseline','middle');t.setAttribute('font-size','13');t.setAttribute('fill','#e8eaef');t.setAttribute('font-weight','600'); t.textContent=DIMS[i].name; svg.appendChild(t);
+      var cp=pt(i,health[i]/100*R); var c2=document.createElementNS(NSs,'text'); c2.setAttribute('x',cp[0]);c2.setAttribute('y',cp[1]-10);c2.setAttribute('text-anchor','middle');c2.setAttribute('font-size','11');c2.setAttribute('fill','#ff9c9c'); c2.textContent=health[i]; svg.appendChild(c2);
+    }
+    // 年份38/健康度实例：当前 health 值 =
+    addPoly(poly(health),'#ff6b6b',0.20,2,null);
+    addPoly([60,60,60,60,60,60].map(function(v,i){var p=pt(i,R*v/100);return p[0].toFixed(1)+','+p[1].toFixed(1)}).join(' '),'#9aa3b5',0,1.5,'5,4');
+    var tg=[]; for(var i=0;i<N;i++){tg.push(TARGET[DIMS[i].id]);} addPoly(poly(tg),'#4ecdc4',0,2,null);
+  }
+  function dimHealth(){
+    var h={}; var arr=[0,0,0,0,0,0];
+    DIMS.forEach(function(d){ h[d.id]={base:DIM_HEALTH[d.id], mult:1}; });
+    debts.forEach(function(it){ if(it.done) return; var dim=it.dim; if(dim in DIM_HEALTH){ h[dim].mult -= 0.02; } });
+    var health=[];
+    DIMS.forEach(function(d,idx){
+      var v=Math.max(0, Math.round(h[d.id].base * h[d.id].mult));
+      health.push(v);
+    });
+    return health;
+  }
+
+  // ---- 渲染维度卡 ----
+  function renderDims(health){
+    var g=document.getElementById('dimGrid'); g.innerHTML='';
+    DIMS.forEach(function(d,i){
+      var div=document.createElement('div'); div.className='dim';
+      var cnt=debts.filter(function(x){return x.dim===d.id && !x.done}).length;
+      div.innerHTML='<div class="rh"><span>'+d.name+'</span><span class="val" style="color:'+d.color+'">'+(60===health[i]?60:health[i])+'</span></div>'+
+        '<div class="meter"><div style="width:'+health[i]+'%;background:'+d.color+'"></div></div>'+
+        '<div style="font-size:11px;color:#9aa3b5;margin-top:4px">待清算 '+cnt+' 项</div>';
+      g.appendChild(div);
+    });
+  }
+
+  // ---- 今日要处理 ----
+  function renderToday(){
+    var box=document.getElementById('todayList'); box.innerHTML='';
+    var items=debts.filter(function(it){ return !it.done && (isOverdue(it) || it.prio==='P0'); });
+    if(items.length===0){ box.innerHTML='<div class="empty" style="grid-column:1/-1">🎉 没有逾期或 P0 待处理，干得漂亮</div>'; return; }
+    items.sort(function(a,b){ return isOverdue(b)?1:-1; });
+    items.forEach(function(it){
+      var d=document.createElement('div'); d.className='ti';
+      d.innerHTML='<span class="code" style="color:'+esc(DIM_COLOR[it.dim]||'#9aa3b5')+'">'+esc(dimName(it.dim))+'</span><span class="name">'+(isOverdue(it)?'⏰ ':'🔴 ')+esc(it.name)+'</span><button data-done="'+esc(it.id)+'" type="button">结清✔</button>';
+      box.appendChild(d);
+    });
+  }
+
+  // ---- 债务清单 ----
+  function renderFilters(){
+    var f=document.getElementById('filters'); f.innerHTML='';
+    var opts=[['all','全部'],['open','待清算'],['done','已结清']];
+    opts.forEach(function(o){ var b=document.createElement('button'); b.className='filter'+(filterDone===o[0]?' on':''); b.textContent=o[1]; b.setAttribute('data-fd',o[0]); f.appendChild(b); });
+    DIMS.forEach(function(d){ var b=document.createElement('button'); b.className='filter'+(filterDim===d.id?' on':''); b.textContent=d.name; b.setAttribute('data-fdim',d.id); f.appendChild(b); });
+  }
+  function renderDebtList(){
+    var list=document.getElementById('debtList'); list.innerHTML='';
+    var shown=debts.slice();
+    if(filterDim!=='all') shown=shown.filter(function(x){return x.dim===filterDim});
+    if(filterDone==='open') shown=shown.filter(function(x){return !x.done});
+    if(filterDone==='done') shown=shown.filter(function(x){return x.done});
+    // 按 P0 未完成 > 逾期 > 优先级排序
+    var pr={'P0':0,'P1':1,'P2':2,'P3':3};
+    shown.sort(function(a,b){
+      var ao=isOverdue(a)?-1:0, bo=isOverdue(b)?-1:0; if(ao!==bo) return ao-bo;
+      var ad=pr[a.prio]||3, bd=pr[b.prio]||3; if(ad!==bd) return ad-bd;
+      return (a.done?1:0)-(b.done?1:0);
+    });
+    document.getElementById('debtCount').textContent = '共 '+debts.length+' 项 · 已结清 '+debts.filter(x=>x.done).length+' · 显示 '+shown.length;
+    if(shown.length===0){ list.innerHTML='<div class="empty">没有匹配的债务</div>'; return; }
+    shown.forEach(function(it){
+      var d=document.createElement('div'); d.className='debt'+(it.done?' done':'');
+      var prio=normPrio(it.prio);
+      var prioChip='chip '+prio.toLowerCase();
+      d.innerHTML='<div class="toggle" data-toggle="'+esc(it.id)+'" role="checkbox" aria-checked="'+(it.done?'true':'false')+'">'+(it.done?'✓':'')+'</div>'+
+        '<div class="body"><div class="bname"><span style="color:'+esc(DIM_COLOR[it.dim]||'#9aa3b5')+'">'+esc(dimName(it.dim))+'</span> '+esc(it.name)+(it.done?'<span class="chip done-chip">已结清</span>':'')+(isOverdue(it)?'<span class="chip p0">⏰ 逾期</span>':'')+'</div>'+
+        '<div class="bdesc">'+esc(it.desc||'')+'</div>'+
+        '<div class="bmeta"><span class="chip '+prioChip+'">'+esc(prio)+'</span>'+
+        (it.due?'<span class="chip">截止 '+esc(it.due)+'</span>':'')+
+        (it.created?'<span class="chip">创建 '+esc(it.created)+'</span>':'')+
+        (it.settled?'<span class="chip">结清 '+esc(it.settled)+'</span>':'')+'</div></div>'+
+        '<div class="act"><button class="tag-done" data-done="'+esc(it.id)+'" type="button">'+(it.done?'撤销':'结清')+'</button><button class="del" data-del="'+esc(it.id)+'" type="button">删除</button></div>';
+      list.appendChild(d);
+    });
+  }
+  function render(){
+    var health=dimHealth();
+    drawRadar(); renderDims(health); renderToday(); renderFilters(); renderDebtList();
+    var total=debts.length, done=debts.filter(x=>x.done).length, open=total-done;
+    var healthScore=0; health.forEach(function(v){healthScore+=v}); healthScore=Math.round(healthScore/6);
+    document.getElementById('healthNum').textContent=healthScore;
+    document.getElementById('cardHealth').className='card'+(healthScore>=60?' good':healthScore>=40?' warn':' bad');
+    document.getElementById('totalNum').textContent=total;
+    document.getElementById('doneNum').textContent=done;
+    document.getElementById('openNum').textContent=open;
+  }
+
+  // ---- 工具 ----
+  function dimName(id){ for(var i=0;i<DIMS.length;i++){ if(DIMS[i].id===id) return DIMS[i].name; } return '其他'; }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+  var ALLOW_DIMS = DIMS.map(function(d){ return d.id; });
+  function normPrio(p){ p=String(p==null?'':p).toUpperCase(); return (p==='P0'||p==='P1'||p==='P2'||p==='P3')?p:'P3'; }
+  // 导入/加载白名单校验：仅保留已知字段 + 类型/取值域/限长，未知维归 'other'
+  function sanitizeDebt(raw){
+    if(!raw || typeof raw!=='object') return null;
+    function str(v,n){ v=(v==null?'':String(v)); return v.length>n?v.slice(0,n):v; }
+    return {
+      id: str(raw.id,64) || ('d'+Date.now()+Math.random().toString(36).slice(2,7)),
+      dim: ALLOW_DIMS.indexOf(raw.dim)>=0 ? raw.dim : 'other',
+      name: str(raw.name,200),
+      desc: str(raw.desc,500),
+      prio: normPrio(raw.prio),
+      due: str(raw.due,20),
+      created: str(raw.created,20),
+      settled: str(raw.settled,20),
+      done: !!raw.done
+    };
+  }
+  function toast(msg){ try{ if(window.top && window.top.toast){ window.top.toast(msg); return; } }catch(e){} }
+
+  // ---- 事件委托 ----
+  document.addEventListener('click', function(e){
+    var t=e.target;
+    if(t.getAttribute && t.getAttribute('data-toggle')){ toggle(t.getAttribute('data-toggle')); return; }
+    if(t.getAttribute && t.getAttribute('data-done')){ settle(t.getAttribute('data-done')); return; }
+    if(t.getAttribute && t.getAttribute('data-del')){ del(t.getAttribute('data-del')); return; }
+    if(t.getAttribute && t.getAttribute('data-fd')){ filterDone=t.getAttribute('data-fd'); renderFilters(); renderDebtList(); return; }
+    if(t.getAttribute && t.getAttribute('data-fdim')){ filterDim=t.getAttribute('data-fdim'); renderFilters(); renderDebtList(); return; }
+  });
+  function toggle(id){ var it=debts.find(function(x){return x.id===id}); if(!it)return; it.done=!it.done; it.settled=it.done?todayStr():''; save(); }
+  function settle(id){ var it=debts.find(function(x){return x.id===id}); if(!it)return; it.done=true; it.settled=todayStr(); save(); toast('已结清：'+it.name); }
+  function del(id){ debts=debts.filter(function(x){return x.id!==id}); save(); }
+  document.getElementById('btnAdd').addEventListener('click', function(){
+    var n=document.getElementById('newName').value.trim(); if(!n){ toast('请输入债务名称'); return; }
+    var dim=document.getElementById('newDim').value, prio=document.getElementById('newPrio').value, due=document.getElementById('newDue').value.trim();
+    debts.push({id:'d'+Date.now(), dim:dim, name:n, desc:'', prio:prio, due:due, done:false, created:todayStr()});
+    document.getElementById('newName').value=''; document.getElementById('newDue').value='';
+    save(); toast('已添加债务');
+  });
+  document.getElementById('btnExport').addEventListener('click', function(){
+    var blob=new Blob([JSON.stringify(debts,null,2)],{type:'application/json'});
+    var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='techdebt-backup-'+todayStr()+'.json'; a.click();
+    toast('已导出备份');
+  });
+  document.getElementById('btnImport').addEventListener('click', function(){ document.getElementById('importFile').click(); });
+  document.getElementById('importFile').addEventListener('change', function(e){
+    var file=e.target.files[0]; if(!file) return;
+    var r=new FileReader(); r.onload=function(){
+      try{
+        var arr=JSON.parse(r.result);
+        if(Array.isArray(arr)){
+          var out=[]; for(var i=0;i<arr.length && out.length<500;i++){ try{ var s=sanitizeDebt(arr[i]); if(s) out.push(s); }catch(x){} }
+          debts=out; save(); toast('导入成功 '+out.length+' 项');
+        } else toast('格式错误：需 JSON 数组');
+      }catch(err){ toast('解析失败'); } e.target.value='';
+    }; r.readAsText(file);
+  });
+  document.getElementById('btnClear').addEventListener('click', function(){
+    if(confirm('确认清空全部债务数据？此操作不可撤销。')){ debts=[]; save(); toast('已清空'); }
+  });
+
+  // 初始化维度下拉
+  (function(){
+    var sel=document.getElementById('newDim');
+    sel.innerHTML=''; DIMS.forEach(function(d){ var o=document.createElement('option'); o.value=d.id; o.textContent=d.name; sel.appendChild(o); });
+  })();
+
+  // resize 上报父 iframe
+  function postResize(){
+    setTimeout(function(){
+      try{ window.parent.postMessage({__wbResize:true,id:'techdebtFrame',h:document.documentElement.scrollHeight},'*'); }catch(e){}
+    },150);
+  }
+
+  load(); render(); postResize();
+})();
+</script>
+</body>
+</html>

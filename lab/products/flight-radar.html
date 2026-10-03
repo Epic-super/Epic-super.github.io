@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>实时航班雷达 · 北京 vs 上海</title>
+<style>
+  :root{
+    --bg:#1d1f27;--card:#171a22;--panel:#20242f;--line:#2f3546;
+    --text:#e8ebf4;--muted:#9aa3b5;--teal:#2dd4bf;--red:#fb7185;--blue:#38bdf8;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:-apple-system,"Segoe UI","Microsoft YaHei",sans-serif;padding:24px clamp(12px,3vw,40px) 60px;line-height:1.55}
+  h1{font-size:20px;display:flex;align-items:center;gap:10px}
+  h1 .dot{width:10px;height:10px;border-radius:50%;background:var(--teal);animation:pulse 1.6s infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(45,212,191,.6)}70%{box-shadow:0 0 0 9px rgba(45,212,191,0)}100%{box-shadow:0 0 0 0 rgba(45,212,191,0)}}
+  .sub{color:var(--muted);font-size:12.5px;margin-top:8px;display:flex;gap:16px;flex-wrap:wrap;align-items:center}
+  .sub b{color:var(--teal)}
+  button.refresh{background:var(--panel);border:1px solid var(--line);color:var(--teal);border-radius:8px;padding:5px 12px;font-size:12px;cursor:pointer}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-top:16px}
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  @media(max-width:700px){.stats{grid-template-columns:repeat(2,1fr)}}
+  .stat{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center}
+  .stat .k{font-size:12px;color:var(--muted);margin-bottom:6px}
+  .stat .v{font-size:24px;font-weight:700;font-variant-numeric:tabular-nums}
+  .bar-row{display:grid;grid-template-columns:100px 1fr 50px;gap:10px;align-items:center;padding:12px 0;border-bottom:1px solid rgba(47,53,70,.5)}
+  .bar-row:last-child{border-bottom:none}
+  .bar-l{font-weight:600;font-size:13.5px}
+  .bar-track{background:var(--panel);height:22px;border-radius:6px;overflow:hidden}
+  .bar{height:100%;border-radius:6px;min-width:2px;transition:width .6s ease}
+  .bar-v{text-align:right;font-weight:600;font-variant-numeric:tabular-nums}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+  @media(max-width:880px){.grid{grid-template-columns:1fr}}
+  .panel2{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;min-height:280px}
+  .ph{font-size:15px;font-weight:600;display:flex;align-items:center;gap:8px;margin-bottom:10px}
+  .ph .cnt{margin-left:auto;font-size:12px;color:var(--muted);background:var(--panel);padding:2px 9px;border-radius:20px}
+  table{width:100%;border-collapse:collapse;font-size:12.5px}
+  th{color:var(--muted);text-align:left;padding:6px;border-bottom:1px solid var(--line);font-size:11.5px}
+  td{padding:6px;border-bottom:1px solid rgba(47,53,70,.4);white-space:nowrap}
+  tr:last-child td{border-bottom:none}
+  .cs{font-weight:600}
+  .empty{color:var(--muted);text-align:center;padding:40px 0;font-size:13px}
+  .loading{color:var(--muted);text-align:center;padding:40px 0;font-size:13px}
+  .loading::after{content:"";display:inline-block;width:12px;height:12px;border:2px solid var(--muted);border-top-color:var(--teal);border-radius:50%;vertical-align:-2px;margin-left:8px;animation:spin .8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .err{background:rgba(251,113,133,.1);border:1px solid rgba(251,113,133,.3);color:#fda4af;border-radius:10px;padding:10px 12px;font-size:12.5px;margin-bottom:8px}
+  .foot{color:var(--muted);font-size:11.5px;margin-top:16px;line-height:1.7}
+  .foot a{color:var(--teal);text-decoration:none}
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+  <h1><span class="dot"></span>实时航班雷达 · 北京 vs 上海</h1>
+  <div class="sub">
+    <span><b id="time">--:--:--</b> 更新</span>
+    <span>自动刷新 <b data-a="60">60</b>s</span>
+    <button class="refresh" onclick="refreshNow()">⟳ 立即刷新</button>
+    <span class="chip">数据：OpenSky Network (ADS-B)</span>
+  </div>
+
+  <div class="card">
+    <div style="font-size:13px;font-weight:600;color:var(--muted);margin-bottom:14px">繁忙程度对比</div>
+    <div class="stats" style="margin-bottom:6px">
+      <div class="stat"><div class="k">北京上空</div><div class="v" style="color:var(--teal)" id="bjK">--</div></div>
+      <div class="stat"><div class="k">上海上空</div><div class="v" style="color:var(--blue)" id="shK">--</div></div>
+      <div class="stat"><div class="k">参考华北峰值</div><div class="v" id="refK">12</div></div>
+      <div class="stat"><div class="k">最高巡航</div><div class="v" id="hiAlt" style="font-size:15px">--</div></div>
+    </div>
+    <div class="bar-row"><div class="bar-l">北京区域</div><div class="bar-track"><div class="bar" id="barBJ" style="background:linear-gradient(90deg,#fb7185,#f472b6);width:0%"></div></div><div class="bar-v" id="barBJV">0</div></div>
+    <div class="bar-row"><div class="bar-l">上海区域</div><div class="bar-track"><div class="bar" id="barSH" style="background:linear-gradient(90deg,#22d3f8,#2dd4bf);width:0%"></div></div><div class="bar-v" id="barSHV">0</div></div>
+  </div>
+
+  <div class="grid">
+    <div class="panel2">
+      <div class="ph"><span style="color:var(--teal)">●</span>北京上空 <span class="cnt" id="bjCount">--</span></div>
+      <div id="bjBox" class="loading">实时抓取中…</div>
+    </div>
+    <div class="panel2">
+      <div class="ph"><span style="color:var(--blue)">●</span>上海上空 <span class="cnt" id="shCount">--</span></div>
+      <div id="shBox" class="loading">实时抓取中…</div>
+    </div>
+  </div>
+
+  <div class="foot">
+    数据来源 <a href="https://opensky-network.org/" target="_blank" rel="noopener">OpenSky Network</a> 公开 ADS-B 网络。高度为气压高度(m)、速度为地速(km/h)、航向为真航向(度)。数据约 10s 延迟，存在区域接收站覆盖差异。<br>
+    区域：北京 39.0–41.0°N / 115.5–117.5°E；上海 30.3–31.5°N / 120.5–122.2°E。
+  </div>
+
+<script>
+var BJ={lamin:39.0,lamax:41.0,lomin:115.5,lomax:117.5};
+var SH={lamin:30.0,lamax:31.5,lomin:120.5,lomax:122.2};
+
+function p(n){return String(n).padStart(2,'0')}
+function stamp(){
+  var d=new Date();
+  document.getElementById('time').textContent=p(d.getHours())+':'+p(d.getMinutes())+':'+p(d.getSeconds());
+}
+function dir(deg){
+  if(deg==null||isNaN(deg))return '—';
+  var d=((Math.round(deg/45))%8);
+  var names=['北','东北','东','东南','南','西南','西','西北'];
+  return names[d]+' '+Math.round(deg)+'°';
+}
+function row(f){
+  var cs=(f[1]||'').trim()||'—';
+  var c=f[2]||'—';
+  var alt=f[7]!=null?Math.round(f[7]):null;
+  var spd=f[9]!=null?Math.round(f[9]*3.6):null;
+  var hdg=f[10]!=null?Math.round(f[10]):null;
+  return '<tr><td class="cs">'+cs+'</td><td>'+c+'</td><td class="alt">'+(alt!==null?alt+' m':'—')+'</td><td>'+(spd!==null?spd+' km/h':'—')+'</td><td>'+(hdg!==null?dir(hdg):'—')+'</td></tr>';
+}
+function renderBox(id,cntId,list){
+  var el=document.getElementById(id);
+  if(!list||!list.length){
+    document.getElementById(cntId).textContent='0 架 / 数据暂缺';
+    el.innerHTML='<div class="empty">该区域暂未捕获到有效 ADS-B 信号（覆盖密度低或时段无航班）</div>';
+    return;
+  }
+  var sorted=list.slice().sort(function(a,b){return (b[7]||0)-(a[7]||0)});
+  document.getElementById(cntId).textContent=sorted.length+' 架';
+  el.innerHTML='<table><thead><tr><th>呼号</th><th>来源国</th><th>高度</th><th>速度</th><th>航向</th></tr></thead><tbody>'
+    +sorted.slice(0,80).map(row).join('')+'</tbody></table>';
+}
+function errBox(id,msg){
+  document.getElementById(id).innerHTML='<div class="err">'+msg+'</div>';
+}
+function fetchReg(bb,cb,onErr){
+  var u='https://opensky-network.org/api/states/all?lamin='+bb.lamin+'&lamax='+bb.lamax+'&lomin='+bb.lomin+'&lomax='+bb.lomax+'&time=0';
+  fetch(u,{cache:'no-store'})
+    .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json()})
+    .then(function(d){cb(d&&d.states?d.states:[])})
+    .catch(function(e){onErr(e)});
+}
+function setBars(bj,sh){
+  var max=Math.max(bj,sh,1);
+  document.getElementById('barBJ').style.width=(bj/max*100)+'%';
+  document.getElementById('barBJV').textContent=bj;
+  document.getElementById('barSH').style.width=(sh/max*100)+'%';
+  document.getElementById('barSHV').textContent=sh;
+  document.getElementById('bjK').textContent=bj;
+  document.getElementById('shK').textContent=sh;
+}
+var gotBJ=false,gotSH=false;
+
+function load(){
+  gotBJ=false;gotSH=false;
+  fetchReg(BJ,function(l){
+    gotBJ=true;
+    renderBox('bjBox','bjCount',l);
+    var hi=0; l.forEach(function(s){if(s[7]&&s[7]>hi)hi=s[7]});
+    if(hi)document.getElementById('hiAlt').textContent=Math.round(hi)+' m';
+    onPair(l.length,0);
+  },function(){
+    gotBJ=true;
+    errBox('bjBox','北京区加载失败：可能触达匿名限频(400/日)或网络不稳');
+    onPair(0,0);
+  });
+  fetchReg(SH,function(l){
+    gotSH=true;
+    renderBox('shBox','shCount',l);
+    onPair(0,l.length);
+  }, function(){
+    gotSH=true;
+    errBox('shBox','上海区加载失败：该地覆盖密度低或网络异常');
+    onPair(0,0);
+  });
+  stamp();
+}
+function onPair(bj,sh){
+  if(!(gotBJ&&gotSH))return;
+  var b=document.getElementById('barBJV').textContent==='--'?bj:parseInt(document.getElementById('barBJV').textContent)||0;
+  var s=document.getElementById('barSHV').textContent==='--'?sh:parseInt(document.getElementById('barSHV').textContent)||0;
+  setBars(b,s);
+}
+function refreshNow(){load()}
+document.addEventListener('DOMContentLoaded',function(){
+  load();
+  setInterval(load,60000);
+});
+</script>
+</body>
+</html>

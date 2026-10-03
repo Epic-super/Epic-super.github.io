@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>番剧门户 · Anime Portal</title>
+<style>
+  :root{--bg:#0f1115;--panel:#171a21;--panel2:#1f232c;--line:#2a2f3a;--txt:#e6e8ec;--sub:#9aa3b2;--accent:#4ECDC4;--accent2:#FF6B6B;--ok:#3ecf8e;--err:#ff6b6b}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);font:14px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;padding:24px;max-width:1120px;margin:0 auto}
+  h1{font-size:22px;margin:0 0 2px;display:flex;align-items:center;gap:10px}
+  h1 .dot{width:10px;height:10px;border-radius:50%;background:var(--accent);animation:pulse 1.4s infinite;flex:none}
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.82)}}
+  .sub{color:var(--sub);font-size:13px;margin-bottom:18px}
+  .bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:18px}
+  button{background:var(--accent);color:#0f1115;border:none;border-radius:9px;padding:10px 18px;font-size:14px;cursor:pointer;font-weight:700;white-space:nowrap}
+  button.sec{background:var(--panel2);color:var(--txt);border:1px solid var(--line)}
+  button:disabled{opacity:.5;cursor:not-allowed}
+  a{color:var(--accent)}
+  .status{font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;padding:9px 14px;border-radius:10px}
+  .status.ok{background:rgba(62,207,142,.12);color:var(--ok);border:1px solid rgba(62,207,142,.35)}
+  .status.err{background:rgba(255,107,107,.12);color:var(--err);border:1px solid rgba(255,107,107,.35)}
+  .status.check{background:var(--panel2);color:var(--sub);border:1px solid var(--line)}
+  .status .spin{width:12px;height:12px;border:2px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:sp .7s linear infinite}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  .gate{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+  @media(max-width:760px){.gate{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+  .card h2{font-size:14px;margin:0 0 8px}
+  .card p,.card li{font-size:13px;color:var(--sub);margin:4px 0;line-height:1.6}
+  .card ul{margin:6px 0 0;padding-left:18px}
+  code{background:var(--panel2);padding:1px 6px;border-radius:6px;font-size:12px;color:var(--accent)}
+  .frame-wrap{margin-top:18px;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--panel);display:none}
+  .frame-wrap.show{display:block}
+  .frame-wrap iframe{width:100%;height:82vh;border:0;display:block;background:#1D1F27}
+  .frame-bar{display:flex;align-items:center;gap:8px;padding:9px 14px;background:var(--panel2);border-bottom:1px solid var(--line);font-size:12px;color:var(--sub)}
+  .frame-bar .live{width:8px;height:8px;border-radius:50%;background:var(--accent);animation:pulse 1.4s infinite}
+  .frame-bar .ext{margin-left:auto;font-size:12px}
+  .chain{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:8px;font-size:12px;color:var(--sub)}
+  .chain .step{background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:2px 9px}
+  .foot{color:var(--sub);font-size:11.5px;margin-top:20px;line-height:1.7}
+  .foot b{color:var(--accent)}
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+  <h1><span class="dot"></span>番剧门户 · Anime Portal</h1>
+  <div class="sub">AniList 元数据 + 放送时间表 + 苹果CMS 多源检索 + HLS 播放 · 本地 Next.js 服务（127.0.0.1:3000）</div>
+
+  <div class="bar">
+    <button id="btnOpen" class="sec" disabled>🚀 打开番剧门户</button>
+    <button id="btnCheck" class="sec">↻ 重新检测服务</button>
+  </div>
+
+  <div class="status check" id="st">
+    <span class="spin"></span><span id="stText">正在检测本地番剧服务（127.0.0.1:3000）…</span>
+  </div>
+
+  <div class="frame-wrap" id="frameWrap">
+    <div class="frame-bar"><span class="live"></span><span>Anime Portal 已嵌入 · 数据来自 AniList 公开 API</span><a class="ext" id="extLink" href="#" target="_blank" rel="noopener">新窗口打开 ↗</a></div>
+    <iframe id="frame" src="" title="Anime Portal 番剧门户"></iframe>
+  </div>
+
+  <div class="gate">
+    <div class="card">
+      <h2>这是干什么的</h2>
+      <p>一个<b style="color:var(--txt)">生产级番剧门户</b>，参考 AniList / bangumi 的信息架构：</p>
+      <ul>
+        <li>首页 Hero 大图 + 当季热播 + 人气榜单</li>
+        <li>浏览 / 排行 / 搜索，含季度切换与分页</li>
+        <li>番剧详情（评分 / 类型 / 工作室 / 角色 / 推荐）</li>
+        <li>本周放送时间表（周一→周日）</li>
+        <li>HLS 播放（hls.js + Safari 原生回退）与收藏</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h2>怎么启动本地服务</h2>
+      <p>这个页面只负责<b style="color:var(--txt)">接入门户</b>。Next.js 服务在另一个目录，它<code>不</code>在这里：</p>
+      <ul>
+        <li>源码目录：<code><本地路径></code></li>
+        <li>启动：<code>cd /d <本地路径></code> 然后 <code>npm run dev</code>（默认 3000 端口）</li>
+        <li>依赖已装好；服务未启动时本页显示<b style="color:var(--err)">降级说明</b>而非空白</li>
+        <li>番剧元数据需能访问 <code>graphql.anilist.co</code>，网络不通时首页会优雅降级为空态</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="chain">
+    <span class="step">① 启动 npm run dev（3000）</span><span>→</span>
+    <span class="step">② 本页自动检测并嵌入</span><span>→</span>
+    <span class="step">③ 首页选番 → 详情 → 播放</span><span>→</span>
+    <span class="step">④ 播放页填 m3u8 源（按番剧记忆）</span>
+  </div>
+
+  <div class="foot">
+    <b>说明</b>：门户源码为独立私有项目 <code>anime-portal</code>（Next.js 15），不随本公开站部署；
+    本页在服务可用时内嵌门户，不可用时降级为操作指引。仓库<b>不内置任何视频直链</b>，
+    默认仅载入公开 HLS 测试流，正式源由你在播放页填写或走苹果CMS 检索。
+  </div>
+
+<script>
+"use strict";
+const API_BASE = "http://127.0.0.1:3000";
+const LS = "ap.lastSeen";
+const stEl = document.getElementById('st');
+const stText = document.getElementById('stText');
+const btnOpen = document.getElementById('btnOpen');
+const frameWrap = document.getElementById('frameWrap');
+const frame = document.getElementById('frame');
+const extLink = document.getElementById('extLink');
+
+function setStatus(kind, txt, hasSpin) {
+  stEl.className = "status " + kind;
+  stText.innerHTML = (hasSpin ? '<span class="spin"></span>' : '') + txt;
+}
+function stOk(t){ setStatus('ok', t, false); }
+function stErr(t){ setStatus('err', t, false); }
+function stCheck(t){ setStatus('check', t, true); }
+
+function withTimeout(ms) {
+  const ctl = new AbortController();
+  const id = setTimeout(() => ctl.abort(), ms);
+  return { signal: ctl.signal, done: () => clearTimeout(id) };
+}
+
+// Next dev 默认不带 CORS 头，跨端口普通 fetch 会被拦；
+// 先用 cors 探，失败再用 no-cors 探（服务在＝resolve，不在＝reject）
+async function probe() {
+  let t = withTimeout(4500);
+  try {
+    const r = await fetch(API_BASE + '/', { signal: t.signal, cache: 'no-store' });
+    t.done();
+    if (r.ok || r.status === 304) return true;
+  } catch (e) { t.done(); }
+  t = withTimeout(4500);
+  try {
+    await fetch(API_BASE + '/', { signal: t.signal, mode: 'no-cors', cache: 'no-store' });
+    t.done();
+    return true;
+  } catch (e) { t.done(); return false; }
+}
+
+async function checkHealth() {
+  stCheck('正在检测本地番剧服务…');
+  btnOpen.disabled = true;
+  frameWrap.classList.remove('show');
+  const ok = await probe();
+  if (ok) {
+    stOk('✓ 本地番剧服务在线（127.0.0.1:3000）· 数据源 AniList · 可正常使用');
+    btnOpen.disabled = false;
+    frame.src = API_BASE + '/';
+    extLink.href = API_BASE + '/';
+    frameWrap.classList.add('show');
+    localStorage.setItem(LS, '1');
+  } else {
+    const first = !localStorage.getItem(LS);
+    stErr('✗ 未检测到本地番剧服务：请在本机执行 cd /d <本地路径> 然后 npm run dev（端口 3000），本页已降级为操作指引。' + (first ? ' 首次打开无需担心，这是正常状态。' : ''));
+    localStorage.setItem(LS, '1');
+  }
+}
+
+btnCheck.onclick = () => checkHealth();
+btnOpen.onclick = () => { window.open(API_BASE + '/', '_blank', 'noopener'); };
+checkHealth();
+</script>
+</body>
+</html>

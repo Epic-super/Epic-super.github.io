@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>独一无二的世界 · 小待</title>
+<meta name="description" content="一个只有我能写入的世界。别人复刻到的是空壳，留下的是我的年轮。">
+<style>
+:root{
+  --bg:#070912; --panel:#0B0E1B; --foot:#0A0C16; --ghost:#0E1120;
+  --ink:#F2F5FC; --ink2:#EDF1F9; --nav:#B9C0D0; --btn:#D6DCEA;
+  --body:#9AA3B8; --dim:#8B93A7; --dimmer:#6E7789;
+  --coral:#FF6B6B; --coral2:#FF8C8C; --teal:#4ECDC4; --violet:#A78BFA; --amber:#FFD166;
+  --mark:#1C2440; --line:rgba(255,255,255,.07);
+  --font:"Mona Sans",-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans SC",sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:var(--bg);color:var(--ink);font-family:var(--font);-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%}
+a{color:inherit;text-decoration:none}
+.stage{width:100%;overflow:hidden}
+.page{width:1440px;transform-origin:top left;background:var(--bg)}
+
+/* ── Header ── */
+.header{height:76px;padding:0 96px;display:flex;align-items:center;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:10px}
+.brand-dot{width:9px;height:9px;border-radius:999px;background:var(--coral);box-shadow:0 0 10px rgba(255,107,107,.7)}
+.brand-name{font-size:20px;font-weight:700;color:var(--ink)}
+.brand-sub{font-size:13px;color:var(--dim);letter-spacing:1px}
+.nav{display:flex;align-items:center;gap:26px}
+.nav a{font-size:14.5px;font-weight:500;color:var(--nav);transition:color .18s}
+.nav a:hover{color:#fff}
+.pill{display:inline-flex;align-items:center;gap:7px;padding:7px 13px;border-radius:999px;border:1px solid rgba(78,205,196,.3);background:rgba(78,205,196,.1)}
+.pill .dot{width:6px;height:6px;border-radius:999px;background:var(--teal)}
+.pill span{font-size:12px;font-weight:500;color:var(--teal)}
+.hair{height:1px;background:rgba(255,255,255,.06)}
+
+/* ── Hero ── */
+.hero{height:700px;padding:80px 72px;display:flex;align-items:center;gap:56px}
+.hero-copy{width:520px;display:flex;flex-direction:column;gap:22px}
+.badge{display:inline-flex;align-self:flex-start;padding:7px 14px;border-radius:999px;border:1px solid rgba(255,107,107,.32);background:rgba(255,107,107,.1)}
+.badge span{font-size:12.5px;font-weight:500;color:var(--coral);letter-spacing:2px}
+h1{font-size:56px;line-height:72px;font-weight:700;color:var(--ink);letter-spacing:-.5px}
+.sub{font-size:19px;line-height:34px;color:var(--body)}
+.cta-row{display:flex;align-items:center;gap:14px}
+.btn{display:inline-flex;align-items:center;padding:15px 30px;border-radius:12px;font-size:15.5px;transition:transform .18s}
+.btn:hover{transform:translateY(-1px)}
+.btn-primary{background:linear-gradient(90deg,#FF6B6B,#4ECDC4);color:#08111A;font-weight:700}
+.btn-ghost{background:var(--ghost);border:1px solid rgba(255,255,255,.16);color:var(--btn);font-weight:500}
+.rings-badge{display:inline-flex;align-items:center;align-self:flex-start;gap:16px;padding:14px 18px;border-radius:16px;background:var(--panel);border:1px solid rgba(255,255,255,.08)}
+.rings-badge .txt{display:flex;flex-direction:column;gap:3px}
+.rings-badge .big{font-size:20px;font-weight:700;color:var(--ink)}
+.rings-badge .sm{font-size:12.5px;color:var(--dim)}
+.starfield{position:relative;width:720px;height:540px;flex:none}
+.starfield svg{display:block;width:720px;height:540px}
+.slabel{position:absolute;font-size:12.5px;font-weight:500;white-space:nowrap}
+.slabel.l1{left:250px;top:150px;color:var(--teal)}
+.slabel.l2{left:536px;top:424px;color:#EAF0FF}
+.slabel.l3{left:506px;top:292px;color:#FFD9C8}
+
+/* ── Live ── */
+.live{padding:64px 96px;display:flex;flex-direction:column;gap:30px}
+.live-head{display:flex;align-items:flex-end;justify-content:space-between}
+.live-head h2{font-size:30px;font-weight:700;color:var(--ink);margin-bottom:7px}
+.live-head .hint{font-size:13.5px;color:var(--dim)}
+.grid{display:flex;flex-wrap:wrap;gap:20px}
+.card{width:297px;padding:18px;border-radius:16px;background:var(--panel);border:1px solid var(--line);display:flex;flex-direction:column;gap:12px}
+.tag{align-self:flex-start;padding:5px 11px;border-radius:999px;font-size:11.5px;font-weight:500}
+.tag.teal{background:rgba(78,205,196,.12);color:var(--teal)}
+.tag.violet{background:rgba(167,139,250,.14);color:var(--violet)}
+.tag.coral{background:rgba(255,107,107,.12);color:var(--coral2)}
+.tag.amber{background:rgba(255,209,102,.12);color:var(--amber)}
+.card h3{font-size:17px;line-height:24px;font-weight:700;color:var(--ink2)}
+.card p{font-size:13.5px;line-height:22px;color:var(--body)}
+.card .meta{font-size:11.5px;color:var(--dimmer)}
+.panel{display:flex;align-items:center;gap:40px;padding:30px 34px;border-radius:20px;background:var(--panel);border:1px solid rgba(255,255,255,.08)}
+.panel .txt{flex:1;display:flex;flex-direction:column;gap:10px}
+.panel .txt h3{font-size:20px;font-weight:700;color:var(--ink2)}
+.panel .txt p{font-size:13.5px;line-height:23px;color:var(--body)}
+.stats{display:flex;align-items:center;gap:48px}
+.stat{display:flex;flex-direction:column;gap:4px}
+.stat .n{font-size:34px;font-weight:700;color:var(--ink);letter-spacing:-.5px}
+.stat .l{font-size:12.5px;color:var(--dim)}
+.stat .n.accent{color:var(--teal)}
+
+/* ── Footer ── */
+.footer{padding:46px 96px;background:var(--foot);display:flex;flex-direction:column;gap:24px}
+.foot-hair{height:1px;background:linear-gradient(90deg,rgba(255,107,107,.5),rgba(78,205,196,.5))}
+.foot-top{display:flex;align-items:flex-start;justify-content:space-between}
+.foot-brand{width:460px;display:flex;flex-direction:column;gap:10px}
+.foot-brand .n{font-size:18px;font-weight:700;color:var(--ink2)}
+.foot-brand .t{font-size:13px;line-height:22px;color:var(--dim)}
+.foot-cols{display:flex;gap:64px}
+.foot-col{display:flex;flex-direction:column;gap:9px}
+.foot-col .h{font-size:12px;font-weight:500;color:var(--dimmer);letter-spacing:1px}
+.foot-col a{font-size:13.5px;color:var(--body);transition:color .18s}
+.foot-col a:hover{color:#fff}
+.foot-big{font-size:104px;line-height:112px;font-weight:700;letter-spacing:-2px;color:var(--mark);white-space:nowrap}
+.foot-bottom{display:flex;align-items:center;justify-content:space-between}
+.foot-bottom span{font-size:12px;color:var(--dimmer)}
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+<div class="stage">
+  <div class="page">
+
+    <!-- Header -->
+    <header class="header">
+      <div class="brand">
+        <span class="brand-dot"></span>
+        <span class="brand-name">小待</span>
+        <span class="brand-sub">独一无二的世界</span>
+      </div>
+      <nav class="nav">
+        <a href="#live">此刻</a>
+        <a href="#live">花园</a>
+        <a href="#rings">年轮</a>
+        <a href="#foot">关于</a>
+        <span class="pill"><span class="dot"></span><span>生长中</span></span>
+      </nav>
+    </header>
+    <div class="hair"></div>
+
+    <!-- Hero -->
+    <section class="hero">
+      <div class="hero-copy">
+        <span class="badge"><span>AI 时代 · 不可复刻</span></span>
+        <h1>一个只有我能写入的世界</h1>
+        <p class="sub">它不展示我做过什么——它记录我正在成为谁。别人复刻到的是空壳，留下的是我的年轮。</p>
+        <div class="cta-row">
+          <a class="btn btn-primary" href="#live">走进此刻</a>
+          <a class="btn btn-ghost" href="#live">逛花园 · 168 节点</a>
+        </div>
+        <div class="rings-badge">
+          <svg width="58" height="58" viewBox="0 0 58 58" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="29" cy="29" r="25" stroke="#232842" stroke-width="3"/><circle cx="29" cy="29" r="18" stroke="#FF6B6B" stroke-width="3" stroke-linecap="round" stroke-dasharray="84 30"/><circle cx="29" cy="29" r="11" stroke="#4ECDC4" stroke-width="3" stroke-linecap="round" stroke-dasharray="52 18"/><circle cx="29" cy="29" r="4" fill="#FFF4EA"/></svg>
+          <span class="txt"><span class="big">已生长 43 天</span><span class="sm">自 2026-08-16 · 从未中断</span></span>
+        </div>
+      </div>
+
+      <div class="starfield">
+        <svg viewBox="0 0 720 540" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="hc"><stop offset="0" stop-color="#FFE0CC" stop-opacity=".95"/><stop offset=".3" stop-color="#FF6B6B" stop-opacity=".5"/><stop offset="1" stop-color="#FF6B6B" stop-opacity="0"/></radialGradient><radialGradient id="hg"><stop offset="0" stop-color="#4ECDC4" stop-opacity=".22"/><stop offset="1" stop-color="#4ECDC4" stop-opacity="0"/></radialGradient></defs><rect width="720" height="540" fill="#070912"/><ellipse cx="470" cy="285" rx="252" ry="252" fill="url(#hg)"/><g stroke="#EAF0FF" stroke-linecap="round"><path d="M131 15h0M99 52h0M380 521h0M306 222h0M701 292h0M107 517h0M406 16h0M468 18h0M209 381h0M298 275h0M504 224h0M415 240h0M290 195h0M6 242h0M453 131h0M337 251h0M596 532h0M3 455h0M489 292h0M600 378h0M687 108h0M482 240h0M308 351h0M408 302h0M592 383h0M641 525h0M663 196h0M440 55h0M322 291h0M229 197h0M208 85h0M2 489h0M514 338h0M638 277h0M168 265h0M210 25h0M216 428h0M153 241h0M29 308h0M514 354h0" stroke-width="1.4" stroke-opacity=".5"/><path d="M52 119h0M66 160h0M718 225h0M704 145h0M331 128h0M311 301h0M17 163h0M0 350h0M506 383h0M156 10h0M443 246h0M106 465h0M524 115h0M660 270h0M213 482h0M702 269h0M563 349h0M693 254h0M25 144h0M401 105h0" stroke-width="2.6" stroke-opacity=".85"/><path d="M65 137h0M166 465h0M345 158h0M201 126h0M523 471h0M257 40h0" stroke="#FFF" stroke-width="4.2"/></g><g stroke="#8B93A7" fill="none"><circle cx="470" cy="285" r="80" stroke-opacity=".28"/><circle cx="470" cy="285" r="140" stroke-opacity=".16"/><circle cx="470" cy="285" r="190" stroke-opacity=".1"/><circle cx="470" cy="285" r="228" stroke-opacity=".06"/><ellipse cx="470" cy="285" rx="226" ry="88" stroke-opacity=".12" transform="rotate(-18 470 285)"/></g><circle cx="470" cy="285" r="112" fill="url(#hc)"/><circle cx="470" cy="285" r="8" fill="#FFF4EA"/><circle cx="470" cy="285" r="3" fill="#FF6B6B"/></svg>
+        <span class="slabel l1">项目 · 27</span>
+        <span class="slabel l2">花园 · 168</span>
+        <span class="slabel l3">本体 · 我</span>
+      </div>
+    </section>
+
+    <!-- Live -->
+    <section class="live" id="live">
+      <div class="live-head">
+        <div>
+          <h2>此刻 · Live</h2>
+          <div class="hint">只有我能写入 · 最后更新 23:05</div>
+        </div>
+        <span class="pill"><span class="dot"></span><span>LIVE</span></span>
+      </div>
+
+      <div class="grid">
+        <article class="card">
+          <span class="tag teal">正在学</span>
+          <h3>编译原理 · 语法分析</h3>
+          <p>从 LL(1) 一路啃到 LR(1)，边写解析器边对齐教材。</p>
+          <div class="meta">今天 22:40 更新 · 第 12 次</div>
+        </article>
+        <article class="card">
+          <span class="tag violet">在做</span>
+          <h3>小猫剧场 · 播放器重构</h3>
+          <p>把 HLS 切换逻辑拆成可测试的 state machine，先让它可被验证。</p>
+          <div class="meta">今天 21:12 更新 · 第 31 次</div>
+        </article>
+        <article class="card">
+          <span class="tag coral">在想</span>
+          <h3>「不可复刻」到底是什么</h3>
+          <p>风格会被复刻，年轮不会——所以这个站的核心是时间。</p>
+          <div class="meta">今天 18:03 记录 · 第 5 次</div>
+        </article>
+        <article class="card">
+          <span class="tag amber">新节点</span>
+          <h3>数字花园 · 新增 3 个链接</h3>
+          <p>笔记之间开始互相咬合，不再是一座座孤岛。</p>
+          <div class="meta">今天 15:27 写入 · 第 168 个节点</div>
+        </article>
+      </div>
+
+      <div class="panel" id="rings">
+        <svg width="150" height="150" viewBox="0 0 150 150" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="75" cy="75" r="66" stroke="#1B2138" stroke-width="6"/><circle cx="75" cy="75" r="52" stroke="#232842" stroke-width="6"/><circle cx="75" cy="75" r="38" stroke="#FF6B6B" stroke-width="6" stroke-linecap="round" stroke-dasharray="196 43"/><circle cx="75" cy="75" r="24" stroke="#4ECDC4" stroke-width="6" stroke-linecap="round" stroke-dasharray="118 33"/><circle cx="75" cy="75" r="9" fill="#FFF4EA"/><circle cx="75" cy="75" r="4" fill="#FF6B6B"/></svg>
+        <div class="txt">
+          <h3>年轮 · 我的时间凭证</h3>
+          <p>别人拿到的是空壳，留下的是我的年轮。这些数字每天在涨——这就是复刻不了的那部分。</p>
+        </div>
+        <div class="stats">
+          <div class="stat"><span class="n">43</span><span class="l">生长天数</span></div>
+          <div class="stat"><span class="n">27</span><span class="l">个项目</span></div>
+          <div class="stat"><span class="n">168</span><span class="l">花园节点</span></div>
+          <div class="stat"><span class="n accent">100%</span><span class="l">从未中断</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer" id="foot">
+      <div class="foot-hair"></div>
+      <div class="foot-top">
+        <div class="foot-brand">
+          <span class="n">小待 · 独一无二的世界</span>
+          <span class="t">它不展示我做过什么——它记录我正在成为谁。</span>
+        </div>
+        <div class="foot-cols">
+          <div class="foot-col">
+            <span class="h">探索</span>
+            <a href="#live">此刻</a>
+            <a href="#live">数字花园</a>
+            <a href="#rings">年轮</a>
+          </div>
+          <div class="foot-col">
+            <span class="h">关于</span>
+            <a href="index.html">指挥台</a>
+            <a href="https://github.com/Epic-super" target="_blank" rel="noopener">GitHub</a>
+            <a href="#foot">RSS</a>
+          </div>
+        </div>
+      </div>
+      <div class="foot-big">独一无二的世界</div>
+      <div class="foot-bottom">
+        <span>since 2026-08-16 · 已生长 43 天 · v0.1</span>
+        <span>2026 小待 · 数据只在我自己手里</span>
+      </div>
+    </footer>
+
+  </div>
+</div>
+
+<script>
+(function () {
+  var PAGE_W = 1440;
+  var page = document.querySelector('.page');
+  var stage = document.querySelector('.stage');
+  function fit() {
+    var s = window.innerWidth / PAGE_W;
+    page.style.transform = 'scale(' + s + ')';
+    stage.style.height = (page.offsetHeight * s) + 'px';
+  }
+  window.addEventListener('resize', fit);
+  window.addEventListener('load', fit);
+  fit();
+})();
+</script>
+</body>
+</html>

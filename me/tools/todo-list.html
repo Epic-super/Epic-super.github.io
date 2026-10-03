@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>待办事项列表 - 小待的个人藏宝库</title>
+    <link rel="stylesheet" href="../css/style.css">
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+    <main>
+        <section id="todo-list-tool" class="tool-container">
+            <h2>待办事项列表</h2>
+            <div>
+                <input type="text" id="todo-input" placeholder="添加新的待办事项...">
+                <button id="add-todo-btn">添加</button>
+            </div>
+            <ul id="todo-list">
+                <!-- 待办事项将在这里动态添加 -->
+            </ul>
+        </section>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const todoInput = document.getElementById('todo-input');
+            const addTodoBtn = document.getElementById('add-todo-btn');
+            const todoList = document.getElementById('todo-list');
+
+            // 从localStorage加载待办事项
+            loadTodos();
+
+            addTodoBtn.addEventListener('click', addTodo);
+            todoInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    addTodo();
+                }
+            });
+
+            function addTodo() {
+                const taskText = todoInput.value.trim();
+                if (taskText === '') {
+                    alert('请输入待办事项！');
+                    return;
+                }
+                createTodoItem(taskText, false);
+                todoInput.value = '';
+                saveTodos();
+            }
+
+            function createTodoItem(text, completed) {
+                const li = document.createElement('li');
+                if (completed) {
+                    li.classList.add('completed');
+                }
+
+                const span = document.createElement('span');
+                span.textContent = text;
+
+                const actionsDiv = document.createElement('div');
+                actionsDiv.classList.add('todo-actions');
+
+                const completeBtn = document.createElement('button');
+                completeBtn.textContent = completed ? '撤销' : '完成';
+                completeBtn.classList.add('complete-btn');
+                completeBtn.addEventListener('click', function() {
+                    li.classList.toggle('completed');
+                    completeBtn.textContent = li.classList.contains('completed') ? '撤销' : '完成';
+                    saveTodos();
+                });
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.textContent = '删除';
+                deleteBtn.classList.add('delete-btn');
+                deleteBtn.addEventListener('click', function() {
+                    todoList.removeChild(li);
+                    saveTodos();
+                });
+
+                actionsDiv.appendChild(completeBtn);
+                actionsDiv.appendChild(deleteBtn);
+                li.appendChild(span);
+                li.appendChild(actionsDiv);
+                todoList.appendChild(li);
+            }
+
+            function saveTodos() {
+                const todos = [];
+                todoList.querySelectorAll('li').forEach(li => {
+                    todos.push({
+                        text: li.querySelector('span').textContent,
+                        completed: li.classList.contains('completed')
+                    });
+                });
+                localStorage.setItem('todos', JSON.stringify(todos));
+            }
+
+            function loadTodos() {
+                const storedTodos = localStorage.getItem('todos');
+                if (storedTodos) {
+                    const todos = JSON.parse(storedTodos);
+                    todos.forEach(todo => createTodoItem(todo.text, todo.completed));
+                }
+            }
+        });
+    </script>
+    <script src="../js/script.js"></script>
+    <script src="../js/components.js"></script>
+
+</body>
+</html>

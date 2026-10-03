@@ -1,0 +1,28 @@
+<html><head><meta charset="utf-8"><style>
+body{background:#0e1116;color:#d7dde5;font-family:system-ui,'Microsoft YaHei',sans-serif;margin:32px}
+h1{font-size:18px} .box{background:#161b22;border:1px solid #2a313c;border-radius:8px;padding:16px;margin:12px 0}
+.k{color:#7fd1ff} code{color:#9fe6a0} .warn{color:#ff9a9a} .ok{color:#9fe6a0}
+.tag{display:inline-block;padding:2px 10px;border-radius:12px;font-size:13px}
+.tail{background:#3a2a00;color:#ffd479} .mid{background:#3a1414;color:#ff9a9a}
+table{border-collapse:collapse;width:100%;font-size:13px} th,td{border:1px solid #2a313c;padding:6px 10px;text-align:left} th{background:#1b2230}
+</style><script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head><body>
+<h1>报价物料信息 · A(模版填充) vs B(7.21源) 真实差异</h1>
+<div class="box">
+<p><b class="warn">结论：A 不是 B 的截断副本，而是残缺且错位的填充结果。</b></p>
+<table>
+<tr><th>指标</th><th>A 模版填充_xlwings</th><th>B RFQ 7.21 源</th><th>说明</th></tr>
+<tr><td>Part # 列(col1)非空</td><td class="warn">2</td><td class="ok">332</td><td>A 零件号整列几乎为空</td></tr>
+<tr><td>col2 非空</td><td class="warn">1</td><td class="ok">498</td><td>同上</td></tr>
+<tr><td>数值数据行(col5-13)</td><td>463</td><td>731</td><td>B 多 268 行</td></tr>
+<tr><td>行内容分布</td><td colspan="2"><span class="tag mid">散落缺失</span></td><td>最佳连续对齐 s=268，不匹配 192/463</td></tr>
+<tr><td>A 数值行 ⊂ B?</td><td colspan="2">是（463/463 全在 B 中）</td><td>散落缺失，非尾部截断</td></tr>
+</table></div>
+<div class="box">
+<h3>对"用哪个当模板"的判断</h3>
+<ul>
+<li><b class="warn">不要拿 A 当母本</b>：零件号整列缺失 + 731 个物料只填进 463 个且位置散乱，数据不可信。</li>
+<li><b class="ok">以 B(7.21) 为源</b>：含完整零件号与全部 731 行物料，是唯一完整数据。</li>
+<li>你的 xlwings 填充脚本需排查两点：① 零件号列(Part #)为何没写进 A；② 为何只填了 463/731 行且错位。</li>
+</ul></div>
+<p style="color:#6b7686">生成于 11:20:17 · 工具：xlwings(Excel COM) · 仅比对 报价物料信息 单表</p>
+</body></html>

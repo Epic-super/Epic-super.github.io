@@ -1,0 +1,32 @@
+===== 月读 智能体 total 0
+===== 月读 AI total 1
+- dlsy-0/JianAi_Student_Assistant | stars 0 | 本项目是一个面向学习场景的轻量“学生助手”原型，提供对话式问答（Chat）、资料检索增强生成（RAG / 检索增强生成）与学习记录查询/写入等能力：通过向量库检索知识片段并交给大模型总结，同时支持按用户、年月读取外部学习记录并追加保存。技术栈采用 Python + LangChain（Agent/ReAct 工具调用链）+ Chroma 向量数据库，Embedding/Chat 使用通义（Dash
+===== 月读 虚拟主播 total 0
+===== 月读 Live2D total 0
+===== 月读 助手 total 1
+- dlsy-0/JianAi_Student_Assistant | stars 0 | 本项目是一个面向学习场景的轻量“学生助手”原型，提供对话式问答（Chat）、资料检索增强生成（RAG / 检索增强生成）与学习记录查询/写入等能力：通过向量库检索知识片段并交给大模型总结，同时支持按用户、年月读取外部学习记录并追加保存。技术栈采用 Python + LangChain（Agent/ReAct 工具调用链）+ Chroma 向量数据库，Embedding/Chat 使用通义（Dash
+===== 月读 桌面 total 2
+- vsh5dvsch7-png/yuedu | stars 13 | 月读 - 安静、轻巧的 Windows 桌面小说阅读器：透明桌面模式、老板键、txt/epub、章节定位、自定义书源
+- wishersZ/reader | stars 0 | 月读：轻巧的 Windows 桌面阅读器（GPL-3.0 开源核心）
+===== 月读 客户端 total 0
+===== Tsukuyomi AI total 11
+- savannah-i-g/TSUKUYOMI | stars 95 | ##Note: this is really old now, and the janky pseudo methods are probably only working out of sheer coincidence. This was an early experiment in how jargon & combinations of artificial weights in pseu
+- shirowanisan/tsukuyomichan-talksoft | stars 41 | AI Talksoft of Tsukuyomichan
+- rozx/Tsukuyomi | stars 31 | Tsukuyomi（月詠）是一款专注日文轻小说 → 中文的 AI 翻译工具。 基于现代 Web 技术构建，提供流畅、可本地运行的阅读与翻译体验。 A moonlit, lightweight translator designed for clarity and elegance.
+- redchenk/tsukuyomi-space-app | stars 4 | Standalone Tsukuyomi Room AI Agent app for desktop and mobile
+- Abhinay0097/-Tsukuyomi-AI-companion-app | stars 1 | 
+- kaki-shu/Tsukuyomi | stars 0 | An iOS 27 beta-ready multilingual RSS and newsletter reader powered by user-owned AI APIs.
+- RichardClawson013/Tsukuyomi | stars 0 | Safety layer for AI agents — intercepts every action before it touches reality
+- yukiharada1228/tsukuyomichan-llm-ft | stars 0 | つくよみちゃん会話AI育成計画の公式データを使用してファインチューニングしたプロジェクト
+- meowtwit/TetrisAI-Tsukuyomi-controller-part | stars 0 | Please someone help me debugging.
+- w2kr1stn/mugen_tsukuyomi | stars 0 | An AI-based microservice which communicates via  REST API and whose purpose is to visualize a possible correlation between published news articles and party programs of established parties, as well as
+===== Tsukuyomi 助手 total 0
+===== 月读chat total 7
+- cirosantilli/china-dictatorship | stars 3211 | 反中共政治宣传库。Anti Chinese government propaganda. 住在中国真名用户的网友请别给星星，不然你要被警察请喝茶。常见问答集，新闻集和饭店和音乐建议。卐习万岁卐。冠状病毒审查郝海东新疆改造中心六四事件法轮功 996.ICU709大抓捕巴拿马文件邓家贵低端人口西藏骚乱。Friends who live in China and have real name on ac
+- gege-circle/.github | stars 2009 | 这里是GitHub的草场，也是戈戈圈爱好者的交流地，主要讨论动漫、游戏、科技、人文、生活等所有话题，欢迎各位小伙伴们在此讨论趣事。This is GitHub grassland, and the community place for Gege circle lovers, mainly discusses anime, games, technology, lifing and other t
+- cirosantilli/china-dictatroship-7 | stars 362 | 反中共政治宣传库。Anti Chinese government propaganda. https://github.com/cirosantilli/china-dictatorship 的备份backup. 住在中国真名用户的网友请别给星星，不然你要被警察请喝茶。常见问答集，新闻集和饭店和音乐建议。卐习万岁卐。冠状病毒审查郝海东新疆改造中心六四事件法轮功 996.ICU709大抓捕巴拿马文件
+- mRFWq7LwNPZjaVv5v6eo/cihna-dictattorshrip-8 | stars 206 | 反中共政治宣传库。Anti Chinese government propaganda. https://github.com/cirosantilli/china-dictatorship 的备份backup. 住在中国真名用户的网友请别给星星，不然你要被警察请喝茶。常见问答集，新闻集和饭店和音乐建议。卐习万岁卐。冠状病毒审查郝海东新疆改造中心六四事件法轮功 996.ICU709大抓捕巴拿马文件
+- panbinibn/OpenPacketFix_ | stars 196 | 大陆修宪香港恶法台湾武统朝鲜毁约美中冷战等都是王沪宁愚弄习思想极左命运共同体的大策划中共窃国这半个多世纪所犯下的滔天罪恶，前期是毛泽东策划的，中期6.4前后是邓小平策划的，黄牛数据分析后期是毛的极左追随者三朝罪恶元凶王沪宁策划的。王沪宁高小肆业因文革政治和情报需要保送“学院外语班“红色仕途翻身，所以王的本质是极左的。他是在上海底层弄堂长大的，因其本性也促成其瘪三下三滥个性，所以也都说他有易主“变色
+- zpc1314521/PCL2 | stars 123 | [stays mad] 反PCL宣传库。Anti PCL propaganda. 大陆修宪香港恶法台湾武统朝鲜毁约美中冷战等都是王沪宁愚弄习思想极左命运共同体的大策划中共窃国这半个多世纪所犯下的滔天罪恶，前期是毛泽东策划的，中期6.4前后是邓小平策划的，黄牛数据分析后期是毛的极左追随者三朝罪恶元凶王沪宁策划的。王沪宁高小肆业因文革政治和情报需要保送“学院外语班“红色仕途翻身，所以王的本质是极左的。
+- dlsy-0/JianAi_Student_Assistant | stars 0 | 本项目是一个面向学习场景的轻量“学生助手”原型，提供对话式问答（Chat）、资料检索增强生成（RAG / 检索增强生成）与学习记录查询/写入等能力：通过向量库检索知识片段并交给大模型总结，同时支持按用户、年月读取外部学习记录并追加保存。技术栈采用 Python + LangChain（Agent/ReAct 工具调用链）+ Chroma 向量数据库，Embedding/Chat 使用通义（Dash
+ERR 月读 tsukuyomi HTTP Error 403: rate limit exceeded

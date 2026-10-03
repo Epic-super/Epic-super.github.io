@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>画廊 · Gallery</title>
+<style>
+  :root {
+    --r-sm: 8px; --r-md: 12px; --r-lg: 20px;
+    --accent: #ff9500;
+    --purple: #af52de;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,.18);
+    --shadow-md: 0 6px 20px rgba(0,0,0,.22);
+    --shadow-lg: 0 16px 48px rgba(0,0,0,.32);
+    --font: "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  }
+  [data-theme="dark"] {
+    --bg: #0e0f12; --bg-2: #16181d; --bg-3: #1d2026;
+    --text: #f2f3f5; --text-2: #a7adb8; --text-3: #6c727d;
+    --border: #2a2e36; --border-2: #353a44;
+    --card: #171a20; --hover: #1f232b; --chip: #23272f;
+  }
+  [data-theme="light"] {
+    --bg: #f5f5f7; --bg-2: #ffffff; --bg-3: #eef0f3;
+    --text: #1d1d1f; --text-2: #51555c; --text-3: #868b94;
+    --border: #e2e4e8; --border-2: #d2d5db;
+    --card: #ffffff; --hover: #f0f1f4; --chip: #eceef2;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    background: var(--bg); color: var(--text); font-family: var(--font);
+    -webkit-font-smoothing: antialiased; overflow: hidden;
+  }
+  button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+  input, textarea { font-family: inherit; color: inherit; }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 10px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+
+  /* ---------- Layout ---------- */
+  .app { display: flex; flex-direction: column; height: 100%; }
+  header {
+    display: flex; align-items: center; gap: 14px; padding: 14px 22px;
+    border-bottom: 1px solid var(--border); background: var(--bg-2); flex-shrink: 0;
+  }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 18px; letter-spacing: .2px; }
+  .brand .dot { width: 11px; height: 11px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 12px var(--accent); }
+  .brand small { color: var(--text-3); font-weight: 500; font-size: 12px; }
+
+  .search { position: relative; flex: 1; max-width: 360px; }
+  .search input {
+    width: 100%; padding: 9px 14px 9px 34px; border-radius: 999px;
+    background: var(--bg-3); border: 1px solid var(--border); outline: none; font-size: 13.5px;
+  }
+  .search input:focus { border-color: var(--accent); }
+  .search svg { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); opacity: .5; }
+
+  .toolbar { display: flex; align-items: center; gap: 8px; margin-left: auto; flex-wrap: wrap; justify-content: flex-end; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px; padding: 8px 13px;
+    border-radius: 999px; background: var(--chip); font-size: 13px; font-weight: 600;
+    border: 1px solid var(--border); transition: .15s;
+  }
+  .btn:hover { background: var(--hover); }
+  .btn.primary { background: var(--accent); color: #1a1205; border-color: transparent; }
+  .btn.primary:hover { filter: brightness(1.06); }
+  .btn.active-on { background: var(--purple); color: #fff; border-color: transparent; }
+  select.sort {
+    padding: 8px 12px; border-radius: 999px; background: var(--chip);
+    border: 1px solid var(--border); font-size: 13px; font-weight: 600; outline: none;
+  }
+  .icon-btn {
+    width: 36px; height: 36px; display: grid; place-items: center; border-radius: 50%;
+    background: var(--chip); border: 1px solid var(--border); transition: .15s;
+  }
+  .icon-btn:hover { background: var(--hover); }
+
+  /* ---------- Banner ---------- */
+  .banner {
+    display: none; padding: 10px 22px; font-size: 12.5px; background: #3a2a08; color: #ffd58a;
+    border-bottom: 1px solid #5a430f;
+  }
+  .banner.show { display: block; }
+
+  /* ---------- Main ---------- */
+  main { flex: 1; display: flex; min-height: 0; }
+  .wall-wrap { flex: 1; overflow-y: auto; padding: 20px 22px 60px; }
+  .colbar { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+  .colchip {
+    padding: 5px 12px; border-radius: 999px; font-size: 12px; font-weight: 600;
+    background: var(--chip); color: var(--text-2); border: 1px solid var(--border); transition: .15s;
+  }
+  .colchip:hover { color: var(--text); }
+  .colchip.active { background: var(--purple); color: #fff; border-color: transparent; }
+  .colchip .cnt { opacity: .65; margin-left: 4px; font-weight: 400; }
+  .tagbar { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+  .tagchip {
+    padding: 5px 12px; border-radius: 999px; font-size: 12.5px; font-weight: 600;
+    background: var(--chip); color: var(--text-2); border: 1px solid var(--border); transition: .15s;
+  }
+  .tagchip:hover { color: var(--text); }
+  .tagchip.active { background: var(--accent); color: #1a1205; border-color: transparent; }
+
+  .wall { column-count: 4; column-gap: 16px; }
+  @media (max-width: 1400px) { .wall { column-count: 3; } }
+  @media (max-width: 1000px) { .wall { column-count: 2; } }
+  @media (max-width: 640px)  { .wall { column-count: 1; } }
+
+  .card {
+    break-inside: avoid; margin-bottom: 16px; background: var(--card);
+    border: 1px solid var(--border); border-radius: var(--r-md); overflow: hidden;
+    cursor: pointer; transition: transform .18s, box-shadow .18s, border-color .18s;
+    position: relative;
+  }
+  .card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: var(--border-2); }
+  .card .colbadge {
+    position: absolute; top: 9px; left: 9px; z-index: 2; font-size: 11px; font-weight: 600;
+    padding: 2px 9px; border-radius: 999px; background: rgba(0,0,0,.55); color: #fff; backdrop-filter: blur(3px);
+  }
+  .card img { width: 100%; display: block; background: var(--bg-3); }
+  .card .meta { padding: 11px 13px 13px; }
+  .card .title { font-weight: 700; font-size: 14px; line-height: 1.35; margin-bottom: 7px;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .card .ctags { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 8px; }
+  .card .ctag { font-size: 11px; color: var(--text-2); background: var(--bg-3); padding: 2px 7px; border-radius: 999px; }
+  .card .cfoot { display: flex; align-items: center; justify-content: space-between; }
+  .stars { display: inline-flex; gap: 1px; }
+  .stars svg { width: 13px; height: 13px; }
+  .card .date { font-size: 11px; color: var(--text-3); }
+
+  .empty { text-align: center; padding: 80px 20px; color: var(--text-3); }
+  .empty .big {
+    width: 88px; height: 88px; margin: 0 auto 18px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, #ff9500 0%, #ff5e3a 50%, #af52de 100%);
+    box-shadow: 0 8px 24px rgba(255,149,0,.22);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .empty h3 { color: var(--text-2); font-weight: 600; margin-bottom: 6px; }
+  .empty p { font-size: 13.5px; }
+  kbd {
+    display: inline-block; padding: 1px 6px; margin: 0 1px;
+    border: 1px solid var(--border); border-bottom-width: 2px; border-radius: 5px;
+    background: var(--bg-2);
+    font: 600 12px/1.4 ui-monospace, Menlo, Consolas, monospace;
+    color: var(--text-2);
+  }
+
+  /* ---------- Grid (nine-grid) view ---------- */
+  .wall.grid { column-count: auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  @media (max-width: 1000px) { .wall.grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 640px)  { .wall.grid { grid-template-columns: repeat(1, 1fr); } }
+  .grid .card { margin-bottom: 0; }
+  .grid .card .thumb { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; display: block; }
+  .grid .card .overlay {
+    position: absolute; left: 0; right: 0; bottom: 0; padding: 26px 14px 12px;
+    background: linear-gradient(transparent, rgba(0,0,0,.74)); color: #fff; pointer-events: none;
+  }
+  .grid .card .overlay .title { color: #fff; -webkit-line-clamp: 1; margin-bottom: 5px; }
+  .grid .card .overlay .stars svg { width: 12px; height: 12px; }
+  .grid .card .meta, .grid .card .colbadge { display: none; }
+
+  /* ---------- Chronological (编年册) view ---------- */
+  .wall.chron { column-count: auto; display: block; }
+  .chrono-group { margin-bottom: 30px; }
+  .chrono-head { display: flex; align-items: center; gap: 10px; margin: 4px 0 14px; padding-bottom: 9px; border-bottom: 1px solid var(--border); }
+  .ch-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 10px var(--accent); flex: none; }
+  .ch-label { font-weight: 800; font-size: 16px; letter-spacing: .3px; }
+  .ch-count { font-size: 12px; color: var(--text-3); }
+  .chrono-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  @media (max-width: 1400px) { .chrono-grid { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 1000px) { .chrono-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 640px)  { .chrono-grid { grid-template-columns: 1fr; } }
+  .chrono-grid .card { margin-bottom: 0; }
+
+  /* ---------- Drop overlay ---------- */
+  .drop-overlay {
+    position: fixed; inset: 0; background: rgba(255,149,0,.10); backdrop-filter: blur(2px);
+    display: none; align-items: center; justify-content: center; z-index: 50; pointer-events: none;
+  }
+  .drop-overlay.show { display: flex; }
+  .drop-overlay .box {
+    border: 2px dashed var(--accent); border-radius: var(--r-lg); padding: 50px 80px;
+    text-align: center; color: var(--accent); font-weight: 700; font-size: 18px; background: var(--bg-2);
+  }
+
+  /* ---------- Detail panel ---------- */
+  .panel {
+    width: 348px; flex-shrink: 0; background: var(--bg-2); border-left: 1px solid var(--border);
+    transform: translateX(100%); transition: transform .26s cubic-bezier(.4,0,.2,1);
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+  .panel.open { transform: translateX(0); }
+  .panel .phead { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid var(--border); }
+  .panel .phead span { font-weight: 700; font-size: 14px; }
+  .panel .pbody { overflow-y: auto; padding: 16px; flex: 1; }
+  .panel .pimg { width: 100%; border-radius: var(--r-md); border: 1px solid var(--border); background: var(--bg-3); margin-bottom: 16px; }
+  .field { margin-bottom: 15px; }
+  .field label { display: block; font-size: 12px; color: var(--text-3); font-weight: 600; margin-bottom: 6px; text-transform: uppercase; letter-spacing: .4px; }
+  .field input, .field textarea {
+    width: 100%; padding: 9px 11px; border-radius: var(--r-sm); background: var(--bg-3);
+    border: 1px solid var(--border); outline: none; font-size: 13.5px; resize: vertical;
+  }
+  .field input:focus, .field textarea:focus { border-color: var(--accent); }
+  .field textarea { min-height: 84px; line-height: 1.5; }
+  .field .hint-sm { font-size: 11px; color: var(--text-3); margin-top: 4px; }
+  .rating-pick { display: inline-flex; gap: 4px; }
+  .rating-pick svg { width: 30px; height: 30px; cursor: pointer; transition: transform .12s; }
+  .rating-pick svg:hover { transform: scale(1.18); }
+  .pfoot { padding: 14px 16px; border-top: 1px solid var(--border); display: flex; gap: 10px; }
+  .pfoot .btn { flex: 1; justify-content: center; }
+  .pfoot .danger { background: transparent; color: #ff5a5a; border: 1px solid #5a2626; }
+  .pfoot .danger:hover { background: #2a1414; }
+  .hint { font-size: 11.5px; color: var(--text-3); text-align: center; padding: 8px 0 0; }
+
+  /* ---------- Lightbox ---------- */
+  .lightbox {
+    position: fixed; inset: 0; z-index: 80; display: none;
+    background: rgba(0,0,0,.92); align-items: center; justify-content: center; padding: 40px;
+  }
+  .lightbox.show { display: flex; }
+  .lightbox img { max-width: 90vw; max-height: 80vh; border-radius: var(--r-md); box-shadow: var(--shadow-lg); }
+  .lightbox .lb-meta { position: absolute; bottom: 26px; left: 50%; transform: translateX(-50%); text-align: center; color: #fff; max-width: 90vw; }
+  .lightbox .lb-meta .lt { font-weight: 700; font-size: 16px; margin-bottom: 6px; }
+  .lightbox .lb-meta .ln { font-size: 13px; color: #cfd2d8; max-width: 70ch; margin: 8px auto 0; line-height: 1.5; }
+  .lightbox .lb-meta .stars { justify-content: center; margin-top: 8px; }
+  .lightbox .lb-meta .stars svg { width: 15px; height: 15px; }
+  .lb-close, .lb-nav {
+    position: fixed; z-index: 81; color: #fff; background: rgba(255,255,255,.12);
+    border: 1px solid rgba(255,255,255,.2); border-radius: 50%; display: grid; place-items: center;
+    transition: .15s; backdrop-filter: blur(4px);
+  }
+  .lb-close { width: 42px; height: 42px; top: 22px; right: 22px; font-size: 18px; }
+  .lb-nav { width: 50px; height: 50px; top: 50%; transform: translateY(-50%); font-size: 28px; }
+  .lb-prev { left: 22px; } .lb-next { right: 22px; }
+  .lb-close:hover, .lb-nav:hover { background: rgba(255,255,255,.26); }
+
+  /* ---------- Pure / slideshow ---------- */
+  body.pure header, body.pure .banner, body.pure .panel,
+  body.pure .tagbar, body.pure .colbar { display: none !important; }
+  body.pure .wall-wrap { padding: 14px; }
+  body.pure .wall { column-gap: 14px; }
+  body.pure .card { margin-bottom: 14px; }
+
+  .slideshow {
+    position: fixed; inset: 0; z-index: 90; display: none;
+    background: #000; align-items: center; justify-content: center; overflow: hidden;
+  }
+  .slideshow.show { display: flex; }
+  .slideshow img {
+    max-width: 92vw; max-height: 82vh; border-radius: 10px; box-shadow: 0 20px 60px rgba(0,0,0,.6);
+    opacity: 0; transition: opacity .8s ease;
+  }
+  .slideshow img.shown { opacity: 1; }
+  .ss-meta { position: absolute; bottom: 30px; left: 0; right: 0; text-align: center; color: #fff; padding: 0 30px; pointer-events: none; }
+  .ss-meta .st { font-weight: 700; font-size: 18px; margin-bottom: 6px; text-shadow: 0 2px 8px rgba(0,0,0,.6); }
+  .ss-meta .sc { font-size: 12px; color: #cfd2d8; margin: 2px 0; }
+  .ss-meta .sn { font-size: 13px; color: #dfe2e8; max-width: 70ch; margin: 6px auto 0; line-height: 1.5; }
+  .ss-meta .stars { justify-content: center; margin-top: 8px; display: inline-flex; gap: 1px; }
+  .ss-meta .stars svg { width: 15px; height: 15px; }
+  .ss-ctrl { position: fixed; z-index: 91; bottom: 22px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; align-items: center; }
+  .ss-btn { width: 46px; height: 46px; border-radius: 50%; background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.22); color: #fff; display: grid; place-items: center; font-size: 20px; backdrop-filter: blur(4px); transition: .15s; }
+  .ss-btn:hover { background: rgba(255,255,255,.28); }
+  .ss-btn.text { width: auto; padding: 0 16px; border-radius: 23px; font-size: 13px; font-weight: 600; }
+  .ss-btn.active { background: var(--accent); color: #1a1205; border-color: transparent; }
+  .ss-dots { position: fixed; z-index: 91; top: 22px; left: 50%; transform: translateX(-50%); display: flex; gap: 7px; max-width: 90vw; overflow: hidden; flex-wrap: wrap; justify-content: center; }
+  .ss-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,.35); transition: .2s; flex: 0 0 auto; cursor: pointer; }
+  .ss-dot.active { background: var(--accent); width: 20px; border-radius: 4px; }
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+<div class="app">
+  <header>
+    <div class="brand"><span class="dot"></span>画廊 <small>Gallery</small></div>
+    <div class="search">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+      <input id="search" type="text" placeholder="搜索标题、说明、标签…" autocomplete="off">
+    </div>
+    <div class="toolbar">
+      <select class="sort" id="sort">
+        <option value="new">最新</option>
+        <option value="old">最早</option>
+        <option value="rate">评分高→低</option>
+        <option value="rate-asc">评分低→高</option>
+      </select>
+      <button class="btn" id="viewBtn">九宫格</button>
+      <button class="btn" id="pureBtn">纯享</button>
+      <button class="btn" id="slideBtn">▶ 放映</button>
+      <button class="icon-btn" id="themeBtn" title="切换主题"></button>
+      <button class="btn" id="importBtn">导入</button>
+      <button class="btn" id="exportBtn">导出</button>
+      <button class="btn primary" id="addBtn">+ 添加图片</button>
+      <input type="file" id="fileInput" accept="image/*" multiple hidden>
+    </div>
+  </header>
+
+  <div class="banner" id="banner"></div>
+
+  <main>
+    <div class="wall-wrap">
+      <div class="colbar" id="colbar"></div>
+      <div class="tagbar" id="tagbar"></div>
+      <div class="wall" id="wall"></div>
+      <div class="empty" id="empty" style="display:none">
+        <div class="big">
+          <svg viewBox="0 0 64 64" width="58" height="58" fill="none" stroke="white" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="5" y="11" width="54" height="42" rx="5" fill="rgba(255,255,255,.16)"/>
+            <circle cx="22" cy="25" r="3.6" fill="white" stroke="none"/>
+            <path d="M9 47 L22 34 L33 44 L43 36 L55 47 L55 49 L9 49 Z" fill="rgba(255,255,255,.55)" stroke="white"/>
+          </svg>
+        </div>
+        <h3>画廊还是空的</h3>
+        <p>把图片拖进来、粘贴（<kbd>Ctrl</kbd> + <kbd>V</kbd>，Mac 用 <kbd>Cmd</kbd> + <kbd>V</kbd>），或点右上角「+ 添加图片」。</p>
+      </div>
+    </div>
+
+    <aside class="panel" id="panel">
+      <div class="phead"><span>详情</span><button class="icon-btn" id="closePanel" title="关闭">✕</button></div>
+      <div class="pbody">
+        <img class="pimg" id="pImg" alt="">
+        <div class="field">
+          <label>标题</label>
+          <input id="pTitle" placeholder="给这张图起个名">
+        </div>
+        <div class="field">
+          <label>标签（逗号分隔）</label>
+          <input id="pTags" placeholder="插画, 旅行, 灵感">
+          <div class="ctags" id="pTagPreview" style="margin-top:8px"></div>
+        </div>
+        <div class="field">
+          <label>合集（归入一个相册，留空为未分组）</label>
+          <input id="pCol" placeholder="旅行, 插画…（单值）">
+          <div class="hint-sm">同一张图只属于一个合集，方便按相册浏览。</div>
+        </div>
+        <div class="field">
+          <label>评分</label>
+          <div class="rating-pick" id="pRating"></div>
+        </div>
+        <div class="field">
+          <label>说明 / 备注</label>
+          <textarea id="pNote" placeholder="写点什么…"></textarea>
+        </div>
+        <div class="hint" id="pDate"></div>
+      </div>
+      <div class="pfoot">
+        <button class="btn danger" id="delBtn">删除</button>
+        <button class="btn primary" id="saveBtn">保存</button>
+      </div>
+    </aside>
+  </main>
+</div>
+
+<div class="lightbox" id="lightbox">
+  <button class="lb-close" id="lbClose">✕</button>
+  <button class="lb-nav lb-prev" id="lbPrev">‹</button>
+  <img id="lbImg" alt="">
+  <div class="lb-meta" id="lbMeta"></div>
+  <button class="lb-nav lb-next" id="lbNext">›</button>
+</div>
+
+<div class="slideshow" id="slideshow">
+  <img id="ssImg" alt="">
+  <div class="ss-dots" id="ssDots"></div>
+  <div class="ss-meta" id="ssMeta"></div>
+  <div class="ss-ctrl">
+    <button class="ss-btn" id="ssPrev">‹</button>
+    <button class="ss-btn text" id="ssPlay">暂停</button>
+    <button class="ss-btn" id="ssNext">›</button>
+    <button class="ss-btn text" id="ssBgm">♪ 关</button>
+    <button class="ss-btn" id="ssClose">✕</button>
+  </div>
+</div>
+
+<div class="drop-overlay" id="dropOverlay"><div class="box">松开即可贴上 →</div></div>
+
+<script>
+"use strict";
+const DB_NAME = "artgallery", STORE = "items", LS_KEY = "artgallery_ls";
+const $ = (s) => document.querySelector(s);
+let db = null, mode = "idb";
+let items = [], activeTag = "全部", activeCol = "全部", currentId = null, currentRating = 0;
+let viewMode = localStorage.getItem("ag-view") || "wall";
+let currentList = [];
+let slideIndex = -1, slideTimer = null, slidePlaying = false;
+let bgmCtx = null, bgmOn = false;
+
+/* ---------- Storage ---------- */
+function openDB() {
+  return new Promise((res, rej) => {
+    let req;
+    try { req = indexedDB.open(DB_NAME, 1); }
+    catch (e) { rej(e); return; }
+    req.onupgradeneeded = (e) => {
+      const d = e.target.result;
+      if (!d.objectStoreNames.contains(STORE)) d.createObjectStore(STORE, { keyPath: "id" });
+    };
+    req.onsuccess = (e) => { db = e.target.result; res(db); };
+    req.onerror = (e) => rej(e.target.error);
+  });
+}
+const Storage = {
+  async init() {
+    try { await openDB(); mode = "idb"; }
+    catch (e) { mode = "ls"; showBanner("当前以浏览器本地（localStorage）模式运行，容量有限；建议通过本地服务器打开以使用 IndexedDB 完整存储。"); }
+  },
+  async getAll() {
+    if (mode === "idb") {
+      return new Promise((res, rej) => {
+        const tx = db.transaction(STORE, "readonly"), r = tx.objectStore(STORE).getAll();
+        r.onsuccess = () => res(r.result || []);
+        r.onerror = () => rej(r.error);
+      });
+    }
+    try { return JSON.parse(localStorage.getItem(LS_KEY) || "[]"); } catch { return []; }
+  },
+  async put(item) {
+    if (mode === "idb") {
+      return new Promise((res, rej) => {
+        const tx = db.transaction(STORE, "readwrite"), r = tx.objectStore(STORE).put(item);
+        r.onsuccess = res; r.onerror = () => rej(r.error);
+      });
+    }
+    const all = await this.getAll();
+    const i = all.findIndex(x => x.id === item.id);
+    if (i >= 0) all[i] = item; else all.push(item);
+    localStorage.setItem(LS_KEY, JSON.stringify(all));
+  },
+  async del(id) {
+    if (mode === "idb") {
+      return new Promise((res, rej) => {
+        const tx = db.transaction(STORE, "readwrite"), r = tx.objectStore(STORE).delete(id);
+        r.onsuccess = res; r.onerror = () => rej(r.error);
+      });
+    }
+    const all = (await this.getAll()).filter(x => x.id !== id);
+    localStorage.setItem(LS_KEY, JSON.stringify(all));
+  }
+};
+
+/* ---------- Utils ---------- */
+function uuid() { return (crypto.randomUUID ? crypto.randomUUID() : "id-" + Date.now() + "-" + Math.random().toString(16).slice(2)); }
+function fmtDate(iso) {
+  const d = new Date(iso);
+  return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0") + " " + String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
+}
+function starSVG(filled) {
+  const c = filled ? "var(--accent)" : "var(--border-2)";
+  return `<svg viewBox="0 0 24 24" fill="${c}"><path d="M12 2l2.95 6.18 6.8.74-5.07 4.6 1.4 6.68L12 17.3l-6.08 3.9 1.4-6.68L2.25 8.92l6.8-.74z"/></svg>`;
+}
+function ratingHTML(r) { let s = ""; for (let i = 1; i <= 5; i++) s += starSVG(i <= r); return s; }
+function esc(s) { return String(s).replace(/[&<>"]/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[m])); }
+function showBanner(msg) { const b = $("#banner"); b.textContent = msg; b.classList.add("show"); }
+
+/* ---------- Tag colors ---------- */
+const TAG_HUES = {};
+function tagHue(tag) {
+  if (!(tag in TAG_HUES)) {
+    let h = 0; for (const ch of tag) h = (h * 31 + ch.charCodeAt(0)) % 360;
+    TAG_HUES[tag] = h;
+  }
+  return TAG_HUES[tag];
+}
+function tagStyle(tag) {
+  const h = tagHue(tag);
+  const dark = document.documentElement.getAttribute("data-theme") === "dark";
+  const bg = dark ? `hsla(${h},70%,55%,.20)` : `hsla(${h},75%,45%,.14)`;
+  const fg = dark ? `hsl(${h},80%,74%)` : `hsl(${h},78%,36%)`;
+  const bd = dark ? `hsla(${h},70%,55%,.45)` : `hsla(${h},75%,45%,.35)`;
+  return `background:${bg};color:${fg};border-color:${bd}`;
+}
+
+/* ---------- Render ---------- */
+function allTags() {
+  const set = new Set();
+  items.forEach(it => (it.tags || []).forEach(t => set.add(t)));
+  return ["全部", ...[...set].sort()];
+}
+function allCols() {
+  const set = new Set();
+  items.forEach(it => set.add(it.collection || ""));
+  return ["全部", ...[...set].filter(Boolean).sort()];
+}
+function renderTags() {
+  const bar = $("#tagbar"); bar.innerHTML = "";
+  allTags().forEach(t => {
+    const c = document.createElement("button");
+    c.className = "tagchip" + (t === activeTag ? " active" : "");
+    c.textContent = t + (t === "全部" ? " (" + items.length + ")" : "");
+    if (t !== "全部" && t !== activeTag) c.style.cssText = tagStyle(t);
+    c.onclick = () => { activeTag = t; renderTags(); renderWall(); };
+    bar.appendChild(c);
+  });
+}
+function renderCols() {
+  const bar = $("#colbar"); bar.innerHTML = "";
+  allCols().forEach(c => {
+    const cnt = c === "全部" ? items.length : items.filter(it => (it.collection || "") === c).length;
+    const b = document.createElement("button");
+    b.className = "colchip" + (c === activeCol ? " active" : "");
+    b.innerHTML = (c === "全部" ? "全部" : esc(c)) + ` <span class="cnt">${cnt}</span>`;
+    b.onclick = () => { activeCol = c; renderCols(); renderWall(); };
+    bar.appendChild(b);
+  });
+}
+function filtered() {
+  const q = $("#search").value.trim().toLowerCase();
+  let list = items.slice();
+  if (activeTag !== "全部") list = list.filter(it => (it.tags || []).includes(activeTag));
+  if (activeCol !== "全部") list = list.filter(it => (it.collection || "") === activeCol);
+  if (q) list = list.filter(it =>
+    (it.title || "").toLowerCase().includes(q) ||
+    (it.note || "").toLowerCase().includes(q) ||
+    (it.tags || []).some(t => t.toLowerCase().includes(q)) ||
+    (it.collection || "").toLowerCase().includes(q));
+  const s = $("#sort").value;
+  list.sort((a, b) => {
+    if (s === "new") return b.created.localeCompare(a.created);
+    if (s === "old") return a.created.localeCompare(b.created);
+    if (s === "rate") return (b.rating || 0) - (a.rating || 0);
+    if (s === "rate-asc") return (a.rating || 0) - (b.rating || 0);
+    return 0;
+  });
+  return list;
+}
+function buildCard(it) {
+  const card = document.createElement("div");
+  card.className = "card";
+  const tagChips = (it.tags && it.tags.length)
+    ? it.tags.map(t => `<span class="ctag" style="${tagStyle(t)}">${esc(t)}</span>`).join("")
+    : "";
+  const colBadge = it.collection ? `<div class="colbadge">${esc(it.collection)}</div>` : "";
+  if (viewMode === "grid") {
+    card.innerHTML =
+      `<img class="thumb" src="${it.src}" alt="" loading="lazy">` +
+      `<div class="overlay"><div class="title">${esc(it.title || "未命名")}</div>` +
+      (it.rating ? `<span class="stars">${ratingHTML(it.rating)}</span>` : ``) + `</div>`;
+  } else {
+    card.innerHTML =
+      colBadge +
+      `<img src="${it.src}" alt="" loading="lazy">` +
+      `<div class="meta">` +
+        `<div class="title">${esc(it.title || "未命名")}</div>` +
+        (tagChips ? `<div class="ctags">${tagChips}</div>` : `<div class="ctags"></div>`) +
+        `<div class="cfoot"><span class="stars">${ratingHTML(it.rating || 0)}</span><span class="date">${fmtDate(it.created).slice(0,10)}</span></div>` +
+      `</div>`;
+  }
+  card._t = null;
+  card.onclick = () => { clearTimeout(card._t); card._t = setTimeout(() => openPanel(it.id), 230); };
+  card.ondblclick = (e) => { e.preventDefault(); clearTimeout(card._t); openLightbox(it.id); };
+  return card;
+}
+function renderWall() {
+  const wall = $("#wall");
+  let cls = "wall";
+  if (viewMode === "grid") cls += " grid";
+  else if (viewMode === "chron") cls += " chron";
+  wall.className = cls;
+  wall.innerHTML = "";
+  const list = filtered();
+  currentList = list;
+  $("#empty").style.display = list.length ? "none" : "block";
+  if (viewMode === "chron") {
+    const groups = [], map = new Map();
+    for (const it of list) {
+      const d = new Date(it.created);
+      const key = d.getFullYear() + "-" + (d.getMonth() + 1);
+      if (!map.has(key)) {
+        const g = { label: d.getFullYear() + "年" + (d.getMonth() + 1) + "月", items: [] };
+        map.set(key, g); groups.push(g);
+      }
+      map.get(key).items.push(it);
+    }
+    groups.forEach(g => {
+      const wrap = document.createElement("div");
+      wrap.className = "chrono-group";
+      const head = document.createElement("div");
+      head.className = "chrono-head";
+      head.innerHTML = `<span class="ch-dot"></span><span class="ch-label">${g.label}</span><span class="ch-count">${g.items.length} 张</span>`;
+      wrap.appendChild(head);
+      const grid = document.createElement("div");
+      grid.className = "chrono-grid";
+      g.items.forEach(it => grid.appendChild(buildCard(it)));
+      wrap.appendChild(grid);
+      wall.appendChild(wrap);
+    });
+    return;
+  }
+  list.forEach(it => wall.appendChild(buildCard(it)));
+}
+
+/* ---------- Panel ---------- */
+function buildRatingPicker() {
+  const wrap = $("#pRating"); wrap.innerHTML = "";
+  for (let i = 1; i <= 5; i++) {
+    const b = document.createElement("span");
+    b.innerHTML = starSVG(i <= currentRating);
+    b.onclick = () => { currentRating = i; buildRatingPicker(); };
+    wrap.appendChild(b);
+  }
+}
+function renderTagPreview() {
+  const v = $("#pTags").value.split(",").map(t => t.trim()).filter(Boolean);
+  $("#pTagPreview").innerHTML = v.map(t => `<span class="ctag" style="${tagStyle(t)}">${esc(t)}</span>`).join("");
+}
+function openPanel(id) {
+  const it = items.find(x => x.id === id);
+  if (!it) return;
+  currentId = id; currentRating = it.rating || 0;
+  $("#pImg").src = it.src;
+  $("#pTitle").value = it.title || "";
+  $("#pTags").value = (it.tags || []).join(", ");
+  $("#pCol").value = it.collection || "";
+  $("#pNote").value = it.note || "";
+  $("#pDate").textContent = "创建于 " + fmtDate(it.created) + (it.updated && it.updated !== it.created ? " · 更新于 " + fmtDate(it.updated) : "");
+  buildRatingPicker();
+  renderTagPreview();
+  $("#panel").classList.add("open");
+}
+function closePanel() { $("#panel").classList.remove("open"); currentId = null; }
+
+async function savePanel() {
+  if (!currentId) return;
+  const it = items.find(x => x.id === currentId);
+  if (!it) return;
+  it.title = $("#pTitle").value.trim();
+  it.tags = $("#pTags").value.split(",").map(t => t.trim()).filter(Boolean);
+  it.collection = $("#pCol").value.trim();
+  it.rating = currentRating;
+  it.note = $("#pNote").value.trim();
+  it.updated = new Date().toISOString();
+  await Storage.put(it);
+  await refresh();
+  closePanel();
+}
+async function deleteCurrent() {
+  if (!currentId) return;
+  if (!confirm("确定删除这张图片？")) return;
+  await Storage.del(currentId);
+  await refresh();
+  closePanel();
+}
+
+/* ---------- Lightbox ---------- */
+let lbIndex = -1;
+function openLightbox(id) {
+  lbIndex = currentList.findIndex(x => x.id === id);
+  if (lbIndex < 0) lbIndex = 0;
+  showLightbox();
+  $("#lightbox").classList.add("show");
+}
+function showLightbox() {
+  const it = currentList[lbIndex];
+  if (!it) return;
+  $("#lbImg").src = it.src;
+  const tags = (it.tags && it.tags.length) ? it.tags.map(t => `<span class="ctag" style="${tagStyle(t)}">${esc(t)}</span>`).join(" ") : "";
+  $("#lbMeta").innerHTML =
+    `<div class="lt">${esc(it.title || "未命名")}</div>` +
+    (tags ? `<div style="margin:4px 0">${tags}</div>` : "") +
+    (it.rating ? `<div class="stars">${ratingHTML(it.rating)}</div>` : "") +
+    (it.note ? `<div class="ln">${esc(it.note)}</div>` : "");
+}
+function closeLightbox() { $("#lightbox").classList.remove("show"); lbIndex = -1; }
+function lbStep(d) {
+  if (!currentList.length) return;
+  lbIndex = (lbIndex + d + currentList.length) % currentList.length;
+  showLightbox();
+}
+
+/* ---------- Slideshow (沉浸放映) ---------- */
+function startSlideshow() {
+  if (!currentList.length) { showBanner("当前筛选下没有可放映的图片"); setTimeout(() => $("#banner").classList.remove("show"), 2200); return; }
+  slideIndex = 0;
+  slidePlaying = true;
+  $("#slideshow").classList.add("show");
+  $("#ssPlay").textContent = "暂停";
+  showSlide(0);
+  scheduleSlide();
+}
+function renderSsDots() {
+  const d = $("#ssDots"); d.innerHTML = "";
+  currentList.forEach((_, i) => {
+    const dot = document.createElement("div");
+    dot.className = "ss-dot" + (i === slideIndex ? " active" : "");
+    dot.onclick = () => { showSlide(i); resetSlideTimer(); };
+    d.appendChild(dot);
+  });
+}
+function showSlide(i) {
+  slideIndex = i;
+  const it = currentList[i];
+  if (!it) return;
+  const img = $("#ssImg");
+  img.classList.remove("shown");
+  const loader = new Image();
+  loader.onload = () => { img.src = it.src; requestAnimationFrame(() => img.classList.add("shown")); };
+  loader.src = it.src;
+  const tags = (it.tags && it.tags.length) ? it.tags.map(t => `<span class="ctag" style="${tagStyle(t)}">${esc(t)}</span>`).join(" ") : "";
+  $("#ssMeta").innerHTML =
+    `<div class="st">${esc(it.title || "未命名")}</div>` +
+    (it.collection ? `<div class="sc">合集 · ${esc(it.collection)}</div>` : "") +
+    (tags ? `<div style="margin:4px 0">${tags}</div>` : "") +
+    (it.rating ? `<div class="stars">${ratingHTML(it.rating)}</div>` : "") +
+    (it.note ? `<div class="sn">${esc(it.note)}</div>` : "");
+  [...$("#ssDots").children].forEach((d, di) => d.classList.toggle("active", di === i));
+}
+function ssStep(d) {
+  if (!currentList.length) return;
+  showSlide((slideIndex + d + currentList.length) % currentList.length);
+  resetSlideTimer();
+}
+function scheduleSlide() {
+  clearInterval(slideTimer);
+  if (slidePlaying) slideTimer = setInterval(() => { if (slidePlaying) ssStep(1); }, 4200);
+}
+function resetSlideTimer() { if (slidePlaying) scheduleSlide(); }
+function togglePlay() {
+  slidePlaying = !slidePlaying;
+  $("#ssPlay").textContent = slidePlaying ? "暂停" : "播放";
+  if (slidePlaying) scheduleSlide(); else clearInterval(slideTimer);
+}
+function toggleBgm() {
+  bgmOn = !bgmOn;
+  const btn = $("#ssBgm");
+  if (bgmOn) {
+    if (!bgmCtx) {
+      bgmCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (bgmCtx.state === "suspended") bgmCtx.resume();
+    if (!bgmCtx._gain) {
+      bgmCtx._gain = bgmCtx.createGain();
+      bgmCtx._gain.gain.value = 0.05;
+      bgmCtx._gain.connect(bgmCtx.destination);
+    }
+    if (bgmCtx._oscs && bgmCtx._oscs.length) return;
+    const freqs = [110, 164.81, 220];
+    bgmCtx._oscs = [];
+    freqs.forEach((f, i) => {
+      const o = bgmCtx.createOscillator();
+      o.type = "sine"; o.frequency.value = f;
+      const g = bgmCtx.createGain(); g.gain.value = i === 0 ? 0.6 : 0.28;
+      o.connect(g); g.connect(bgmCtx._gain); o.start();
+      bgmCtx._oscs.push(o);
+    });
+    btn.classList.add("active"); btn.textContent = "♪ 开";
+  } else {
+    if (bgmCtx && bgmCtx._oscs) { bgmCtx._oscs.forEach(o => { try { o.stop(); } catch (e) {} }); bgmCtx._oscs = []; }
+    btn.classList.remove("active"); btn.textContent = "♪ 关";
+  }
+}
+function stopSlideshow() {
+  clearInterval(slideTimer); slideTimer = null; slidePlaying = false;
+  if (bgmOn) toggleBgm();
+  $("#slideshow").classList.remove("show");
+}
+
+/* ---------- Ingest images ---------- */
+function fileToDataURL(file) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result);
+    r.onerror = rej;
+    r.readAsDataURL(file);
+  });
+}
+async function ingestFiles(fileList) {
+  const files = [...fileList].filter(f => f.type.startsWith("image/"));
+  if (!files.length) return;
+  for (const f of files) {
+    const src = await fileToDataURL(f);
+    const now = new Date().toISOString();
+    const item = { id: uuid(), src, title: "", tags: [], rating: 0, note: "", collection: "", created: now, updated: now };
+    await Storage.put(item);
+    items.push(item);
+  }
+  await refresh();
+}
+
+/* ---------- Import / Export ---------- */
+async function exportJSON() {
+  const data = { version: 1, exported: new Date().toISOString(), items };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "gallery-" + new Date().toISOString().slice(0, 10) + ".json";
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+async function importJSON() {
+  const inp = document.createElement("input");
+  inp.type = "file"; inp.accept = "application/json";
+  inp.onchange = async () => {
+    const f = inp.files[0]; if (!f) return;
+    try {
+      const data = JSON.parse(await f.text());
+      const arr = Array.isArray(data) ? data : data.items || [];
+      for (const it of arr) {
+        if (!it.id || !it.src) continue;
+        if (!items.find(x => x.id === it.id)) { items.push(it); await Storage.put(it); }
+      }
+      await refresh();
+    } catch (e) { alert("导入失败：文件格式不正确"); }
+  };
+  inp.click();
+}
+
+/* ---------- Theme ---------- */
+function applyTheme(t) {
+  document.documentElement.setAttribute("data-theme", t);
+  localStorage.setItem("ag-theme", t);
+  $("#themeBtn").innerHTML = t === "dark"
+    ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4 12H2M22 12h-2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19"/></svg>`
+    : `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 109.8 9.8z"/></svg>`;
+  renderTags();
+}
+
+/* ---------- Refresh ---------- */
+async function refresh() {
+  items = await Storage.getAll();
+  renderCols();
+  renderTags();
+  renderWall();
+}
+
+/* ---------- Wire up ---------- */
+function init() {
+  applyTheme(localStorage.getItem("ag-theme") || (matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark"));
+  Storage.init().then(refresh);
+
+  $("#viewBtn").textContent = viewMode === "wall" ? "九宫格" : viewMode === "grid" ? "编年册" : "卡片墙";
+  $("#addBtn").onclick = () => $("#fileInput").click();
+  $("#fileInput").onchange = (e) => { ingestFiles(e.target.files); e.target.value = ""; };
+  $("#search").oninput = renderWall;
+  $("#sort").onchange = renderWall;
+  $("#viewBtn").onclick = () => {
+    const order = ["wall", "grid", "chron"];
+    viewMode = order[(order.indexOf(viewMode) + 1) % 3];
+    localStorage.setItem("ag-view", viewMode);
+    $("#viewBtn").textContent = viewMode === "wall" ? "九宫格" : viewMode === "grid" ? "编年册" : "卡片墙";
+    renderWall();
+  };
+  $("#pureBtn").onclick = () => {
+    const on = document.body.classList.toggle("pure");
+    $("#pureBtn").textContent = on ? "退出纯享" : "纯享";
+  };
+  $("#slideBtn").onclick = startSlideshow;
+  $("#ssClose").onclick = stopSlideshow;
+  $("#ssPrev").onclick = (e) => { e.stopPropagation(); ssStep(-1); };
+  $("#ssNext").onclick = (e) => { e.stopPropagation(); ssStep(1); };
+  $("#ssPlay").onclick = (e) => { e.stopPropagation(); togglePlay(); };
+  $("#ssBgm").onclick = (e) => { e.stopPropagation(); toggleBgm(); };
+  $("#slideshow").onclick = (e) => { if (e.target.id === "slideshow") stopSlideshow(); };
+  $("#themeBtn").onclick = () => {
+    applyTheme(document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark");
+    renderWall();
+  };
+  $("#closePanel").onclick = closePanel;
+  $("#saveBtn").onclick = savePanel;
+  $("#delBtn").onclick = deleteCurrent;
+  $("#exportBtn").onclick = exportJSON;
+  $("#importBtn").onclick = importJSON;
+  $("#pTags").oninput = renderTagPreview;
+
+  // lightbox
+  $("#lbClose").onclick = closeLightbox;
+  $("#lbPrev").onclick = (e) => { e.stopPropagation(); lbStep(-1); };
+  $("#lbNext").onclick = (e) => { e.stopPropagation(); lbStep(1); };
+  $("#lightbox").onclick = (e) => { if (e.target.id === "lightbox") closeLightbox(); };
+
+  // drag & drop
+  const ov = $("#dropOverlay");
+  let dragDepth = 0;
+  window.addEventListener("dragenter", (e) => { e.preventDefault(); dragDepth++; ov.classList.add("show"); });
+  window.addEventListener("dragover", (e) => e.preventDefault());
+  window.addEventListener("dragleave", (e) => { e.preventDefault(); dragDepth--; if (dragDepth <= 0) { ov.classList.remove("show"); dragDepth = 0; } });
+  window.addEventListener("drop", (e) => {
+    e.preventDefault(); dragDepth = 0; ov.classList.remove("show");
+    if (e.dataTransfer.files.length) ingestFiles(e.dataTransfer.files);
+  });
+
+  // paste
+  window.addEventListener("paste", (e) => {
+    const itemsClip = e.clipboardData && e.clipboardData.items;
+    if (!itemsClip) return;
+    const imgs = [];
+    for (const it of itemsClip) if (it.type.startsWith("image/")) imgs.push(it.getAsFile());
+    if (imgs.length) ingestFiles(imgs);
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      if ($("#slideshow").classList.contains("show")) { stopSlideshow(); return; }
+      if (document.body.classList.contains("pure")) { document.body.classList.remove("pure"); $("#pureBtn").textContent = "纯享"; return; }
+      if ($("#lightbox").classList.contains("show")) { closeLightbox(); return; }
+      closePanel();
+      return;
+    }
+    if ($("#slideshow").classList.contains("show")) {
+      if (e.key === "ArrowLeft") ssStep(-1);
+      if (e.key === "ArrowRight") ssStep(1);
+      return;
+    }
+    if ($("#lightbox").classList.contains("show")) {
+      if (e.key === "ArrowLeft") lbStep(-1);
+      if (e.key === "ArrowRight") lbStep(1);
+    }
+  });
+}
+init();
+</script>
+</body>
+</html>

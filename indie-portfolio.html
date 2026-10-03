@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>独立游戏开发者 · 作品集</title><style>
+:root{color-scheme:dark;--bg:#0a0f16;--panel:#121b27;--line:#26374a;--text:#edf4f9;--muted:#8ea4b4;--pink:#ff6b9d;--violet:#8e7cff;--cyan:#4eccc4;--gold:#ffd166}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(1200px 600px at 85% -5%,#1b3346 0,transparent 55%),#0a0f16;color:var(--text);font:15px/1.65 system-ui,-apple-system,"Segoe UI",sans-serif}.wrap{max-width:1080px;margin:auto;padding:22px 20px 60px}
+.lang{position:sticky;top:12px;z-index:50;display:flex;justify-content:flex-end}.lang button{cursor:pointer;border:1px solid var(--line);background:#14202c;color:var(--text);padding:6px 14px;border-radius:999px;font-size:13px}.lang button.on{background:linear-gradient(90deg,var(--pink),var(--violet));border-color:transparent}
+.hero{padding:44px 0 30px}.eyebrow{color:var(--cyan);letter-spacing:.14em;font-size:12px;text-transform:uppercase}.hero h1{font-size:clamp(34px,6.5vw,72px);line-height:1.04;margin:14px 0}.grad{background:linear-gradient(90deg,var(--pink),var(--violet),var(--cyan));-webkit-background-clip:text;background-clip:text;color:transparent}.hero p{color:var(--muted);max-width:640px;font-size:17px}.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}.chip{border:1px solid #31536b;border-radius:999px;padding:5px 12px;font-size:13px;color:var(--cyan)}
+.sec-h{display:flex;justify-content:space-between;align-items:baseline;margin:46px 0 16px}.sec-h h2{margin:0;font-size:26px}.sec-h span{color:var(--muted);font-size:13px}
+.games{display:grid;grid-template-columns:1fr 1fr;gap:18px}.game{background:linear-gradient(160deg,#14212f,#0d1620);border:1px solid var(--line);border-radius:18px;overflow:hidden}.game .art{height:190px;position:relative;display:flex;align-items:flex-end;padding:16px}.game .art h3{margin:0;font-size:24px;text-shadow:0 2px 12px #000}.g1{background:linear-gradient(135deg,#4eccc4,#1d6b7a 45%,#0b2431)}.g2{background:linear-gradient(135deg,#ff6b9d,#6246ea 55%,#1a2440)}.plat{position:absolute;top:12px;right:12px;font-size:11px;background:#0009;padding:3px 8px;border-radius:6px;color:#fff}.game .bd{padding:16px}.game p{color:var(--muted);font-size:14px;min-height:44px}.links{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.links a{text-decoration:none;font-size:13px;color:#fff;background:#1c2c3c;border:1px solid #33495f;padding:6px 12px;border-radius:9px}.links a.steam{background:linear-gradient(90deg,var(--pink),var(--violet));border-color:transparent}
+.jamgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.jam{background:#0e1720;border:1px solid var(--line);border-radius:14px;padding:16px}.jam .tag{font-size:11px;color:var(--gold);letter-spacing:.06em}.jam h4{margin:8px 0 6px}.jam p{color:var(--muted);font-size:13px;margin:0}.jam .meta{color:var(--cyan);font-size:12px;margin-top:8px}
+.blog{display:grid;grid-template-columns:1fr 1fr;gap:14px}.post{background:#0e1720;border:1px solid var(--line);border-radius:14px;padding:16px;text-decoration:none;color:inherit;transition:.15s}.post:hover{border-color:var(--cyan);transform:translateY(-2px)}.post .d{color:var(--muted);font-size:12px}.post h4{margin:6px 0}.post p{color:var(--muted);font-size:13px;margin:0}
+.social{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}.social a{text-decoration:none;color:#fff;background:#162230;border:1px solid #2c4257;padding:9px 16px;border-radius:10px;font-size:14px}
+footer{margin-top:52px;color:var(--muted);font-size:12px;border-top:1px solid var(--line);padding-top:18px}
+@media(max-width:720px){.games,.blog{grid-template-columns:1fr}.jamgrid{grid-template-columns:1fr 1fr}.hero{padding:28px 0 20px}}
+</style><script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head><body><div class="wrap">
+<div class="lang"><button id="langBtn" title="Switch language">EN</button></div>
+<header class="hero">
+<div class="eyebrow">indie game developer · portfolio</div>
+<h1>把想法做成<br><span class="grad" data-i18n="heroGrad">可以玩的世界。</span></h1>
+<p data-i18n="heroSub">独立游戏开发者作品集。专注于游戏手感与情感表达，从 Game Jam 到 Steam 上架，小团队也能做大事。</p>
+<div class="chips"><span class="chip">Unity / Godot</span><span class="chip">Pixel Art</span><span class="chip">Game Feel</span><span class="chip">Localization</span><span class="chip">WebGL</span></div>
+</header>
+
+<section><div class="sec-h"><h2 data-i18n="secGames">Steam 游戏</h2><span data-i18n="secGamesSub">已上架 · 正在更新</span></div>
+<div class="games">
+<article class="game"><div class="art g1"><span class="plat">STEAM</span><h3>Orbital Float</h3></div><div class="bd"><p data-i18n="g1d">太空漂浮解谜。控制一块残骸在失重中拼接空间站，手感和物理反馈是核心。</p><div class="links"><a class="steam" href="https://store.steampowered.com/" target="_blank" rel="noopener">Steam</a><a href="#" data-i18n="g1v">预告片</a><a href="#" data-i18n="g1t">试玩</a><a href="https://github.com/" target="_blank" rel="noopener">GitHub</a></div></div></article>
+<article class="game"><div class="art g2"><span class="plat">STEAM</span><h3>Neon Tide</h3></div><div class="bd"><p data-i18n="g2d">霓虹潮汐下的潜水冒险，探索光污染城市的失落水面，剧情驱动的 2D 横版。</p><div class="links"><a class="steam" href="https://store.steampowered.com/" target="_blank" rel="noopener">Steam</a><a href="#" data-i18n="g2v">预告片</a><a href="#" data-i18n="g2t">试玩</a><a href="https://github.com/" target="_blank" rel="noopener">GitHub</a></div></div></article>
+</div></section>
+
+<section><div class="sec-h"><h2 data-i18n="secJam">Game Jam 原型</h2><span data-i18n="secJamSub">48 小时 · 快速验证想法</span></div>
+<div class="jamgrid">
+<div class="jam"><div class="tag">Ludum Dare 54</div><h4>Gravity Garden</h4><p data-i18n="jam1">颠倒引力的花园种植，48h 完成。</p><div class="meta">Godot · Puzzle</div></div>
+<div class="jam"><div class="tag">GGJ 2025</div><h4>Echo Chamber</h4><p data-i18n="jam2">用回声解谜，声音即地形。</p><div class="meta">Unity · Audio</div></div>
+<div class="jam"><div class="tag">Mini Jam</div><h4>Paper Plane</h4><p data-i18n="jam3">纸飞机飞行物理沙盒。</p><div class="meta">Unity · Physics</div></div>
+<div class="jam"><div class="tag">Brackeys</div><h4>Lantern</h4><p data-i18n="jam4">黑暗森林中的提灯解谜。</p><div class="meta">Godot · Puzzle</div></div>
+<div class="jam"><div class="tag">Mini Jam</div><h4>Clockwork</h4><p data-i18n="jam5">用齿轮和发条驱动的平台跳跃。</p><div class="meta">Unity · Platformer</div></div>
+<div class="jam"><div class="tag">GGJ 2024</div><h4>Depth</h4><p data-i18n="jam6">潜航生存，氧气管理。</p><div class="meta">Godot · Survival</div></div>
+</div></section>
+
+<section><div class="sec-h"><h2 data-i18n="secBlog">技术博客</h2><span data-i18n="secBlogSub">开发复盘 · 工程笔记</span></div>
+<div class="blog">
+<a class="post" href="#"><span class="d">2026-03</span><h4 data-i18n="blog1t">让漂浮有手感：Orbital Float 的物理调参日志</h4><p data-i18n="blog1d">阻尼、阈值与玩家预期的三角平衡。</p></a>
+<a class="post" href="#"><span class="d">2025-11</span><h4 data-i18n="blog2t">Godot 像素美术管线：从 Aseprite 到引擎</h4><p data-i18n="blog2d">调色板、锚点与精灵动画的自动化。</p></a>
+<a class="post" href="#"><span class="d">2025-07</span><h4 data-i18n="blog3t">独立游戏多语言发布实践</h4><p data-i18n="blog3d">本地化文件结构、fallback 与发布节奏。</p></a>
+<a class="post" href="#"><span class="d">2025-02</span><h4 data-i18n="blog4t">48 小时 Game Jam 的取舍艺术</h4><p data-i18n="blog4d">如何砍掉 80% 想法保住核心循环。</p></a>
+</div></section>
+
+<section><div class="sec-h"><h2 data-i18n="secContact">保持联系</h2><span data-i18n="secContactSub">约稿 · 合作 · 交个朋友</span></div>
+<div class="social"><a href="https://github.com/" target="_blank" rel="noopener">GitHub</a><a href="#" data-i18n="contactItch">Itch.io</a><a href="#" data-i18n="contactX">X / Twitter</a><a href="#" data-i18n="contactMail">Email</a></div></section>
+
+<footer><span data-i18n="foot">独立游戏开发者作品集 · 前端设计工具集 · © </span><span id="yr"></span></footer>
+</div>
+<script>
+(function(){
+var I18N={zh:{heroGrad:"可以玩的世界。",heroSub:"独立游戏开发者作品集。专注于游戏手感与情感表达，从 Game Jam 到 Steam 上架，小团队也能做大事。",secGames:"Steam 游戏",secGamesSub:"已上架 · 正在更新",g1d:"太空漂浮解谜。控制一块残骸在失重中拼接空间站，手感和物理反馈是核心。",g2d:"霓虹潮汐下的潜水冒险，探索光污染城市的失落水面，剧情驱动的 2D 横版。",g1v:"预告片",g2v:"预告片",g1t:"试玩",g2t:"试玩",secJam:"Game Jam 原型",secJamSub:"48 小时 · 快速验证想法",jam1:"颠倒引力的花园种植，48h 完成。",jam2:"用回声解谜，声音即地形。",jam3:"纸飞机飞行物理沙盒。",jam4:"黑暗森林中的提灯解谜。",jam5:"用齿轮和发条驱动的平台跳跃。",jam6:"潜航生存，氧气管理。",secBlog:"技术博客",secBlogSub:"开发复盘 · 工程笔记",blog1t:"让漂浮有手感：Orbital Float 的物理调参日志",blog1d:"阻尼、阈值与玩家预期的三角平衡。",blog2t:"Godot 像素美术管线：从 Aseprite 到引擎",blog2d:"调色板、锚点与精灵动画的自动化。",blog3t:"独立游戏多语言发布实践",blog3d:"本地化文件结构、fallback 与发布节奏。",blog4t:"48 小时 Game Jam 的取舍艺术",blog4d:"如何砍掉 80% 想法保住核心循环。",secContact:"保持联系",secContactSub:"约稿 · 合作 · 交个朋友",contactItch:"Itch.io",contactX:"X / Twitter",contactMail:"Email",foot:"独立游戏开发者作品集 · 前端设计工具集 · © "},
+en:{heroGrad:"worlds you can play.",heroSub:"Independent game developer portfolio. Focused on game feel and emotional expression — from Game Jams to Steam releases, small teams can make big things.",secGames:"Steam Games",secGamesSub:"Released · actively updated",g1d:"Zero-gravity puzzle. Guide a wreck to rebuild a station in weightlessness — feel and physics are the core.",g2d:"Dive adventure beneath a neon tide, exploring sunken waters of a light-polluted city. Story-driven 2D side-scroller.",g1v:"Trailer",g2v:"Trailer",g1t:"Demo",g2t:"Demo",secJam:"Game Jam Prototypes",secJamSub:"48 hours · validate ideas fast",jam1:"Gravity-flipped garden farming, made in 48h.",jam2:"Puzzle with echoes — sound becomes terrain.",jam3:"Paper-plane flight physics sandbox.",jam4:"Lantern puzzles in a dark forest.",jam5:"Gear-and-clockwork platformer.",jam6:"Submarine survival with oxygen management.",secBlog:"Dev Blog",secBlogSub:"Postmortems · engineering notes",blog1t:"Making weightlessness feel good: Orbital Float physics tuning log",blog1d:"Balancing damping, thresholds and player expectation.",blog2t:"Godot pixel-art pipeline: from Aseprite to engine",blog2d:"Palettes, anchors and sprite animation automation.",blog3t:"Localizing an indie game: practical notes",blog3d:"Locale file structure, fallbacks and release rhythm.",blog4t:"The art of cutting in a 48-hour Game Jam",blog4d:"How to drop 80% of ideas and keep the core loop.",secContact:"Stay in touch",secContactSub:"Commission · collab · say hi",contactItch:"Itch.io",contactX:"X / Twitter",contactMail:"Email",foot:"Indie game developer portfolio · Frontend toolkit · © "}
+};
+var KEY="wb_indie_lang";var lang=localStorage.getItem(KEY)||"zh";
+function apply(){var d=I18N[lang]||I18N.zh;document.querySelectorAll("[data-i18n]").forEach(function(el){if(d[el.getAttribute("data-i18n")]!==undefined)el.textContent=d[el.getAttribute("data-i18n")];});var btn=document.getElementById("langBtn");btn.textContent=lang==="zh"?"EN":"中文";btn.classList.toggle("on",lang==="zh");document.documentElement.lang=lang==="zh"?"zh-CN":"en";}
+document.getElementById("langBtn").onclick=function(){lang=lang==="zh"?"en":"zh";localStorage.setItem(KEY,lang);apply();};
+document.getElementById("yr").textContent=new Date().getFullYear();apply();
+parent.postMessage({__wbResize:true,id:"indiePortfolioFrame",h:document.documentElement.scrollHeight},"*");
+})();
+</script></body></html>

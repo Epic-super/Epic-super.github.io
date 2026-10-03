@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RFQ 物料清单 · 主表逐列公式对比</title>
+<style>
+ :root{--bg:#0f1115;--card:#171a21;--line:#2a2f3a;--txt:#e6e9ef;--mut:#9aa3b2;
+ --red:#ff6b6b;--grn:#4ec9a8;--yel:#e5c07b;--blue:#61afef}
+ *{box-sizing:border-box}
+ body{margin:0;background:var(--bg);color:var(--txt);font:14px/1.7 -apple-system,"Segoe UI",Roboto,"Microsoft YaHei",sans-serif}
+ .wrap{max-width:1120px;margin:0 auto;padding:30px 22px 60px}
+ h1{font-size:22px;margin:0 0 4px}h2{font-size:18px;margin:30px 0 10px;padding-left:10px;border-left:3px solid var(--blue)}
+ h3{font-size:15px;margin:0 0 6px}
+ .sub{color:var(--mut);font-size:13px;margin:0 0 20px}
+ .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 18px;margin:12px 0}
+ table{width:100%;border-collapse:collapse;margin:6px 0;font-size:13px}
+ th,td{border:1px solid var(--line);padding:6px 9px;text-align:left;vertical-align:top}
+ th{background:#1d212b;color:var(--mut);font-weight:600}
+ .mono{font-family:"SF Mono",Consolas,monospace;font-size:12.5px;color:var(--grn)}
+ .mut{color:var(--mut)}
+ .tag{display:inline-block;padding:1px 8px;border-radius:20px;font-size:12px;font-weight:600}
+ .t-red{background:rgba(255,107,107,.16);color:var(--red)} .t-yel{background:rgba(229,192,123,.16);color:var(--yel)}
+ .t-grn{background:rgba(78,201,168,.16);color:var(--grn)} .t-blue{background:rgba(97,175,239,.16);color:var(--blue)}
+ .warn{background:rgba(255,107,107,.08);border:1px solid rgba(255,107,107,.35);border-radius:8px;padding:10px 14px;font-size:13px}
+ .scroll{max-height:430px;overflow:auto}
+ footer{color:var(--mut);font-size:12px;margin-top:34px;border-top:1px solid var(--line);padding-top:12px}
+</style><script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head><body><div class="wrap">
+<h1>RFQ 物料清单 · 主表「报价物料信息」逐列公式对比</h1>
+<p class="sub">模板（初始）vs 填充后（最终）· 共 32 列。公式列=有公式的单元格；输入列=纯手工录入无公式。</p>
+
+<h2>一、32 列总览</h2>
+<div class="card"><div class="scroll"><table>
+<tr><th>列</th><th>表头</th><th>状态</th><th>模板公式数</th><th>填充公式数</th><th>内容差异格</th><th>说明</th></tr>
+<tr><td class='mono'>A</td><td>—</td><td><span class='tag t-grn'>输入列</span></td><td class='mut'>0</td><td class='mut'>0</td><td class='mut'>0</td><td class='mut'>（无公式，手工录入）</td></tr><tr><td class='mono'>B</td><td>Part #</td><td><span class='tag t-grn'>输入列</span></td><td class='mut'>0</td><td class='mut'>0</td><td class='mut'>0</td><td class='mut'>（无公式，手工录入）</td></tr><tr><td class='mono'>C</td><td>2.0</td><td><span class='tag t-grn'>输入列</span></td><td class='mut'>0</td><td class='mut'>0</td><td class='mut'>0</td><td class='mut'>（无公式，手工录入）</td></tr><tr><td class='mono'>D</td><td>3.0</td><td><span class='tag t-grn'>输入列</span></td><td class='mut'>0</td><td class='mut'>0</td><td class='mut'>0</td><td class='mut'>（无公式，手工录入）</td></tr><tr><td class='mono'>E</td><td>4.0</td><td><span class='tag t-grn'>输入列</span></td><td class='mut'>0</td><td class='mut'>0</td><td class='mut'>0</td><td class='mut'>（无公式，手工录入）</td></tr><tr><td class='mono'>F</td><td>数量</td><td><span class='tag t-grn'>输入列</span></td><td class='mut'>0</td><td class='mut'>0</td><td class='mut'>0</td><td class='mut'>（无公式，手工录入）</td></tr><tr><td class='mono'>G</td><td>Material SPEC</td><td><span class='tag t-grn'>输入列</span></td><td class='mut'>0</td><td class='mut'>0</td><td class='mut'>0</td><td class='mut'>（无公式，手工录入）</td></tr><tr><td class='mono'>H</td><td>长度mm</td><td><span class='tag t-grn'>输入列</span></td><td class='mut'>0</td><td class='mut'>0</td><td class='mut'>0</td><td class='mut'>（无公式，手工录入）</td></tr><tr><td class='mono'>I</td><td>宽度mm</td><td><span class='tag t-grn'>输入列</span></td><td class='mut'>0</td><td class='mut'>0</td><td class='mut'>0</td><td class='mut'>（无公式，手工录入）</td></tr><tr><td class='mono'>J</td><td>厚度mm</td><td><span class='tag t-grn'>输入列</span></td><td class='mut'>0</td><td class='mut'>0</td><td class='mut'>0</td><td class='mut'>（无公式，手工录入）</td></tr><tr><td class='mono'>K</td><td>Material weight          (kg)</td><td><span class='tag t-red'>内容变更</span></td><td>461</td><td>724</td><td>32</td><td class='mut'>见下方明细</td></tr><tr><td class='mono'>L</td><td>Materialit price  (kg/rmb)</td><td><span class='tag t-grn'>输入列</span></td><td class='mut'>0</td><td class='mut'>0</td><td class='mut'>0</td><td class='mut'>（无公式，手工录入）</td></tr><tr><td class='mono'>M</td><td>Material Cost   (RMB)</td><td><span class='tag t-yel'>统计差异</span></td><td>461</td><td>725</td><td>0</td><td class='mut'>模板1模式 / 填充1模式</td></tr><tr><td class='mono'>N</td><td>Material Cost *F列  (RMB)</td><td><span class='tag t-yel'>统计差异</span></td><td>461</td><td>725</td><td>0</td><td class='mut'>模板1模式 / 填充1模式</td></tr><tr><td class='mono'>O</td><td>Machining Cost     (RMB)</td><td><span class='tag t-grn'>输入列</span></td><td class='mut'>0</td><td class='mut'>0</td><td class='mut'>0</td><td class='mut'>（无公式，手工录入）</td></tr><tr><td class='mono'>P</td><td>Machining Cost *F列    (RMB)</td><td><span class='tag t-yel'>统计差异</span></td><td>461</td><td>725</td><td>0</td><td class='mut'>模板1模式 / 填充1模式</td></tr><tr><td class='mono'>Q</td><td>Finish  Cost    (RMB)</td><td><span class='tag t-grn'>输入列</span></td><td class='mut'>0</td><td class='mut'>0</td><td class='mut'>0</td><td class='mut'>（无公式，手工录入）</td></tr><tr><td class='mono'>R</td><td>Finish  Cost *F列  (RMB)</td><td><span class='tag t-yel'>统计差异</span></td><td>461</td><td>725</td><td>0</td><td class='mut'>模板1模式 / 填充1模式</td></tr><tr><td class='mono'>S</td><td>Powdercoat/paint  Cost    (RMB)</td><td><span class='tag t-grn'>输入列</span></td><td class='mut'>0</td><td class='mut'>0</td><td class='mut'>0</td><td class='mut'>（无公式，手工录入）</td></tr><tr><td class='mono'>T</td><td>Powdercoat/paint  Cost *F列   (RMB)</td><td><span class='tag t-yel'>统计差异</span></td><td>461</td><td>725</td><td>0</td><td class='mut'>模板1模式 / 填充1模式</td></tr><tr><td class='mono'>U</td><td>hardware cost(RMB)</td><td><span class='tag t-grn'>输入列</span></td><td class='mut'>0</td><td class='mut'>0</td><td class='mut'>0</td><td class='mut'>（无公式，手工录入）</td></tr><tr><td class='mono'>V</td><td>hardware cost*F列(RMB)</td><td><span class='tag t-yel'>统计差异</span></td><td>461</td><td>725</td><td>0</td><td class='mut'>模板1模式 / 填充1模式</td></tr><tr><td class='mono'>W</td><td>Management Cost    (RMB)</td><td><span class='tag t-red'>内容变更</span></td><td>461</td><td>725</td><td>171</td><td class='mut'>见下方明细</td></tr><tr><td class='mono'>X</td><td>Management Cost*F列  (RMB)</td><td><span class='tag t-yel'>统计差异</span></td><td>461</td><td>725</td><td>0</td><td class='mut'>模板1模式 / 填充1模式</td></tr><tr><td class='mono'>Y</td><td>Packing Cost    (RMB)</td><td><span class='tag t-grn'>输入列</span></td><td class='mut'>0</td><td class='mut'>0</td><td class='mut'>0</td><td class='mut'>（无公式，手工录入）</td></tr><tr><td class='mono'>Z</td><td>Packing Cost*F列    (RMB)</td><td><span class='tag t-yel'>统计差异</span></td><td>461</td><td>725</td><td>0</td><td class='mut'>模板1模式 / 填充1模式</td></tr><tr><td class='mono'>AA</td><td>HANDLINGXL*0.03（RMB）</td><td><span class='tag t-yel'>统计差异</span></td><td>461</td><td>725</td><td>0</td><td class='mut'>模板1模式 / 填充1模式</td></tr><tr><td class='mono'>AB</td><td>FOB SHANGHAI    (RMB)</td><td><span class='tag t-yel'>统计差异</span></td><td>461</td><td>725</td><td>0</td><td class='mut'>模板1模式 / 填充1模式</td></tr><tr><td class='mono'>AC</td><td>SHIPPING（RMB)</td><td><span class='tag t-yel'>统计差异</span></td><td>426</td><td>725</td><td>0</td><td class='mut'>模板1模式 / 填充1模式</td></tr><tr><td class='mono'>AD</td><td>DAP总价（RMB）</td><td><span class='tag t-yel'>统计差异</span></td><td>461</td><td>725</td><td>0</td><td class='mut'>模板1模式 / 填充1模式</td></tr><tr><td class='mono'>AE</td><td>REMARK</td><td><span class='tag t-grn'>输入列</span></td><td class='mut'>0</td><td class='mut'>0</td><td class='mut'>0</td><td class='mut'>（无公式，手工录入）</td></tr><tr><td class='mono'>AF</td><td>DAP总价（USD）</td><td><span class='tag t-yel'>统计差异</span></td><td>461</td><td>725</td><td>0</td><td class='mut'>模板1模式 / 填充1模式</td></tr>
+</table></div>
+<p class="mut" style="font-size:12.5px">只有 <b>K</b>、<b>W</b> 两列存在公式内容差异；M/N/P/R/T/V/X/Z/AA/AB/AC/AD/AF 等列公式完全相同，仅填充行数由 461 扩到 725。</p>
+</div>
+
+<h2>二、各公式列原文对比</h2>
+
+    <div class="card">
+      <h3>K &nbsp;·&nbsp; Material weight          (kg) &nbsp;<span class="tag t-red">内容变更</span></h3>
+      <table>
+        <tr><th style="width:30%">模板（初始）</th><th style="width:8%">计数</th><th>示例公式（原文）</th></tr>
+        <tr><td class='mono'>=<b>H*I*J*2.8/1000/1000</td><td>431</td><td class='mono'>=H3*I3*J3*2.8/1000/1000</td></tr><tr><td class='mono'>=<b>J*I*H*2.8/1000/1000</td><td>30</td><td class='mono'>=J434*I434*H434*2.8/1000/1000</td></tr>
+      </table>
+      <table>
+        <tr><th style="width:30%">填充后（最终）</th><th style="width:8%">计数</th><th>示例公式（原文）</th></tr>
+        <tr><td class='mono'>=<b>H*I*J*2.8/1000/1000</td><td>689</td><td class='mono'>=H3*I3*J3*2.8/1000/1000</td></tr><tr><td class='mono'>=<b>J*I*H*2.8/1000/1000</td><td>30</td><td class='mono'>=J704*I704*H704*2.8/1000/1000</td></tr><tr><td class='mono'>=<b>H*I*J*7.8/1000/1000</td><td>5</td><td class='mono'>=H160*I160*J160*7.8/1000/1000</td></tr>
+      </table>
+      <div class='warn' style='margin-top:8px'>K · Material weight（材料重量）：模板自身底部 434–463 行已是逆序 =J*I*H*2.8；填充后其中 28 行被修正为 =H*I*J*2.8，但新增的 704–733 行又全部逆序 =J*I*H*2.8（与模板底部块同款≠主体）。另 4 行(160/163/427/430)密度 2.8→7.8(钢)。</div>
+    </div>
+    <div class="card">
+      <h3>M &nbsp;·&nbsp; Material Cost   (RMB) &nbsp;<span class="tag t-yel">统计差异</span></h3>
+      <table>
+        <tr><th style="width:30%">模板（初始）</th><th style="width:8%">计数</th><th>示例公式（原文）</th></tr>
+        <tr><td class='mono'>=<b>L*K</td><td>461</td><td class='mono'>=L3*K3</td></tr>
+      </table>
+      <table>
+        <tr><th style="width:30%">填充后（最终）</th><th style="width:8%">计数</th><th>示例公式（原文）</th></tr>
+        <tr><td class='mono'>=<b>L*K</td><td>725</td><td class='mono'>=L3*K3</td></tr>
+      </table>
+      
+    </div>
+    <div class="card">
+      <h3>N &nbsp;·&nbsp; Material Cost *F列  (RMB) &nbsp;<span class="tag t-yel">统计差异</span></h3>
+      <table>
+        <tr><th style="width:30%">模板（初始）</th><th style="width:8%">计数</th><th>示例公式（原文）</th></tr>
+        <tr><td class='mono'>=<b>M*F</td><td>461</td><td class='mono'>=M3*F3</td></tr>
+      </table>
+      <table>
+        <tr><th style="width:30%">填充后（最终）</th><th style="width:8%">计数</th><th>示例公式（原文）</th></tr>
+        <tr><td class='mono'>=<b>M*F</td><td>725</td><td class='mono'>=M3*F3</td></tr>
+      </table>
+      
+    </div>
+    <div class="card">
+      <h3>P &nbsp;·&nbsp; Machining Cost *F列    (RMB) &nbsp;<span class="tag t-yel">统计差异</span></h3>
+      <table>
+        <tr><th style="width:30%">模板（初始）</th><th style="width:8%">计数</th><th>示例公式（原文）</th></tr>
+        <tr><td class='mono'>=<b>O*F</td><td>461</td><td class='mono'>=O3*F3</td></tr>
+      </table>
+      <table>
+        <tr><th style="width:30%">填充后（最终）</th><th style="width:8%">计数</th><th>示例公式（原文）</th></tr>
+        <tr><td class='mono'>=<b>O*F</td><td>725</td><td class='mono'>=O3*F3</td></tr>
+      </table>
+      
+    </div>
+    <div class="card">
+      <h3>R &nbsp;·&nbsp; Finish  Cost *F列  (RMB) &nbsp;<span class="tag t-yel">统计差异</span></h3>
+      <table>
+        <tr><th style="width:30%">模板（初始）</th><th style="width:8%">计数</th><th>示例公式（原文）</th></tr>
+        <tr><td class='mono'>=<b>Q*F</td><td>461</td><td class='mono'>=Q3*F3</td></tr>
+      </table>
+      <table>
+        <tr><th style="width:30%">填充后（最终）</th><th style="width:8%">计数</th><th>示例公式（原文）</th></tr>
+        <tr><td class='mono'>=<b>Q*F</td><td>725</td><td class='mono'>=Q3*F3</td></tr>
+      </table>
+      
+    </div>
+    <div class="card">
+      <h3>T &nbsp;·&nbsp; Powdercoat/paint  Cost *F列   (RMB) &nbsp;<span class="tag t-yel">统计差异</span></h3>
+      <table>
+        <tr><th style="width:30%">模板（初始）</th><th style="width:8%">计数</th><th>示例公式（原文）</th></tr>
+        <tr><td class='mono'>=<b>S*F</td><td>461</td><td class='mono'>=S3*F3</td></tr>
+      </table>
+      <table>
+        <tr><th style="width:30%">填充后（最终）</th><th style="width:8%">计数</th><th>示例公式（原文）</th></tr>
+        <tr><td class='mono'>=<b>S*F</td><td>725</td><td class='mono'>=S3*F3</td></tr>
+      </table>
+      
+    </div>
+    <div class="card">
+      <h3>V &nbsp;·&nbsp; hardware cost*F列(RMB) &nbsp;<span class="tag t-yel">统计差异</span></h3>
+      <table>
+        <tr><th style="width:30%">模板（初始）</th><th style="width:8%">计数</th><th>示例公式（原文）</th></tr>
+        <tr><td class='mono'>=<b>U*F</td><td>461</td><td class='mono'>=U3*F3</td></tr>
+      </table>
+      <table>
+        <tr><th style="width:30%">填充后（最终）</th><th style="width:8%">计数</th><th>示例公式（原文）</th></tr>
+        <tr><td class='mono'>=<b>U*F</td><td>725</td><td class='mono'>=U3*F3</td></tr>
+      </table>
+      
+    </div>
+    <div class="card">
+      <h3>W &nbsp;·&nbsp; Management Cost    (RMB) &nbsp;<span class="tag t-red">内容变更</span></h3>
+      <table>
+        <tr><th style="width:30%">模板（初始）</th><th style="width:8%">计数</th><th>示例公式（原文）</th></tr>
+        <tr><td class='mono'>=<b>(M+O+Q+S+U+Y)*0.1</td><td>290</td><td class='mono'>=(M174+O174+Q174+S174+U174+Y174)*0.1</td></tr><tr><td class='mono'>=<b>(M+O+Q+S+U)*0.1</td><td>171</td><td class='mono'>=(M3+O3+Q3+S3+U3)*0.1</td></tr>
+      </table>
+      <table>
+        <tr><th style="width:30%">填充后（最终）</th><th style="width:8%">计数</th><th>示例公式（原文）</th></tr>
+        <tr><td class='mono'>=<b>(M+O+Q+S+U+Y)*0.1</td><td>725</td><td class='mono'>=(M3+O3+Q3+S3+U3+Y3)*0.1</td></tr>
+      </table>
+      <div class='warn' style='margin-top:8px'>W · Management Cost（管理费/利润）：171 行公式内容被改写：初始 =(M+O+Q+S+U)*0.1 → 填充 =(M+O+Q+S+U+Y)*0.1，基数多出 +Y 一项，计算口径不一致，需业务确认。</div>
+    </div>
+    <div class="card">
+      <h3>X &nbsp;·&nbsp; Management Cost*F列  (RMB) &nbsp;<span class="tag t-yel">统计差异</span></h3>
+      <table>
+        <tr><th style="width:30%">模板（初始）</th><th style="width:8%">计数</th><th>示例公式（原文）</th></tr>
+        <tr><td class='mono'>=<b>W*F</td><td>461</td><td class='mono'>=W3*F3</td></tr>
+      </table>
+      <table>
+        <tr><th style="width:30%">填充后（最终）</th><th style="width:8%">计数</th><th>示例公式（原文）</th></tr>
+        <tr><td class='mono'>=<b>W*F</td><td>725</td><td class='mono'>=W3*F3</td></tr>
+      </table>
+      
+    </div>
+    <div class="card">
+      <h3>Z &nbsp;·&nbsp; Packing Cost*F列    (RMB) &nbsp;<span class="tag t-yel">统计差异</span></h3>
+      <table>
+        <tr><th style="width:30%">模板（初始）</th><th style="width:8%">计数</th><th>示例公式（原文）</th></tr>
+        <tr><td class='mono'>=<b>Y*F</td><td>461</td><td class='mono'>=Y3*F3</td></tr>
+      </table>
+      <table>
+        <tr><th style="width:30%">填充后（最终）</th><th style="width:8%">计数</th><th>示例公式（原文）</th></tr>
+        <tr><td class='mono'>=<b>Y*F</td><td>725</td><td class='mono'>=Y3*F3</td></tr>
+      </table>
+      
+    </div>
+    <div class="card">
+      <h3>AA &nbsp;·&nbsp; HANDLINGXL*0.03（RMB） &nbsp;<span class="tag t-yel">统计差异</span></h3>
+      <table>
+        <tr><th style="width:30%">模板（初始）</th><th style="width:8%">计数</th><th>示例公式（原文）</th></tr>
+        <tr><td class='mono'>=<b>X*0.03</td><td>461</td><td class='mono'>=X3*0.03</td></tr>
+      </table>
+      <table>
+        <tr><th style="width:30%">填充后（最终）</th><th style="width:8%">计数</th><th>示例公式（原文）</th></tr>
+        <tr><td class='mono'>=<b>X*0.03</td><td>725</td><td class='mono'>=X3*0.03</td></tr>
+      </table>
+      
+    </div>
+    <div class="card">
+      <h3>AB &nbsp;·&nbsp; FOB SHANGHAI    (RMB) &nbsp;<span class="tag t-yel">统计差异</span></h3>
+      <table>
+        <tr><th style="width:30%">模板（初始）</th><th style="width:8%">计数</th><th>示例公式（原文）</th></tr>
+        <tr><td class='mono'>=<b>N+P+R+T+V+X+Z+AA</td><td>461</td><td class='mono'>=N3+P3+R3+T3+V3+X3+Z3+AA3</td></tr>
+      </table>
+      <table>
+        <tr><th style="width:30%">填充后（最终）</th><th style="width:8%">计数</th><th>示例公式（原文）</th></tr>
+        <tr><td class='mono'>=<b>N+P+R+T+V+X+Z+AA</td><td>725</td><td class='mono'>=N3+P3+R3+T3+V3+X3+Z3+AA3</td></tr>
+      </table>
+      
+    </div>
+    <div class="card">
+      <h3>AC &nbsp;·&nbsp; SHIPPING（RMB) &nbsp;<span class="tag t-yel">统计差异</span></h3>
+      <table>
+        <tr><th style="width:30%">模板（初始）</th><th style="width:8%">计数</th><th>示例公式（原文）</th></tr>
+        <tr><td class='mono'>=<b>AB*0.12</td><td>426</td><td class='mono'>=AB3*0.12</td></tr>
+      </table>
+      <table>
+        <tr><th style="width:30%">填充后（最终）</th><th style="width:8%">计数</th><th>示例公式（原文）</th></tr>
+        <tr><td class='mono'>=<b>AB*0.12</td><td>725</td><td class='mono'>=AB3*0.12</td></tr>
+      </table>
+      
+    </div>
+    <div class="card">
+      <h3>AD &nbsp;·&nbsp; DAP总价（RMB） &nbsp;<span class="tag t-yel">统计差异</span></h3>
+      <table>
+        <tr><th style="width:30%">模板（初始）</th><th style="width:8%">计数</th><th>示例公式（原文）</th></tr>
+        <tr><td class='mono'>=<b>AB+AC</td><td>461</td><td class='mono'>=AB3+AC3</td></tr>
+      </table>
+      <table>
+        <tr><th style="width:30%">填充后（最终）</th><th style="width:8%">计数</th><th>示例公式（原文）</th></tr>
+        <tr><td class='mono'>=<b>AB+AC</td><td>725</td><td class='mono'>=AB3+AC3</td></tr>
+      </table>
+      
+    </div>
+    <div class="card">
+      <h3>AF &nbsp;·&nbsp; DAP总价（USD） &nbsp;<span class="tag t-yel">统计差异</span></h3>
+      <table>
+        <tr><th style="width:30%">模板（初始）</th><th style="width:8%">计数</th><th>示例公式（原文）</th></tr>
+        <tr><td class='mono'>=<b>AD/6.4</td><td>461</td><td class='mono'>=AD3/6.4</td></tr>
+      </table>
+      <table>
+        <tr><th style="width:30%">填充后（最终）</th><th style="width:8%">计数</th><th>示例公式（原文）</th></tr>
+        <tr><td class='mono'>=<b>AD/6.4</td><td>725</td><td class='mono'>=AD3/6.4</td></tr>
+      </table>
+      
+    </div>
+
+<footer>数据：xlwings 提取 → 归一化签名比对。文件名含不间断空格 \xa0。关联报告：RFQ公式差异与填充问题分析报告.html / RFQ公式内容对比分析.html</footer>
+</div></body></html>

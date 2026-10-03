@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>脑力训练合集 · 21 款</title>
+<style>
+  :root{
+    --bg:#0f1311; --panel:#181d1a; --ink:#e8efe9; --muted:#8b9b93; --line:#262d29;
+    --primary:#34d399; --radius:12px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;overflow:hidden}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--ink);display:flex;flex-direction:column}
+  .bar{display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:1px solid var(--line);background:var(--panel);flex:none}
+  .back{display:inline-flex;align-items:center;gap:6px;padding:7px 11px;border-radius:9px;border:1px solid var(--line);background:var(--panel);color:var(--ink);font-size:12.5px;cursor:pointer;font-weight:700;text-decoration:none}
+  .back:hover{border-color:var(--primary)}
+  .title{font-size:13.5px;font-weight:800;opacity:.95}
+  .spacer{flex:1}
+  .hint{font-size:11.5px;color:var(--muted)}
+  .frame{flex:1;min-height:0;background:#0f1311}
+  .frame iframe{width:100%;height:100%;border:0;display:block}
+  @media(max-width:600px){
+    .bar{padding:8px 10px}
+    .back{padding:6px 9px;font-size:12px}
+    .hint{display:none}
+  }
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+  <div class="bar">
+    <a class="back" href="../index.html" target="_top">← 返回指挥台</a>
+    <div class="title">🧠 脑力训练合集 · 21 款</div>
+    <div class="spacer"></div>
+    <div class="hint">心理旋转 / N-Back / 舒尔特方格 / Stroop 等 · 每款 10 级难度</div>
+  </div>
+  <div class="frame">
+    <iframe src="../../spatial-games/brain-development-games/docs/index.html" title="Brain Development Games" allow="fullscreen"></iframe>
+  </div>
+</body>
+</html>

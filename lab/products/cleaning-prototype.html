@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>图纸元数据清洗原型</title>
+<style>
+  :root{ --bg:#0d1117; --panel:#161b22; --line:#30363d; --fg:#e6edf3; --mut:#8b949e; --acc:#58a6ff; --ok:#3fb950; --warn:#d29922; --bad:#f85149; }
+  *{box-sizing:border-box}
+  body{background:var(--bg);color:var(--fg);font:13px/1.5 -apple-system,"Segoe UI",Roboto,"Microsoft YaHei",sans-serif;margin:0;padding:18px}
+  h1{font-size:17px;margin:0 0 4px}
+  .sub{color:var(--mut);margin:0 0 14px}
+  .rules{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+  .rules label{background:var(--panel);border:1px solid var(--line);padding:6px 10px;border-radius:6px;cursor:pointer;user-select:none;display:flex;align-items:center;gap:6px}
+  .rules input{accent-color:var(--acc)}
+  .stats{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+  .stat{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px 12px;min-width:108px}
+  .stat b{display:block;font-size:18px;color:var(--acc)}
+  .stat span{color:var(--mut);font-size:11px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:900px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:auto;max-height:560px}
+  .card h2{font-size:13px;margin:0;padding:9px 12px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--panel)}
+  table{border-collapse:collapse;width:100%;font-size:12px}
+  th,td{border-bottom:1px solid var(--line);padding:5px 8px;text-align:left;white-space:nowrap}
+  th{color:var(--mut);position:sticky;top:30px;background:var(--panel)}
+  td.miss{color:var(--bad);background:rgba(248,81,73,.08)}
+  td.fix{color:var(--warn);background:rgba(210,153,34,.10)}
+  td.dup{color:var(--mut);text-decoration:line-through;opacity:.6}
+  .legend{color:var(--mut);font-size:11px;margin-top:10px}
+  .legend b{color:var(--fg)}
+  code{background:#1f2630;padding:1px 5px;border-radius:4px;color:#ffa657}
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+<h1>图纸元数据清洗原型</h1>
+<p class="sub">自包含演示 · 仿真脏数据 · 规则可逐项开关 · 无需联网。看效果后告诉我真实字段结构即可对齐。</p>
+
+<div class="rules" id="rules">
+  <label><input type="checkbox" data-r="dedup" checked> 去重（按图号）</label>
+  <label><input type="checkbox" data-r="ver" checked> 版次归并（留最新）</label>
+  <label><input type="checkbox" data-r="norm" checked> 字段标准化</label>
+  <label><input type="checkbox" data-r="enc" checked> 编码修复</label>
+  <label><input type="checkbox" data-r="unit" checked> 单位/重量归一</label>
+  <label><input type="checkbox" data-r="date" checked> 日期归一</label>
+  <label><input type="checkbox" data-r="miss" checked> 缺失标记</label>
+</div>
+
+<div class="stats" id="stats"></div>
+
+<div class="grid">
+  <div class="card"><h2>原始（脏）数据</h2><div id="raw"></div></div>
+  <div class="card"><h2>清洗后数据</h2><div id="clean"></div></div>
+</div>
+
+<p class="legend">
+  <b>图例：</b> <span style="color:var(--bad)">红底</span>=缺失标记 · 
+  <span style="color:var(--warn)">黄底</span>=编码/格式被修正 · 
+  <span style="color:var(--mut)">删除线</span>=被新版次覆盖的旧记录。
+  规则说明见下。
+</p>
+
+<script>window.addEventListener('error',function(e){try{var v=document.getElementById('app')||document.getElementById('view')||document.body;if(!v||v.dataset.err)return;v.dataset.err='1';var s=(e.error&&e.error.stack)||e.message||'';var b=document.createElement('div');b.style.cssText='padding:16px;margin:14px;font-family:ui-monospace,monospace;font-size:13px;color:#a33;background:#fdeceb;border:1px solid #f5c6cb;border-radius:12px;line-height:1.5';b.innerHTML='<b>⚠ 页面出错了</b><br><span style="color:#555">'+(e.message||'')+'</span><pre style="white-space:pre-wrap;margin-top:8px;font-size:11px">'+(s||'').slice(0,1000)+'</pre><small style="color:#666">建议 Ctrl+Shift+R 强刷；F12 → Application → Local Storage 清本页缓存后刷新。</small>';v.insertBefore(b,v.firstChild);}catch(_){}});
+// ---------- 编码修复（mojibake）----------
+function toMojibake(s){const b=new TextEncoder().encode(s);let o="";for(const x of b)o+=String.fromCharCode(x);return o;}
+function fixMojibake(s){
+  // 若含高位 Latin-1 字节，尝试按 UTF-8 重新解码
+  let hasHigh=false; const bytes=[];
+  for(let i=0;i<s.length;i++){const c=s.charCodeAt(i)&0xff; if(c>127)hasHigh=true; bytes.push(c);}
+  if(!hasHigh) return s;
+  try{const r=new TextDecoder("utf-8").decode(new Uint8Array(bytes)); if(r && !/[�]/.test(r)) return r;}catch(e){}
+  return s;
+}
+const MB = s => "MB:"+s; // 标记原始真实值，加载时转成乱码
+
+// ---------- 仿真脏数据集 ----------
+// [图号, 名称, 材料, 重量, 单位, 版本, 设计, 日期, 备注]
+const RAW = [
+  ["HG-2023-001","左支座","Q235","12.5","kg","A","张三","2023/1/5",""],
+  ["hg2023001","左支座","q235","12.5KG","","A","张三","2023-01-05",""],               // 同图号·脏格式
+  ["HG-2023-001","左支座","Q235A","12500","g","B","张三","2023.2.1",""],              // 同图号·新版次B
+  ["HG-2023-002","右支座 ","Q235","13.0","KG","A","李四","2023/01/06",""],
+  ["HG-2023-002","右支座","Q235","","kg","A","李四","2023/1/6","重量缺失"],             // 重量缺
+  ["HG 2023 003"," 法兰盘 ","q235b","8.2","kg","01","王五","2023/3/1",""],
+  ["HG-2023-003","法兰盘","Q235-B","8.2","kg","V1.0","王五","2023-03-01",""],          // 同图号·版次V1.0
+  ["HG-2023-004",MB("主梁焊接件"),"Q345","20","kg","A","赵六","2023/4/1","名称乱码"],
+  ["HG-2023-004",MB("主梁焊接件"),"Q345","20.0","kg","A","赵六","2023/04/01",""],       // 完全重复
+  ["HG-2023-005"," 支撑板 ",MB("不锈钢"),"5.5","kg","C","孙七","2023/5/9",""],
+  ["hg-2023-006","螺栓M10","35#","0.02","kg","A","周八","23-6-1",""],                  // 短年份
+  ["HG2023007","垫圈","Q235","","","A","吴九","2023/7/12","重量&单位缺失"],
+  ["HG-2023-008",MB("齿轮箱体"),"HT200","44","kg","B","郑十","2023/8/3",""],
+  ["HG-2023-008",MB("齿轮箱体"),"HT200","44.0","kg","A","郑十","2023/8/1",""],         // 旧版次A
+  ["HG-2023-009","轴套 ","45钢","3.1","kg","A","张三","2023/9/15",""],
+  ["HG-2023-010"," 法兰盖","Q235B","9.0","KG","A","李四","2023/10/2",""],
+  ["HG-2023-011",MB("联轴器"),"45","6.7","kg","01","王五","2023/11/11",""],
+  ["HG-2023-012"," 支架 ","Q235-A","15","kg","A","赵六","2023/12/1",""],
+  ["HG-2023-013","销轴","35","0.5","kg","A","孙七","2024/1/5",""],
+  ["HG-2023-014"," 端盖","Q345B","7.3","kg","B","周八","2024/2/9","改版"],
+  ["HG-2023-015",MB("油封压盖"),"Q235","4.4","kg","A","吴九","2024/3/22",""],
+  ["HG-2023-016"," 支座 ","Q235","","kg","A","郑十","2024/4/1","缺重量"],
+  ["HG-2023-017","弹簧座","65Mn","2.2","kg","A","张三","2024/5/18",""],
+  ["HG-2023-018",MB("传动轴"),"40Cr","11.8","kg","A","李四","2024/6/30",""],
+  ["HG-2023-019"," 压板","Q235","1.5","KG","A","王五","2024/7/7",""],
+  ["HG-2023-020","定位块","Q235-A","3.0","kg","01","赵六","2024/8/8",""],
+  ["HG-2023-021",MB("轴承座"),"HT250","18","kg","B","孙七","2024/9/9",""],
+  ["HG-2023-022"," 卡板","Q235","0.8","kg","A","周八","2024/10/10",""],
+];
+
+const COLS=["图号","名称","材料","重量(kg)","单位","版本","设计","日期","备注"];
+
+function load(){
+  return RAW.map(r=>{
+    let [no,name,mat,w,unit,ver,des,dt,note]=r;
+    if(typeof name==="string"&&name.startsWith("MB:"))name=fixDisplay(toMojibake(name.slice(3)));
+    if(typeof mat==="string"&&mat.startsWith("MB:"))mat=fixDisplay(toMojibake(mat.slice(3)));
+    return {no,name,mat,w,unit,ver,des,dt,note,raw:r};
+  });
+}
+// 加载时把 MB 标记的真实值先转成乱码，模拟脏数据
+function fixDisplay(s){return s;}
+
+// ---------- 清洗引擎 ----------
+function verScore(v){
+  if(!v) return 0;
+  v=v.trim();
+  if(/^V/i.test(v)){const n=parseFloat(v.slice(1));return isNaN(n)?0:n;}
+  if(/^[A-Za-z]$/i.test(v))return v.toUpperCase().charCodeAt(0)-64;
+  if(/^\d+(\.\d+)?$/.test(v))return parseFloat(v);
+  return 0;
+}
+function normNo(s){return (s||"").toUpperCase().replace(/\s+/g,"").replace(/[^A-Z0-9]/g,"");}
+function normDate(s){
+  if(!s)return "";
+  let m=s.trim().match(/(\d{1,4})[/\-.年](\d{1,2})[/\-.月](\d{1,2})/);
+  if(!m)return s;
+  let [_,y,mo,d]=m; if(y.length===2)y="20"+y;
+  return `${y}-${String(mo).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+}
+function normMat(s){return (s||"").toUpperCase().replace(/\s+/g,"").replace(/-/g,"-");}
+function normName(s){return (s||"").replace(/\s+/g," ").trim();}
+
+function clean(rows,on){
+  const stats={total:rows.length,dedup:0,ver:0,enc:0,unit:0,date:0,miss:0};
+  // 编码修复 + 基础标准化
+  let out=rows.map(r=>{
+    const c={...r};
+    if(on.enc){ const n2=fixMojibake(c.name); if(n2!==c.name){stats.enc++;c.name=n2;} const m2=fixMojibake(c.mat); if(m2!==c.mat){stats.enc++;c.mat=m2;} }
+    if(on.norm){ c.no=c.no.trim(); c.name=normName(c.name); c.mat=normMat(c.mat); }
+    if(on.unit){ if((c.unit||"").toUpperCase()==="G"&&c.w){c.w=(parseFloat(c.w)/1000);c.unit="kg";stats.unit++;} else {c.unit=(c.unit||"").toUpperCase()||"kg"; if(c.w)stats.unit++;} if(c.w)c.w=parseFloat(c.w); }
+    if(on.date){ const d=normDate(c.dt); if(d&&d!==c.dt)stats.date++; c.dt=d; }
+    if(on.miss){ if(!c.w&&!c.unit)stats.miss++; }
+    return c;
+  });
+  // 版次归并
+  if(on.ver){
+    const map={};
+    out.forEach(c=>{const k=normNo(c.no); if(!map[k])map[k]=[]; map[k].push(c);});
+    out.forEach(c=>{const k=normNo(c.no); const grp=map[k]; const top=grp.reduce((a,b)=>verScore(b.ver)>verScore(a.ver)?b:a); if(c!==top){c._superseded=true; stats.ver++;}});
+  }
+  // 去重（完全重复 / 同图号旧版次归并视为去重计数）
+  if(on.dedup){
+    const seen=new Set(); const map={};
+    out=out.filter(c=>{const k=normNo(c.no)+"|"+c.ver; if(seen.has(k)){stats.dedup++;return false;} seen.add(k); return true;});
+  }
+  return {out,stats};
+}
+
+// ---------- 渲染 ----------
+function rowHTML(r,mode){
+  const sup=r._superseded;
+  const miss = (mode==="clean") && (!r.w&&!r.unit);
+  const cells=[r.no,r.name,r.mat,r.w,r.unit,r.ver,r.des,r.dt,r.note].map(v=>{
+    let cls=""; if(mode==="clean"){ if(miss&&(v===r.w||v===r.unit))cls="miss"; }
+    let disp=v===""?"—":v;
+    if(sup)cls+=" dup";
+    return `<td class="${cls.trim()}">${disp}</td>`;
+  });
+  return `<tr>${cells.join("")}</tr>`;
+}
+function render(){
+  const on={}; document.querySelectorAll("#rules input").forEach(i=>on[i.dataset.r]=i.checked);
+  const rows=load();
+  document.getElementById("raw").innerHTML=`<table><tr>${COLS.map(c=>`<th>${c}</th>`).join("")}</tr>${rows.map(r=>rowHTML(r,"raw")).join("")}</table>`;
+  const {out,stats}=clean(rows,on);
+  document.getElementById("clean").innerHTML=`<table><tr>${COLS.map(c=>`<th>${c}</th>`).join("")}</tr>${out.map(r=>rowHTML(r,"clean")).join("")}</table>`;
+  document.getElementById("stats").innerHTML=`
+    <div class="stat"><b>${stats.total}</b><span>原始记录</span></div>
+    <div class="stat"><b>${out.length}</b><span>清洗后保留</span></div>
+    <div class="stat"><b style="color:var(--ok)">${stats.dedup}</b><span>完全去重</span></div>
+    <div class="stat"><b style="color:var(--ok)">${stats.ver}</b><span>版次覆盖</span></div>
+    <div class="stat"><b style="color:var(--warn)">${stats.enc}</b><span>编码修复</span></div>
+    <div class="stat"><b style="color:var(--warn)">${stats.unit}</b><span>单位/重量归一</span></div>
+    <div class="stat"><b style="color:var(--warn)">${stats.date}</b><span>日期归一</span></div>
+    <div class="stat"><b style="color:var(--bad)">${stats.miss}</b><span>缺失标记</span></div>`;
+}
+document.getElementById("rules").addEventListener("change",render);
+render();
+</script>
+</body>
+</html>
