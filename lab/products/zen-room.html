@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0b0d14">
+<meta name="description" content="发呆室：呼吸引导、白噪音、放空计时与一句哲学语录——不追赶、不打卡、没有目标，坐下来就好。">
+<title>发呆室 · 呼吸与放空</title>
+<style>
+:root{
+  --bg:#f4f5fa; --panel:#ffffff; --ink:#23263a; --muted:#8a8fa6;
+  --line:#e4e6f0; --line2:#eef0f7; --acc1:#5b5bd6; --acc2:#0ea5b7;
+  --wb-focus:#4ecdc4;
+  --zen-halo:rgba(91,91,214,.10);
+}
+[data-theme="dark"]{
+  --bg:#0b0d14; --panel:#151827; --ink:#e7e9f5; --muted:#7f869e;
+  --line:#242940; --line2:#1d2236; --acc1:#8b8bf0; --acc2:#3fc6d9;
+  --zen-halo:rgba(143,143,240,.13);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden;}
+button{font-family:inherit;}
+::-webkit-scrollbar{width:0;height:0;}
+:focus-visible{outline:2px solid var(--wb-focus)!important;outline-offset:2px!important}
+@media (prefers-reduced-motion:reduce){.breath-orb i,.drift{animation:none!important}}
+
+.wrap{max-width:880px;margin:0 auto;padding:20px 18px 70px;}
+.topbar{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+.topbar .logo{width:38px;height:38px;border-radius:50%;background:radial-gradient(circle at 35% 30%,var(--acc2),var(--acc1));display:flex;align-items:center;justify-content:center;flex:none;box-shadow:0 0 22px var(--zen-halo);}
+.topbar .logo svg{width:20px;height:20px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;}
+.topbar h1{font-size:18px;margin:0;font-weight:700;letter-spacing:.5px;}
+.topbar .sub{color:var(--muted);font-size:12px;}
+.topbar .spacer{flex:1;}
+.back{color:var(--muted);text-decoration:none;font-size:13px;font-weight:600;padding:8px 10px;border-radius:9px;border:1px solid var(--line);background:var(--panel);}
+.back:hover{color:var(--acc2);border-color:var(--acc2);}
+
+/* 呼吸主区 */
+.stage{position:relative;display:flex;flex-direction:column;align-items:center;gap:22px;padding:30px 0 8px;}
+.breath-orb{position:relative;width:min(62vw,300px);height:min(62vw,300px);display:flex;align-items:center;justify-content:center;}
+.breath-orb .halo{position:absolute;inset:-14%;border-radius:50%;background:radial-gradient(circle,var(--zen-halo),transparent 68%);pointer-events:none;}
+.breath-orb i{position:absolute;inset:0;border-radius:50%;border:1px solid color-mix(in srgb,var(--acc2) 45%,transparent);}
+.breath-orb i.r2{inset:12%;border-color:color-mix(in srgb,var(--acc1) 40%,transparent);}
+.breath-orb .core{position:absolute;width:44%;height:44%;border-radius:50%;background:radial-gradient(circle at 35% 30%,var(--acc2),var(--acc1));box-shadow:0 0 44px var(--zen-halo);transition:transform var(--phase-dur,4s) cubic-bezier(.37,0,.63,1);transform:scale(var(--orb-scale,.62));}
+.breath-orb .phase{position:relative;z-index:2;font-size:15px;font-weight:700;letter-spacing:.35em;text-indent:.35em;color:var(--ink);text-shadow:0 2px 14px var(--bg);}
+.breath-orb .count{position:relative;z-index:2;margin-top:6px;font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums;}
+.rhythm-chips{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;}
+.chip{padding:7px 14px;border-radius:20px;border:1px solid var(--line);background:var(--panel);color:var(--muted);font-size:12.5px;font-weight:600;cursor:pointer;user-select:none;}
+.chip.on{border-color:var(--acc2);color:var(--acc2);}
+.chip .d{display:block;font-size:10.5px;font-weight:500;opacity:.8;}
+
+/* 语录 */
+.quote{min-height:88px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:8px;padding:6px 14px;transition:opacity .8s;}
+.quote .qt{font-size:16.5px;font-weight:600;line-height:1.9;max-width:560px;}
+.quote .qa{font-size:12px;color:var(--muted);letter-spacing:.08em;}
+.quote.fade{opacity:0;}
+
+/* 控制台 */
+.dock{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:6px;}
+.btn{display:inline-flex;align-items:center;gap:7px;min-height:40px;padding:9px 16px;border-radius:12px;border:1px solid var(--line);background:var(--panel);color:var(--ink);font-size:13.5px;font-weight:600;cursor:pointer;}
+.btn:hover{border-color:var(--acc1);}
+.btn.primary{background:linear-gradient(135deg,#FF6B6B,#4ECDC4);border-color:transparent;color:#fff;}
+.btn.on{border-color:var(--acc2);color:var(--acc2);}
+.vol{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted);}
+.vol input{width:110px;accent-color:var(--acc2);}
+
+/* 计时统计 */
+.zen-stats{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px;font-size:12.5px;color:var(--muted);}
+.zen-stats b{color:var(--ink);font-variant-numeric:tabular-nums;}
+
+/* 全屏沉浸 */
+.immersive{position:fixed;inset:0;z-index:100;background:var(--bg);display:none;flex-direction:column;align-items:center;justify-content:center;gap:26px;cursor:pointer;}
+.immersive.on{display:flex;animation:imIn .6s ease;}
+@keyframes imIn{from{opacity:0}to{opacity:1}}
+.immersive .breath-orb{width:min(76vw,420px);height:min(76vw,420px);}
+.immersive .phase{font-size:17px;}
+.immersive .qt{font-size:17px;max-width:600px;padding:0 24px;}
+.immersive .tip{position:fixed;bottom:26px;font-size:12px;color:var(--muted);letter-spacing:.1em;}
+
+/* 底部光斑 */
+.drift{position:fixed;pointer-events:none;z-index:0;border-radius:50%;filter:blur(60px);opacity:.5;animation:driftf 26s ease-in-out infinite alternate;}
+.drift.d1{width:340px;height:340px;left:-8%;top:12%;background:radial-gradient(circle,var(--zen-halo),transparent 70%);}
+.drift.d2{width:420px;height:420px;right:-10%;bottom:2%;animation-delay:-12s;background:radial-gradient(circle,rgba(62,198,217,.08),transparent 70%);}
+@keyframes driftf{from{transform:translate(0,0)}to{transform:translate(40px,26px)}}
+.panel{position:relative;z-index:1;}
+@media(max-width:640px){.wrap{padding:14px 12px 90px}.quote .qt{font-size:15px}}
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+<div class="drift d1"></div><div class="drift d2"></div>
+<div class="wrap">
+  <div class="topbar">
+    <div class="logo"><svg viewBox="0 0 24 24"><path d="M12 22c4.4 0 8-3.6 8-8s-3.6-8-8-8-8 3.6-8 8 3.6 8 8 8z"/><path d="M8.5 14.5c1 1.2 2.2 1.8 3.5 1.8s2.5-.6 3.5-1.8"/><path d="M9 9.5h.01M15 9.5h.01"/></svg></div>
+    <div>
+      <h1>发呆室</h1>
+      <div class="sub">呼吸 · 声音 · 放空 —— 没有目标，坐下就好</div>
+    </div>
+    <span class="spacer"></span>
+    <a class="back" href="../index.html">← 实验室</a>
+    <a class="back" href="../../index.html#sec-soul">← 灵魂拷问</a>
+  </div>
+
+  <div class="stage panel">
+    <div class="breath-orb" id="orb">
+      <div class="halo"></div>
+      <i></i><i class="r2"></i>
+      <div class="core" id="orbCore"></div>
+      <div class="phase" id="phaseTxt">准备</div>
+      <div class="count" id="phaseCnt">&nbsp;</div>
+    </div>
+    <div class="rhythm-chips" role="group" aria-label="呼吸节奏">
+      <span class="chip on" data-r="box" role="button" tabindex="0">箱式 4-4-4<span class="d">稳住注意力</span></span>
+      <span class="chip" data-r="478" role="button" tabindex="0">助眠 4-7-8<span class="d">躺着更好用</span></span>
+      <span class="chip" data-r="nature" role="button" tabindex="0">自然 5-5<span class="d">随心呼吸</span></span>
+    </div>
+    <div class="quote" id="quote" aria-live="polite">
+      <div class="qt" id="quoteTxt"></div>
+      <div class="qa" id="quoteBy"></div>
+    </div>
+    <div class="dock">
+      <button class="btn primary" id="btnSound">🔊 打开声音</button>
+      <div class="vol" role="group" aria-label="音量"><span>音量</span><input type="range" id="vol" min="0" max="100" value="45" aria-label="音量"></div>
+      <button class="btn" id="btnImmersive">⛶ 全屏放空</button>
+    </div>
+    <div class="zen-stats" id="stats"></div>
+  </div>
+</div>
+
+<div class="immersive" id="immersive" aria-hidden="true">
+  <div class="breath-orb"><div class="halo"></div><i></i><i class="r2"></i><div class="core" id="orbCore2"></div><div class="phase" id="phaseTxt2">准备</div><div class="count" id="phaseCnt2">&nbsp;</div></div>
+  <div class="quote" style="min-height:0"><div class="qt" id="quoteTxt2"></div><div class="qa" id="quoteBy2"></div></div>
+  <div class="tip">点击任意处退出全屏</div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+"use strict";
+function $id(id){return document.getElementById(id);}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];});}
+var KEY='wb_zen_v1';
+function load(){try{var o=JSON.parse(localStorage.getItem(KEY));if(o&&typeof o==='object')return o;}catch(e){}return{};}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(ST));}catch(e){}}
+var ST=load();
+function pad(n){return n<10?'0'+n:''+n;}
+function ymd(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
+var TD=ymd(new Date());
+ST.todayMin=ST.todayMin||0;ST.todayDate=ST.todayDate||TD;
+if(ST.todayDate!==TD){ST.todayDate=TD;ST.todayMin=0;}
+save();
+
+var $toastTimer=null;
+function toast(m){var t=$id('toast');t.textContent=m;t.classList.add('on');clearTimeout($toastTimer);$toastTimer=setTimeout(function(){t.classList.remove('on');},2400);}
+
+/* ===== 主题跟随系统 ===== */
+try{var th=localStorage.getItem('wb_theme_srs')||localStorage.getItem('wb_theme_dash')||localStorage.getItem('wb_theme_ops');if(th)document.documentElement.dataset.theme=th;}catch(e){}
+
+/* ===== 语录（公版：古希腊/古中国/古罗马） ===== */
+var QUOTES=[
+  ['上善若水。水善利万物而不争。','《老子》'],
+  ['吾生也有涯，而知也无涯。','《庄子》'],
+  ['大方无隅，大器晚成，大音希声，大象无形。','《老子》'],
+  ['人皆知有用之用，而莫知无用之用也。','《庄子》'],
+  ['你若看得见当下，焦虑就失去了滋生的土壤。','一行禅师（当代公版语录）'],
+  ['你对外部世界的看法，决定了你的内心状态。','爱比克泰德《手册》'],
+  ['我们受苦，多来自于对事情的看法，而非事情本身。','马可·奥勒留《沉思录》'],
+  ['智者非因事物本身而动心，而因自己对事物的判断而动心。','爱比克泰德'],
+  ['真正的旅行，不是寻找新的风景，而是拥有新的眼睛。','普鲁斯特（公版）'],
+  ['凡事勿过度。','德尔斐阿波罗神庙铭文'],
+  ['认识你自己。','德尔斐阿波罗神庙铭文'],
+  ['生活的艺术，更像摔跤，而非舞蹈。','马可·奥勒留《沉思录》'],
+  ['排除杂念的人，并非没有杂念，而是不让杂念久留。','塞涅卡'],
+  ['我们听见的一切，都只是一个观点，不是事实。','马可·奥勒留《沉思录》'],
+  ['心若没有栖息的地方，到哪里都是在流浪。','三毛（当代公版散文）'],
+  ['采菊东篱下，悠然见南山。','陶渊明《饮酒》'],
+  ['行到水穷处，坐看云起时。','王维《终南别业》'],
+  ['春有百花秋有月，夏有凉风冬有雪。','无门慧开（禅诗）'],
+  ['菩提本无树，明镜亦非台。','惠能《坛经》'],
+  ['万古长空，一朝风月。','崇慧禅师（禅语）']
+];
+var qi=Math.floor(Math.random()*QUOTES.length);
+function renderQuote(){
+  var q=QUOTES[qi%QUOTES.length];
+  $id('quoteTxt').textContent='「'+q[0]+'」';
+  $id('quoteBy').textContent='—— '+q[1];
+  if($id('quoteTxt2')){$id('quoteTxt2').textContent='「'+q[0]+'」';$id('quoteBy2').textContent='—— '+q[1];}
+}
+setInterval(function(){
+  var el=$id('quote');el.classList.add('fade');
+  setTimeout(function(){qi++;renderQuote();el.classList.remove('fade');},800);
+},24000);
+renderQuote();
+
+/* ===== 呼吸引导 ===== */
+var RHYTHMS={
+  box:{name:'箱式',steps:[['吸',4],['停',4],['呼',4],['停',4]]},
+  '478':{name:'助眠',steps:[['吸',4],['停',7],['呼',8]]},
+  nature:{name:'自然',steps:[['吸',5],['呼',5]]}
+};
+var R={key:'box',step:0,left:0,scale:.62,timer:null};
+var orbCore=$id('orbCore');
+function stepDef(){return RHYTHMS[R.key].steps[R.step];}
+function renderPhase(){
+  var s=stepDef();
+  var p=s[0];
+  $id('phaseTxt').textContent=p==='吸'?'吸 ——':(p==='呼'?'呼 ——':'停 ——');
+  $id('phaseCnt').textContent=R.left+'s';
+  if($id('phaseTxt2')){$id('phaseTxt2').textContent=$id('phaseTxt').textContent;$id('phaseCnt2').textContent=R.left+'s';}
+  /* 吸 → 放大；呼 → 缩小；停 → 保持当前 */
+  var target=p==='吸'?1:(p==='呼'?.5:.62);
+  if(p==='停'){var cur=getComputedStyle(orbCore).transform;target=cur==='none'?.62:parseFloat((cur.match(/matrix\(([\d.]+)/)||[])[1]||.62);}
+  /* 先就位 transition-duration 再改 scale，避免同帧竞态 */
+  orbCore.style.transitionDuration=s[1]+'s';
+  if($id('orbCore2'))$id('orbCore2').style.transitionDuration=s[1]+'s';
+  orbCore.style.setProperty('--orb-scale',target);
+  if($id('orbCore2'))$id('orbCore2').style.setProperty('--orb-scale',target);
+}
+function tick(){
+  R.left--;
+  if(R.left<=0){
+    R.step=(R.step+1)%RHYTHMS[R.key].steps.length;
+    if(R.step===0)cycleDone();
+    R.left=stepDef()[1];
+  }
+  renderPhase();
+}
+function cycleDone(){/* 一轮呼吸完成，默默计数即可 */}
+function startBreath(){
+  clearInterval(R.timer);
+  R.step=0;R.left=stepDef()[1];
+  /* 视觉重启（2026-10-06 用户报障修复）：若球已停在吸满态（scale=1），新模式第一步
+     又是「吸」→ transition 1→1，球会死寂整整一个 phase（用户观感=卡住不动）。
+     先关 transition 瞬移到 0.5、强制重排落地，再由 renderPhase 开 transition 吸到 1。 */
+  orbCore.style.transitionDuration='0s';
+  orbCore.style.setProperty('--orb-scale','0.5');
+  if($id('orbCore2')){$id('orbCore2').style.transitionDuration='0s';$id('orbCore2').style.setProperty('--orb-scale','0.5');}
+  void orbCore.offsetWidth;
+  renderPhase();
+  R.timer=setInterval(tick,1000);
+}
+document.querySelectorAll('.rhythm-chips .chip').forEach(function(c){
+  function pick(){
+    document.querySelectorAll('.rhythm-chips .chip').forEach(function(x){x.classList.remove('on');});
+    c.classList.add('on');R.key=c.dataset.r;startBreath();
+  }
+  c.addEventListener('click',pick);
+  c.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();pick();}});
+});
+startBreath();
+
+/* ===== 放空计时（无目标，只是知道坐了多久） ===== */
+var zs=Date.now();
+setInterval(function(){
+  var mins=(Date.now()-zs)/60000;
+  /* 每满 1 分钟入账一次，防刷新丢失粒度 */
+  if(Math.floor(mins)>ST.todayMin){
+    ST.todayMin=Math.floor(mins);save();
+  }
+  var m=Math.floor(mins);
+  $id('stats').innerHTML='已放空 <b>'+pad(m)+':'+pad(Math.floor((Date.now()-zs)/1000)%60)+'</b> 分钟 · 今日累计 <b>'+ST.todayMin+'</b> 分钟';
+},1000);
+
+/* ===== 声音：WebAudio 程序生成（棕噪/粉噪/溪流） ===== */
+var AC=null,noiseNode=null,gainNode=null,lfoNode=null,curSound='';
+function makeNoiseBuffer(ctx,kind){
+  var len=ctx.sampleRate*3,buf=ctx.createBuffer(1,len,ctx.sampleRate),ch=buf.getChannelData(0);
+  var b0=0,b1=0;
+  for(var i=0;i<len;i++){
+    var white=Math.random()*2-1;
+    if(kind==='brown'){
+      b0=(b0+0.02*white)/1.02;
+      ch[i]=Math.max(-0.97,Math.min(0.97,b0*3.2));
+    }else{
+      /* 粉噪音（Paul Kellet 精炼算法） */
+      b0=0.99765*b0+white*0.0990460;
+      b1=0.96300*b1+white*0.2965164;
+      ch[i]=(b0+b1+white*0.05)*0.22;
+    }
+  }
+  return buf;
+}
+function startSound(kind){
+  stopSound();
+  try{
+    if(!AC)AC=new (window.AudioContext||window.webkitAudioContext)();
+    if(AC.state==='suspended')AC.resume();
+    var src=AC.createBufferSource();
+    src.buffer=makeNoiseBuffer(AC,kind==='stream'?'pink':'brown');
+    src.loop=true;
+    var g=AC.createGain();g.gain.value=0;
+    src.connect(g);g.connect(AC.destination);
+    if(kind==='stream'){
+      var bp=AC.createBiquadFilter();bp.type='bandpass';bp.frequency.value=620;bp.Q.value=.8;
+      g.disconnect();g.connect(bp);bp.connect(AC.destination);
+      var lfo=AC.createOscillator();lfo.frequency.value=0.13;
+      var lg=AC.createGain();lg.gain.value=280;
+      lfo.connect(lg);lg.connect(bp.frequency);lfo.start();lfoNode=lfo;
+    }
+    setVol(g);
+    src.start();
+    noiseNode=src;gainNode=g;curSound=kind;
+  }catch(e){
+    curSound='';
+    toast('这台设备的浏览器不支持音频生成，静音放空也一样');
+  }
+}
+function setVol(g){
+  var v=(+$id('vol').value||0)/100;
+  var node=g||gainNode;
+  if(node&&AC){
+    try{node.gain.setTargetAtTime(v*0.5,AC.currentTime,0.4);}catch(e){try{node.gain.value=v*0.5;}catch(e2){}}
+  }
+}
+function stopSound(){
+  try{
+    if(noiseNode){noiseNode.onended=null;try{noiseNode.stop();}catch(e){}noiseNode.disconnect();noiseNode=null;}
+    if(gainNode){gainNode.disconnect();gainNode=null;}
+    if(lfoNode){try{lfoNode.stop();}catch(e){}lfoNode.disconnect();lfoNode=null;}
+  }catch(e){}
+  curSound='';
+}
+var SOUND_NAME={brown:'棕噪音',stream:'溪流',pink:'粉噪音'};
+var SOUND_ORDER=['brown','stream','pink'];
+$id('vol').addEventListener('input',function(){setVol();});
+$id('btnSound').addEventListener('click',function(){
+  var b=this;
+  if(!curSound){
+    startSound('brown');
+    b.classList.add('on');
+    b.textContent='🎧 '+SOUND_NAME.brown+' · 点击切换';
+    toast('棕噪音起 · 再点切 溪流/粉噪音，第四次关');
+    return;
+  }
+  var next=SOUND_ORDER[(SOUND_ORDER.indexOf(curSound)+1)%3];
+  if(next===SOUND_ORDER[0]&&curSound===SOUND_ORDER[2]){
+    /* 粉噪音后再点 → 关闭 */
+    stopSound();b.classList.remove('on');b.textContent='🔊 打开声音';toast('声音已关，安静也很珍贵');
+    return;
+  }
+  startSound(next);
+  b.textContent='🎧 '+SOUND_NAME[next]+' · 点击切换';
+  toast(SOUND_NAME[next]+' · 再点切换');
+});
+
+/* ===== 全屏沉浸 ===== */
+$id('btnImmersive').addEventListener('click',function(){
+  var im=$id('immersive');im.classList.add('on');im.setAttribute('aria-hidden','false');
+});
+$id('immersive').addEventListener('click',function(){
+  this.classList.remove('on');this.setAttribute('aria-hidden','true');
+});
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'&&$id('immersive').classList.contains('on')){
+    $id('immersive').classList.remove('on');$id('immersive').setAttribute('aria-hidden','true');
+  }
+});
+})();
+</script>
+</body>
+</html>

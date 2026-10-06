@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>3D 沉浸式云游 · 城市漫游</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#050a18">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --sky:#050a18; --ink:#e7eef6; --dim:#9db2cc; --line:rgba(103,158,209,.35);
+  --accent:#22d3ee; --card:rgba(10,18,38,.82); --card-line:rgba(96,165,250,.35);
+  --good:#3dd68c; --danger:#ff5c7a;
+}
+html,body{height:100%;overflow:hidden;background:var(--sky);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",sans-serif;}
+#app{position:fixed;inset:0}
+canvas#view{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:grab;touch-action:none}
+canvas#view.drag{cursor:grabbing}
+
+/* ===== 顶栏 ===== */
+#topbar{position:absolute;top:0;left:0;right:0;z-index:10;display:flex;align-items:center;gap:10px;
+  padding:12px 14px;padding-top:calc(12px + env(safe-area-inset-top));background:linear-gradient(180deg,rgba(4,9,24,.66),rgba(4,9,24,0));
+  pointer-events:none}
+#brand{font-size:15px;font-weight:700;letter-spacing:.02em;pointer-events:auto;display:flex;align-items:center;gap:8px}
+#backlink{pointer-events:auto;flex:none;display:inline-flex;align-items:center;gap:5px;padding:7px 12px;border-radius:999px;border:1px solid var(--line);background:rgba(10,18,38,.62);color:var(--ink);text-decoration:none;font-size:12.5px;font-weight:700;backdrop-filter:blur(6px);transition:.18s}
+#backlink:hover{border-color:var(--accent);color:#fff}
+#brand .dot{width:9px;height:9px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px var(--accent);animation:pulse 2.2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.75)}}
+#citybar{display:flex;gap:6px;flex-wrap:wrap;pointer-events:auto;margin-left:auto;justify-content:flex-end}
+.chip{padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:rgba(10,18,38,.55);
+  color:var(--dim);font-size:12.5px;font-weight:600;cursor:pointer;transition:.18s;backdrop-filter:blur(6px);white-space:nowrap}
+.chip:hover{color:#fff;border-color:var(--accent)}
+.chip.on{color:#06212e;background:var(--accent);border-color:var(--accent);box-shadow:0 0 14px rgba(34,211,238,.5)}
+
+/* ===== 右上工具 ===== */
+#tools{position:absolute;top:64px;right:14px;z-index:10;display:flex;gap:8px;flex-direction:column;pointer-events:auto}
+.tbtn{width:40px;height:40px;border-radius:12px;border:1px solid var(--line);background:rgba(10,18,38,.6);
+  color:var(--dim);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.18s;backdrop-filter:blur(6px)}
+.tbtn:hover{color:#fff;border-color:var(--accent);transform:translateY(-1px)}
+.tbtn svg{width:19px;height:19px}
+
+/* ===== POI 侧栏 ===== */
+#poi{position:absolute;left:14px;top:64px;z-index:10;width:210px;pointer-events:auto}
+#poi h4{font-size:11px;letter-spacing:.14em;color:var(--dim);margin:0 4px 8px;font-weight:700}
+.poiitem{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;margin-bottom:4px;
+  border:1px solid transparent;cursor:pointer;transition:.18s;background:transparent}
+.poiitem:hover{background:rgba(34,211,238,.08);border-color:var(--card-line)}
+.poiitem.on{background:rgba(34,211,238,.12);border-color:var(--accent)}
+.poiitem .pdot{width:8px;height:8px;border-radius:50%;flex:none;box-shadow:0 0 8px currentColor}
+.poiitem .pnm{font-size:12.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* ===== 提示条 ===== */
+#hint{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom));z-index:10;
+  padding:8px 16px;border-radius:999px;font-size:12px;color:var(--dim);background:rgba(10,18,38,.55);
+  border:1px solid var(--line);backdrop-filter:blur(6px);white-space:nowrap;pointer-events:none}
+
+/* ===== 开场覆盖 ===== */
+#intro{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;background:radial-gradient(120% 90% at 50% 0%,#0a1c33,#050a18 70%);flex-direction:column;text-align:center}
+#intro.hide{opacity:0;pointer-events:none;transition:opacity .9s ease .2s}
+#intro .t1{font-size:13px;letter-spacing:.34em;color:var(--accent);margin-bottom:14px;font-weight:600}
+#intro .t2{font-size:44px;font-weight:800;letter-spacing:.04em;text-shadow:0 6px 40px rgba(34,211,238,.35)}
+#intro .t3{margin-top:12px;font-size:13px;color:var(--dim);letter-spacing:.05em}
+#intro .play{margin-top:28px;padding:12px 30px;border-radius:999px;border:none;cursor:pointer;
+  background:var(--accent);color:#06212e;font-weight:700;font-size:14px;letter-spacing:.1em;
+  box-shadow:0 0 24px rgba(34,211,238,.5);transition:.2s}
+#intro .play:hover{transform:translateY(-2px);box-shadow:0 0 34px rgba(34,211,238,.7)}
+#intro .skip{margin-top:12px;padding:8px 14px;background:none;border:none;color:var(--dim);font-size:12px;cursor:pointer}
+
+/* ===== 地标信息卡 ===== */
+#info{position:absolute;left:50%;transform:translateX(-50%) translateY(20px);bottom:calc(64px + env(safe-area-inset-bottom));z-index:12;
+  width:min(560px,92vw);background:var(--card);border:1px solid var(--card-line);border-radius:18px;padding:16px 18px;
+  box-shadow:0 18px 60px rgba(0,0,0,.5);backdrop-filter:blur(14px);opacity:0;pointer-events:none;transition:.28s}
+#info.show{opacity:1;pointer-events:auto;transform:translateX(-50%) translateY(0)}
+#info .ih{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+#info .ih .idot{width:11px;height:11px;border-radius:50%;box-shadow:0 0 10px currentColor}
+#info .ih .inm{font-size:18px;font-weight:800;letter-spacing:.01em}
+#info .ih .iclose{margin-left:auto;width:28px;height:28px;border-radius:8px;border:none;background:rgba(255,255,255,.08);color:var(--dim);cursor:pointer;font-size:16px}
+#info .icn{font-size:13px;color:#cfdcee;line-height:1.7;margin-bottom:12px}
+#info .shops b{display:block;font-size:12px;color:var(--accent);letter-spacing:.12em;margin-bottom:8px}
+#info .shop{display:flex;align-items:center;gap:8px;font-size:13px;color:#e4ecf8;padding:7px 0;border-top:1px dashed rgba(96,165,250,.2)}
+#info .shop .sd{width:8px;height:8px;border-radius:50%;background:var(--good);flex:none}
+#info .shop .st{color:var(--dim);font-size:12px;margin-left:auto;flex:none}
+#info .shop .ds{color:#7fe9bd;font-size:12px;flex:none;margin-left:10px}
+
+/* 移动端适配 */
+@media (max-width:600px){
+  #brand span.txt{display:none}
+  #citybar{gap:5px}
+  .chip{padding:5px 10px;font-size:11.5px}
+  #poi{width:150px;left:10px;top:62px}
+  #tools{right:10px;top:62px}
+  #intro .t2{font-size:34px}
+  #hint{font-size:11px;padding:7px 12px}
+}
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+<div id="app">
+  <canvas id="view"></canvas>
+
+  <div id="topbar">
+    <a id="backlink" href="../index.html" title="返回 Lab 子系统">← Lab</a>
+    <div id="brand"><span class="dot"></span><span class="txt">沉浸式云游</span></div>
+    <div id="citybar"></div>
+  </div>
+
+  <div id="tools">
+    <button class="tbtn" id="btnTheme" title="昼夜切换">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+    </button>
+    <button class="tbtn" id="btnReplay" title="重播开场">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v4h4"/></svg>
+    </button>
+  </div>
+
+  <div id="poi"><h4>城市地标</h4><div id="poiList"></div></div>
+
+  <div id="info">
+    <div class="ih"><span class="idot" id="infoDot"></span><span class="inm" id="infoName"></span>
+      <button class="iclose" id="infoClose" title="关闭">✕</button></div>
+    <div class="icn" id="infoDesc"></div>
+    <div class="shops"><b>附近好店 · 逛吃指南</b><div id="infoShops"></div></div>
+  </div>
+
+  <div id="hint">拖拽旋转 · 滚轮 / 双指缩放 · 点击地标查看介绍</div>
+</div>
+
+<div id="intro">
+  <div class="t1">CITY · IMMERSION</div>
+  <div class="t2" id="introName">云游上海</div>
+  <div class="t3" id="introSub">电影级运镜 · 带你俯瞰地标云集之城</div>
+  <button class="play" id="introPlay">开始漫游</button>
+  <button class="skip" id="introSkip">跳过</button>
+</div>
+
+<script>
+(function(){
+'use strict';
+var cv=document.getElementById('view'), ctx=cv.getContext('2d');
+window.addEventListener('error',function(e){
+  var box=document.createElement('pre');box.style.cssText='position:fixed;left:12px;right:12px;bottom:12px;z-index:9999;margin:0;padding:12px;border:1px solid #ff5c7a;border-radius:10px;background:#2a0d18;color:#ffd8df;font:12px/1.5 monospace;white-space:pre-wrap';
+  box.textContent='渲染错误：'+(e.message||'未知错误');document.body.appendChild(box);
+});
+var W=0,H=0,f=0,cx=0,cy0=0;
+function resize(){W=cv.width=window.innerWidth;H=cv.height=window.innerHeight;f=H*1.35;cx=W/2;cy0=H/2;}
+window.addEventListener('resize',resize);resize();
+
+/* ---------- 调色板 ---------- */
+var PAL={
+ night:{sky:['#050a18','#0a1c33','#123a55'],fog:'#0a1830',ground:'#0b1120',grid:'rgba(34,211,238,.10)',gridA:'rgba(34,211,238,.28)',
+   bld:['#16324f','#1c3f63','#25466b','#313a6b','#203a5e','#2f4b7c','#143d5f'],star:'#cfe6ff',
+   water:'rgba(20,40,70,.72)',waterL:'rgba(34,211,238,.28)',land:['#ff3b5c','#ffc24b','#22d3ee','#3dd68c','#a78bfa','#ff8a5c']},
+ day:{sky:['#9fd0ff','#cfe8ff','#e8f6ff'],fog:'#dfeaf3',ground:'#9fb6c9',grid:'rgba(255,255,255,.30)',gridA:'rgba(46,112,180,.40)',
+   bld:['#cfdbe6','#b8cddd','#a9bfd2','#c2d3e0','#a5bdd4','#8fb0c9','#b8c6d2'],star:'', 
+   water:'rgba(80,140,190,.6)',waterL:'rgba(255,255,255,.5)',land:['#c0392b','#c07a1b','#1f7ac0','#2e8b57','#7c5cc4','#d2603a']}
+};
+var pal=PAL.night, mode='night';
+
+/* ---------- 随机 ---------- */
+function rng(seed){var t=seed>>>0;return function(){t+=0x6D2B79F5;var r=Math.imul(t^t>>>15,1|t);r^=r+Math.imul(r^r>>>7,61|r);return((r^r>>>14)>>>0)/4294967296;};}
+function pick(a,r){return a[Math.floor(r()*a.length)];}
+
+/* ---------- 城市数据 ---------- */
+var CITIES=[
+ {id:'sh',name:'上海',tag:'魔都 · 黄浦江畔',seed:7,landmarks:[
+  {name:'东方明珠塔',x:-60,z:-150,c:'#ff3b5c',intro:'陆家嘴金融地标，高 468 米，由三根立柱与 11 个大小球体构成，红色球舱是它最醒目的记忆点，登塔可俯瞰外滩与浦江夜色。',
+    shops:[{n:'正大广场',t:'购物',d:'300m'},{n:'环球金融中心',t:'餐饮',d:'500m'},{n:'上海之巅观景台',t:'景点',d:'700m'}],
+    shape:function(){return [box(0,0,0,8,8,120,'#a8b8cc'),sphere(0,132,0,13,'#ff3b5c'),box(0,112,0,24,24,36,'#a8b8cc'),sphere(0,168,0,8,'#ff3b5c'),box(0,170,0,3,3,30,'#a8b8cc')];},anchor:210},
+  {name:'上海中心大厦',x:170,z:-120,c:'#22d3ee',intro:'632 米中国第一高楼，"龙卷风"式螺旋扭转外形。118 层"上海之巅"观光层是这座城市新的制高点。',
+    shops:[{n:'陆家嘴中心L+Mall',t:'购物',d:'350m'},{n:'云朵下午茶',t:'餐饮',d:'450m'}],
+    shape:function(){var s=[];for(var i=0;i<14;i++){var w=46-i*2.6,h=22,y0=i*20;s.push(box(0,y0,0,w,w,h,'#bfe8ff'));}s.push(sphere(0,286,0,5,'#22d3ee'));return s;},anchor:292},
+  {name:'金茂大厦',x:60,z:-230,c:'#ffc24b',intro:'88 层 420 米，1998 年落成的塔形地标，顶部逐层收分，与东方明珠、上海中心构成陆家嘴天际线。',
+    shops:[{n:'金茂观光厅',t:'景点',d:'0m'},{n:'晶品广场',t:'购物',d:'400m'}],
+    shape:function(){var s=[box(0,0,0,44,44,60,'#d8b16a')];for(var i=0;i<12;i++){var w=44-i*2.8,h=16,y0=60+i*15;s.push(box(0,y0,0,w,w,h,'#e6c37f'));}return s;},anchor:246},
+  {name:'外滩',x:-260,z:-40,c:'#3dd68c',intro:'黄浦江西岸的"万国建筑博览群"，十里洋场旧梦。入夜华灯初上，隔江对望陆家嘴摩天森林。',
+    shops:[{n:'外滩源',t:'文化',d:'200m'},{n:'和平饭店',t:'住宿',d:'400m'},{n:'半岛下午茶',t:'餐饮',d:'600m'}],
+    shape:function(){var s=[],y=0;for(var i=0;i<9;i++){var w=34,h=46+(i%3)*16;s.push(box(-90+i*38,0,0,w,w*0.6,h,'#dfe4ea'));s.push(box(-86+i*38,h-6,0,w+4,w*0.6+2,6,'#7fb2d9'));}return s;},anchor:70},
+  {name:'豫园',x:-120,z:150,c:'#a78bfa',intro:'明代江南古典园林，亭台楼阁错落。紧邻城隍庙与老城厢，浓缩上海六百年的烟火气。',
+    shops:[{n:'豫园商城',t:'购物',d:'100m'},{n:'城隍庙小吃',t:'餐饮',d:'150m'},{n:'老城隍庙',t:'景点',d:'50m'}],
+    shape:function(){var s=[];for(var i=0;i<3;i++){s.push(box(i*26,0,-i*10,22,22,34,'#b56a5a'));s.push(box(i*26,34,-i*10,16,16,10,'#7aa37a'));s.push(box(i*26,44,-i*10,22,22,8,'#6f9a6f'));}return s;},anchor:60},
+  {name:'外白渡桥',x:-30,z:40,c:'#ff8a5c',intro:'百年钢桁架桥，横跨苏州河入江口，老上海的时代地标，多部电影在此取景。',
+    shops:[{n:'北外滩滨江',t:'景点',d:'300m'},{n:'原邮政博物馆',t:'文化',d:'500m'}],
+    shape:function(){var s=[];for(var i=0;i<8;i++)s.push(box(-70+i*20,18,-8,16,16,16,'#9aa7b8'));s.push(box(0,0,0,0,0,0,'#9aa7b8'));s.push(box(-70,0,-10,10,20,10,'#7d8a9c'));s.push(box(70,0,10,10,20,10,'#7d8a9c'));return s;},anchor:42}],
+   water:[-160,0]},
+ {id:'bj',name:'北京',tag:'古都 · 中轴气象',seed:21,landmarks:[
+  {name:'天安门',x:0,z:-120,c:'#ff3b5c',intro:'明清皇城正门，红墙金瓦，1949 年开国大典与历次阅兵在此举行，是国家的象征。',
+    shops:[{n:'故宫',t:'景点',d:'1km'},{n:'王府井大街',t:'购物',d:'1.5km'}],
+    shape:function(){return [box(0,0,0,120,120,26,'#c0392b'),box(0,30,0,30,30,30,'#c0392b'),box(-46,26,0,16,10,10,'#d8b16a'),box(46,26,0,16,10,10,'#d8b16a'),sphere(0,64,0,6,'#ffc24b')];},anchor:74},
+  {name:'故宫',x:150,z:-60,c:'#ffc24b',intro:'明清两代皇家宫殿，世界现存最大木质古建筑群，中轴线与琉璃瓦见证六百年帝制风华。',
+    shops:[{n:'景山公园',t:'景点',d:'500m'},{n:'南锣鼓巷',t:'小吃',d:'2km'}],
+    shape:function(){var s=[];for(var i=0;i<6;i++)s.push(box(i*56-140,0,0,44,44,30,'#d98a4a'));for(i=0;i<6;i++)s.push(box(i*56-140,30,0,30,30,12,'#d8b16a'));s.push(box(0,42,0,180,180,16,'#8a2f2f'));return s;},anchor:62},
+  {name:'鸟巢',x:-150,z:60,c:'#3dd68c',intro:'2008 北京奥运主体育场，编织式钢结构的"鸟巢"，承载无数体育记忆。',
+    shops:[{n:'奥林匹克公园',t:'景点',d:'200m'},{n:'水立方',t:'景点',d:'300m'}],
+    shape:function(){var s=[];for(var i=0;i<8;i++){var a=i*Math.PI/4;var x=Math.cos(a)*70,z=Math.sin(a)*70;s.push(box(x,0,z,10,10,60,'#9aa7b8'));s.push(box(x*0.9,56,z*0.9,10,10,8,'#c8d2de'));}s.push(sphere(0,64,0,6,'#3dd68c'));return s;},anchor:72},
+  {name:'央视大楼',x:230,z:80,c:'#22d3ee',intro:'悬挑结构"大裤衩"，由两座斜塔与顶部连廊构成，是长安街边最前卫的地标。',
+    shops:[{n:'国贸商城',t:'购物',d:'800m'},{n:'三里屯',t:'餐饮',d:'1.5km'}],
+    shape:function(){return [box(0,0,0,22,22,140,'#bfe8ff'),box(-18,0,0,10,10,90,'#bfe8ff'),box(18,0,0,10,10,90,'#bfe8ff'),box(0,130,0,24,24,16,'#bfe8ff')];},anchor:150},
+  {name:'长城',x:-70,z:220,c:'#ff8a5c',intro:'八达岭段雄踞山脊，万里长城是世界文化遗产，蜿蜒如龙守护北疆。',
+    shops:[{n:'八达岭景区',t:'景点',d:'0m'}],
+    shape:function(){var s=[];for(var i=0;i<12;i++)s.push(box(-120+i*22,0,-40+Math.sin(i*0.6)*34,12,12,16,'#c9b49a'));for(i=0;i<5;i++){s.push(box(-120+i*66,14,-40+Math.sin(i*3)*40,6,16,12,'#a8917a'));}return s;},anchor:36}],
+   water:null},
+ {id:'sz',name:'深圳',tag:'鹏城 · 湾区新潮',seed:33,landmarks:[
+  {name:'平安金融中心',x:0,z:-150,c:'#22d3ee',intro:'深圳第一高楼 599 米，莲花山畔的"深圳之巅"，双层观光厅 116 层俯瞰湾城。',
+    shops:[{n:'平安金融中心商场',t:'购物',d:'100m'},{n:'福田CBD',t:'餐饮',d:'500m'}],
+    shape:function(){var s=[box(0,0,0,52,52,80,'#bfe8ff')];for(var i=0;i<13;i++){var w=52-i*2.4,h=18,y0=80+i*17;s.push(box(0,y0,0,w,w,h,'#cfeeff'));}return s;},anchor:300},
+  {name:'腾讯滨海大厦',x:180,z:-80,c:'#3dd68c',intro:'腾讯总部，双塔中部以连廊相接，滨海大道上最具未来感的园区地标。',
+    shops:[{n:'深业上城',t:'购物',d:'700m'},{n:'深圳湾公园',t:'景点',d:'2km'}],
+    shape:function(){return [box(-26,0,0,26,26,150,'#a9f0c8'),box(26,0,0,26,26,150,'#a9f0c8'),box(0,120,0,26,26,14,'#8fe6bb')];},anchor:158},
+  {name:'京基100',x:-170,z:40,c:'#ffc24b',intro:'441 米罗湖地标，塔身呈流线收分，与地王大厦共同撑起老城天际线。',
+    shops:[{n:'万象城',t:'购物',d:'300m'},{n:'东门步行街',t:'小吃',d:'1km'}],
+    shape:function(){var s=[box(0,0,0,46,46,60,'#e6c37f')];for(var i=0;i<11;i++){var w=46-i*3,h=18,y0=60+i*16;s.push(box(0,y0,0,w,w,h,'#f0d69a'));}return s;},anchor:240}],
+   water:[120,0]},
+ {id:'cd',name:'成都',tag:'天府 · 烟火闲适',seed:41,landmarks:[
+  {name:'天府熊猫塔',x:0,z:-150,c:'#22d3ee',intro:'339 米"天府之眼"电视塔，塔身随灯光变幻，锦江畔的夜空中最亮的坐标。',
+    shops:[{n:'锦江夜游',t:'景点',d:'500m'},{n:'建设路小吃街',t:'餐饮',d:'800m'}],
+    shape:function(){return [box(0,0,0,10,10,120,'#d9e4ee'),sphere(0,150,0,12,'#22d3ee'),box(0,152,0,4,4,40,'#d9e4ee'),sphere(0,198,0,5,'#22d3ee')];},anchor:206},
+  {name:'宽窄巷子',x:160,z:-60,c:'#ff8a5c',intro:'清代古街区，宽、窄、井三巷纵横，青砖黛瓦里装着成都最松弛的慢生活。',
+    shops:[{n:'人民公园',t:'景点',d:'600m'},{n:'鹤鸣茶社',t:'茶饮',d:'650m'}],
+    shape:function(){var s=[];for(var i=0;i<6;i++)s.push(box(-60+i*24,0,-14,18,18,16,'#b56a5a'));for(i=0;i<6;i++)s.push(box(-60+i*24,16,-14,12,12,8,'#8a4f44'));s.push(box(-40,0,14,20,20,16,'#b56a5a'));return s;},anchor:30},
+  {name:'春熙路',x:-150,z:90,c:'#a78bfa',intro:'百年商业街，时尚地标与市井美食并存，成都烟火气的第一站。',
+    shops:[{n:'太古里',t:'购物',d:'200m'},{n:'龙抄手总店',t:'小吃',d:'400m'}],
+    shape:function(){var s=[box(0,0,0,80,80,20,'#e0c8a8')];for(var i=0;i<4;i++)s.push(box(-30+i*20,22,-10,12,12,10,'#cfa97c'));return s;},anchor:36}],
+   water:null},
+ {id:'hz',name:'杭州',tag:'天堂 · 湖光山色',seed:55,landmarks:[
+  {name:'雷峰塔',x:0,z:-140,c:'#ffc24b',intro:'西湖十景"雷峰夕照"，白娘子传说的发生地。塔身五重飞檐，倒影摇曳在湖面。',
+    shops:[{n:'西湖游船',t:'景点',d:'300m'},{n:'河坊街',t:'小吃',d:'1km'}],
+    shape:function(){var s=[box(0,0,0,40,40,14,'#9a6f4f')];for(var i=0;i<5;i++){var w=34-i*4,h=18,y0=14+i*26;s.push(box(0,y0,0,w,w,h,'#b98a5f'));s.push(box(0,y0+h-2,0,w+8,w+8,5,'#8a5f44'));}s.push(box(0,146,0,6,6,20,'#b98a5f'));return s;},anchor:168},
+  {name:'西湖',x:160,z:-30,c:'#3dd68c',intro:'三面云山一面城，苏堤春晓、断桥残雪，四季皆景的人间天堂。',
+    shops:[{n:'断桥残雪',t:'景点',d:'1km'},{n:'龙井村',t:'茶饮',d:'3km'}],
+    shape:function(){var s=[box(0,0,0,150,150,8,'#d4e6d0')];for(var i=0;i<4;i++)s.push(box(-40+i*30,10,-20,6,6,26,'#a8c9a3'));return s;},anchor:22},
+  {name:'钱江新城',x:-170,z:90,c:'#22d3ee',intro:'拥江发展的现代 CBD，日月同辉的双子建筑与钱塘江灯光秀相映成辉。',
+    shops:[{n:'来福士',t:'购物',d:'200m'},{n:'城市阳台',t:'景点',d:'150m'}],
+    shape:function(){return [box(-30,0,0,28,28,150,'#bfe8ff'),box(30,0,0,28,28,150,'#bfe8ff'),box(0,138,0,26,26,12,'#9cd6f5'),box(0,150,0,10,10,14,'#22d3ee')];},anchor:164}],
+   water:[-100,-60]},
+ {id:'gz',name:'赣州',tag:'宋城 · 客家摇篮',seed:61,landmarks:[
+  {name:'赣州古城墙',x:-20,z:-130,c:'#ff8a5c',intro:'临江而立的宋明城墙，蜿蜒近三千米，是江南现存规模最大的古城墙之一，砖石间藏着赣州六百年的砖墙故事。',
+    shops:[{n:'城墙遗址博物馆',t:'文化',d:'200m'},{n:'涌金门码头',t:'景点',d:'400m'},{n:'赣江风光带',t:'景点',d:'500m'}],
+    shape:function(){var s=[];for(var i=0;i<12;i++){s.push(box(-110+i*22,0,-10,20,20,30,'#b5855a'));if(i%2===0)s.push(box(-98+i*22,30,-10,8,8,14,'#9a6f4f'));}return s;},anchor:48},
+  {name:'八境台',x:70,z:-180,c:'#ffc24b',intro:'建在古城墙上的楼台，登此可眺八境，苏轼曾题"八境初由故郡来"，是俯瞰赣江与古城的最佳观景点。',
+    shops:[{n:'八境公园',t:'景点',d:'150m'},{n:'赣江夜游',t:'景点',d:'600m'}],
+    shape:function(){return [box(0,0,0,40,40,26,'#9a6f4f'),box(-14,26,0,12,12,12,'#b98a5f'),box(14,26,0,12,12,12,'#b98a5f'),box(0,38,0,20,20,12,'#8a5f44'),box(0,50,0,6,6,18,'#d8b16a')];},anchor:70},
+  {name:'郁孤台',x:-170,z:-60,c:'#a78bfa',intro:'辛弃疾"郁孤台下清江水"的咏叹之地，南宋词人登台怀古，台名源自郁孤屹立于章江之畔。',
+    shops:[{n:'郁孤台历史文化街区',t:'文化',d:'300m'},{n:'赣州老街',t:'小吃',d:'500m'}],
+    shape:function(){var s=[box(0,0,0,30,30,20,'#b5855a')];for(var i=0;i<2;i++){var w=24-i*6,h=16,y0=20+i*18;s.push(box(0,y0,0,w,w,h,'#c99a6f'));s.push(box(0,y0+h-2,0,w+6,w+6,5,'#8a5f44'));}s.push(box(0,76,0,5,5,16,'#b5855a'));return s;},anchor:96},
+  {name:'通天岩',x:150,z:90,c:'#3dd68c',intro:'江南最大的石窟艺术宝库，摩崖造像与历代题刻密布，丹霞幽谷间藏着千年的宗教之美。',
+    shops:[{n:'通天岩石窟',t:'景点',d:'0m'},{n:'赣南植物园',t:'景点',d:'800m'}],
+    shape:function(){var s=[];for(var i=0;i<7;i++)s.push(box(-70+i*24,0,0,20,20,44,'#7d9a6f'));for(i=0;i<3;i++)s.push(sphere(-28+i*30,60,0,10,'#5f8a5f'));return s;},anchor:74},
+  {name:'客家文化城',x:-60,z:190,c:'#22d3ee',intro:'客家先民南迁集散的故地，围屋与方形土楼交织，承载客家人耕读传家的千年记忆。',
+    shops:[{n:'客家围屋',t:'文化',d:'100m'},{n:'客家美食街',t:'餐饮',d:'300m'}],
+    shape:function(){var s=[box(0,0,0,90,90,18,'#c9b49a')];for(var i=0;i<4;i++){s.push(box(-36+i*24,18,-16,16,16,30,'#a8917a'));}s.push(box(0,48,0,14,14,8,'#8a2f2f'));return s;},anchor:58}],
+   water:[-110,-150]}
+];
+
+/* ---------- 3D 世界构建 ---------- */
+function box(x,y0,z,w,d,h,c){return {type:'box',x:x,y0:y0,z:z,w:w,d:d,h:h,c:c};}
+function sphere(x,y,z,r,c){return {type:'sphere',x:x,y:y,z:z,r:r,c:c};}
+
+var world={boxes:[],land:[],anchor:[]};
+function rebuild(city){
+  world.boxes=[]; world.land=[]; world.anchor=[];
+  var c=city;
+  // 地标
+  var i,r;
+  for(i=0;i<c.landmarks.length;i++){
+    var L=c.landmarks[i];
+    var segs=L.shape();
+    for(r=0;r<segs.length;r++){
+      var s=segs[r];
+      if(s.type==='box'){
+        world.boxes.push({cx:L.x+s.x,cy:s.y0+s.h/2,cz:L.z+s.z,w:s.w,h:s.h,d:s.d,c:s.c});
+      }else{
+        world.land.push({type:'sphere',cx:L.x+s.x,cy:s.y,cz:L.z+s.z,r:s.r,c:s.c});
+      }
+    }
+    world.anchor.push({x:L.x,z:L.z,y:L.anchor,name:L.name,c:L.c,land:L});
+  }
+  // 天际线建筑
+  var R=rng(c.seed);
+  var placed=[]; var n=0, guard=0;
+  while(n<110 && guard<4000){
+    guard++;
+    var ang=R()*Math.PI*2, rad=80+Math.sqrt(R())*330;
+    var x=Math.cos(ang)*rad, z=Math.sin(ang)*rad;
+    // 避让地标
+    var ok=true;
+    for(i=0;i<world.anchor.length;i++){var a=world.anchor[i];var d2=(a.x-x)*(a.x-x)+(a.z-z)*(a.z-z);if(d2<60*60){ok=false;break;}}
+    if(!ok)continue;
+    for(i=0;i<placed.length;i++){var p=placed[i];var d2=(p.x-x)*(p.x-x)+(p.z-z)*(p.z-z);if(d2<34*34){ok=false;break;}}
+    if(!ok)continue;
+    var wdt=16+R()*26, dep=wdt*(0.8+R()*0.5), hgt=26+R()*R()*150;
+    world.boxes.push({cx:x,cy:hgt/2,cz:z,w:wdt,h:hgt,d:dep,c:pick(pal.bld,R)});
+    placed.push({x:x,z:z}); n++;
+  }
+  // 水域
+  world.water=c.water;
+}
+
+/* ---------- 相机 ---------- */
+var cam={yaw:0.9,pitch:0.52,dist:880,tx:0,tz:0};
+var defYaw={sh:0.9,bj:1.1,sz:1.0,cd:1.2,hz:1.0,gz:1.1};
+var defPitch=0.5, defDist=900;
+
+function viewBasis(){
+  // 相机位置（绕目标点 orbit，pitch 抬高俯视）
+  var camX=cam.tx+ (cam.dist*Math.cos(cam.pitch)*Math.sin(cam.yaw));
+  var camY=         cam.dist*Math.sin(cam.pitch);
+  var camZ=cam.tz+ (cam.dist*Math.cos(cam.pitch)*Math.cos(cam.yaw));
+  // 前向（看向目标）
+  var fx=cam.tx-camX, fy=0-camY, fz=cam.tz-camZ;
+  var fl=Math.sqrt(fx*fx+fy*fy+fz*fz);fx/=fl;fy/=fl;fz/=fl;
+  // 右向 = f × up(0,1,0) = (-fz, 0, fx)
+  var rx=-fz, ry=0, rz=fx;
+  var rl=Math.sqrt(rx*rx+rz*rz)||1; rx/=rl; rz/=rl;
+  // 上向 u = r × f
+  var ux=ry*fz-rz*fy, uy=rz*fx-rx*fz, uz=rx*fy-ry*fx;
+  return {pos:{x:camX,y:camY,z:camZ}, r:{x:rx,y:ry,z:rz}, u:{x:ux,y:uy,z:uz}, f:{x:fx,y:fy,z:fz}};
+}
+function proj(p,vb){
+  var dx=p.x-vb.pos.x, dy=p.y-vb.pos.y, dz=p.z-vb.pos.z;
+  var cz=dx*vb.f.x+dy*vb.f.y+dz*vb.f.z;
+  if(cz<1)return null;
+  var cxx=dx*vb.r.x+dy*vb.r.y+dz*vb.r.z;
+  var cyy=dx*vb.u.x+dy*vb.u.y+dz*vb.u.z;
+  return {x:cx+cxx*f/cz, y:cy0-cyy*f/cz, z:cz};
+}
+
+/* ---------- 绘制工具 ---------- */
+function hex2rgb(h){h=h.replace('#','');if(h.length===3)h=h[0]+h[0]+h[1]+h[1]+h[2]+h[2];var n=parseInt(h,16);return [(n>>16)&255,(n>>8)&255,n&255];}
+function shade(hex,f){
+  var c=hex2rgb(hex);var L=f>1?0.35:(1-f)*0.6; // 简化：明暗
+  // f 为亮度因子：f=1 原色，>1 变亮，<1 变暗
+  var k=Math.min(2.2,Math.max(0.15,f));
+  var r=Math.min(255,Math.round(c[0]*k)),g=Math.min(255,Math.round(c[1]*k)),b=Math.min(255,Math.round(c[2]*k));
+  return 'rgb('+r+','+g+','+b+')';
+}
+function fogMix(hex,z,base){
+  // z 越大越远，混合向雾色；同时兼容 shade() 生成的 rgb() 颜色
+  var fg=Math.min(1,Math.max(0,(z-600)/1400));
+  var c=hex.indexOf('rgb')===0?hex.match(/\d+/g).map(Number):hex2rgb(hex), fog=hex2rgb(base);
+  var r=Math.round(c[0]*(1-fg)+fog[0]*fg),g=Math.round(c[1]*(1-fg)+fog[1]*fg),b=Math.round(c[2]*(1-fg)+fog[2]*fg);
+  return 'rgb('+r+','+g+','+b+')';
+}
+function path2d(pts){var p=new Path2D();p.moveTo(pts[0].x,pts[0].y);for(var i=1;i<pts.length;i++)p.lineTo(pts[i].x,pts[i].y);p.closePath();return p;}
+
+/* ---------- 渲染 ---------- */
+function drawBoxFace(pts,color){if(pts.length<3)return;ctx.beginPath();ctx.moveTo(pts[0].x,pts[0].y);for(var i=1;i<pts.length;i++)ctx.lineTo(pts[i].x,pts[i].y);ctx.closePath();ctx.fillStyle=color;ctx.fill();}
+
+function render(){
+  ctx.clearRect(0,0,W,H);
+  // 天空
+  var g=ctx.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,pal.sky[0]);g.addColorStop(0.6,pal.sky[1]);g.addColorStop(1,pal.sky[2]);
+  ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  // 星星（夜间）
+  if(mode==='night'){ctx.fillStyle='rgba(207,230,255,.7)';for(var s=0;s<90;s++){var sx=(s*97.3)%W, sy=(s*61.7)%(H*0.6);ctx.globalAlpha=0.3+((s*13)%10)/20;ctx.fillRect(sx,sy,1.6,1.6);}ctx.globalAlpha=1;}
+
+  var vb=viewBasis();
+  var gExt=1300;
+  var faces=[]; var landDraw=[];
+
+  // 地面底（大四边形）
+  var gpts=[proj({x:-gExt,y:0,z:-gExt},vb),proj({x:gExt,y:0,z:-gExt},vb),proj({x:gExt,y:0,z:gExt},vb),proj({x:-gExt,y:0,z:gExt},vb)];
+  if(gpts.every(function(p){return p;})){
+    ctx.beginPath();ctx.moveTo(gpts[0].x,gpts[0].y);
+    for(var gi=1;gi<4;gi++)ctx.lineTo(gpts[gi].x,gpts[gi].y);
+    ctx.closePath();ctx.fillStyle=pal.ground;ctx.fill();
+  }
+  // 网格
+  ctx.strokeStyle=pal.grid;ctx.lineWidth=1;
+  for(var gx=-900;gx<=900;gx+=120){
+    var a=proj({x:gx,y:0,z:-900},vb),b=proj({x:gx,y:0,z:900},vb);
+    if(a&&b){ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}
+  }
+  for(var gz=-900;gz<=900;gz+=120){
+    var c=proj({x:-900,y:0,z:gz},vb),d=proj({x:900,y:0,z:gz},vb);
+    if(c&&d){ctx.beginPath();ctx.moveTo(c.x,c.y);ctx.lineTo(d.x,d.y);ctx.stroke();}
+  }
+  ctx.strokeStyle=pal.gridA;ctx.lineWidth=1.5;
+
+  // 水面
+  if(world.water){
+    var wxc=world.water[0], wzc=world.water[1], wd=110, wl=950;
+    var wps=[proj({x:wxc-wd/2,y:0.5,z:wzc-wl/2},vb),proj({x:wxc+wd/2,y:0.5,z:wzc-wl/2},vb),proj({x:wxc+wd/2,y:0.5,z:wzc+wl/2},vb),proj({x:wxc-wd/2,y:0.5,z:wzc+wl/2},vb)];
+    if(wps.every(function(p){return p;})){
+      ctx.beginPath();ctx.moveTo(wps[0].x,wps[0].y);for(gi=1;gi<4;gi++)ctx.lineTo(wps[gi].x,wps[gi].y);ctx.closePath();
+      ctx.fillStyle=pal.water;ctx.fill();
+      // 波光
+      ctx.strokeStyle=pal.waterL;ctx.lineWidth=1.5;
+      for(var ww=0;ww<6;ww++){var wt=((time*0.4)+ww*0.35)%1;var wlz=wzc-wl/2+wt*wl;var wa=proj({x:wxc-40,y:1.2,z:wlz},vb),wb=proj({x:wxc+40,y:1.2,z:wlz},vb);if(wa&&wb){ctx.globalAlpha=.6;ctx.beginPath();ctx.moveTo(wa.x,wa.y);ctx.lineTo(wb.x,wb.y);ctx.stroke();ctx.globalAlpha=1;}}
+    }
+  }
+
+  // 收集建筑面
+  var boxes=world.boxes;
+  for(var b=0;b<boxes.length;b++){
+    var o=boxes[b];var hw=o.w/2,hh=o.h/2,hd=o.d/2;
+    var corns=[
+      proj({x:o.cx-hw,y:o.cy-hh,z:o.cz-hd},vb),proj({x:o.cx+hw,y:o.cy-hh,z:o.cz-hd},vb),
+      proj({x:o.cx+hw,y:o.cy+hh,z:o.cz-hd},vb),proj({x:o.cx-hw,y:o.cy+hh,z:o.cz-hd},vb),
+      proj({x:o.cx-hw,y:o.cy-hh,z:o.cz+hd},vb),proj({x:o.cx+hw,y:o.cy-hh,z:o.cz+hd},vb),
+      proj({x:o.cx+hw,y:o.cy+hh,z:o.cz+hd},vb),proj({x:o.cx-hw,y:o.cy+hh,z:o.cz+hd},vb)];
+    var facesDef=[
+      {idx:[0,1,2,3],n:[0,0,-1],k:0.55,cen:{x:o.cx,y:o.cy,z:o.cz-hd}},
+      {idx:[4,5,6,7],n:[0,0,1],k:1.0,cen:{x:o.cx,y:o.cy,z:o.cz+hd}},
+      {idx:[1,5,6,2],n:[1,0,0],k:0.78,cen:{x:o.cx+hw,y:o.cy,z:o.cz}},
+      {idx:[0,4,7,3],n:[-1,0,0],k:0.6,cen:{x:o.cx-hw,y:o.cy,z:o.cz}},
+      {idx:[3,2,6,7],n:[0,1,0],k:1.22,cen:{x:o.cx,y:o.cy+hh,z:o.cz}}];
+    for(var fi=0;fi<5;fi++){
+      var fd=facesDef[fi];
+      var pts=[];var all=true;
+      for(var ci=0;ci<4;ci++){var cp=corns[fd.idx[ci]];if(!cp){all=false;break;}pts.push(cp);}
+      if(!all)continue;
+      // 可见性：外法线朝向相机
+      var vx=vb.pos.x-fd.cen.x, vy=vb.pos.y-fd.cen.y, vz=vb.pos.z-fd.cen.z;
+      if(vx*fd.n[0]+vy*fd.n[1]+vz*fd.n[2]<=0)continue;
+      var midz=(pts[0].z+pts[2].z)/2;
+      faces.push({z:midz,color:o.c,pts:pts,k:fd.k});
+    }
+  }
+  // 排序（远处在前）
+  faces.sort(function(a,b){return b.z-a.z;});
+  for(var q=0;q<faces.length;q++){
+    var fc=faces[q];
+    var col=fogMix(shade(fc.color,fc.k),fc.z,pal.fog);
+    drawBoxFace(fc.pts,col);
+  }
+  // 球体（地标）
+  var lands=world.land;
+  var lp=[];
+  for(var l=0;l<lands.length;l++){
+    var sp=proj({x:lands[l].cx,y:lands[l].cy,z:lands[l].cz},vb);
+    if(sp){var rad=lands[l].r*f/Math.max(sp.z,1);lp.push({z:sp.z,sp:sp,r:Math.max(0.5,rad),c:lands[l].c});}
+  }
+  lp.sort(function(a,b){return b.z-a.z;});
+  for(var li=0;li<lp.length;li++){
+    var it=lp[li];
+    var fgcol=fogMix(it.c,it.sp.z,pal.fog);
+    ctx.fillStyle=fgcol;ctx.beginPath();ctx.arc(it.sp.x,it.sp.y,it.r,0,6.283);ctx.fill();
+    // 光晕
+    var rg=ctx.createRadialGradient(it.sp.x,it.sp.y,0,it.sp.x,it.sp.y,it.r*2.2);
+    rg.addColorStop(0,fogMix(it.c,it.sp.z,pal.fog).replace('rgb','rgba').replace(')',',0.25)'));
+    rg.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=rg;ctx.beginPath();ctx.arc(it.sp.x,it.sp.y,it.r*2.2,0,6.283);ctx.fill();
+  }
+
+  // 地标标记（2D overlay）
+  drawMarkers(vb);
+}
+
+/* ---------- 标记与命中 ---------- */
+var markers=[];
+function drawMarkers(vb){
+  markers=[];
+  for(var i=0;i<world.anchor.length;i++){
+    var a=world.anchor[i];
+    var p=proj({x:a.x,y:a.y,z:a.z},vb);
+    if(!p)continue;
+    markers.push({x:p.x,y:p.y,name:a.name,c:a.c,land:a.land,z:p.z});
+    var rad=7+Math.sin(time*0.006+i*1.7)*2;
+    ctx.beginPath();ctx.arc(p.x,p.y,rad,0,6.283);
+    ctx.fillStyle=a.c;ctx.fill();
+    ctx.beginPath();ctx.arc(p.x,p.y,rad+4,0,6.283);
+    ctx.strokeStyle=a.c;ctx.globalAlpha=0.35;ctx.lineWidth=1.5;ctx.stroke();ctx.globalAlpha=1;
+    ctx.font='600 12px sans-serif';ctx.textAlign='left';ctx.textBaseline='middle';
+    ctx.fillStyle='rgba(10,18,38,.75)';
+    var tw=ctx.measureText(a.name).width+16;
+    var bx=p.x+16, by=p.y-10;
+    if(bx+tw>W)bx=p.x-16-tw;
+    ctx.fillStyle='rgba(10,18,38,.7)';ctx.beginPath();rrect(bx,by,tw,20,10);ctx.fill();
+    ctx.fillStyle='#fff';ctx.fillText(a.name,bx+8,by+10);
+  }
+}
+
+/* ---------- 时间与动画 ---------- */
+var time=0;var raf;
+function rrect(x,y,w,h,r){
+  ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();
+}
+function loop(){
+  time=performance.now();
+  try{render();}catch(err){
+    var box=document.getElementById('renderError');
+    if(!box){box=document.createElement('pre');box.id='renderError';box.style.cssText='position:fixed;left:12px;right:12px;bottom:12px;z-index:9999;margin:0;padding:12px;border:1px solid #ff5c7a;border-radius:10px;background:#2a0d18;color:#ffd8df;font:12px/1.5 monospace;white-space:pre-wrap';document.body.appendChild(box);}
+    box.textContent='渲染错误：'+(err.stack||err.message||err);
+    return;
+  }
+  raf=requestAnimationFrame(loop);
+}
+
+/* ---------- 交互：轨道 ---------- */
+var pointers=new Map();var dragStart=null;var moved=false;var pinch=null;
+cv.addEventListener('pointerdown',function(e){
+  cv.setPointerCapture(e.pointerId);
+  pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  moved=false;dragStart={x:e.clientX,y:e.clientY};
+  cv.classList.add('drag');
+});
+cv.addEventListener('pointermove',function(e){
+  if(!pointers.has(e.pointerId))return;
+  var prev=pointers.get(e.pointerId);
+  var dx=e.clientX-prev.x, dy=e.clientY-prev.y;
+  pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(Math.abs(e.clientX-dragStart.x)+Math.abs(e.clientY-dragStart.y)>5)moved=true;
+  if(pointers.size===1){
+    cam.yaw+=dx*0.006; cam.pitch=Math.max(0.05,Math.min(1.25,cam.pitch+dy*0.004));
+  }else if(pointers.size===2){
+    var pts=Array.from(pointers.values());
+    var d0=Math.hypot(pts[0].x-pts[1].x,pts[0].y-pts[1].y);
+    var pd=pinch?pinch.d:Math.max(100,d0);
+    pinch={d:d0};
+    if(d0>0)cam.dist=Math.max(200,Math.min(1800,cam.dist*(pd/d0)));
+  }
+});
+function endPtr(e){
+  if(!pointers.has(e.pointerId))return;
+  pointers.delete(e.pointerId);pinch=null;
+  cv.classList.remove('drag');
+  if(pointers.size===0&&!moved){hitTest(e.clientX,e.clientY);}
+}
+cv.addEventListener('pointerup',endPtr);
+cv.addEventListener('pointercancel',endPtr);
+cv.addEventListener('wheel',function(e){e.preventDefault();cam.dist=Math.max(200,Math.min(1800,cam.dist+e.deltaY*0.6));},{passive:false});
+
+/* ---------- 命中检测 ---------- */
+function hitTest(x,y){
+  var best=null,bd=1e9;
+  for(var i=0;i<markers.length;i++){var m=markers[i];var d=Math.hypot(m.x-x,m.y-y);if(d<24&&d<bd){bd=d;best=m;}}
+  if(best){showInfo(best);focusLandmark(best);}
+  else closeInfo();
+}
+
+/* ---------- 地标聚焦 ---------- */
+function focusLandmark(m){
+  var lx=m.x,mz=m.z;
+  var ty=m.land.anchor;
+  // 目标 yaw：让相机从东南方向看向地标
+  var target={tx:lx,tz:mz,yaw:0.15,pitch:0.42,dist:Math.max(420,m.land.name.length*30)};
+  animateCam(target,900);
+  highlightPOI(m.name);
+}
+function animateCam(target,dur){
+  var from={yaw:cam.yaw,pitch:cam.pitch,dist:cam.dist,tx:cam.tx,tz:cam.tz};
+  var t0=time;
+  function step(){
+    var t=Math.min(1,(time-t0)/dur);var e=t*t*(3-2*t);
+    cam.yaw=from.yaw+(target.yaw-from.yaw)*e;
+    cam.pitch=from.pitch+(target.pitch-from.pitch)*e;
+    cam.dist=from.dist+(target.dist-from.dist)*e;
+    cam.tx=from.tx+(target.tx-from.tx)*e;
+    cam.tz=from.tz+(target.tz-from.tz)*e;
+    if(t<1)requestAnimationFrame(step);
+  }
+  step();
+}
+
+/* ---------- 信息卡 ---------- */
+var infoEl=document.getElementById('info');
+function showInfo(m){
+  document.getElementById('infoName').textContent=m.name;
+  document.getElementById('infoDesc').textContent=m.land.intro;
+  document.getElementById('infoDot').style.color=m.c;
+  var sh=document.getElementById('infoShops');sh.innerHTML='';
+  m.land.shops.forEach(function(s){
+    var d=document.createElement('div');d.className='shop';
+    d.innerHTML='<span class="sd"></span><span>'+s.n+'</span><span class="st">'+s.t+'</span><span class="ds">'+s.d+'</span>';
+    sh.appendChild(d);
+  });
+  infoEl.classList.add('show');
+}
+function closeInfo(){infoEl.classList.remove('show');unhighlightPOI();}
+document.getElementById('infoClose').onclick=closeInfo;
+function highlightPOI(name){Array.prototype.forEach.call(document.querySelectorAll('.poiitem'),function(el){el.classList.toggle('on',el.dataset.n===name);});}
+function unhighlightPOI(){Array.prototype.forEach.call(document.querySelectorAll('.poiitem'),function(el){el.classList.remove('on');});}
+
+/* ---------- POI 侧栏 ---------- */
+function renderPOI(c){
+  var box=document.getElementById('poiList');box.innerHTML='';
+  c.landmarks.forEach(function(L){
+    var d=document.createElement('div');d.className='poiitem';d.dataset.n=L.name;
+    d.innerHTML='<span class="pdot" style="color:'+L.c+'"></span><span class="pnm">'+L.name+'</span>';
+    d.onclick=function(){var m={x:L.x,z:L.z,land:L,name:L.name,c:L.c,y:L.anchor};focusLandmark(m);};
+    box.appendChild(d);
+  });
+}
+
+/* ---------- 开场 ---------- */
+var introDone=false;
+function playIntro(c){
+  introDone=true;
+  var overlay=document.getElementById('intro');
+  document.getElementById('introName').textContent='云游'+c.name;
+  document.getElementById('introSub').textContent='电影级运镜 · '+c.tag;
+  overlay.classList.remove('hide');
+  // 重设为高空视角
+  cam.yaw=defYaw[c.id]+Math.PI*2.4; cam.pitch=1.0; cam.dist=1500; cam.tx=0; cam.tz=0;
+  var t0=time;var dur=2600;
+  function step(){
+    var t=Math.min(1,(time-t0)/dur);var e=t<0.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+    cam.yaw=defYaw[c.id]+Math.PI*2.4+(defYaw[c.id]-defYaw[c.id]-Math.PI*2.4)*e;
+    cam.pitch=1.0+(defPitch-1.0)*e;
+    cam.dist=1500+(defDist-1500)*e;
+    cam.tx=0;cam.tz=0;
+    if(t<1)requestAnimationFrame(step);else {overlay.classList.add('hide');}
+  }
+  step();
+  setTimeout(function(){overlay.classList.add('hide');},dur+600);
+}
+function enterCity(e){
+  if(e){e.preventDefault();e.stopPropagation();}
+  introDone=true;
+  var overlay=document.getElementById('intro');
+  overlay.classList.add('hide');
+  overlay.style.pointerEvents='none';
+  overlay.setAttribute('aria-hidden','true');
+}
+var introPlay=document.getElementById('introPlay');
+var introSkip=document.getElementById('introSkip');
+introPlay.addEventListener('click',enterCity);
+introPlay.addEventListener('pointerup',enterCity);
+introSkip.addEventListener('click',enterCity);
+introSkip.addEventListener('pointerup',enterCity);
+document.getElementById('btnReplay').onclick=function(){var c=CITIES[state.city];playIntro(c);};
+
+/* ---------- 昼夜 ---------- */
+document.getElementById('btnTheme').onclick=function(){
+  mode=(mode==='night')?'day':'night';pal=PAL[mode];
+  rebuild(CITIES[state.city]);
+};
+
+/* ---------- 城市切换 ---------- */
+var state={city:0};
+function renderCitybar(){
+  var bar=document.getElementById('citybar');bar.innerHTML='';
+  CITIES.forEach(function(c,i){
+    var b=document.createElement('button');b.className='chip'+(i===state.city?' on':'');
+    b.textContent=c.name;b.onclick=function(){if(i===state.city)return;state.city=i;switchCity();};
+    bar.appendChild(b);
+  });
+}
+function switchCity(){
+  var c=CITIES[state.city];
+  rebuild(c);renderPOI(c);closeInfo();
+  cam.tx=0;cam.tz=0;cam.yaw=defYaw[c.id];cam.pitch=defPitch;cam.dist=defDist;
+  playIntro(c);
+}
+
+/* ---------- 启动 ---------- */
+renderCitybar();
+rebuild(CITIES[0]);
+renderPOI(CITIES[0]);
+loop();
+playIntro(CITIES[0]);
+})();
+</script>
+</body>
+</html>

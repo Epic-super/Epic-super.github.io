@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>自由剧场 · Free Theater</title>
+<style>
+  :root{--bg:#0f1115;--panel:#171a21;--panel2:#1f232c;--line:#2a2f3a;--txt:#e6e8ec;--sub:#9aa3b2;--accent:#FF6B6B;--accent2:#4ECDC4;--ok:#3ecf8e;--err:#ff6b6b}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);font:14px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;padding:24px;max-width:1120px;margin:0 auto}
+  h1{font-size:22px;margin:0 0 2px;display:flex;align-items:center;gap:10px}
+  h1 .dot{width:10px;height:10px;border-radius:50%;background:var(--accent);animation:pulse 1.4s infinite;flex:none}
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.82)}}
+  .sub{color:var(--sub);font-size:13px;margin-bottom:18px}
+  #backlink{position:absolute;top:20px;right:24px;display:inline-flex;align-items:center;gap:5px;padding:7px 13px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--sub);text-decoration:none;font-size:12.5px;font-weight:700;transition:.18s}
+  #backlink:hover{border-color:var(--accent);color:var(--txt)}
+  .bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:18px}
+  button{background:var(--accent);color:#14090b;border:none;border-radius:9px;padding:10px 18px;font-size:14px;cursor:pointer;font-weight:700;white-space:nowrap}
+  button.sec{background:var(--panel2);color:var(--txt);border:1px solid var(--line)}
+  button:disabled{opacity:.5;cursor:not-allowed}
+  a{color:var(--accent)}
+  .status{font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;padding:9px 14px;border-radius:10px}
+  .status.ok{background:rgba(62,207,142,.12);color:var(--ok);border:1px solid rgba(62,207,142,.35)}
+  .status.err{background:rgba(255,107,107,.12);color:var(--err);border:1px solid rgba(255,107,107,.35)}
+  .status.check{background:var(--panel2);color:var(--sub);border:1px solid var(--line)}
+  .status .spin{width:12px;height:12px;border:2px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:sp .7s linear infinite}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  .gate{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+  @media(max-width:760px){.gate{grid-template-columns:1fr}#backlink{position:static;margin-bottom:10px}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+  .card h2{font-size:14px;margin:0 0 8px}
+  .card p,.card li{font-size:13px;color:var(--sub);margin:4px 0;line-height:1.6}
+  .card ul{margin:6px 0 0;padding-left:18px}
+  code{background:var(--panel2);padding:1px 6px;border-radius:6px;font-size:12px;color:var(--accent2)}
+  .warn{background:rgba(255,107,107,.1);border:1px solid rgba(255,107,107,.3);border-radius:10px;padding:9px 12px;font-size:12.5px;color:var(--sub);margin-top:10px}
+  .warn b{color:var(--err)}
+  .frame-wrap{margin-top:18px;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--panel);display:none}
+  .frame-wrap.show{display:block}
+  .frame-wrap iframe{width:100%;height:82vh;border:0;display:block;background:#1D1F27}
+  .frame-bar{display:flex;align-items:center;gap:8px;padding:9px 14px;background:var(--panel2);border-bottom:1px solid var(--line);font-size:12px;color:var(--sub)}
+  .frame-bar .live{width:8px;height:8px;border-radius:50%;background:var(--accent);animation:pulse 1.4s infinite}
+  .frame-bar .ext{margin-left:auto;font-size:12px}
+  .chain{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:8px;font-size:12px;color:var(--sub)}
+  .chain .step{background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:2px 9px}
+  .foot{color:var(--sub);font-size:11.5px;margin-top:20px;line-height:1.7}
+  .foot b{color:var(--accent2)}
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+  <a id="backlink" href="../index.html" title="返回 Lab 子系统">← Lab</a>
+
+  <h1><span class="dot"></span>自由剧场 · Free Theater</h1>
+  <div class="sub">全网影视聚合客户端 · Electron 桌面端 + Web 双端 · 本地服务（127.0.0.1:5173）</div>
+
+  <div class="bar">
+    <button id="btnOpen">🚀 打开 Web 版</button>
+    <button id="btnCheck" class="sec">↻ 重新检测服务</button>
+  </div>
+
+  <div class="status check" id="st">
+    <span class="spin"></span><span id="stText">正在检测本地自由剧场服务（127.0.0.1:5173）…</span>
+  </div>
+
+  <div class="frame-wrap" id="frameWrap">
+    <div class="frame-bar"><span class="live"></span><span>Free Theater Web 已嵌入 · 影视数据来自公开 CMS 源站</span><a class="ext" id="extLink" href="#" target="_blank" rel="noopener">新窗口打开 ↗</a></div>
+    <iframe id="frame" src="" title="Free Theater 自由剧场"></iframe>
+  </div>
+
+  <div class="gate">
+    <div class="card">
+      <h2>这是干什么的</h2>
+      <p>一个<b style="color:var(--txt)">影视聚合客户端</b>，Electron 桌面端与 Web 共用同一套代码：</p>
+      <ul>
+        <li>8 个页面：首页 / 发现 / 详情 / 播放 / 收藏 / 最近 / 下载 / 设置</li>
+        <li>苹果CMS 多源渐进聚合（约 45 个可用源，运行时探活），去重 + 分批并发、首批够用即停，避免连接风暴</li>
+        <li>自研播放器：自定义控制栏、字幕、倍速、画中画、键盘快捷键</li>
+        <li>时间级续播（按剧集记忆进度）+ 网络 / 媒体错误分级自愈</li>
+        <li>收藏、观看历史、下载队列本地持久化</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h2>怎么启动本地服务</h2>
+      <p>本页只负责<b style="color:var(--txt)">接入剧场</b>。源码在另一个目录，它<code>不</code>在这里：</p>
+      <ul>
+        <li>源码目录：<code><本地路径></code></li>
+        <li>桌面端（主形态）：<code>npm run electron</code>　同时拉起 Vite + Electron 窗口</li>
+        <li>仅 Web 版（本页嵌入用）：<code>npm run dev</code>　端口 <code>5173</code></li>
+        <li>依赖已装好；服务未启动时本页显示<b style="color:var(--err)">降级说明</b>而非空白</li>
+      </ul>
+      <div class="warn">
+        <b>端口提醒</b>：剧场的 Web 服务是 <code>5173</code>。此前它默认用 <code>3000</code>，
+        会与开机自启的「番剧门户」撞车 —— 启动器只判断「端口有没有被监听」，
+        可能把番剧门户当成剧场加载进窗口。现已改为 5173，并加了页面身份校验兜底。
+      </div>
+    </div>
+  </div>
+
+  <div class="chain">
+    <span class="step">① 启动 npm run dev（5173）</span><span>→</span>
+    <span class="step">② 本页自动检测并嵌入</span><span>→</span>
+    <span class="step">③ 首页 / 发现选片</span><span>→</span>
+    <span class="step">④ 详情选线路 → 播放 / 续播</span>
+  </div>
+
+  <div class="foot">
+    <b>说明</b>：剧场源码为独立私有项目 <code>free-theater</code>（Electron + Vite + React），不随本公开站部署；
+    本页在服务可用时内嵌 Web 版，不可用时降级为操作指引。仓库<b>不内置任何视频直链</b>，
+    片源来自公开 CMS 源站检索；开发模式下相关请求经 <code>/cms-proxy</code> 转发，
+    也可改写走番剧门户的 <code>/api/cms</code>（服务端多源聚合，无 CORS 限制）。
+  </div>
+
+<script>
+"use strict";
+const API_BASE = "http://127.0.0.1:5173";
+const LS = "ft.lastSeen";
+const stEl = document.getElementById('st');
+const stText = document.getElementById('stText');
+const btnOpen = document.getElementById('btnOpen');
+const frameWrap = document.getElementById('frameWrap');
+const frame = document.getElementById('frame');
+const extLink = document.getElementById('extLink');
+
+function setStatus(kind, txt, hasSpin) {
+  stEl.className = "status " + kind;
+  stText.innerHTML = (hasSpin ? '<span class="spin"></span>' : '') + txt;
+}
+function stOk(t){ setStatus('ok', t, false); }
+function stErr(t){ setStatus('err', t, false); }
+function stCheck(t){ setStatus('check', t, true); }
+
+function withTimeout(ms) {
+  const ctl = new AbortController();
+  const id = setTimeout(() => ctl.abort(), ms);
+  return { signal: ctl.signal, done: () => clearTimeout(id) };
+}
+
+// Vite dev 首页不带 CORS 头，跨端口普通 fetch 会被拦；
+// 先用 cors 探，失败再用 no-cors 探（服务在＝resolve，不在＝reject）
+async function probe() {
+  let t = withTimeout(4500);
+  try {
+    const r = await fetch(API_BASE + '/', { signal: t.signal, cache: 'no-store' });
+    t.done();
+    if (r.ok || r.status === 304) return true;
+  } catch (e) { t.done(); }
+  t = withTimeout(4500);
+  try {
+    await fetch(API_BASE + '/', { signal: t.signal, mode: 'no-cors', cache: 'no-store' });
+    t.done();
+    return true;
+  } catch (e) { t.done(); return false; }
+}
+
+async function checkHealth() {
+  stCheck('正在检测本地自由剧场服务…');
+  btnOpen.disabled = true;
+  frameWrap.classList.remove('show');
+  const ok = await probe();
+  if (ok) {
+    stOk('✓ 本地自由剧场服务在线（127.0.0.1:5173）· 可正常使用');
+    btnOpen.disabled = false;
+    frame.src = API_BASE + '/';
+    extLink.href = API_BASE + '/';
+    frameWrap.classList.add('show');
+    localStorage.setItem(LS, '1');
+  } else {
+    const first = !localStorage.getItem(LS);
+    stErr('✗ 未检测到本地自由剧场服务：请在本机执行 cd /d <本地路径> 然后 npm run dev（端口 5173），本页已降级为操作指引。' + (first ? ' 首次打开无需担心，这是正常状态。' : ''));
+    localStorage.setItem(LS, '1');
+  }
+}
+
+btnCheck.onclick = () => checkHealth();
+btnOpen.onclick = () => { window.open(API_BASE + '/', '_blank', 'noopener'); };
+checkHealth();
+</script>
+</body>
+</html>

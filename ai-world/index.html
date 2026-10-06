@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<title>AI 大模型世界 · 小待</title>
+<style>
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#04060f;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;color:#e8eef9}
+  #scene{position:fixed;inset:0;width:100%;height:100%;display:block}
+  /* 准星 */
+  #crosshair{position:fixed;left:50%;top:50%;width:18px;height:18px;transform:translate(-50%,-50%);pointer-events:none;opacity:0;transition:opacity .2s}
+  #crosshair::before,#crosshair::after{content:"";position:absolute;background:rgba(140,180,255,.85)}
+  #crosshair::before{left:50%;top:0;width:2px;height:100%;transform:translateX(-50%)}
+  #crosshair::after{top:50%;left:0;height:2px;width:100%;transform:translateY(-50%)}
+  /* 顶部 */
+  #topbar{position:fixed;top:0;left:0;right:0;padding:12px 16px;display:flex;align-items:center;gap:10px;pointer-events:none;z-index:5}
+  #topbar .t{font-weight:800;font-size:15px;letter-spacing:.4px;text-shadow:0 1px 6px rgba(0,0,0,.6)}
+  #topbar .v{font-size:11px;color:#8ba0c8;background:rgba(10,14,28,.5);padding:2px 8px;border-radius:999px}
+  #topbar .s{font-size:12px;font-weight:700;color:#060b18;background:#6c8cff;padding:2px 10px;border-radius:999px;box-shadow:0 2px 10px rgba(108,140,255,.4)}
+  #hint{position:fixed;left:50%;bottom:78px;transform:translateX(-50%);background:rgba(10,14,28,.72);border:1px solid rgba(108,140,255,.4);color:#d6e2ff;padding:9px 16px;border-radius:12px;font-size:14px;font-weight:600;backdrop-filter:blur(8px);opacity:0;transition:opacity .25s;pointer-events:none;white-space:nowrap;z-index:7}
+  #controls{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);font-size:12px;color:#8ba0c8;background:rgba(10,14,28,.5);padding:6px 14px;border-radius:999px;pointer-events:none;z-index:5}
+  /* 帮助 */
+  #help{position:fixed;inset:0;z-index:9;display:flex;align-items:center;justify-content:center;background:rgba(4,6,15,.78);backdrop-filter:blur(5px);padding:24px}
+  #help .panel{max-width:520px;width:100%;background:rgba(12,16,30,.96);border:1px solid rgba(108,140,255,.35);border-radius:18px;padding:22px 26px}
+  #help h2{margin:0 0 12px;font-size:19px;color:#9db4ff}
+  #help .row{display:flex;justify-content:space-between;gap:16px;padding:6px 0;border-bottom:1px dashed rgba(255,255,255,.08);font-size:14px}
+  #help .row:last-child{border-bottom:none}
+  #help .k{font-weight:700;color:#d6e2ff;white-space:nowrap}
+  #help .d{color:#8ba0c8;text-align:right}
+  #help .cls{margin-top:16px;text-align:center;color:#8ba0c8;font-size:13px}
+  #help.hidden{display:none}
+  /* 进入遮罩 */
+  #overlay{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(900px 500px at 50% 40%,rgba(108,140,255,.12),transparent 60%),rgba(4,6,15,.88);backdrop-filter:blur(4px);cursor:pointer;text-align:center;padding:24px}
+  #overlay h1{font-size:27px;margin:0 0 10px;font-weight:800;letter-spacing:.5px}
+  #overlay p{margin:4px 0;color:#8ba0c8;font-size:14px;line-height:1.7;max-width:520px}
+  #overlay .enter{margin-top:22px;display:inline-flex;align-items:center;gap:8px;padding:13px 26px;border-radius:14px;background:#6c8cff;color:#060b18;font-weight:800;font-size:15px;box-shadow:0 8px 24px rgba(108,140,255,.3)}
+  #overlay .keys{margin-top:18px;display:flex;gap:8px;flex-wrap:wrap;justify-content:center;max-width:520px}
+  #overlay .key{border:1px solid #243050;background:rgba(255,255,255,.04);border-radius:8px;padding:5px 9px;font-size:12px;color:#cfe0ff}
+  #overlay .back{margin-top:26px}
+  #overlay .back a{color:#8ba0c8;text-decoration:none;font-size:13px;padding:8px 14px;border:1px solid #243050;border-radius:999px}
+  #overlay .back a:hover{color:#d6e2ff;border-color:rgba(108,140,255,.5)}
+  #overlay.hidden{display:none}
+  @media (hover:none){#controls{display:none}}
+  /* 模型档案详情面板 */
+  #detail{position:fixed;right:-460px;top:0;bottom:0;width:min(420px,92vw);z-index:8;background:rgba(10,14,28,.94);border-left:1px solid rgba(108,140,255,.4);backdrop-filter:blur(12px);box-shadow:-14px 0 40px rgba(0,0,0,.5);transition:right .28s cubic-bezier(.2,.7,.3,1);display:flex;flex-direction:column;overflow:hidden}
+  #detail.open{right:0}
+  #detail .hd{padding:20px 22px 14px;border-bottom:1px solid rgba(255,255,255,.08)}
+  #detail .row1{display:flex;align-items:center;gap:12px}
+  #detail .dot{width:16px;height:16px;border-radius:50%;box-shadow:0 0 14px currentColor;background:currentColor;flex:none}
+  #detail .n{font-weight:800;font-size:20px}
+  #detail .fam{font-size:12px;color:#8ba0c8;margin-top:2px}
+  #detail .co{margin-left:auto;text-align:right}
+  #detail .co b{display:block;font-size:13px}
+  #detail .co span{font-size:11px;color:#8ba0c8}
+  #detail .bd{padding:16px 22px;overflow:auto;line-height:1.7;font-size:14px}
+  #detail .tg{display:inline-block;font-size:11px;color:#cfe0ff;border:1px solid rgba(108,140,255,.4);padding:2px 10px;border-radius:999px;margin-bottom:12px}
+  #detail .sec{font-weight:800;font-size:13px;color:#9db4ff;margin:16px 0 6px}
+  #detail ul{margin:0;padding-left:18px}
+  #detail li{margin:3px 0}
+  #detail .kv{display:grid;grid-template-columns:84px 1fr;gap:4px 12px;font-size:13px}
+  #detail .kv b{color:#9db4ff;font-weight:700}
+  #detail .tl{margin:0;padding:0;list-style:none}
+  #detail .tl li{position:relative;padding:0 0 10px 16px;border-left:1px solid rgba(108,140,255,.3);font-size:13px;color:#cdd8f0}
+  #detail .tl li::before{content:"";position:absolute;left:-4px;top:5px;width:7px;height:7px;border-radius:50%;background:#6c8cff}
+  #detail .tl li b{color:#fff;font-weight:700}
+  #detail .close{position:absolute;top:14px;right:14px;background:none;border:1px solid #243050;color:#8ba0c8;border-radius:50%;width:30px;height:30px;font-size:16px;cursor:pointer;font-family:inherit}
+  /* 对比面板 */
+  #cmp{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%) scale(.96);z-index:9;width:min(880px,94vw);max-height:84vh;background:rgba(12,16,30,.97);border:1px solid rgba(108,140,255,.4);border-radius:18px;padding:20px 22px;display:none;flex-direction:column;opacity:0;transition:opacity .22s,transform .22s;box-shadow:0 22px 60px rgba(0,0,0,.6)}
+  #cmp.open{display:flex;opacity:1;transform:translate(-50%,-50%) scale(1)}
+  #cmp h2{margin:0 0 12px;font-size:18px;color:#9db4ff}
+  #cmp .pick{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+  #cmp .chip{border:1px solid #243050;background:rgba(255,255,255,.04);color:#cfe0ff;border-radius:999px;padding:3px 10px;font-size:12px;cursor:pointer;user-select:none}
+  #cmp .chip.on{background:rgba(108,140,255,.22);border-color:#6c8cff;color:#fff}
+  #cmp .wrap{overflow:auto}
+  #cmp table{border-collapse:collapse;width:100%;font-size:13px;min-width:560px}
+  #cmp th,#cmp td{border:1px solid rgba(108,140,255,.2);padding:8px 10px;vertical-align:top;text-align:left}
+  #cmp th.h{background:rgba(108,140,255,.10)}
+  #cmp td.hd{font-weight:700;color:#9db4ff;white-space:nowrap}
+  #cmp tr.hd2 th{text-align:center;font-size:13.5px}
+  #cmp .cmp-foot{margin-top:14px;display:flex;gap:10px;justify-content:flex-end;align-items:center}
+  #cmp .btn{border:1px solid #243050;background:rgba(255,255,255,.04);color:#cfe0ff;border-radius:999px;padding:6px 16px;font-size:12.5px;cursor:pointer;font-family:inherit}
+  #cmp .btn.primary{background:#6c8cff;color:#060b18;border-color:#6c8cff;font-weight:700}
+  #cmpNote{position:fixed;left:50%;top:66px;transform:translateX(-50%);color:#8ba0c8;font-size:12px;background:rgba(10,14,28,.6);border:1px solid rgba(108,140,255,.2);padding:5px 12px;border-radius:999px;z-index:6;opacity:0;transition:opacity .2s;pointer-events:none}
+  #cmpNote.show{opacity:1}
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+<canvas id="scene"></canvas>
+<div id="crosshair"></div>
+<div id="topbar"><span class="t">AI 大模型世界</span><span class="s" id="viewName">巡游漫游</span><span class="v">Three.js · 上帝视角 · 12 家模型 · ◉按E看档案 · C对比</span></div>
+<div id="hint"></div>
+<div id="controls">WASD 移动 · 鼠标视角 · Shift 加速 · E 打开档案 · C 对比 · Tab 漫游/巡览 · H 帮助 · P 截图 · Esc 退出</div>
+<div id="cmpNote"></div>
+
+<div id="help" class="hidden">
+  <div class="panel">
+    <h2>🪐 操作指南</h2>
+    <div class="row"><span class="k">W / A / S / D · 方向键</span><span class="d">在星河间移动</span></div>
+    <div class="row"><span class="k">鼠标移动</span><span class="d">转动视角（准星对准模型）</span></div>
+    <div class="row"><span class="k">Shift</span><span class="d">加速飞行</span></div>
+    <div class="row"><span class="k">E · 鼠标左键点击</span><span class="d">打开对准 / 最近的模型档案</span></div>
+    <div class="row"><span class="k">C</span><span class="d">打开对比面板（勾选 2 – 4 家并排对比）</span></div>
+    <div class="row"><span class="k">Tab</span><span class="d">切换 巡游漫游 / 自动天幕巡览（上帝视角）</span></div>
+    <div class="row"><span class="k">Q / E · 滚轮</span><span class="d">巡览模式下缩放视角</span></div>
+    <div class="row"><span class="k">P</span><span class="d">截图保存 PNG</span></div>
+    <div class="row"><span class="k">H</span><span class="d">打开 / 关闭 本帮助</span></div>
+    <div class="row"><span class="k">Esc</span><span class="d">退出鼠标锁定 / 关闭面板</span></div>
+    <div class="cls">按 H 或点击空白处关闭</div>
+  </div>
+</div>
+
+<div id="detail">
+  <button class="close" id="dClose">×</button>
+  <div class="hd">
+    <div class="row1"><span class="dot" id="dDot"></span><div><div class="n" id="dName"></div><div class="fam" id="dFam"></div></div>
+    <div class="co"><b id="dCo"></b><span id="dCountry"></span></div></div>
+  </div>
+  <div class="bd" id="dBd"></div>
+</div>
+
+<div id="cmp">
+  <h2>⚖️ 模型对比</h2>
+  <div class="pick" id="cmpPick"></div>
+  <div class="wrap" id="cmpWrap"></div>
+  <div class="cmp-foot"><span style="color:#8ba0c8;font-size:12px;margin-right:auto">数据为 2026-09 整理，请以各家官方为准</span><button class="btn" id="cmpClear">清空</button><button class="btn primary" id="cmpClose">完成 ✕</button></div>
+</div>
+
+<div id="overlay">
+  <h1>🪐 AI 大模型世界</h1>
+  <p>一个可以飞进去「上帝视角」俯瞰各大 AI 大模型的星河。十二家模型化作十二颗星体，靠近它们就能打开<b>能力档案</b>，或用对比面板把它们<b>并排比拼</b>——比能力、比上下文、比开源与否。</p>
+  <div class="keys">
+    <span class="key">W/A/S/D 飞行</span><span class="key">鼠标 转视角</span>
+    <span class="key">E 档案</span><span class="key">C 对比</span>
+    <span class="key">Tab 天幕巡览</span><span class="key">H 帮助</span><span class="key">P 截图</span>
+  </div>
+  <div class="enter">点击进入 ▶</div>
+  <div class="back"><a href="../index.html">← 返回指挥台</a></div>
+</div>
+
+<script type="importmap">
+{ "imports": { "three": "../lib/three/three.module.min.js" } }
+</script>
+<script type="module">
+import * as THREE from 'three';
+
+/* ================= 模型数据（2026-09 整理，个人学习参考） ================= */
+const MODELS = [
+  { id:'deepseek', name:'DeepSeek', co:'深度求索', country:'中国', color:0x4d6bfe, emoji:'🧊',
+    family:'DeepSeek-R1 / V3', open:'开放权重',
+    tag:'开源推理之王，数学代码硬实力',
+    caps:['深度推理(可观察思考链)','数学 / 代码','中英双语','通用对话与 Agent'],
+    strengths:['推理过程可见、可解释','低成本、可自主部署','MATH / Codeforces 等硬核基准第一梯队','开源生态活跃'],
+    context:'128k', cutoff:'2025-05（训练数据）',
+    tl:['2023-11 发布 DeepSeek-Coder','2024-05 DeepSeek-V2 以极低价走红','2024-12 DeepSeek-V3（MoE 驱动）','2025-01 DeepSeek-R1 开源推理模型出圈'],
+    note:'开源权重 + 极低 API 价格使其成为 DIY / 私有化部署热门选择，也是本页模型之一。' },
+  { id:'kimi', name:'Kimi', co:'月之暗面 Moonshot AI', country:'中国', color:0xff9ec7, emoji:'🌕',
+    family:'Kimi K2 / K2 thinking', open:'开放权重',
+    tag:'超长文本与 Agent 行动的国货之光',
+    caps:['超长上下文阅读','Agent / 工具调用','文件与链接解析','中文优化'],
+    strengths:['百万级长文档理解','K2 开放权重、行动能力出色','官网 / App 对中文用户友好','LiveBench 等开源基准靠前'],
+    context:'128k（可扩展）', cutoff:'2025-10（K2 thinking）',
+    tl:['2023-10 发布 20 万字长上下文 Kimi','2025-07 Kimi K2 全量开源','2025-10 上线推理版 K2 thinking'],
+    note:'主打“长文本 + 动手干活”，适合读长报告、管理长文档。' },
+  { id:'gpt', name:'GPT', co:'OpenAI', country:'美国', color:0x10a37f, emoji:'⚡',
+    family:'GPT-5 / GPT-4o / GPT-4.1', open:'闭源',
+    tag:'十亿级用户的通用智能标杆',
+    caps:['多模态（文 / 图 / 音 / 视频）','推理','编码','通用对话'],
+    strengths:['生态最广（ChatGPT / API / Siri 等）','多模态能力成熟','长期是各综合基准第一梯队','Agent / 函数调用完善'],
+    context:'128k–1M（GPT-4.1）', cutoff:'持续更新',
+    tl:['2022-11 发布 ChatGPT','2023-03 发布 GPT-4','2024-05 GPT-4o 原生多模态','2025-08 推出 GPT-5'],
+    note:'行业事实标准，几乎所有工具的“默认脑”。' },
+  { id:'claude', name:'Claude', co:'Anthropic', country:'美国', color:0xd9774f, emoji:'🌗',
+    family:'Claude Opus / Sonnet / Haiku', open:'闭源',
+    tag:'长文档与代码专家的温柔一面',
+    caps:['长文写作与润色','代码','长上下文','安全对齐'],
+    strengths:['写作 / 代码口碑极佳','SWE-bench 编程评测常年领先','200k 长上下文','对齐与安全策略严谨'],
+    context:'200k（1M Beta）', cutoff:'持续更新',
+    tl:['2023-03 发布 Claude','2023-07 发布 Claude 2','2024-03 发布 Claude 3','2025-09 推出 Opus 4.5'],
+    note:'被许多开发者形容为“写得最好”的模型之一。' },
+  { id:'gemini', name:'Gemini', co:'Google', country:'美国', color:0x5b77e5, emoji:'🌍',
+    family:'Gemini 2.5 Pro / Flash', open:'闭源',
+    tag:'原生多模态与百万级上下文',
+    caps:['原生多模态','超长上下文','端侧离线','深度 Agent'],
+    strengths:['1M–2M 超长上下文','与 Chrome / Android / 搜索深度集成','多模态原生一体','端侧模型覆盖广'],
+    context:'1M–2M', cutoff:'持续更新',
+    tl:['2023-12 发布 Gemini','2024-02 推出 Gemini 1.5','2025-06 上线 Gemini 2.5 Pro','持续推进 Gemini 3'],
+    note:'巨量上下文是杀手锏，可一次性“吞”整本书 / 整段代码仓库。' },
+  { id:'qwen', name:'Qwen', co:'阿里 通义千问', country:'中国', color:0x8c61ff, emoji:'⛰️',
+    family:'Qwen3 / QWQ / Qwen2.5', open:'开源',
+    tag:'全栈开源的中文全能选手',
+    caps:['中文','数学','代码','多模态（Qwen-Omni）'],
+    strengths:['全尺寸开源覆盖（0.5B–235B）','中文效果优异','国产硬件生态适配好','指令 / 蒸馏生态成熟'],
+    context:'32k–256k', cutoff:'2025-04（Qwen3）',
+    tl:['2023-04 发布通义千问','2024 推出 Qwen2.5 系列','2025-04 开源旗舰 Qwen3','持续扩充多模态 Omni'],
+    note:'开源模型里最“能打”的中文选择之一，适合私有化。' },
+  { id:'glm', name:'GLM', co:'智谱 AI', country:'中国', color:0x5b9aff, emoji:'🔮',
+    family:'GLM-4.5 / GLM-4.5V / Z1', open:'开放权重',
+    tag:'国产代码与智能体先行者',
+    caps:['代码 / 编程','Agent 与工具','中文','多模态（V 版）'],
+    strengths:['深耕 Code / Agent 场景','GLM-4.5 全面对标旗舰','国产生态与本地化','早期开源中文大模型之一'],
+    context:'128k', cutoff:'2025',
+    tl:['2019 年成立','2024-01 发布 GLM-4','2025 推出 GLM-4.5 系列','持续迭代 Z1 推理 + V 多模态'],
+    note:'国内最早一批开源大模型玩家，代码与智能体体验扎实。' },
+  { id:'doubao', name:'豆包', co:'字节跳动', country:'中国', color:0x5eead4, emoji:'🍀',
+    family:'Doubao 2 mini / Seed-OSS', open:'部分开源',
+    tag:'国民级 AI 助手，亲民低价',
+    caps:['中文对话','多模态','语音','营销与创作'],
+    strengths:['背靠抖音生态、C 端用户海量','API 价格极具竞争力','语音 / 创作功能全','Seed 开源系列反哺生态'],
+    context:'256k', cutoff:'持续更新',
+    tl:['2023-08 发布豆包','2024 推出豆包大模型','2025 上市豆包 2 mini','开源 Seed-OSS 系列'],
+    note:'价格与流量的双料王者，普通用户最常“摸”到的国产模型之一。' },
+  { id:'grok', name:'Grok', co:'xAI', country:'美国', color:0x9aa4b2, emoji:'🌀',
+    family:'Grok 4 / Grok 3', open:'闭源（Grok-1 开源）',
+    tag:'接轨 X 实时数据的迷因式头脑',
+    caps:['实时网络（X 平台）','深度推理','图像增强','快速对话'],
+    strengths:['实时信息接入','Think 推理模式','训练算力与语料庞大','Grok-1 曾开源'],
+    context:'256k–1M', cutoff:'持续更新',
+    tl:['2023-11 发布 Grok','2024 开源 Grok-1','2025 推出 Grok 3 / Grok 4'],
+    note:'以实时、风格活泼著称，深度捆绑 X。' },
+  { id:'mistral', name:'Mistral', co:'Mistral AI', country:'法国 / 欧盟', color:0xff6a00, emoji:'🌎',
+    family:'Mistral Large / Medium / Codestral', open:'部分开源',
+    tag:'欧洲开源劲旅，效率为王',
+    caps:['多语言（含欧洲语种）','代码（Codestral）','MoE 高效推理','企业级定制'],
+    strengths:['MoE 结构高效低成本','多语言覆盖广','面向企业私有化','开源小参数社区活跃'],
+    context:'32k–128k', cutoff:'2025',
+    tl:['2023-05 成立','2023-09 发布 Mamba 架构','2024 推出 Mistral Large','发布专项代码模型 Codestral'],
+    note:'欧洲最具代表性的开源模型厂牌。' },
+  { id:'ernie', name:'文心一彦', co:'百度', country:'中国', color:0x3ba0ff, emoji:'📚',
+    family:'文心 4.5 / ERNIE 4.5', open:'闭源',
+    tag:'中文搜索与知识图谱背书',
+    caps:['中文','搜索增强','知识图谱','多模态'],
+    strengths:['搜索 / 知识图谱底座强','中文理解与问答','图耳搜索引擎生态','飞浆生态'],
+    context:'128k', cutoff:'2025',
+    tl:['2023-03 发布文心一言','2024 推出文心 4.0','2025 上线文心 4.5','持续开源 ERNIE 部分能力'],
+    note:'背靠百度搜索，中文知识类问答有天然优势。（页面文案以官方为准）' },
+  { id:'hunyuan', name:'混元', co:'腾讯', country:'中国', color:0x0ad4ff, emoji:'🌀',
+    family:'混元 Turbo / T1', open:'部分开源',
+    tag:'深度耦合微信生态的多模态体',
+    caps:['中文','多模态','视频生成','微信/QQ 生态'],
+    strengths:['微信 / QQ 深度集成','混元视频生成','Turbo 推理版','开源 Hunyuan 系列'],
+    context:'128k', cutoff:'2025',
+    tl:['2023-09 发布混元','2024 开源混元大模型','2025 推出混元 T1 Turbo','扩展视频多模态'],
+    note:'坐拥中国最大社交流量入口之一。' }
+];
+
+/* ================= 渲染器 / 场景 / 相机 ================= */
+const canvas = document.getElementById('scene');
+const overlay = document.getElementById('overlay');
+const crosshair = document.getElementById('crosshair');
+const hint = document.getElementById('hint');
+const viewName = document.getElementById('viewName');
+let renderer = null;
+try {
+  renderer = new THREE.WebGLRenderer({ canvas, antialias:true, powerPreference:'high-performance', preserveDrawingBuffer:true });
+} catch (e) {
+  overlay.innerHTML = '<h1>⚠️ 当前设备不支持 WebGL</h1><p>浏览器或显卡不支持 WebGL，无法进入星河。</p><div class="back"><a href="../index.html">← 返回指挥台</a></div>';
+  throw e;
+}
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+const scene = new THREE.Scene();
+scene.fog = new THREE.Fog(0x04060f, 70, 320);
+const camera = new THREE.PerspectiveCamera(68, innerWidth/innerHeight, 0.1, 1200);
+const EYE = 3.0;
+camera.position.set(0, 22, 96);
+
+/* 星海背景 */
+let starsField = null;
+(function makeStars(){
+  scene.background = new THREE.Color(0x04060f);
+  const total = 2600, pos = new Float32Array(total*3), col = new Float32Array(total*3);
+  const cA = new THREE.Color(), cB = new THREE.Color();
+  for(let i=0;i<total;i++){
+    const r = 220 + Math.random()*520;
+    const th = Math.random()*Math.PI*2;
+    const ph = Math.acos(2*Math.random()-1);
+    pos[i*3]=r*Math.sin(ph)*Math.cos(th); pos[i*3+1]=r*Math.cos(ph)*0.7; pos[i*3+2]=r*Math.sin(ph)*Math.sin(th);
+    const t = Math.random();
+    const c = cA.copy(new THREE.Color(0x4d6bfe)).lerp(cB.set(0x8c61ff), t*0.6+(Math.random()*0.4));
+    c.lerp(new THREE.Color(0xffffff), Math.random()*0.35);
+    col[i*3]=c.r; col[i*3+1]=c.g; col[i*3+2]=c.b;
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(pos,3));
+  g.setAttribute('color', new THREE.BufferAttribute(col,3));
+  starsField = new THREE.Points(g, new THREE.PointsMaterial({ size:0.9, vertexColors:true, transparent:true, opacity:0.9, sizeAttenuation:true }));
+  scene.add(starsField);
+  // 少量亮星
+  const n2=160, p2=new Float32Array(n2*3);
+  for(let i=0;i<n2;i++){ const r=300+Math.random()*500; const th=Math.random()*Math.PI*2, ph=Math.acos(2*Math.random()-1);
+    p2[i*3]=r*Math.sin(ph)*Math.cos(th); p2[i*3+1]=r*Math.cos(ph)*0.7; p2[i*3+2]=r*Math.sin(ph)*Math.sin(th); }
+  const g2=new THREE.BufferGeometry(); g2.setAttribute('position',new THREE.BufferAttribute(p2,3));
+  const bright=new THREE.Points(g2,new THREE.PointsMaterial({color:0xcfe0ff,size:1.6,sizeAttenuation:true}));
+  scene.add(bright);
+})();
+
+/* 中央核心 */
+const core = new THREE.Mesh(new THREE.IcosahedronGeometry(3.4, 2),
+  new THREE.MeshStandardMaterial({ color:0x0a1550, emissive:0x4d6bfe, emissiveIntensity:1.2, roughness:0.3, metalness:0.4 }));
+scene.add(core);
+const coreGlow = new THREE.Mesh(new THREE.SphereGeometry(4.6, 24, 24),
+  new THREE.MeshBasicMaterial({ color:0x4d6bfe, transparent:true, opacity:0.14, side:THREE.DoubleSide }));
+scene.add(coreGlow);
+const coreLight = new THREE.PointLight(0x6c8cff, 2.4, 60); scene.add(coreLight);
+const ambient = new THREE.AmbientLight(0x334066, 0.9); scene.add(ambient);
+const hemi = new THREE.HemisphereLight(0x9db4ff, 0x04060f, 0.7); scene.add(hemi);
+const rim = new THREE.DirectionalLight(0x8c61ff, 0.5); rim.position.set(-40,30,-30); scene.add(rim);
+const sunl = new THREE.DirectionalLight(0xfff2dd, 0.35); sunl.position.set(40,60,60); scene.add(sunl);
+
+/* ================= 行星系统 ================= */
+const worlds = [];
+function rr(x,a,b,w,h,r){ x.beginPath(); x.moveTo(a+r,b); x.arcTo(a+w,b,a+w,b+h,r); x.arcTo(a+w,b+h,a,b+h,r); x.arcTo(a,b+h,a,b,r); x.arcTo(a,b,a+w,b,r); x.closePath(); }
+function makeLabel(text, acc){
+  const c=document.createElement('canvas'); c.width=300; c.height=70; const x=c.getContext('2d');
+  x.fillStyle='rgba(8,12,26,0.82)'; rr(x,4,4,292,62,16); x.fill();
+  x.strokeStyle=acc; x.lineWidth=2; rr(x,4,4,292,62,16); x.stroke();
+  x.fillStyle='#f0f4ff'; x.font='bold 30px "PingFang SC","Microsoft YaHei",sans-serif';
+  x.textAlign='center'; x.textBaseline='middle'; x.fillText(text,150,30);
+  x.fillStyle='#9db4ff'; x.font='16px "PingFang SC",sans-serif'; x.fillText('按 E 打开档案',150,54);
+  const tex=new THREE.CanvasTexture(c); tex.colorSpace=THREE.SRGBColorSpace;
+  const s=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true,depthWrite:false}));
+  s.scale.set(6.4,1.5,1); return s;
+}
+const GRP_SEED = 7.3; // 行星体系围绕核心错落分布
+MODELS.forEach((m, i) => {
+  const ang = i/MODELS.length*Math.PI*2;
+  const rad = 30 + (i%3)*9 + Math.sin(i*1.7)*4;
+  const y = Math.sin(i*2.1)*13;
+  const ak = THREE.MathUtils.lerp(0.25, 0.9, Math.abs(Math.sin(i*1.3)));
+  const colorHex = '#'+m.color.toString(16).padStart(6,'0');
+  const grp = new THREE.Group();
+  grp.position.set(Math.cos(ang)*rad, y, Math.sin(ang)*rad);
+  // 行星本体（发光球）
+  const bodyMat = new THREE.MeshStandardMaterial({ color:m.color, emissive:m.color, emissiveIntensity:0.9, roughness:0.35, metalness:0.1 });
+  const body = new THREE.Mesh(new THREE.IcosahedronGeometry(2.1, 2), bodyMat);
+  // 少量表面色斑
+  const bumps = new THREE.Mesh(new THREE.IcosahedronGeometry(2.15, 3),
+    new THREE.MeshStandardMaterial({ color:m.color, emissive:m.color, emissiveIntensity:0.5, wireframe:true, transparent:true, opacity:0.18 }));
+  grp.add(body); grp.add(bumps);
+  // 光环
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(3.1, 0.14, 12, 56),
+    new THREE.MeshStandardMaterial({ color:0x0a1550, emissive:m.color, emissiveIntensity:1.1, roughness:0.4 }));
+  ring.rotation.x = Math.PI/2.4; ring.rotation.z = Math.sin(i*3)*0.3; grp.add(ring);
+  // 点光源（让行星在空间里“亮”出来）
+  const pl = new THREE.PointLight(m.color, 1.4, 26); pl.position.set(0,0,0); grp.add(pl);
+  // 标签
+  const label = makeLabel(m.name, colorHex); label.position.y = 4.4; grp.add(label);
+  // 卫星环绕
+  const moon = new THREE.Mesh(new THREE.SphereGeometry(0.42, 10, 10),
+    new THREE.MeshStandardMaterial({ color:0xcfe0ff, emissive:0x9db4ff, emissiveIntensity:0.3, roughness:0.5 }));
+  grp.add(moon);
+  grp.userData = { idx:i, spin:3.5+Math.random()*3, orbit:Math.random()*6.28, orbitSpd:(0.25+Math.random()*0.5)*(Math.random()<.5?1:-1), colorHex };
+  scene.add(grp);
+  worlds.push(grp);
+});
+
+/* ================= 相机控制：漫游 / 巡览 ================= */
+let locked=false, yaw=0, pitch=0, mode=0; // 0 漫游 1 巡览
+const keys={};
+const HAS_POINTER_LOCK = 'pointerLockElement' in document;
+function enterWorld(){
+  if (HAS_POINTER_LOCK) { try{ canvas.requestPointerLock(); }catch(e){ /* 降级：直接进入 */ } }
+  if (!locked) { locked=true; overlay.classList.add('hidden'); if(!HAS_POINTER_LOCK) canvas.className=''; }
+}
+overlay.addEventListener('click', enterWorld);
+canvas.addEventListener('click', ()=>{ if(!locked) enterWorld(); });
+document.addEventListener('pointerlockchange', ()=>{
+  const nl = document.pointerLockElement===canvas;
+  locked = nl;
+  overlay.classList.toggle('hidden', locked);
+  if(crosshair) crosshair.style.opacity = locked&&mode===0 ? 1 : 0;
+});
+addEventListener('mousemove', e=>{
+  if(!locked || mode===1) return;
+  yaw   -= e.movementX*0.0022;
+  pitch -= e.movementY*0.0022;
+  pitch = Math.max(-1.2, Math.min(1.2, pitch));
+});
+
+let flashText=null, flashUntil=0;
+function flashHint(t){ flashText=t; flashUntil=performance.now()+1500; }
+function flashNote(t){ const n=document.getElementById('cmpNote'); n.textContent=t; n.classList.add('show'); clearTimeout(flashNote._t); flashNote._t=setTimeout(()=>n.classList.remove('show'), 1800); }
+
+function toggleMode(){
+  mode = 1 - mode;
+  if(mode===0){ // 回到自由漫游：站到核心前方高处
+    camera.position.set(Math.sin(yaw)*60, 6, Math.cos(yaw)*60);
+    pitch = -0.12;
+  }
+  viewName.textContent = mode===0 ? '巡游漫游' : '自动天幕巡览';
+  flashHint(mode===0 ? '🎮 自由漫游：WASD 飞行' : '🌌 天幕巡览：自动环绕上帝视角');
+  if(crosshair) crosshair.style.opacity = locked&&mode===0 ? 1 : 0;
+  if(mode===1 && locked && HAS_POINTER_LOCK && document.pointerLockElement===canvas){ document.exitPointerLock(); }
+}
+
+/* 相机渲染 */
+function animateCamera(dt, now){
+  if(mode===1){
+    // 自动环绕核心
+    const t = now*0.00009;
+    const r = 78;
+    const target = new THREE.Vector3(Math.cos(t)*r, 14+Math.sin(now*0.00005)*6, Math.sin(t)*r);
+    camera.position.lerp(target, 1-Math.exp(-dt*0.5));
+    camera.lookAt(core.position.clone().add(new THREE.Vector3(0,0,0)));
+  } else {
+    // 漫游：WASD 相对视角移动
+    let f=0, r2=0;
+    if(keys['KeyW']||keys['ArrowUp'])f+=1;
+    if(keys['KeyS']||keys['ArrowDown'])f-=1;
+    if(keys['KeyD']||keys['ArrowRight'])r2+=1;
+    if(keys['KeyA']||keys['ArrowLeft'])r2-=1;
+    const speed=(keys['ShiftLeft']||keys['ShiftRight']?20:9)*dt;
+    const sin=Math.sin(yaw), cos=Math.cos(yaw);
+    camera.position.x += (sin*f + cos*r2)*speed;
+    camera.position.z += (-cos*f + sin*r2)*speed;
+    camera.position.x = Math.max(-200, Math.min(200, camera.position.x));
+    camera.position.z = Math.max(-200, Math.min(200, camera.position.z));
+    camera.rotation.order = 'YXZ';
+    camera.rotation.y = yaw; camera.rotation.x = pitch;
+  }
+}
+
+/* ================= 行星旋转 / 运动 ================= */
+function updateWorlds(dt, now){
+  worlds.forEach((g, i) => {
+    const u = g.userData;
+    g.children[0].rotation.y += dt*0.2;      // 本体自转
+    const ring = g.children[2]; ring.rotation.x += dt*0.1;
+    const label = g.children[4];
+    label.position.y = 4.4 + Math.sin(now*0.002 + i)*0.3;
+    // 卫星环绕
+    u.orbit += dt*u.orbitSpd;
+    const moon = g.children[5];
+    moon.position.set(Math.cos(u.orbit)*3.6, 0.3, Math.sin(u.orbit)*3.6);
+    // 靠近高亮
+    const d = camera.position.distanceTo(g.position);
+    const hot = d < 16;
+    const f = hot ? 1.15 : 1;
+    label.scale.set(6.4*f, 1.5*f, 1);
+    label.material.opacity = hot ? 1 : 0.9;
+  });
+}
+
+/* ================= 选取 + 打开档案 ================= */
+const raycaster = new THREE.Raycaster();
+const center = new THREE.Vector2(0,0);
+function pickNearest(maxDist=150){
+  camera.updateMatrixWorld();
+  raycaster.setFromCamera(center, camera);
+  const hits = raycaster.intersectObjects(worlds, true);
+  for(const h of hits){
+    let o=h.object; while(o && !(o.userData && o.userData.idx!=null)) o=o.parent;
+    if(o && MODELS[o.userData.idx]) return o;
+  }
+  // 兜底：中心最近
+  let best=null, bd=maxDist;
+  for(const g of worlds){
+    const d=camera.position.distanceTo(g.position);
+    if(d<bd){ bd=d; best=g; }
+  }
+  return best;
+}
+const detailEl = document.getElementById('detail');
+function esc(s){ return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function openDetail(idx){
+  const m = MODELS[idx];
+  document.getElementById('dDot').style.color = m.color===0? '#fff' : '#'+m.color.toString(16).padStart(6,'0');
+  document.getElementById('dName').textContent = m.emoji+' '+m.name;
+  document.getElementById('dFam').textContent = m.family + ' · ' + m.open;
+  document.getElementById('dCo').textContent = m.co;
+  document.getElementById('dCountry').textContent = m.country;
+  const bd = document.getElementById('dBd');
+  let h = '';
+  h += '<span class="tg">'+esc(m.tag)+'</span>';
+  h += '<div class="kv">';
+  h += '<b>上下文</b><span>'+esc(m.context)+'</span>';
+  h += '<b>知识截止</b><span>'+esc(m.cutoff)+'</span>';
+  h += '<b>开源</b><span>'+esc(m.open)+'</span>';
+  h += '</div>';
+  h += '<div class="sec">能力</div><ul>'+m.caps.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul>';
+  h += '<div class="sec">亮点</div><ul>'+m.strengths.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul>';
+  h += '<div class="sec">发展脉络</div><ul class="tl">'+m.tl.map(x=>{ const mm=x.split(' ',2); const d=mm[0]; const r=x.slice(d.length).trim();
+    return '<li><b>'+esc(d)+'</b> '+esc(r)+'</li>'; }).join('')+'</ul>';
+  if(m.note) h += '<div class="sec">备注</div><div style="color:#8ba0c8;font-size:13px">'+esc(m.note)+'</div>';
+  bd.innerHTML = h;
+  detailEl.classList.add('open');
+}
+function closeDetail(){ detailEl.classList.remove('open'); }
+document.getElementById('dClose').addEventListener('click', closeDetail);
+function interact(){
+  if(detailEl.classList.contains('open')){ closeDetail(); return; }
+  const g = pickNearest();
+  if(g){ openDetail(g.userData.idx); }
+  else flashHint('离模型远一点再按 E');
+}
+
+/* ================= 对比面板 ================= */
+const selected = new Set();
+function pColor(m){ return '#'+m.color.toString(16).padStart(6,'0'); }
+function renderPick(){
+  const box = document.getElementById('cmpPick');
+  box.innerHTML = '';
+  MODELS.forEach(m=>{
+    const c = document.createElement('span');
+    c.className = 'chip'+(selected.has(m.id)?' on':'');
+    c.textContent = m.emoji+' '+m.name;
+    c.onclick = ()=>{
+      if(selected.has(m.id)) selected.delete(m.id);
+      else if(selected.size >= 4){ flashNote('最多同时对比 4 家'); return; }
+      else selected.add(m.id);
+      renderPick(); renderCmp();
+    };
+    box.appendChild(c);
+  });
+}
+function tcell(v){ return '<td>'+esc(v)+'</td>'; }
+function renderCmp(){
+  const sel = MODELS.filter(m=>selected.has(m.id));
+  const wrap = document.getElementById('cmpWrap');
+  if(sel.length < 1){ wrap.innerHTML = '<div style="color:#8ba0c8;font-size:13px;padding:8px 0">👈 点上方勾选 2 – 4 家模型，即可并排对比。</div>'; return; }
+  const head = sel.map(m=>'<th class="h" style="color:'+pColor(m)+'">'+m.emoji+' '+esc(m.name)+'</th>').join('');
+  const row2 = sel.map(m=>'<th>'+esc(m.family)+'</th>').join('');
+  const company = sel.map(m=>'<td>'+esc(m.co)+'<span style="display:block;color:#8ba0c8">'+esc(m.country)+'</span></td>').join('');
+  const open = sel.map(m=>'<td>'+esc(m.open)+(m.open==='开源'||m.open.includes('开源')?' ✅':' 🔒')+'</td>').join('');
+  const ctx = sel.map(m=>tcell(m.context)).join('');
+  const cutoff = sel.map(m=>tcell(m.cutoff)).join('');
+  const caps = sel.map(m=>tcell(m.caps.join(' · '))).join('');
+  const str = sel.map(m=>tcell(m.strengths.join(' · '))).join('');
+  const tag = sel.map(m=>tcell(m.tag)).join('');
+  wrap.innerHTML =
+    '<table><tr><th class="hd">对比项</th>'+head+'</tr>'+
+    '<tr class="hd2"><td class="hd">版本 / 家族</td>'+row2+'</tr>'+
+    '<tr><td class="hd">一句话定位</td>'+tag+'</tr>'+
+    '<tr><td class="hd">公司 / 国家</td>'+company+'</tr>'+
+    '<tr><td class="hd">开源情况</td>'+open+'</tr>'+
+    '<tr><td class="hd">上下文长度</td>'+ctx+'</tr>'+
+    '<tr><td class="hd">知识截止</td>'+cutoff+'</tr>'+
+    '<tr><td class="hd">能力</td>'+caps+'</tr>'+
+    '<tr><td class="hd">亮点</td>'+str+'</tr></table>';
+}
+const cmpEl = document.getElementById('cmp');
+function openCmp(){ cmpEl.classList.add('open'); renderPick(); renderCmp(); }
+function closeCmp(){ cmpEl.classList.remove('open'); }
+document.getElementById('cmpClose').addEventListener('click', closeCmp);
+document.getElementById('cmpClear').addEventListener('click', ()=>{ selected.clear(); renderPick(); renderCmp(); });
+
+/* ================= 截图 / 帮助 ================= */
+function toggleHelp(){ document.getElementById('help').classList.toggle('hidden'); }
+document.getElementById('help').addEventListener('click', ()=>document.getElementById('help').classList.add('hidden'));
+function takePhoto(){
+  try{
+    const a=document.createElement('a'); a.href=renderer.domElement.toDataURL('image/png'); a.download='ai-world-'+Date.now()+'.png'; a.click();
+    flashHint('📸 已截图保存');
+  }catch(e){ flashHint('截图失败'); }
+}
+
+addEventListener('keydown', e=>{
+  keys[e.code]=true;
+  if(e.code==='Tab'){ e.preventDefault(); toggleMode(); }
+  if(e.code==='KeyE'){ if(detailEl.classList.contains('open')) closeDetail(); else interact(); }
+  if(e.code==='KeyC'){ if(cmpEl.classList.contains('open')) closeCmp(); else openCmp(); }
+  if(e.code==='KeyH') toggleHelp();
+  if(e.code==='KeyP') takePhoto();
+  if(e.code==='Escape'){ if(cmpEl.classList.contains('open')) closeCmp(); else if(detailEl.classList.contains('open')) closeDetail(); else { /* 指针锁由浏览器接管 */ } }
+  if(e.code==='Space') e.preventDefault();
+});
+addEventListener('keyup', e=>keys[e.code]=false);
+canvas.addEventListener('mousedown', e=>{ if(locked && e.button===0 && mode===0) interact(); });
+
+/* ================= 主循环 ================= */
+const clock=new THREE.Clock();
+function animate(){
+  requestAnimationFrame(animate);
+  const dt=Math.min(clock.getDelta(),0.05);
+  const now=performance.now();
+  animateCamera(dt, now);
+  updateWorlds(dt, now);
+  core.rotation.y += dt*0.15; core.rotation.z += dt*0.05;
+  coreGlow.scale.setScalar(1+Math.sin(now*0.002)*0.06);
+  if(starsField) starsField.rotation.y += dt*0.0003;
+  // 提示
+  if(mode===1){ hint.style.opacity=0; }
+  else if(now<flashUntil){ hint.textContent=flashText; hint.style.opacity=1; }
+  else {
+    const g=pickNearest(26);
+    if(g){ const m=MODELS[g.userData.idx]; hint.textContent = m.emoji+' '+m.name+' · '+m.family+'  → 按 E 打开档案'; hint.style.opacity=1; }
+    else hint.style.opacity=0;
+  }
+  renderer.render(scene,camera);
+}
+addEventListener('resize', ()=>{ camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth,innerHeight); });
+renderer.setSize(innerWidth,innerHeight);
+animate();
+</script>
+</body>
+</html>

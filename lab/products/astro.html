@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>星辰大海 · 航天与天文</title>
+<style>
+  :root{
+    --bg:#1D1F27; --bg2:#23262F; --card:#2A2E3A; --line:#393E4C;
+    --txt:#E8EAF0; --mut:#9AA0B0; --acc1:#FF6B6B; --acc2:#4ECDC4;
+    --tag:#3A3F4E; --star:#FFD43B; --violet:#a78bfa; --te:#4ECDC4;
+    --grad:linear-gradient(135deg,#FF6B6B,#4ECDC4);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;line-height:1.6}
+  a{color:inherit;text-decoration:none}
+  .topbar{position:sticky;top:0;z-index:30;display:flex;align-items:center;justify-content:space-between;
+    padding:10px 16px;background:rgba(29,31,39,.85);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  .topbar a{display:inline-flex;align-items:center;gap:6px;color:var(--mut);font-size:13px}
+  .topbar a:hover{color:var(--acc2)}
+  .clock{font-size:12px;color:var(--mut);font-variant-numeric:tabular-nums;letter-spacing:.5px}
+  .wrap{max-width:1080px;margin:0 auto;padding:24px 18px 90px}
+  /* hero */
+  .hero{position:relative;overflow:hidden;border:1px solid var(--line);border-radius:18px;padding:30px 26px;margin-bottom:26px;
+    background:radial-gradient(1200px 400px at 80% -10%,rgba(78,205,196,.18),transparent 60%),radial-gradient(900px 360px at 10% 110%,rgba(255,107,107,.18),transparent 55%),var(--bg2)}
+  .hero::before{content:"";position:absolute;inset:0;background-image:radial-gradient(1.4px 1.4px at 20% 30%,#fff,transparent),radial-gradient(1.2px 1.2px at 70% 60%,#fff,transparent),radial-gradient(1px 1px at 45% 80%,#cfe,transparent),radial-gradient(1.3px 1.3px at 85% 25%,#fff,transparent),radial-gradient(1px 1px at 33% 12%,#fff,transparent);opacity:.5;pointer-events:none}
+  .hero h1{position:relative;font-size:27px;font-weight:700;letter-spacing:1px;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .hero .sub{position:relative;color:var(--mut);font-size:14px;margin-top:8px;max-width:640px}
+  .hero .story{position:relative;margin-top:16px;font-size:13.5px;color:#cfd3df;background:rgba(0,0,0,.22);border-left:3px solid var(--acc2);padding:10px 14px;border-radius:0 10px 10px 0}
+  .hero .story b{color:var(--star)}
+  .hero .meta-row{position:relative;display:flex;gap:18px;flex-wrap:wrap;margin-top:16px;font-size:12.5px;color:var(--mut)}
+  .hero .meta-row b{color:var(--txt);font-variant-numeric:tabular-nums}
+  /* sections */
+  section{margin:30px 0;transition:margin .38s cubic-bezier(.22,.61,.36,1)}
+  section.collapsed{margin:13px 0}
+  .sec-head{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+  .sec-head h2{font-size:18px;font-weight:600;display:flex;align-items:center;gap:9px}
+  .sec-head .ic{width:30px;height:30px;border-radius:9px;background:var(--tag);display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+  .sec-head .ic svg{width:17px;height:17px;fill:var(--acc2)}
+  .sec-head .tag{margin-left:auto;font-size:11px;color:var(--mut);background:var(--tag);padding:3px 9px;border-radius:10px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
+  .grid{display:grid;gap:14px}
+  .g3{grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
+  .g2{grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
+  .muted{color:var(--mut);font-size:13px}
+  .err{color:#ff9a9a;font-size:12.5px}
+  .pill{display:inline-block;font-size:11px;padding:2px 8px;border-radius:9px;background:var(--tag);color:var(--mut);margin:2px 4px 2px 0}
+  button.btn{background:var(--bg2);border:1px solid var(--line);color:var(--txt);border-radius:9px;padding:8px 13px;font-size:13px;cursor:pointer}
+  button.btn:hover{border-color:var(--acc2);color:var(--acc2)}
+  input,select{background:var(--bg2);border:1px solid var(--line);color:var(--txt);border-radius:8px;padding:7px 10px;font-size:13px;outline:none;font-family:inherit}
+  input:focus,select:focus{border-color:var(--acc2)}
+  /* APOD */
+  #apodImg{width:100%;max-height:460px;object-fit:cover;border-radius:12px;background:#000;display:block}
+  .apod-bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+  .apod-title{font-size:16px;font-weight:600;margin:10px 0 4px}
+  .apod-cap{font-size:13px;color:#cfd3df;line-height:1.7}
+  .apod-copy{font-size:12px;color:var(--mut);margin-top:6px}
+  /* ISS map */
+  .iss-wrap{display:grid;grid-template-columns:1.4fr 1fr;gap:16px}
+  @media(max-width:760px){.iss-wrap{grid-template-columns:1fr}}
+  .mapbox{position:relative;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#0c1622}
+  .mapbox svg{display:block;width:100%;height:auto}
+  .iss-stat{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .iss-stat .box{background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:11px 13px}
+  .iss-stat .box .k{font-size:11px;color:var(--mut)}
+  .iss-stat .box .v{font-size:18px;font-weight:600;font-variant-numeric:tabular-nums}
+  .iss-stat .box .v small{font-size:11px;color:var(--mut);font-weight:400}
+  /* launches */
+  .launch{padding:13px 15px;border:1px solid var(--line);border-radius:12px;background:var(--bg2);margin-bottom:10px}
+  .launch .nm{font-weight:600;font-size:14.5px}
+  .launch .ln{font-size:12.5px;color:var(--mut);margin-top:3px}
+  .launch .cd{font-size:13px;color:var(--star);font-variant-numeric:tabular-nums;margin-top:6px}
+  /* moon */
+  .moon-row{display:flex;gap:20px;align-items:center;flex-wrap:wrap}
+  .moon-svg{filter:drop-shadow(0 0 18px rgba(255,212,59,.25))}
+  .moon-info .nm{font-size:18px;font-weight:600}
+  .moon-info .pc{font-size:13px;color:var(--mut);margin-top:4px}
+  /* planets */
+  .planet h3{font-size:15px;font-weight:600;display:flex;align-items:center;gap:8px}
+  .planet .dot{width:14px;height:14px;border-radius:50%;flex:0 0 auto}
+  .planet p{font-size:12.5px;color:var(--mut);margin-top:8px;line-height:1.6}
+  .planet .facts{margin-top:9px;display:grid;gap:5px}
+  .planet .facts div{font-size:12px;color:#cfd3df}
+  .planet .facts b{color:var(--txt)}
+  /* deep space exploration */
+  .deep-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+  .chip{font-size:12px;padding:5px 13px;border-radius:20px;border:1px solid var(--line);background:var(--bg2);color:var(--mut);cursor:pointer}
+  .chip:hover{border-color:var(--acc2);color:var(--acc2)}
+  .chip.on{background:var(--acc2);color:#10241f;border-color:var(--acc2);font-weight:600}
+  .deep-bar .cnt{margin-left:auto;font-size:12px;color:var(--mut)}
+  .deep-card{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:14px 15px 15px;position:relative;overflow:hidden}
+  .deep-card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,#4ECDC4,#5b8def)}
+  .deep-card.cn::before{background:linear-gradient(180deg,#FF6B6B,#FFD43B)}
+  .deep-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .deep-top h3{font-size:14.5px;font-weight:600}
+  .deep-top .flag{font-size:10.5px;padding:1px 7px;border-radius:7px;background:rgba(78,205,196,.16);color:#4ECDC4;font-weight:600}
+  .deep-card.cn .flag{background:rgba(255,107,107,.16);color:#ff9a9a}
+  .deep-top .yr{margin-left:auto;font-size:12px;color:var(--star);font-variant-numeric:tabular-nums}
+  .deep-card .meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px;font-size:11px}
+  .deep-card .meta span{padding:1px 8px;border-radius:7px;border:1px solid var(--line);color:var(--mut)}
+  .st{font-size:11px;padding:1px 8px;border-radius:7px;border:1px solid var(--line)}
+  .st.on{color:#4ECDC4;border-color:rgba(78,205,196,.45)}
+  .st.done{color:#FFD43B;border-color:rgba(255,212,59,.45)}
+  .st.plan{color:#a78bfa;border-color:rgba(167,139,250,.45)}
+  .deep-card p{font-size:12.5px;color:var(--mut);margin-top:9px;line-height:1.6}
+  .deep-card .hi{font-size:12px;color:#cfd3df;margin-top:9px;background:rgba(0,0,0,.22);border-radius:9px;padding:8px 11px;line-height:1.55}
+  .deep-card .hi b{color:var(--star)}
+  /* roadmap */
+  .road{display:grid;gap:14px}
+  .stage{border:1px solid var(--line);border-radius:14px;padding:15px 17px;background:var(--card);position:relative;padding-left:54px}
+  .stage .num{position:absolute;left:14px;top:15px;width:28px;height:28px;border-radius:50%;background:var(--grad);color:#10241f;font-weight:700;display:flex;align-items:center;justify-content:center;font-size:13px}
+  .stage h3{font-size:15px;font-weight:600;margin-bottom:6px}
+  .stage p{font-size:13px;color:#cfd3df;margin-bottom:8px}
+  .stage .res{display:flex;flex-wrap:wrap;gap:6px}
+  .stage .res a{font-size:12px;color:var(--acc2);border:1px solid var(--line);border-radius:8px;padding:4px 9px}
+  .stage .res a:hover{background:var(--acc2);color:#10241f}
+  /* on this day */
+  .otd .ev{border-left:3px solid var(--star);padding:6px 0 6px 13px;margin-bottom:10px}
+  .otd .ev .yr{font-size:12px;color:var(--acc2);font-weight:600}
+  .otd .ev .tx{font-size:13px;color:#cfd3df;margin-top:2px}
+  footer{margin-top:40px;border-top:1px solid var(--line);padding-top:18px;color:var(--mut);font-size:12px;line-height:1.8}
+  footer a{color:var(--acc2)}
+  /* settings popover */
+  #setPop{position:fixed;right:16px;bottom:16px;z-index:40;width:300px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:0 12px 40px rgba(0,0,0,.5);display:none}
+  #setPop.on{display:block}
+  #setGear{position:fixed;right:16px;bottom:16px;z-index:39;width:46px;height:46px;border-radius:50%;background:var(--grad);border:none;color:#10241f;font-size:20px;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.4)}
+  #setPop label{font-size:12px;color:var(--mut);display:block;margin-bottom:6px}
+  #setPop .row{display:flex;gap:8px;margin-top:10px}
+  /* fold / quick-nav / back-to-top —— 现代折叠：高度自适应内容 */
+  .sec-head{cursor:pointer;border-radius:10px;padding:4px 6px;margin-left:-6px;transition:background .2s}
+  .sec-head:hover{background:rgba(255,255,255,.03)}
+  .sec-head .chev{margin-left:8px;font-size:11px;color:var(--mut);transition:transform .32s cubic-bezier(.4,0,.2,1),color .2s;flex:0 0 auto}
+  section.collapsed .sec-head .chev{transform:rotate(-90deg)}
+  /* grid-rows 0fr↔1fr：不用测像素即可过渡到内容真实高度（自适应内容多寡） */
+  .sec-body{display:grid;grid-template-rows:1fr;opacity:1;
+    transition:grid-template-rows .38s cubic-bezier(.22,.61,.36,1),opacity .3s ease,margin-top .38s cubic-bezier(.22,.61,.36,1)}
+  .sec-inner{overflow:hidden;min-height:0}
+  section.collapsed .sec-body{grid-template-rows:0fr;opacity:0}
+  .sec-head:hover h2{color:var(--acc2)}
+  .sec-head:hover .chev{color:var(--acc2)}
+  /* 快捷导航：当前阅读板块高亮（scroll-spy） */
+  .secnav a.on{color:var(--acc2);border-color:var(--acc2);background:rgba(78,205,196,.13);font-weight:600}
+  .tbtn{font-size:12px;color:var(--mut);background:var(--tag);border:1px solid var(--line);border-radius:12px;padding:3px 11px;cursor:pointer;font-family:inherit}
+  .tbtn:hover{color:var(--acc2);border-color:var(--acc2)}
+  .secnav{position:sticky;top:44px;z-index:25;display:flex;gap:6px;overflow-x:auto;padding:8px 2px;margin-bottom:6px;background:rgba(29,31,39,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);scrollbar-width:none}
+  .secnav::-webkit-scrollbar{display:none}
+  .secnav a{flex:0 0 auto;font-size:12px;color:var(--mut);border:1px solid var(--line);border-radius:16px;padding:4px 12px;background:var(--bg2);white-space:nowrap}
+  .secnav a:hover{color:var(--acc2);border-color:var(--acc2)}
+  #toTop{position:fixed;right:16px;bottom:74px;z-index:38;width:46px;height:46px;border-radius:50%;border:1px solid var(--line);background:var(--bg2);color:var(--txt);font-size:19px;line-height:1;cursor:pointer;display:none;box-shadow:0 6px 20px rgba(0,0,0,.4)}
+  #toTop.on{display:block}
+  #toTop:hover{border-color:var(--acc2);color:var(--acc2)}
+/* a11y 1.0.226：上方规则移除了 :focus 轮廓，此处为键盘用户补回焦点环（鼠标用户无感） */
+:focus-visible{outline:2px solid var(--wb-focus,#4ecdc4)!important;outline-offset:2px!important}
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+<div class="topbar">
+  <a href="../index.html">← 返回实验室</a>
+  <button class="tbtn" id="foldAll" onclick="foldAll()">全部折叠</button>
+  <span class="clock" id="utcClock">--:--:-- UTC</span>
+</div>
+
+<div class="wrap">
+  <!-- HERO -->
+  <div class="hero">
+    <h1>星辰大海 · 航天与天文</h1>
+    <div class="sub">用公开数据资源，把从小想当宇航员的那个自己，重新接回来。<br>实时轨道、每日天文图、月相、发射窗口、行星档案与一条属于你的自学路径。</div>
+    <div class="story">小待说：从小想当宇航员和科学工作者，可惜走了弯路，读了大专、做了技术工作。但好奇心不该被学历埋掉——<b>你已经是科学工作者了</b>，只是战场换成了工程。这片星海，随时为你敞开。</div>
+    <div class="meta-row">
+      <span>协调世界时 <b id="hUtc">--:--</b></span>
+      <span>星历日期 <b id="hDate">----/--/--</b></span>
+      <span>自定星历 <b id="hStar">—</b></span>
+      <span>数据源 <b>NASA · WhereTheISS · TheSpaceDevs</b></span>
+    </div>
+  </div>
+
+  <!-- 板块快捷跳转（sticky） -->
+  <nav class="secnav" aria-label="板块快捷跳转"></nav>
+
+  <!-- APOD -->
+  <section id="apod">
+    <div class="sec-head">
+      <span class="ic"><svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 109 9 9 9 0 00-9-9zm0 4a5 5 0 015 5h-5z"/></svg></span>
+      <h2>NASA 每日天文图</h2>
+      <span class="tag">api.nasa.gov · APOD</span>
+    </div>
+    <div class="apod-bar">
+      <input type="date" id="apodDate">
+      <button class="btn" onclick="apodGo()">查看</button>
+      <button class="btn" onclick="apodToday()">回到今天</button>
+      <span id="apodStatus" class="muted"></span>
+    </div>
+    <div class="card">
+      <div id="apodMedia"></div>
+      <div class="apod-title" id="apodTitle">加载中…</div>
+      <div class="apod-cap" id="apodCap"></div>
+      <div class="apod-copy" id="apodCopy"></div>
+    </div>
+  </section>
+
+  <!-- ISS -->
+  <section id="iss">
+    <div class="sec-head">
+      <span class="ic"><svg viewBox="0 0 24 24"><path d="M12 2l2.4 5.2L20 9l-5.6 1.8L12 16l-2.4-5.2L4 9l5.6-1.8zM5 17l1.4 3 3-1.2-1.4-3zM16 17l-1.4 3-3-1.2 1.4-3z"/></svg></span>
+      <h2>国际空间站 · 实时位置</h2>
+      <span class="tag" id="issTag">每 5 秒刷新</span>
+    </div>
+    <div class="iss-wrap">
+      <div class="mapbox">
+        <svg id="issMap" viewBox="0 0 360 180" preserveAspectRatio="xMidYMid meet" aria-label="ISS 地面轨迹图">
+          <defs>
+            <radialGradient id="dayg" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#ffd86b" stop-opacity=".35"/>
+              <stop offset="60%" stop-color="#ffd86b" stop-opacity=".12"/>
+              <stop offset="100%" stop-color="#ffd86b" stop-opacity="0"/>
+            </radialGradient>
+          </defs>
+          <rect x="0" y="0" width="360" height="180" fill="#0c1622"/>
+          <g id="grat" stroke="#1c3247" stroke-width=".5" fill="none"></g>
+          <circle id="dayNight" cx="180" cy="90" r="170" fill="url(#dayg)"/>
+          <g id="trail" stroke="#4ECDC4" stroke-width=".8" fill="none" opacity=".7"></g>
+          <g id="issMark">
+            <circle r="3.4" fill="#FF6B6B"/>
+            <circle r="7" fill="#FF6B6B" opacity=".25"/>
+            <text x="0" y="-9" text-anchor="middle" fill="#FF8f8f" font-size="7" font-family="sans-serif">ISS</text>
+          </g>
+        </svg>
+      </div>
+      <div>
+        <div class="iss-stat">
+          <div class="box"><div class="k">纬度 LAT</div><div class="v" id="iLat">--</div></div>
+          <div class="box"><div class="k">经度 LON</div><div class="v" id="iLon">--</div></div>
+          <div class="box"><div class="k">高度 ALT</div><div class="v" id="iAlt">--<small> km</small></div></div>
+          <div class="box"><div class="k">速度 VEL</div><div class="v" id="iVel">--<small> km/h</small></div></div>
+        </div>
+        <p class="muted" id="issNote" style="margin-top:12px">正在追踪国际空间站的实时坐标…</p>
+        <button class="btn" id="passBtn" style="margin-top:10px;display:none" onclick="issPass()">计算我的上空过境</button>
+        <div id="passOut" class="muted" style="margin-top:8px"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LAUNCHES -->
+  <section id="launches">
+    <div class="sec-head">
+      <span class="ic"><svg viewBox="0 0 24 24"><path d="M12 2c1.5 0 2.7 1.2 2.7 2.7 0 1.5-1.2 2.7-2.7 2.7S9.3 6.2 9.3 4.7C9.3 3.2 10.5 2 12 2z"/><path d="M5 9.5c0-2 2.5-3 7-3s7 1 7 3v2c0 2-2.5 3-7 3s-7-1-7-3z"/><path d="M9.5 15.5 8 22M14.5 15.5 16 22"/></svg></span>
+      <h2>近期火箭发射</h2>
+      <span class="tag">The Space Devs</span>
+    </div>
+    <div id="launchList"><p class="muted">加载中…</p></div>
+  </section>
+
+  <!-- MOON -->
+  <section id="moon">
+    <div class="sec-head">
+      <span class="ic"><svg viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg></span>
+      <h2>今夜月相</h2>
+      <span class="tag">本地计算 · 无需联网</span>
+    </div>
+    <div class="card moon-row">
+      <svg class="moon-svg" width="120" height="120" viewBox="0 0 100 100" aria-label="月相">
+        <circle cx="50" cy="50" r="44" fill="#10141c"/>
+        <path id="moonLit" fill="#E8EAF0" d=""/>
+        <circle cx="50" cy="50" r="44" fill="none" stroke="#2c3340" stroke-width="1"/>
+      </svg>
+      <div class="moon-info">
+        <div class="nm" id="moonName">—</div>
+        <div class="pc" id="moonPc">照明度 —</div>
+        <p class="muted" id="moonTip" style="margin-top:8px;max-width:360px"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- PLANETS -->
+  <section id="planets">
+    <div class="sec-head">
+      <span class="ic"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 4a6 6 0 010 12 6 6 0 010-12z"/></svg></span>
+      <h2>太阳系速览</h2>
+      <span class="tag">静态档案</span>
+    </div>
+    <div class="grid g3" id="planetGrid"></div>
+  </section>
+
+  <!-- DEEP SPACE EXPLORATION -->
+  <section id="deep">
+    <div class="sec-head">
+      <span class="ic"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 0118 0 9 9 0 01-18 0zm9-3.4a3.4 3.4 0 100 6.8 3.4 3.4 0 000-6.8z"/><path d="M18.5 3l.6 1.6L20.7 5.2 19.1 5.8 18.5 7.4 17.9 5.8 16.3 5.2 17.9 4.6zM6 17.4l.4 1 1 .4-1 .4-.4 1-.4-1-1-.4 1-.4z"/></svg></span>
+      <h2>国内外星际探索 · 深空任务档案</h2>
+      <span class="tag">中国航天 + 国际深空 · 静态知识</span>
+    </div>
+    <div class="deep-bar">
+      <button class="chip on" data-f="all" onclick="deepFilter('all',this)">全部</button>
+      <button class="chip" data-f="cn" onclick="deepFilter('cn',this)">中国</button>
+      <button class="chip" data-f="intl" onclick="deepFilter('intl',this)">国际</button>
+      <span class="cnt" id="deepCnt"></span>
+    </div>
+    <div class="grid g2" id="deepGrid"></div>
+  </section>
+
+  <!-- ROADMAP -->
+  <section id="roadmap">
+    <div class="sec-head">
+      <span class="ic"><svg viewBox="0 0 24 24"><path d="M4 19V5h6v14H4zm10 0V9h6v10h-6zM7 7h0M17 11h0"/></svg></span>
+      <h2>从爱好者到懂行 · 自学路径</h2>
+      <span class="tag">为你而写</span>
+    </div>
+    <div class="road" id="roadGrid"></div>
+  </section>
+
+  <!-- ON THIS DAY -->
+  <section id="onthisday" class="otd">
+    <div class="sec-head">
+      <span class="ic"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 10h4v2h-6V6h2z"/></svg></span>
+      <h2>历史上的今天 · 太空里程碑</h2>
+      <span class="tag" id="otdDate">--</span>
+    </div>
+    <div id="otdList"><p class="muted">加载中…</p></div>
+  </section>
+
+  <footer>
+    本页为「自考-考研」工作台 Lab 子系统，纯前端、零外链、可离线降级。实时数据来自公开 API：
+    <a href="https://api.nasa.gov" target="_blank" rel="noopener">NASA Open Data (APOD/NEO)</a>、
+    <a href="https://wheretheiss.at" target="_blank" rel="noopener">WhereTheISS.at</a>、
+    <a href="https://thespacedevs.com" target="_blank" rel="noopener">The Space Devs</a>。
+    月相与行星档案为本地计算/静态知识，无需联网。NASA DEMO_KEY 有访问限额，建议填入你自己的 API Key（右下角齿轮）。<br>
+    致每一个没走原路、却没放下仰望的人。
+  </footer>
+</div>
+
+<button id="toTop" title="回到顶部" aria-label="回到顶部">↑</button>
+<button id="setGear" onclick="toggleSet()" title="设置">⚙</button>
+<div id="setPop">
+  <label>NASA API Key（默认 DEMO_KEY，限流；建议填自己的）</label>
+  <input id="nasaKey" type="text" style="width:100%" placeholder="DEMO_KEY" aria-label="DEMO_KEY">
+  <div class="row">
+    <button class="btn" onclick="saveKey()">保存</button>
+    <button class="btn" onclick="toggleSet(false)">关闭</button>
+  </div>
+  <p class="muted" style="margin-top:10px;font-size:11.5px">免费申请：api.nasa.gov 注册即得。Key 仅存本机 localStorage，不外发。</p>
+</div>
+
+<script>
+"use strict";
+const $ = s => document.querySelector(s);
+const LS = localStorage;
+function safe(fn){ try{ return fn(); }catch(e){ console.error(e); return null; } }
+function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+/* ---------- NASA key ---------- */
+function getKey(){ return LS.getItem('nasa_key') || 'DEMO_KEY'; }
+function saveKey(){ const v=$('#nasaKey').value.trim(); LS.setItem('nasa_key', v||'DEMO_KEY'); $('#nasaKey').value=v; toggleSet(false); apodGo(); if(neoReady) loadNEO(); }
+function toggleSet(force){ const p=$('#setPop'); const on = force===undefined ? !p.classList.contains('on') : force; p.classList.toggle('on', on); $('#setGear').style.display = on?'none':'block'; }
+
+/* ---------- UTC clock + stardate ---------- */
+function tickClock(){
+  const n=new Date();
+  const p=x=>String(x).padStart(2,'0');
+  const utc=p(n.getUTCHours())+':'+p(n.getUTCMinutes())+':'+p(n.getUTCSeconds());
+  $('#utcClock').textContent=utc+' UTC';
+  $('#hUtc').textContent=utc.slice(0,5);
+  $('#hDate').textContent=n.getUTCFullYear()+'/'+p(n.getUTCMonth()+1)+'/'+p(n.getUTCDate());
+  // 简易星历（Star Trek 风格趣味值）：年积日
+  const start=new Date(Date.UTC(n.getUTCFullYear(),0,0));
+  const doy=Math.floor((n-start)/86400000);
+  const frac=(n.getUTCHours()*3600+n.getUTCMinutes()*60+n.getUTCSeconds())/864;
+  $('#hStar').textContent=''+n.getUTCFullYear()+'.'+String(doy).padStart(3,'0')+'.'+p(Math.floor(frac));
+}
+setInterval(tickClock,1000); tickClock();
+
+/* ---------- APOD ---------- */
+const apodCache={};
+function apodToday(){ const d=new Date(); $('#apodDate').value=toISO(d); apodGo(); }
+function toISO(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+async function apodGo(){
+  const date=$('#apodDate').value || toISO(new Date());
+  $('#apodDate').value=date;
+  const st=$('#apodStatus'); st.textContent='请求中…';
+  if(apodCache[date]){ renderApod(apodCache[date]); return; }
+  const url='https://api.nasa.gov/planetary/apod?api_key='+encodeURIComponent(getKey())+'&date='+date;
+  try{
+    const r=await fetch(url);
+    if(r.status===429){ st.textContent='⚠ DEMO_KEY 今日额度用尽，填入自己的 Key 解锁'; showApodFallback(); return; }
+    if(!r.ok) throw 0;
+    const j=await r.json();
+    apodCache[date]=j; LS.setItem('apod_'+date, JSON.stringify({t:Date.now(),j}));
+    renderApod(j);
+  }catch(e){
+    st.textContent='⚠ 网络/接口不可用，展示离线星空';
+    showApodFallback();
+  }
+}
+function renderApod(j){
+  $('#apodStatus').textContent='';
+  const m=$('#apodMedia');
+  if(j.media_type==='image'){
+    m.innerHTML='<img id="apodImg" alt="APOD" src="'+esc(j.url)+'">';
+    const im=$('#apodImg'); im.onerror=()=>{ m.innerHTML='<div class="card" style="text-align:center;padding:40px;color:var(--mut)">图片加载失败（可能跨域或离线）</div>'; };
+  }else{
+    m.innerHTML='<div class="apod-cap" style="margin:0 0 8px">今日为视频内容：<a href="'+esc(j.url)+'" target="_blank" rel="noopener" style="color:var(--acc2)">点此观看 ↗</a></div>';
+  }
+  $('#apodTitle').textContent=j.title||'(无标题)';
+  $('#apodCap').textContent=j.explanation||'';
+  $('#apodCopy').textContent=j.copyright?('© '+j.copyright+' · '+j.date):(j.date||'');
+}
+function showApodFallback(){
+  const m=$('#apodMedia');
+  m.innerHTML='<div style="height:220px;border-radius:12px;background:radial-gradient(2px 2px at 20% 30%,#fff,transparent),radial-gradient(2px 2px at 60% 50%,#fff,transparent),radial-gradient(1.5px 1.5px at 80% 70%,#cdf,transparent),radial-gradient(2px 2px at 40% 80%,#fff,transparent),#05070d;display:flex;align-items:center;justify-content:center;color:var(--mut);font-size:13px">离线星空 · 联网后返回即可看 NASA 每日图</div>';
+  $('#apodTitle').textContent='今日天文图（离线）';
+  $('#apodCap').textContent='NASA 每日天文图（APOD）为人类每日精选一张宇宙影像并附科普解说。离线时无法加载，连网或填入自有 NASA Key 后即可查看。建议从「NASA 天文每日一图」长期积累，建立自己的宇宙审美。';
+  $('#apodCopy').textContent='';
+}
+// 预热：尝试读本地缓存
+(function(){ for(let i=0;i<3;i++){ const d=new Date(Date.now()-i*86400000); const k='apod_'+toISO(d); const v=LS.getItem(k); if(v){ try{ const o=JSON.parse(v); if(Date.now()-o.t<86400000){ apodCache[d.toISOString().slice(0,10)]=o.j; } }catch(e){} } } })();
+
+/* ---------- ISS ---------- */
+const ISS_API='https://api.wheretheiss.at/v1/satellites/25544';
+let issTrail=[];
+function drawGrat(){
+  const g=$('#grat'); let s='';
+  for(let lon=-150;lon<=150;lon+=30){ const x=lon+180; s+='<line x1="'+x+'" y1="0" x2="'+x+'" y2="180"/>'; }
+  for(let lat=-60;lat<=60;lat+=30){ const y=90-lat; s+='<line x1="0" y1="'+y+'" x2="360" y2="'+y+'"/>'; }
+  s+='<line x1="0" y1="90" x2="360" y2="90" stroke="#2a4a66" stroke-width=".8"/>';
+  s+='<line x1="180" y1="0" x2="180" y2="180" stroke="#2a4a66" stroke=".8" stroke-width=".8"/>';
+  g.innerHTML=s;
+}
+function updateDayNight(){
+  const n=new Date(); const utc=n.getUTCHours()+n.getUTCMinutes()/60;
+  const lon=-15*(utc-12); const doy=Math.floor((n-new Date(Date.UTC(n.getUTCFullYear(),0,0)))/86400000);
+  const lat=23.44*Math.sin(2*Math.PI*(doy-81)/365);
+  const x=lon+180, y=90-lat;
+  const c=$('#dayNight'); c.setAttribute('cx',x); c.setAttribute('cy',y);
+}
+async function loadISS(){
+  try{
+    const r=await fetch(ISS_API); if(!r.ok) throw 0;
+    const j=await r.json();
+    const x=j.longitude+180, y=90-j.latitude;
+    $('#issMark').setAttribute('transform','translate('+x+','+y+')');
+    $('#iLat').textContent=j.latitude.toFixed(2)+'°';
+    $('#iLon').textContent=j.longitude.toFixed(2)+'°';
+    $('#iAlt').innerHTML=j.altitude.toFixed(1)+'<small> km</small>';
+    $('#iVel').innerHTML=Math.round(j.velocity*3600/1000).toLocaleString()+'<small> km/h</small>';
+    $('#issNote').textContent='国际空间站正以约 '+Math.round(j.velocity*3600/1000).toLocaleString()+' km/h 绕地飞行，每 92 分钟一圈。';
+    $('#issTag').textContent='实时 · 信号正常';
+    issTrail.push([x,y]); if(issTrail.length>40) issTrail.shift();
+    $('#trail').innerHTML=issTrail.map(p=>'<polyline points="'+p[0].toFixed(1)+','+p[1].toFixed(1)+'"/>').join('');
+  }catch(e){
+    $('#issTag').textContent='信号丢失 · 稍后重试';
+    $('#issNote').textContent='无法连接 ISS 位置服务（可能离线或接口限流）。地图与坐标显示将保持上一次结果。';
+  }
+}
+async function issPass(){
+  const out=$('#passOut'); out.textContent='请求定位…';
+  if(!navigator.geolocation){ out.textContent='当前环境不支持定位。'; return; }
+  navigator.geolocation.getCurrentPosition(async pos=>{
+    const {latitude:lat,longitude:lon}=pos.coords;
+    try{
+      const r=await fetch(ISS_API+'/passes?lat='+lat+'&lon='+lon+'&n=1');
+      if(!r.ok) throw 0; const j=await r.json(); const p=j[0];
+      const t=new Date(p.startUTC*1000);
+      out.innerHTML='下一次过境：<b style="color:var(--star)">'+t.toLocaleString()+'</b> · 可见时长 '+Math.round(p.duration)+'s · 最大仰角 '+Math.round(p.maxEl)+'°';
+    }catch(e){ out.textContent='过境计算失败（接口限流或离线）。'; }
+  }, err=>{ out.textContent='定位被拒绝，无法计算你的上空过境。'; }, {enableHighAccuracy:false,timeout:8000});
+}
+if(navigator.geolocation){ $('#passBtn').style.display='inline-block'; }
+drawGrat(); updateDayNight(); setInterval(updateDayNight,60000); loadISS(); setInterval(loadISS,5000);
+
+/* ---------- LAUNCHES ---------- */
+async function loadLaunches(){
+  const el=$('#launchList');
+  try{
+    const r=await fetch('https://ll.thespacedevs.com/2.2.0/launch/upcoming/?limit=5&mode=list');
+    if(!r.ok) throw 0;
+    const j=await r.json(); const list=j.results||[];
+    if(!list.length){ el.innerHTML='<p class="muted">暂无已排期发射。</p>'; return; }
+    el.innerHTML=list.map(l=>{
+      const net=new Date((l.net||'').replace(' ','T')+'Z');
+      const cd=countdown(net);
+      const prov=(l.launch_service_provider&&l.launch_service_provider.name)||'';
+      const rkt=(l.rocket&&l.rocket.configuration&&l.rocket.configuration.name)||'';
+      const pad=(l.pad&&l.pad.name)||''; const loc=(l.pad&&l.pad.location&&l.pad.location.name)||'';
+      return '<div class="launch"><div class="nm">'+esc(l.name)+'</div><div class="ln">'+esc(prov)+(rkt?' · '+esc(rkt):'')+(loc?' · '+esc(loc):'')+'</div><div class="cd">🚀 '+cd+'</div></div>';
+    }).join('');
+  }catch(e){
+    el.innerHTML='<p class="err">⚠ 发射数据暂不可用（接口限流或离线）。可前往 <a href="https://www.spacex.com/launches/" target="_blank" rel="noopener" style="color:var(--acc2)">SpaceX</a> / <a href="https://nextspaceflight.com" target="_blank" rel="noopener" style="color:var(--acc2)">NextSpaceflight</a> 查看。</p>';
+  }
+}
+function countdown(dt){
+  if(!(dt instanceof Date)||isNaN(dt)) return '时间待定';
+  let s=Math.floor((dt-new Date())/1000);
+  if(s<=0) return '进行中 / 已发射';
+  const d=Math.floor(s/86400); s-=d*86400; const h=Math.floor(s/3600); s-=h*3600; const m=Math.floor(s/60); s-=m*60;
+  return 'T-'+(d>0?d+'天 ':'')+String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+}
+loadLaunches(); setInterval(loadLaunches, 1800000);
+
+/* ---------- MOON (pure JS) ---------- */
+function toJulian(d){ return (d.getTime()/86400000)+2440587.5; }
+function moonPhase(d){
+  const syn=29.530588853; const jd=toJulian(d);
+  let ph=((jd-2451550.1)%syn)/syn; if(ph<0) ph+=1; return ph;
+}
+function moonName(p){
+  if(p<0.03||p>0.97) return '新月 New Moon';
+  if(p<0.22) return '蛾眉月 Waxing Crescent';
+  if(p<0.28) return '上弦月 First Quarter';
+  if(p<0.47) return '盈凸月 Waxing Gibbous';
+  if(p<0.53) return '满月 Full Moon';
+  if(p<0.72) return '亏凸月 Waning Gibbous';
+  if(p<0.78) return '下弦月 Last Quarter';
+  return '残月 Waning Crescent';
+}
+function moonTips(p){
+  if(p<0.03||p>0.97) return '月亮与太阳同侧，几乎不可见——适合看深空天体（星系、星云），不受月光干扰。';
+  if(p<0.28) return '日落后西方天空的一弯银钩，是辨认「月海」与环形山的好时机。';
+  if(p<0.53) return '亮面渐满，适合观测整片月面细节；满月时地形阴影最短、反差最低。';
+  return '后半夜东南方可见，黎明前最亮——适合拍「带食月落」与地照现象。';
+}
+function moonPath(R,p){
+  const cx=50, cy=50;
+  const c=Math.cos(2*Math.PI*p); const rx=R*Math.abs(c);
+  let d='';
+  if(p<0.5){ // waxing, lit on right
+    d='M '+cx+' '+(cy-R)+' A '+R+' '+R+' 0 0 1 '+cx+' '+(cy+R);
+    const sweep=(p<0.25)?0:1;
+    d+=' A '+rx.toFixed(2)+' '+R+' 0 0 '+sweep+' '+cx+' '+(cy-R);
+  }else{ // waning, lit on left
+    d='M '+cx+' '+(cy-R)+' A '+R+' '+R+' 0 0 0 '+cx+' '+(cy+R);
+    const sweep=(p<0.75)?1:0;
+    d+=' A '+rx.toFixed(2)+' '+R+' 0 0 '+sweep+' '+cx+' '+(cy-R);
+  }
+  return d;
+}
+function renderMoon(){
+  const p=moonPhase(new Date());
+  $('#moonLit').setAttribute('d', moonPath(44,p));
+  $('#moonName').textContent=moonName(p);
+  const ill=Math.round((1-Math.cos(2*Math.PI*p))/2*100);
+  $('#moonPc').textContent='照明度 '+ill+'%';
+  $('#moonTip').textContent=moonTips(p);
+}
+renderMoon();
+
+/* ---------- PLANETS (static) ---------- */
+const PLANETS=[
+  {n:'太阳 Sun',c:'#FFD43B',d:'太阳系唯一的恒星，占系统总质量 99.86%。',f:['直径 1,392,700 km','表面温度 ≈5,500 ℃','核心 1,500 万 ℃ 核聚变']},
+  {n:'水星 Mercury',c:'#b0a48f',d:'最靠近太阳、最小的行星，昼夜温差极端。',f:['直径 4,879 km','距日 0.39 AU','公转 88 天']},
+  {n:'金星 Venus',c:'#e6c27a',d:'浓厚 CO₂ 大气致强烈温室效应，表面最热。',f:['直径 12,104 km','距日 0.72 AU','公转 225 天 · 自转逆行']},
+  {n:'地球 Earth',c:'#4ECDC4',d:'已知唯一存在生命的星球，液态水覆盖 71%。',f:['直径 12,742 km','距日 1 AU','公转 365.25 天']},
+  {n:'火星 Mars',c:'#e07a5f',d:'红色星球，拥有太阳系最高的奥林帕斯山。',f:['直径 6,779 km','距日 1.52 AU','公转 687 天 · 2 颗卫星']},
+  {n:'木星 Jupiter',c:'#d8a47f',d:'最大行星，气态巨行星，大红斑是巨型风暴。',f:['直径 139,820 km','距日 5.2 AU','公转 11.9 年 · 95+ 卫星']},
+  {n:'土星 Saturn',c:'#e8d39a',d:'以壮观的冰环系统闻名。',f:['直径 116,460 km','距日 9.5 AU','公转 29.5 年 · 壮丽光环']},
+  {n:'天王星 Uranus',c:'#9fe3e0',d:'侧躺自转的冰巨星，自转轴几乎平躺。',f:['直径 50,724 km','距日 19.2 AU','公转 84 年 · 甲烷呈蓝']},
+  {n:'海王星 Neptune',c:'#5b8def',d:'最远行星，风速可达 2,100 km/h。',f:['直径 49,244 km','距日 30 AU','公转 165 年 · 深蓝']}
+];
+function renderPlanets(){
+  $('#planetGrid').innerHTML=PLANETS.map(p=>'<div class="card planet"><h3><span class="dot" style="background:'+p.c+'"></span>'+esc(p.n)+'</h3><p>'+esc(p.d)+'</p><div class="facts">'+p.f.map(x=>'<div>'+esc(x)+'</div>').join('')+'</div></div>').join('');
+}
+renderPlanets();
+
+/* ---------- DEEP SPACE EXPLORATION (中国 + 国际) ---------- */
+function rich(s){ return esc(s).replace(/&lt;b&gt;/g,'<b>').replace(/&lt;\/b&gt;/g,'</b>').replace(/&lt;br&gt;/g,'<br>'); }
+const DEEP=[
+  /* --- 中国 --- */
+  {n:'嫦娥一号',e:'CE-1',c:'cn',org:'CNSA 中国国家航天局',y:'2007',s:'done',tg:'月球',d:'中国首颗月球探测卫星，获取全月面影像，实现绕月探测零的突破。',hi:'让中国成为<b>世界第五个发射月球探测器</b>的国家。'},
+  {n:'嫦娥三号 · 玉兔号',e:'CE-3',c:'cn',org:'CNSA 中国国家航天局',y:'2013',s:'done',tg:'月球',d:'首次实现中国航天器在地外天体软着陆与巡视勘察。',hi:'玉兔号在月面工作 <b>972 天</b>，远超 3 个月的设计寿命。'},
+  {n:'嫦娥四号 · 玉兔二号',e:'CE-4',c:'cn',org:'CNSA 中国国家航天局',y:'2019',s:'done',tg:'月球背面',d:'人类首次在月球背面软着陆并巡视，揭开月背的神秘面纱。',hi:'借助「鹊桥」中继星，完成史无前例的<b>月背探索</b>。'},
+  {n:'嫦娥五号',e:'CE-5',c:'cn',org:'CNSA 中国国家航天局',y:'2020',s:'done',tg:'月球',d:'完成中国首次月球采样返回，带回 1,731 克月壤样品。',hi:'中国成为<b>第三个实现月球采样返回</b>的国家。'},
+  {n:'嫦娥六号',e:'CE-6',c:'cn',org:'CNSA 中国国家航天局',y:'2024',s:'done',tg:'月球背面',d:'人类首次月球背面采样返回，带回 1,935.3 克样品。',hi:'世界首次<b>月背自动采样返回</b>，改写月球演化认知。'},
+  {n:'天问一号 · 祝融号',e:'Tianwen-1',c:'cn',org:'CNSA 中国国家航天局',y:'2021',s:'done',tg:'火星',d:'一次任务实现「绕、落、巡」三步，祝融号巡视乌托邦平原。',hi:'中国成为<b>第二个成功着陆火星</b>并巡视的国家。'},
+  {n:'天问二号',e:'Tianwen-2',c:'cn',org:'CNSA 中国国家航天局',y:'2025',s:'on',tg:'近地小行星',d:'对近地小行星 2016 HO3 采样返回，并顺访主带彗星 311P。',hi:'中国首次<b>小行星采样返回</b>，一次发射覆盖双目标。'},
+  {n:'天宫空间站',e:'Tiangong',c:'cn',org:'CMSA 中国载人航天工程办公室',y:'2022',s:'on',tg:'近地轨道',d:'中国自主建造运营的载人空间站，三舱「T」字构型长期驻留。',hi:'天和核心舱 + 问天 + 梦天实验舱，<b>持续有人照料</b>。'},
+  {n:'神舟五号',e:'Shenzhou-5',c:'cn',org:'CMSA 中国载人航天工程办公室',y:'2003',s:'done',tg:'近地轨道',d:'杨利伟乘神舟五号飞天，成为首位进入太空的中国航天员。',hi:'中国成为<b>第三个独立掌握载人航天技术</b>的国家。'},
+  {n:'鹊桥二号',e:'Queqiao-2',c:'cn',org:'CNSA 中国国家航天局',y:'2024',s:'on',tg:'月球轨道',d:'新一代地月中继通信卫星，为月背任务提供通信桥梁。',hi:'支撑嫦娥六号及后续<b>月球南极探测</b>的中继通信。'},
+  {n:'羲和号 · 夸父一号',e:'ASO-S',c:'cn',org:'CNSA 中国国家航天局',y:'2021',s:'on',tg:'太阳',d:'中国首颗太阳探测卫星与综合性太阳观测卫星。',hi:'开启中国<b>「探日时代」</b>，研究耀斑与日冕物质抛射。'},
+  {n:'载人登月工程',e:'梦舟 · 揽月',c:'cn',org:'CMSA 中国载人航天工程办公室',y:'2030 前',s:'plan',tg:'月球',d:'长征十号 + 梦舟飞船 + 揽月着陆器，冲刺中国人首次登月。',hi:'目标 2030 年前实现<b>载人月面着陆</b>与科学考察。'},
+  /* --- 国际 --- */
+  {n:'旅行者 1 号',e:'Voyager 1',c:'intl',org:'NASA 美国航天局',y:'1977',s:'on',tg:'星际空间',d:'1977 年发射，2012 年进入星际空间，人类飞得最远的探测器。',hi:'距地球 <b>240 亿公里以上</b>，仍以微弱信号与地球联系。'},
+  {n:'旅行者 2 号',e:'Voyager 2',c:'intl',org:'NASA 美国航天局',y:'1977',s:'on',tg:'星际空间',d:'唯一造访过天王星与海王星的探测器，2018 年进入星际空间。',hi:'完成行星<b>「大巡游」</b>，携带金唱片向宇宙致意。'},
+  {n:'新视野号',e:'New Horizons',c:'intl',org:'NASA 美国航天局',y:'2006',s:'on',tg:'冥王星 / 柯伊伯带',d:'2015 年首次近距离飞掠冥王星，2019 年探访柯伊伯带天体 Arrokoth。',hi:'人类首次看清冥王星，抵达<b>太阳系最遥远</b>的天体。'},
+  {n:'好奇号',e:'Curiosity',c:'intl',org:'NASA 美国航天局',y:'2012',s:'on',tg:'火星',d:'核动力火星车，长期探测盖尔陨石坑，寻找宜居环境证据。',hi:'发现有机分子，证明火星曾具备<b>宜居条件</b>。'},
+  {n:'毅力号',e:'Perseverance',c:'intl',org:'NASA 美国航天局',y:'2021',s:'on',tg:'火星',d:'采集火星岩芯等待返回地球，并携带「机智号」直升机。',hi:'首次在火星实现<b>动力受控飞行</b>。'},
+  {n:'朱诺号',e:'Juno',c:'intl',org:'NASA 美国航天局',y:'2016',s:'on',tg:'木星',d:'极轨环绕木星，研究其大气、磁场与内部结构。',hi:'揭示木星极区风暴群与<b>未知的深层构造</b>。'},
+  {n:'卡西尼-惠更斯',e:'Cassini-Huygens',c:'intl',org:'NASA / ESA',y:'1997',s:'done',tg:'土星',d:'环绕土星 13 年，释放惠更斯号着陆土卫六。',hi:'首次着陆外太阳系天体，发现<b>土卫二地下海洋</b>。'},
+  {n:'帕克太阳探测器',e:'Parker Solar Probe',c:'intl',org:'NASA 美国航天局',y:'2018',s:'on',tg:'太阳',d:'首次穿越太阳日冕，不断刷新「最近太阳」纪录。',hi:'人类第一次<b>「触摸」太阳</b>，探究日冕加热之谜。'},
+  {n:'詹姆斯·韦布空间望远镜',e:'JWST',c:'intl',org:'NASA / ESA / CSA',y:'2021',s:'on',tg:'深空宇宙',d:'红外太空望远镜，观测宇宙最早星系与系外行星大气。',hi:'迄今最强大的空间望远镜，不断改写<b>早期宇宙图景</b>。'},
+  {n:'罗塞塔 · 菲莱',e:'Rosetta',c:'intl',org:'ESA 欧洲空间局',y:'2004',s:'done',tg:'彗星 67P',d:'首次环绕彗星并释放着陆器菲莱登陆彗核。',hi:'首次<b>软着陆彗星</b>，追踪太阳系原始物质。'},
+  {n:'隼鸟 2 号',e:'Hayabusa2',c:'intl',org:'JAXA 日本宇宙航空研究开发机构',y:'2014',s:'done',tg:'小行星龙宫',d:'日本小行星采样返回任务，2020 年带回 5.4 克原始样本。',hi:'首次带回含水的<b>碳质小行星地下样本</b>。'},
+  {n:'OSIRIS-REx',e:'OSIRIS-REx',c:'intl',org:'NASA 美国航天局',y:'2016',s:'done',tg:'小行星贝努',d:'采集贝努小行星样本，2023 年将 121.6 克样本送回地球。',hi:'美国首次小行星采样返回，研究<b>生命起源前物质</b>。'},
+  {n:'贝皮科伦坡',e:'BepiColombo',c:'intl',org:'ESA / JAXA',y:'2018',s:'on',tg:'水星',d:'欧洲与日本联合水星探测，预计 2026 年进入环水星轨道。',hi:'双探测器协同研究水星<b>磁场与稀薄大气</b>。'},
+  {n:'木星冰月探测器',e:'JUICE',c:'intl',org:'ESA 欧洲空间局',y:'2023',s:'on',tg:'木星冰卫星',d:'探测木卫二、木卫三、木卫四的冰壳与地下海洋。',hi:'欧洲首个木星系冰卫星探测器，<b>2031 年</b>抵达木星。'},
+  {n:'欧罗巴快船',e:'Europa Clipper',c:'intl',org:'NASA 美国航天局',y:'2024',s:'on',tg:'木卫二',d:'飞掠式探测木卫二冰壳下的液态海洋。',hi:'评估木卫二<b>宜居性</b>，寻找潜在生命线索。'},
+  {n:'双小行星重定向测试',e:'DART',c:'intl',org:'NASA 美国航天局',y:'2022',s:'done',tg:'小行星 Dimorphos',d:'人类首次主动撞击小行星，验证行星防御技术。',hi:'成功改变小行星绕行轨道，验证<b>动能撞击防御</b>。'},
+  {n:'阿尔忒弥斯计划',e:'Artemis',c:'intl',org:'NASA 美国航天局',y:'2022',s:'on',tg:'月球',d:'美国重返月球计划，目标让首位女性与有色人种登月。',hi:'目标建立月球长期驻留，为<b>载人火星</b>铺路。'}
+];
+const ST={done:'已完成',on:'进行中',plan:'规划中'};
+function deepCard(m){
+  return '<div class="deep-card '+m.c+'"><div class="deep-top"><span class="flag">'+(m.c==='cn'?'中国':'国际')+'</span><h3>'+esc(m.n)+'</h3><span class="yr">'+esc(m.y)+'</span></div>'
+   +'<div class="meta"><span>'+esc(m.org)+'</span><span>目标 · '+esc(m.tg)+'</span><span class="st '+m.s+'">'+esc(ST[m.s])+'</span></div>'
+   +'<p>'+esc(m.d)+'</p><div class="hi">'+rich(m.hi)+'</div></div>';
+}
+function deepFilter(f,btn){
+  const chips=document.querySelectorAll('.deep-bar .chip');
+  for(let i=0;i<chips.length;i++){ chips[i].classList.remove('on'); }
+  if(btn){ btn.classList.add('on'); }
+  else{ const b=document.querySelector('.deep-bar .chip[data-f="'+f+'"]'); if(b) b.classList.add('on'); }
+  const list = f==='all' ? DEEP : DEEP.filter(x=>x.c===f);
+  $('#deepGrid').innerHTML=list.map(deepCard).join('');
+  $('#deepCnt').textContent='共 '+list.length+' 项任务';
+}
+deepFilter('all');
+
+/* ---------- ROADMAP (for 小待) ---------- */
+const ROAD=[
+  {t:'心态重启：你已经是科学工作者',d:'学历只是路径标签，不是能力边界。你用工程能力理解宇宙，本身就是科学实践。先接受「爱好者 + 工程师」这个身份，再谈进阶。',res:[['NASA 公民科学','https://science.nasa.gov/citizenscience/'],['Zooniverse 众包科研','https://www.zooniverse.org']]},
+  {t:'阶段一 · 数学与物理地基',d:'轨道力学、火箭方程都建立在经典力学与微积分上。不必重读学位，按「够用 + 直觉」补：矢量、导数、牛顿定律、能量守恒。',res:[['MIT OpenCourseWare','https://ocw.mit.edu'],['3Blue1Brown 本质理解','https://www.3blue1brown.com'],['可汗学院物理','https://www.khanacademy.org']]},
+  {t:'阶段二 · 天文观测入门',d:'从肉眼与双筒认星座、认行星开始，建立「天上的坐标系」（赤经赤纬、黄道）。一台望远镜前先用免费星图软件练手。',res:[['Stellarium 免费 planetarium','https://stellarium.org'],['国际暗夜协会','https://www.darksky.org'],['Sky & Telescope','https://skyandtelescope.org']]},
+  {t:'阶段三 · 航天工程原理',d:'读懂「为什么火箭这样飞」：二体问题、霍曼转移、逃逸速度、火箭方程、姿态控制。Kerbal 是一个被低估的教学工具。',res:[['NASA Basics of Space Flight','https://science.nasa.gov/learn/basics-of-space-flight/'],['Kerbal Space Program','https://www.kerbalspaceprogram.com'],['轨道力学讲义(Andrew Hull)','https://www.youtube.com/results?search_query=orbital+mechanics+lecture']]},
+  {t:'阶段四 · 前沿课题追踪',d:'系外行星、黑洞、引力波、詹姆斯·韦伯。直接读任务官网与公开数据集，而非只刷科普短视频——你具备读原始数据的能力。',res:[['NASA Exoplanet Archive','https://exoplanetarchive.ipac.caltech.edu'],['LIGO 引力波','https://www.ligo.caltech.edu'],['Webb 望远镜','https://webbtelescope.org']]},
+  {t:'阶段五 · 动手造工具（就像本页）',d:'用公开 API 自己写看板、处理数据。你已能做出这片星海——下一步用 Python + Astropy 读真实星表，把好奇心变成可复现的分析。',res:[['Astropy 天文 Python','https://www.astropy.org'],['中国 国家天文科学数据中心','https://nadc.china-vo.org'],['天体物理数据系统 ADS','https://ui.adsabs.harvard.edu']]}
+];
+function renderRoad(){
+  $('#roadGrid').innerHTML=ROAD.map((s,i)=>'<div class="stage"><div class="num">'+(i+1)+'</div><h3>'+esc(s.t)+'</h3><p>'+esc(s.d)+'</p><div class="res">'+s.res.map(r=>'<a href="'+esc(r[1])+'" target="_blank" rel="noopener">'+esc(r[0])+' ↗</a>').join('')+'</div></div>').join('');
+}
+renderRoad();
+
+/* ---------- ON THIS DAY ---------- */
+const OTD={
+  '0104':[['1958','苏联成功发射首颗月球探测器 Luna 1（虽未命中，成为首颗脱离地球引力的飞行器）']],
+  '0112':[['2005','「深度撞击」任务构想推进，人类开始认真考虑主动撞击彗星以研究其成分']],
+  '0131':[['1958','美国首颗卫星 Explorer 1 升空，发现范艾伦辐射带']],
+  '0201':[['2003','哥伦比亚号航天飞机返航解体，7 名宇航员遇难，深刻改变了 NASA 安全文化']],
+  '0211':[['2010','对近地小行星 1999 RQ36（贝努）的采样返回构想推进，后成为 OSIRIS-REx 任务']],
+  '0326':[['2006','欧洲 Venus Express 抵达金星，开启长期大气观测']],
+  '0401':[['1990','哈勃空间望远镜由发现号航天飞机部署入轨（当月稍晚正式释放）']],
+  '0412':[['1961','尤里·加加林乘东方一号成为首位进入太空的人类']],
+  '0424':[['1990','哈勃空间望远镜正式释放到预定轨道']],
+  '0514':[['1973','美国发射天空实验室 Skylab，首个空间站']],
+  '0525':[['1961','艾伦·谢泼德成为首位进入太空的美国人']],
+  '0601':[['1930','冥王星被克莱德·汤博发现（2006 年降级为矮行星）']],
+  '0605':[['1975','美苏阿波罗-联盟测试计划对接，冷战中的一次太空握手']],
+  '0706':[['1997','火星探路者号着陆，旅居者号成为首辆火星车']],
+  '0720':[['1969','阿波罗 11 号：阿姆斯特朗与奥尔德林首次踏上月球']],
+  '0824':[['2006','国际天文学联合会将冥王星重新定义为「矮行星」']],
+  '0912':[['1962','水手 2 号成为首颗成功飞掠行星（金星）的探测器']],
+  '1004':[['1957','斯普特尼克 1 号升空，人类首颗人造卫星，太空时代开启']],
+  '1024':[['2007','嫦娥一号发射，中国首颗月球探测卫星']],
+  '1110':[['1967','阿波罗 4 号首次发射土星五号，验证载人登月运力']],
+  '1120':[['1998','国际空间站首个舱段 Zarya 发射，开启在轨组装']],
+  '1204':[['1996','火星全球勘测者入轨，绘制首张高分辨率火星地图']],
+  '1221':[['1968','阿波罗 8 号首次载人绕月，人类首次目睹「地出」']]
+};
+function renderOTD(){
+  const n=new Date(); const key=String(n.getMonth()+1).padStart(2,'0')+String(n.getDate()).padStart(2,'0');
+  $('#otdDate').textContent=(n.getMonth()+1)+' 月 '+n.getDate()+' 日';
+  const list=OTD[key]||[];
+  if(!list.length){ $('#otdList').innerHTML='<p class="muted">今天暂无收录的太空里程碑，但头顶的星星照常在。你可以去「历史上的今天」补充你心中的坐标。</p>'; return; }
+  $('#otdList').innerHTML=list.map(e=>'<div class="ev"><div class="yr">'+esc(e[0])+'</div><div class="tx">'+esc(e[1])+'</div></div>').join('');
+}
+renderOTD();
+
+/* ---------- NEO (optional, requires own key) ---------- */
+let neoReady=true;
+async function loadNEO(){
+  if(getKey()==='DEMO_KEY'){ neoReady=false; return; } // 保护 DEMO_KEY 额度
+  try{
+    const d=toISO(new Date());
+    const r=await fetch('https://api.nasa.gov/neo/rest/v1/feed?start_date='+d+'&end_date='+d+'&api_key='+encodeURIComponent(getKey()));
+    if(!r.ok) throw 0; const j=await r.json();
+    const near=j.near_earth_objects&&j.near_earth_objects[d];
+    if(!near){ return; }
+    // 仅记录，不渲染独立区块以免页面过长；如需可扩展
+    console.log('NEO today count:', near.length);
+  }catch(e){ /* 静默 */ }
+}
+
+/* ---------- FOLD / QUICK-NAV / BACK-TO-TOP ---------- */
+const SECS=[['apod','每日天文图'],['iss','ISS 实时'],['launches','火箭发射'],['moon','今夜月相'],['planets','太阳系'],['deep','星际探索'],['roadmap','自学路径'],['onthisday','历史上今天']];
+const FOLD_KEY='astro_fold';
+function foldSet(){ try{ return new Set(JSON.parse(LS.getItem(FOLD_KEY)||'[]')); }catch(e){ return new Set(); } }
+function saveFold(s){ try{ LS.setItem(FOLD_KEY, JSON.stringify([...s])); }catch(e){} }
+function secs(){ return [...document.querySelectorAll('.wrap > section[id]')]; }
+function updateFoldAll(){ const b=$('#foldAll'); if(!b) return; b.textContent = secs().some(s=>s.classList.contains('collapsed')) ? '全部展开' : '全部折叠'; }
+function setFold(id, collapsed, persist){
+  const sec=document.getElementById(id); if(!sec) return;
+  sec.classList.toggle('collapsed', collapsed);
+  const h=sec.querySelector('.sec-head'); if(h) h.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+  if(persist!==false){ const s=foldSet(); collapsed ? s.add(id) : s.delete(id); saveFold(s); }
+  updateFoldAll();
+  if(typeof spy==='function') spy();
+}
+function toggleSec(id){ const sec=document.getElementById(id); if(!sec) return; setFold(id, !sec.classList.contains('collapsed')); }
+function foldAll(){
+  const any=secs().some(s=>s.classList.contains('collapsed'));
+  const s=foldSet();
+  secs().forEach(sec=>{ sec.classList.toggle('collapsed', !any); !any ? s.add(sec.id) : s.delete(sec.id); });
+  saveFold(s); updateFoldAll();
+  if(typeof spy==='function') spy();
+}
+function fitNav(){ const tb=document.querySelector('.topbar'), nav=document.querySelector('.secnav'); if(tb&&nav) nav.style.top=tb.offsetHeight+'px'; }
+function jumpSec(e,id){
+  e.preventDefault(); setFold(id, false);
+  const tb=document.querySelector('.topbar'), nav=document.querySelector('.secnav'), sec=document.getElementById(id);
+  const off=(tb?tb.offsetHeight:0)+(nav?nav.offsetHeight:0)+10;
+  window.scrollTo({ top: Math.max(0, sec.getBoundingClientRect().top + window.scrollY - off), behavior:'smooth' });
+}
+function buildNav(){
+  const nav=document.querySelector('.secnav'); if(!nav) return;
+  nav.innerHTML=SECS.map(s=>'<a href="#'+s[0]+'" onclick="jumpSec(event,\''+s[0]+'\')">'+esc(s[1])+'</a>').join('');
+}
+/* 把 sec-head 之后的内容整体包进 .sec-body>.sec-inner，供高度过渡使用（不改动原有节点与选择器） */
+function wrapBody(sec){
+  const head=sec.querySelector('.sec-head'); if(!head) return null;
+  let body=sec.querySelector(':scope > .sec-body');
+  if(body) return body;
+  body=document.createElement('div'); body.className='sec-body';
+  const inner=document.createElement('div'); inner.className='sec-inner';
+  let n=head.nextSibling;
+  while(n){ const nx=n.nextSibling; inner.appendChild(n); n=nx; }
+  body.appendChild(inner); sec.appendChild(body);
+  return body;
+}
+/* scroll-spy：当前阅读板块在快捷导航中高亮 */
+let spyCur=null;
+function spy(){
+  const nav=document.querySelector('.secnav'); if(!nav) return;
+  const links=[...nav.querySelectorAll('a')];
+  const tb=document.querySelector('.topbar');
+  const off=(tb?tb.offsetHeight:0)+(nav?nav.offsetHeight:0)+26;
+  let cur=null;
+  secs().forEach(sec=>{
+    if(sec.classList.contains('collapsed')) return;   // 折叠的板块不参与高亮
+    if(sec.getBoundingClientRect().top-off<=0) cur=sec.id;  // 最后一个越过顶部线的即当前板块
+  });
+  if(!cur){ const f=secs().find(s=>!s.classList.contains('collapsed')); cur=f?f.id:null; }
+  if(cur===spyCur) return; spyCur=cur;
+  links.forEach(a=>a.classList.toggle('on', a.getAttribute('href')==='#'+cur));
+}
+function initUX(){
+  secs().forEach(sec=>{
+    const head=sec.querySelector('.sec-head'); if(!head) return;
+    wrapBody(sec);
+    if(!head.querySelector('.chev')){ const c=document.createElement('span'); c.className='chev'; c.textContent='▾'; head.appendChild(c); }
+    head.addEventListener('click', ()=>toggleSec(sec.id));
+    head.setAttribute('role','button'); head.tabIndex=0; head.setAttribute('aria-expanded','true');
+    head.addEventListener('keydown', ev=>{ if(ev.key==='Enter'||ev.key===' '){ ev.preventDefault(); toggleSec(sec.id); } });
+  });
+  const s=foldSet(); secs().forEach(sec=>{ if(s.has(sec.id)) sec.classList.add('collapsed'); });
+  buildNav(); updateFoldAll(); fitNav();
+  // 滚动/缩放时刷新高亮（rAF 节流，避免连续触发重排）
+  let raf=0;
+  const onMove=()=>{ if(raf) return; raf=requestAnimationFrame(()=>{ raf=0; spy(); }); };
+  window.addEventListener('scroll', onMove, {passive:true});
+  window.addEventListener('resize', onMove);
+  spy();
+  const top=$('#toTop');
+  if(top){
+    const onScroll=()=>top.classList.toggle('on', window.scrollY>320);
+    window.addEventListener('scroll', onScroll, {passive:true}); onScroll();
+    top.addEventListener('click', ()=>window.scrollTo({top:0,behavior:'smooth'}));
+  }
+}
+window.addEventListener('resize', fitNav);
+initUX();
+
+/* init */
+$('#nasaKey').value=getKey();
+apodToday();
+</script>
+</body>
+</html>

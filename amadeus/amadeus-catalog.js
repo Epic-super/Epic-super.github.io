@@ -1,0 +1,53 @@
+/* ===========================================================
+   网页版 Amadeus 反应目录 · 移植自上游 amadeus-pet（rafiqxin/amadeus-pet）
+   src/voice/catalog.js 的 45 条触摸台词元数据（id / 心情 / 中文），
+   内容与意图均属上游作者，此处仅作非商业同人复用并保留出处。
+   挂到 window.AMADEUS_CATALOG，由 amadeus-core.js 读取做点触反应。
+   =========================================================== */
+window.AMADEUS_CATALOG = [
+  {"id":"hello","mood":"happy","zh":"你好。"},
+  {"id":"daga_kotowaru","mood":"annoyed","zh":"但是我拒绝。"},
+  {"id":"devilish_pervert","mood":"angry","zh":"没想到你竟然这么变态，我看错你了。"},
+  {"id":"i_guess","mood":"indifferent","zh":"也对呢。"},
+  {"id":"nice","mood":"winking","zh":"干得漂亮。"},
+  {"id":"pervert_confirmed","mood":"pissed","zh":"变态确定。"},
+  {"id":"sorry","mood":"sad","zh":"抱歉。"},
+  {"id":"sounds_tough","mood":"side","zh":"很辛苦呢。"},
+  {"id":"this_guy_hopeless","mood":"disappointed","zh":"这家伙没救了，必须要做点什么。"},
+  {"id":"christina","mood":"annoyed","zh":"克莉斯缇娜？"},
+  {"id":"gah","mood":"indifferent","zh":"咔。"},
+  {"id":"dont_add_tina","mood":"angry","zh":"缇娜禁止！"},
+  {"id":"why_christina","mood":"pissed","zh":"我很好奇为什么我叫克莉斯缇娜？"},
+  {"id":"who_the_hell_christina","mood":"pissed","zh":"谁是克莉斯缇娜啊？"},
+  {"id":"ask_me_whatever","mood":"happy","zh":"尽管问我吧，我会尽力回答你的。"},
+  {"id":"could_i_help","mood":"happy","zh":"那个，需要帮助吗？"},
+  {"id":"what_do_you_want","mood":"happy","zh":"需要帮助吗？"},
+  {"id":"what_is_it","mood":"happy","zh":"怎么了？"},
+  {"id":"heheh","mood":"winking","zh":"呵呵呵。"},
+  {"id":"huh_why_say","mood":"sided_worried","zh":"哎？为什么？"},
+  {"id":"you_sure","mood":"sided_worried","zh":"是这样啊。"},
+  {"id":"nice_to_meet_okabe","mood":"sided_pleasant","zh":"冈部伦太郎，初次见面，我是牧濑红莉栖，请多指教。"},
+  {"id":"look_forward_to_working","mood":"happy","zh":"请多指教。"},
+  {"id":"senpai_question","mood":"side","zh":"那么前辈，我能再问一个问题吗？"},
+  {"id":"senpai_questionmark","mood":"side","zh":"前辈？"},
+  {"id":"senpai_what_we_talkin","mood":"sided_worried","zh":"呐，前辈。关于刚才那件事…"},
+  {"id":"senpai_who_is_this","mood":"normal","zh":"嗯，前辈，那边的那个人是？"},
+  {"id":"senpai_please_dont_tell","mood":"blush","zh":"前辈，拜托请不要告诉其他人。"},
+  {"id":"still_not_happy","mood":"blush","zh":"我对这件事不是很满意。"},
+  {"id":"dont_call_me_like_that","mood":"angry","zh":"别那样叫我。"},
+  {"id":"tm_nonsense","mood":"disappointed","zh":"毫无意义呢。"},
+  {"id":"tm_scientist_no_evidence","mood":"normal","zh":"那是因为科学家还没发现问题的关键所在。"},
+  {"id":"tm_we_dont_know","mood":"normal","zh":"但是，也并不是说完全不可能，对吧？"},
+  {"id":"tm_you_said","mood":"sided_worried","zh":"你指的是时间机器？"},
+  {"id":"humans_software","mood":"normal","zh":"人们不是也会把自己比作成由硬件和软件组合起来的吗？"},
+  {"id":"memory_complex","mood":"indifferent","zh":"但是记忆数据和其他数据不同，是很复杂的。"},
+  {"id":"secret_diary","mood":"indifferent","zh":"也就是说，是秘密日记。"},
+  {"id":"modifying_memories_impossible","mood":"indifferent","zh":"修改我的记忆？理论上是可行的。"},
+  {"id":"memories_christina","mood":"winking","zh":"举例来说，可以做到让我认为自己的名字是克莉斯缇娜。"},
+  {"id":"gah_extended","mood":"blush","zh":"咔、啊、嗯嗯嗯…"},
+  {"id":"should_christina","mood":"pissed","zh":"还是说，我称呼自己为克莉斯缇娜更好一点？"},
+  {"id":"ok","mood":"happy","zh":"什么？"},
+  {"id":"tm_not_possible","mood":"disappointed","zh":"有点道理，从理论上来讲时间机器也不是不可能的。"},
+  {"id":"pleased_to_meet_you","mood":"sided_pleasant","zh":"说起来，还没正式自我介绍过。我叫牧濑红莉栖，初次见面，请多关照。"},
+  {"id":"pervert_idot_wanttodie","mood":"angry","zh":"你个变态！你是笨蛋？想死吗？！"}
+];

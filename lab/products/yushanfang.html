@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>御膳房小程序 · 实现全景</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif;
+    background: radial-gradient(1200px 600px at 20% -10%, #fff6e9 0%, transparent 60%),
+                radial-gradient(1000px 500px at 100% 110%, #fdeede 0%, transparent 55%),
+                linear-gradient(160deg, #fbf3e8 0%, #f3e7d6 100%);
+    color: #2C1810; padding: 28px 20px 48px; min-height: 100%;
+  }
+  .head { text-align: center; margin-bottom: 22px; }
+  .head .title { font-size: 30px; font-weight: 900; letter-spacing: 1px; }
+  .head .title .cr { margin-right: 10px; }
+  .head .sub { font-size: 15px; color: #9b8579; margin-top: 8px; }
+
+  .wrap { max-width: 1080px; margin: 0 auto; display: flex; gap: 44px; align-items: flex-start; }
+  @media (max-width: 880px) { .wrap { flex-direction: column; align-items: center; } }
+
+  /* ===== 手机 ===== */
+  .phone-col { flex: 0 0 auto; }
+  .phone {
+    width: 340px; background: #141416; border-radius: 42px; padding: 11px;
+    box-shadow: 0 26px 60px rgba(120,60,30,0.28), inset 0 0 0 2px #2a2a2e; position: relative;
+  }
+  .notch { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); width: 120px; height: 22px; background:#141416; border-radius: 0 0 16px 16px; z-index: 6; }
+  .screen { width: 318px; background: #FFF8F0; border-radius: 32px; overflow: hidden; position: relative; min-height: 660px; }
+  .statusbar { height: 28px; display:flex; align-items:center; justify-content:space-between; padding: 0 20px; font-size: 11px; color:#fff; font-weight:600; background: linear-gradient(135deg,#9E2B25,#C0392B); }
+  .navbar { height: 42px; display:flex; align-items:center; justify-content:center; position:relative; background:#9E2B25; color:#fff; font-size:16px; font-weight:700; }
+  .navbar .back { position:absolute; left: 14px; font-size: 21px; }
+  .scr { display:none; }
+  .scr.show { display:block; animation: fade .35s ease; }
+  @keyframes fade { from { opacity: 0; transform: translateY(6px);} to { opacity:1; transform:none; } }
+  .content { padding-bottom: 58px; }
+
+  /* 通用元素（与小程序一致） */
+  .hero { background: linear-gradient(135deg,#9E2B25 0%,#C0392B 60%,#D4AF37 140%); padding: 12px 14px 18px; color:#fff; }
+  .brand { display:flex; align-items:center; }
+  .brand .crown { font-size: 28px; margin-right: 9px; }
+  .hero-title { font-size: 24px; font-weight: 800; letter-spacing: 2px; }
+  .hero-sub { font-size: 12px; opacity:.9; margin-top: 2px; }
+  .login-btn { background: rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.5); color:#fff; font-size: 12px; padding: 6px 12px; border-radius: 999px; }
+  .user-chip { display:flex; align-items:center; background: rgba(255,255,255,.16); padding: 4px 9px 4px 4px; border-radius: 999px; }
+  .user-chip .av { width: 26px; height:26px; border-radius:50%; background:#fff; display:flex; align-items:center; justify-content:center; font-size:16px; }
+  .user-chip .nm { color:#fff; font-size: 12px; margin-left: 6px; }
+  .search { margin-top: 12px; display:flex; align-items:center; background:#fff; border-radius:999px; padding: 7px 13px; }
+  .search .ico { font-size: 14px; margin-right: 6px; }
+  .search input { border:none; outline:none; font-size: 13px; flex:1; color:#2C1810; }
+
+  .banner { height: 88px; margin: 11px; border-radius: 13px; background: linear-gradient(120deg,#fff3e0,#ffe9d6); display:flex; align-items:center; padding: 0 16px; box-shadow: 0 3px 9px rgba(120,80,50,.1); }
+  .banner .e { font-size: 42px; margin-right: 13px; }
+  .banner .t { font-size: 15px; font-weight: 800; color:#9E2B25; }
+  .banner .d { font-size: 12px; color:#7A6A5E; margin-top: 3px; }
+
+  .section { margin: 14px 13px 0; }
+  .section-hd { display:flex; align-items:center; justify-content:space-between; margin-bottom: 9px; }
+  .section-hd .t { font-size: 15px; font-weight: 700; }
+  .section-hd .t::before { content:""; display:inline-block; width:5px; height:15px; background:#D4AF37; border-radius:3px; margin-right: 7px; vertical-align:-2px; }
+  .section-hdr .more { font-size: 12px; color:#9b8579; }
+
+  .cate-grid { display:flex; flex-wrap:wrap; background:#fff; border-radius:11px; padding: 9px 4px; box-shadow:0 3px 9px rgba(120,80,50,.08); }
+  .cate-cell { width:25%; display:flex; flex-direction:column; align-items:center; padding: 8px 0; }
+  .cate-cell .ci { font-size: 28px; }
+  .cate-cell .cn { font-size: 12px; color:#5a4a3e; margin-top: 4px; }
+
+  .rec-scroll { white-space:nowrap; }
+  .rec-card { display:inline-block; width: 124px; margin-right: 9px; vertical-align:top; background:#fff; border-radius:11px; overflow:hidden; box-shadow:0 3px 7px rgba(120,80,50,.08); cursor:pointer; }
+  .rec-img { width:124px; height:102px; background:#f6ece0; display:flex; align-items:center; justify-content:center; font-size:50px; position:relative; }
+  .rec-tag { position:absolute; top:6px; left:6px; background:#9E2B25; color:#fff; font-size:10px; padding:2px 7px; border-radius:999px; }
+  .rec-name { font-size:13px; font-weight:700; margin: 6px 8px 3px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .rec-meta { display:flex; align-items:baseline; justify-content:space-between; padding: 0 8px 7px; }
+  .price { color:#9E2B25; font-weight:800; }
+  .price .unit { font-size:11px; } .price .num { font-size:16px; }
+  .price-old { color:#b9a99c; font-size:11px; text-decoration:line-through; margin-left:5px; }
+  .sales { font-size:11px; color:#b9a99c; }
+
+  .hot-row { display:flex; align-items:center; padding: 10px 11px; border-bottom:1px solid #f3ece2; cursor:pointer; }
+  .hot-row:last-child { border-bottom:none; }
+  .hot-rank { width: 26px; font-size: 20px; text-align:center; }
+  .hot-img { width: 56px; height:56px; border-radius:9px; background:#f6ece0; display:flex; align-items:center; justify-content:center; font-size:32px; margin: 0 9px; }
+  .hot-info { flex:1; min-width:0; }
+  .hot-name { font-size:14px; font-weight:700; }
+  .hot-desc { font-size:11px; color:#9b8579; margin: 2px 0 4px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .hot-bottom { display:flex; align-items:baseline; justify-content:space-between; }
+
+  .tabbar { position:absolute; left:0; right:0; bottom:0; height: 52px; display:flex; background:#FFFDF9; box-shadow:0 -2px 8px rgba(120,80,50,.1); z-index:5; }
+  .tab-item { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; color:#9b8579; font-size:10px; cursor:pointer; }
+  .tab-item.on { color:#9E2B25; }
+  .tab-item .ti { font-size: 21px; position:relative; }
+  .tab-item.on .ti { transform:scale(1.12); }
+  .tab-item.on .tx { font-weight:700; }
+  .badge { position:absolute; top:-3px; right:-9px; min-width:14px; height:14px; line-height:14px; padding:0 3px; background:#fff; color:#9E2B25; border-radius:999px; font-size:9px; font-weight:800; border:1px solid #9E2B25; text-align:center; }
+
+  .cate-body { display:flex; height: 600px; }
+  .side { width: 88px; background:#f7efe6; overflow:hidden; }
+  .side-item { display:flex; align-items:center; padding: 15px 7px; font-size: 12px; color:#5a4a3e; border-left:3px solid transparent; }
+  .side-item.on { background:#fff; color:#9E2B25; font-weight:700; border-left-color:#9E2B25; }
+  .side-item .si { font-size: 16px; margin-right: 4px; }
+  .dish-area { flex:1; padding: 2px 9px 0; overflow:hidden; }
+  .dish-card { display:flex; padding: 9px; margin-bottom: 9px; background:#fff; border-radius:10px; box-shadow:0 2px 6px rgba(120,80,50,.07); cursor:pointer; }
+  .dish-img { width: 82px; height:82px; border-radius:8px; background:#f6ece0; display:flex; align-items:center; justify-content:center; font-size:40px; position:relative; flex-shrink:0; }
+  .dish-tag { position:absolute; top:4px; left:4px; background:rgba(158,43,37,.9); color:#fff; font-size:9px; padding:1px 5px; border-radius:999px; }
+  .dish-info { flex:1; min-width:0; margin-left: 9px; display:flex; flex-direction:column; }
+  .dish-name { font-size:14px; font-weight:700; line-height:1.3; }
+  .dish-desc { font-size:10px; color:#9b8579; margin-top:2px; line-height:1.3; }
+  .dish-tags { display:flex; flex-wrap:wrap; margin-top:4px; }
+  .d-tag { font-size:9px; color:#C0392B; background:#fdeceA; border-radius:4px; padding:1px 4px; margin-right:4px; }
+  .dish-bottom { margin-top:auto; display:flex; align-items:flex-end; justify-content:space-between; }
+  .add-btn { width:26px; height:26px; line-height:24px; text-align:center; background:linear-gradient(135deg,#C0392B,#9E2B25); color:#fff; border-radius:50%; font-size:18px; font-weight:700; }
+
+  .hero-img { width:100%; height:210px; background:#f6ece0; display:flex; align-items:center; justify-content:center; font-size:100px; }
+  .info-card { margin: -18px 13px 0; padding: 13px; background:#fff; border-radius:12px; position:relative; box-shadow:0 3px 9px rgba(120,80,50,.08); }
+  .name-row { display:flex; align-items:center; justify-content:space-between; }
+  .d-name { font-size:19px; font-weight:800; }
+  .d-emoji { font-size:22px; }
+  .meta-row { display:flex; align-items:baseline; margin-top:7px; }
+  .meta-spacer { flex:1; }
+  .meta-item { font-size:11px; color:#9b8579; margin-left:11px; }
+  .tags { display:flex; flex-wrap:wrap; margin-top:7px; }
+  .desc { font-size:13px; color:#5a4a3e; line-height:1.7; margin-top:9px; }
+  .note-card { margin:14px 13px 0; padding: 11px 13px; background:#fff; border-radius:12px; box-shadow:0 3px 9px rgba(120,80,50,.08); }
+  .note-line { font-size:12px; color:#7A6A5E; line-height:2; }
+  .detail-bar { position:absolute; left:0; right:0; bottom:0; height:52px; background:#fff; display:flex; align-items:center; padding:0 13px; box-shadow:0 -2px 8px rgba(120,80,50,.1); z-index:5; }
+  .cart-entry { display:flex; flex-direction:column; align-items:center; justify-content:center; width:58px; color:#9E2B25; }
+  .cart-entry .cei { font-size:18px; }
+  .cart-entry .cet { font-size:9px; margin-top:1px; }
+  .stepper { display:flex; align-items:center; margin-left:auto; margin-right:9px; }
+  .st-btn { width:28px; height:28px; line-height:26px; text-align:center; font-size:18px; border-radius:50%; background:#f3ece2; color:#9E2B25; font-weight:700; }
+  .st-num { min-width:28px; text-align:center; font-size:15px; font-weight:700; }
+  .buy-now { background:linear-gradient(135deg,#C0392B,#9E2B25); color:#fff; font-weight:700; padding:10px 20px; border-radius:999px; font-size:14px; }
+
+  .cart-list { padding: 0 13px; }
+  .cart-item { display:flex; align-items:center; padding: 9px; margin-bottom: 9px; background:#fff; border-radius:10px; box-shadow:0 2px 6px rgba(120,80,50,.07); }
+  .ci-img { width:58px; height:58px; border-radius:8px; background:#f6ece0; display:flex; align-items:center; justify-content:center; font-size:30px; flex-shrink:0; }
+  .ci-info { flex:1; min-width:0; margin:0 9px; }
+  .ci-name { font-size:14px; font-weight:700; }
+  .ci-price { margin-top:8px; }
+  .ci-ops { display:flex; flex-direction:column; align-items:flex-end; }
+  .ci-del { font-size:10px; color:#b9a99c; margin-top:7px; }
+  .login-tip { margin:0 13px; padding:7px 10px; background:#fff4e0; color:#b8860b; font-size:11px; border-radius:8px; }
+  .settlement { position:absolute; left:0; right:0; bottom:0; height:52px; background:#fff; display:flex; align-items:center; justify-content:space-between; padding:0 13px; box-shadow:0 -2px 8px rgba(120,80,50,.1); z-index:5; }
+  .set-info { display:flex; align-items:baseline; }
+  .set-label { font-size:12px; color:#7A6A5E; margin-right:5px; }
+  .set-price .num { font-size:20px; }
+  .set-btn { background:linear-gradient(135deg,#C0392B,#9E2B25); color:#fff; font-weight:700; padding:10px 26px; border-radius:999px; font-size:14px; }
+
+  .order-list { padding: 11px 13px; }
+  .order-card { padding: 13px; margin-bottom: 11px; background:#fff; border-radius:11px; box-shadow:0 2px 7px rgba(120,80,50,.08); }
+  .od-hd { display:flex; align-items:center; justify-content:space-between; }
+  .od-no { font-size:12px; color:#7A6A5E; }
+  .od-status { font-size:13px; font-weight:700; color:#C8920F; }
+  .od-time { font-size:11px; color:#b9a99c; margin-top:3px; }
+  .od-items { margin-top:7px; border-top:1px solid #f3ece2; padding-top:6px; }
+  .od-item { display:flex; align-items:center; padding:5px 0; }
+  .od-img { width:36px; height:36px; border-radius:7px; background:#f6ece0; display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0; }
+  .od-name { flex:1; min-width:0; font-size:13px; margin:0 7px; }
+  .od-x { font-size:11px; color:#9b8579; margin-right:7px; }
+  .od-price { font-size:12px; color:#5a4a3e; font-weight:600; }
+  .od-ft { display:flex; align-items:center; justify-content:space-between; margin-top:6px; border-top:1px solid #f3ece2; padding-top:7px; }
+  .od-total { font-size:12px; color:#5a4a3e; }
+  .od-total .num { font-size:16px; }
+  .od-cancel { font-size:11px; color:#9b8579; border:1px solid #d8c8b8; border-radius:999px; padding:4px 10px; }
+  .empty { text-align:center; color:#9b8579; padding:50px 18px; font-size:13px; }
+  .empty .e { font-size:44px; display:block; margin-bottom:9px; }
+
+  /* ===== 步骤面板 ===== */
+  .steps-col { flex: 1 1 auto; min-width: 280px; max-width: 560px; }
+  .steps-head { display:flex; align-items:center; justify-content:space-between; margin-bottom: 14px; }
+  .steps-head .h { font-size: 19px; font-weight: 800; }
+  .ctrl { display:flex; gap: 8px; }
+  .ctrl button { border:none; background:#fff; color:#9E2B25; border:1px solid #e6d4bf; border-radius:999px; padding: 7px 14px; font-size:13px; font-weight:700; cursor:pointer; box-shadow:0 2px 6px rgba(120,80,50,.08); }
+  .ctrl button:hover { background:#fff4e8; }
+  .progress { height: 6px; background:#ecdfce; border-radius:999px; overflow:hidden; margin-bottom: 16px; }
+  .progress > i { display:block; height:100%; width:12%; background:linear-gradient(90deg,#C0392B,#D4AF37); border-radius:999px; transition: width .5s ease; }
+
+  .step {
+    background:#fff; border:1px solid #efe2d2; border-radius:14px; padding: 14px 16px; margin-bottom: 12px; cursor:pointer;
+    transition:color .25s ease,background-color .25s ease,border-color .25s ease,box-shadow .25s ease,opacity .25s ease,transform .25s ease; position:relative; overflow:hidden;
+  }
+  .step::before { content:""; position:absolute; left:0; top:0; bottom:0; width:4px; background:transparent; transition: background .25s; }
+  .step .top { display:flex; align-items:center; gap: 11px; }
+  .step .num { width:30px; height:30px; border-radius:50%; background:#f3ece2; color:#9E2B25; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:15px; flex-shrink:0; }
+  .step .st { font-size:16px; font-weight:700; }
+  .step .body { max-height:0; opacity:0; overflow:hidden; transition: max-height .35s ease, opacity .3s ease, margin .3s; }
+  .step.active { border-color:#D4AF37; box-shadow:0 10px 26px rgba(158,43,37,.14); }
+  .step.active::before { background:#9E2B25; }
+  .step.active .num { background:#9E2B25; color:#fff; }
+  .step.active .body { max-height:200px; opacity:1; margin-top:10px; }
+  .step .desc { font-size:13px; color:#5a4a3e; line-height:1.7; }
+  .prompt { margin-top:10px; background:#fff8ec; border:1px dashed #e3c98f; border-radius:10px; padding:9px 11px; font-size:12.5px; color:#7a5a12; line-height:1.6; }
+  .prompt b { color:#9E2B25; }
+  .prompt .lbl { font-weight:800; display:block; margin-bottom:3px; }
+  .pill { font-size:11px; color:#9b8579; margin-left:auto; }
+/* a11y 1.0.226：上方规则移除了 :focus 轮廓，此处为键盘用户补回焦点环（鼠标用户无感） */
+:focus-visible{outline:2px solid var(--wb-focus,#4ecdc4)!important;outline-offset:2px!important}
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+  <div class="head">
+    <div class="title"><span class="cr">🏮</span>御膳房小程序 · 实现全景</div>
+    <div class="sub">右侧分步动画逐步演示如何一步步搭出这个餐饮点单小程序 · 可点击手机任意位置探索</div>
+  </div>
+
+  <div class="wrap">
+    <!-- 手机 -->
+    <div class="phone-col">
+      <div class="phone">
+        <div class="notch"></div>
+        <div class="screen">
+          <div class="statusbar"><span>9:41</span><span>🔋 100%</span></div>
+          <div class="navbar" id="navTitle">御膳房</div>
+          <div class="content" id="phoneContent">
+
+            <!-- 首页 -->
+            <div class="scr show" data-screen="home">
+              <div class="hero">
+                <div class="brand">
+                  <span class="crown">👑</span>
+                  <div><div class="hero-title">御膳房</div><div class="hero-sub">宫廷风味 · 甄选好味 🍲</div></div>
+                  <div style="margin-left:auto"><span class="login-btn" onclick="goScreen('home')">👤 微信授权登录</span></div>
+                </div>
+                <div class="search"><span class="ico">🔍</span><input value="" placeholder="搜索你喜欢的菜品～"  aria-label="搜索你喜欢的菜品～" /></div>
+              </div>
+              <div class="banner"><span class="e">🏮</span><div><div class="t">宫廷御膳 · 现点现做</div><div class="d">甄选食材，匠心烹制</div></div></div>
+              <div class="section">
+                <div class="section-hd"><span class="t">菜品分类</span><span class="more" style="font-size:12px;color:#9b8579">全部 ›</span></div>
+                <div class="cate-grid">
+                  <div class="cate-cell"><span class="ci">🏮</span><span class="cn">招牌御膳</span></div>
+                  <div class="cate-cell"><span class="ci">🍲</span><span class="cn">宫廷热菜</span></div>
+                  <div class="cate-cell"><span class="ci">🥣</span><span class="cn">养生汤羹</span></div>
+                  <div class="cate-cell"><span class="ci">🍚</span><span class="cn">精致主食</span></div>
+                  <div class="cate-cell"><span class="ci">🥟</span><span class="cn">御点茶食</span></div>
+                  <div class="cate-cell"><span class="ci">🍵</span><span class="cn">琼浆茶饮</span></div>
+                </div>
+              </div>
+              <div class="section">
+                <div class="section-hd"><span class="t">👑 招牌推荐</span></div>
+                <div class="rec-scroll">
+                  <div class="rec-card" onclick="goScreen('detail')"><div class="rec-img">🍲<span class="rec-tag">特惠</span></div><div class="rec-name">一品佛跳墙</div><div class="rec-meta"><span class="price"><span class="unit">¥</span><span class="num">188</span></span><span class="sales">售328</span></div></div>
+                  <div class="rec-card" onclick="goScreen('detail')"><div class="rec-img">🦆<span class="rec-tag">特惠</span></div><div class="rec-name">御花园烤鸭</div><div class="rec-meta"><span class="price"><span class="unit">¥</span><span class="num">128</span></span><span class="sales">售512</span></div></div>
+                  <div class="rec-card" onclick="goScreen('detail')"><div class="rec-img">🍮</div><div class="rec-name">芙蓉燕窝羹</div><div class="rec-meta"><span class="price"><span class="unit">¥</span><span class="num">98</span></span><span class="sales">售88</span></div></div>
+                </div>
+              </div>
+              <div class="section">
+                <div class="section-hd"><span class="t">🔥 热销榜单</span></div>
+                <div style="background:#fff;border-radius:11px;box-shadow:0 3px 9px rgba(120,80,50,.08)">
+                  <div class="hot-row" onclick="goScreen('detail')"><span class="hot-rank">🥇</span><div class="hot-img">🦆</div><div class="hot-info"><div class="hot-name">御花园烤鸭</div><div class="hot-desc">果木明炉，皮脆肉嫩</div><div class="hot-bottom"><span class="price"><span class="unit">¥</span><span class="num">128</span></span><span class="sales">售512</span></div></div></div>
+                  <div class="hot-row" onclick="goScreen('detail')"><span class="hot-rank">🥈</span><div class="hot-img">🥟</div><div class="hot-info"><div class="hot-name">奶黄流沙包</div><div class="hot-desc">一口爆浆，奶香浓郁</div><div class="hot-bottom"><span class="price"><span class="unit">¥</span><span class="num">20</span></span><span class="sales">售340</span></div></div></div>
+                  <div class="hot-row" onclick="goScreen('detail')"><span class="hot-rank">🥉</span><div class="hot-img">🍲</div><div class="hot-info"><div class="hot-name">一品佛跳墙</div><div class="hot-desc">文火慢炖八小时</div><div class="hot-bottom"><span class="price"><span class="unit">¥</span><span class="num">188</span></span><span class="sales">售328</span></div></div></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 菜单 -->
+            <div class="scr" data-screen="menu">
+              <div class="cate-body">
+                <div class="side">
+                  <div class="side-item on" onclick="pickSide(this)"><span class="si">🏮</span>招牌御膳</div>
+                  <div class="side-item" onclick="pickSide(this)"><span class="si">🍲</span>宫廷热菜</div>
+                  <div class="side-item" onclick="pickSide(this)"><span class="si">🥣</span>养生汤羹</div>
+                  <div class="side-item" onclick="pickSide(this)"><span class="si">🍚</span>精致主食</div>
+                  <div class="side-item" onclick="pickSide(this)"><span class="si">🥟</span>御点茶食</div>
+                  <div class="side-item" onclick="pickSide(this)"><span class="si">🍵</span>琼浆茶饮</div>
+                </div>
+                <div class="dish-area" id="dishArea"></div>
+              </div>
+            </div>
+
+            <!-- 详情 -->
+            <div class="scr" data-screen="detail">
+              <div class="hero-img">🍲</div>
+              <div class="info-card">
+                <div class="name-row"><span class="d-name" id="dName">一品佛跳墙</span><span class="d-emoji">🍲</span></div>
+                <div class="meta-row"><span class="price"><span class="unit">¥</span><span class="num">188</span></span><span class="price-old">¥218</span><span class="meta-spacer"></span><span class="meta-item">⭐ 4.9</span><span class="meta-item">🛒 售328</span></div>
+                <div class="tags"><span class="d-tag">招牌</span><span class="d-tag">尊享</span></div>
+                <div class="desc">山海珍馐汇聚一坛，文火慢炖八小时，汤浓味醇，御膳房头牌。</div>
+              </div>
+              <div class="section"><div class="section-hd"><span class="t">📜 菜品说明</span></div>
+                <div class="note-card">
+                  <div class="note-line">🍳 现点现做，保证新鲜出锅</div>
+                  <div class="note-line">🌿 精选时令食材，口味地道</div>
+                  <div class="note-line">⏱ 高峰期出餐约 15-25 分钟</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 购物车 -->
+            <div class="scr" data-screen="cart">
+              <div class="section" style="margin-top:14px"><span class="t" style="font-size:14px;font-weight:700">🛒 已选菜品（3）</span></div>
+              <div class="cart-list" style="margin-top:10px">
+                <div class="cart-item"><div class="ci-img">🍲</div><div class="ci-info"><div class="ci-name">一品佛跳墙</div><div class="ci-price price"><span class="unit">¥</span><span class="num">188</span></div></div><div class="ci-ops"><div class="stepper"><span class="st-btn">－</span><span class="st-num">1</span><span class="st-btn">＋</span></div><span class="ci-del">🗑 删除</span></div></div>
+                <div class="cart-item"><div class="ci-img">🥟</div><div class="ci-info"><div class="ci-name">奶黄流沙包</div><div class="ci-price price"><span class="unit">¥</span><span class="num">20</span></div></div><div class="ci-ops"><div class="stepper"><span class="st-btn">－</span><span class="st-num">2</span><span class="st-btn">＋</span></div><span class="ci-del">🗑 删除</span></div></div>
+              </div>
+              <div class="login-tip">⚠️ 未登录，下单前请先在「首页」授权登录以保存订单</div>
+            </div>
+
+            <!-- 订单 -->
+            <div class="scr" data-screen="orders">
+              <div class="order-list" style="margin-top:4px">
+                <div class="order-card">
+                  <div class="od-hd"><span class="od-no">订单号 YS17699999999</span><span class="od-status">⏳ 待处理</span></div>
+                  <div class="od-time">🕒 2026-09-28 20:30</div>
+                  <div class="od-items">
+                    <div class="od-item"><div class="od-img">🍲</div><span class="od-name">一品佛跳墙</span><span class="od-x">×1</span><span class="od-price">¥188</span></div>
+                    <div class="od-item"><div class="od-img">🥟</div><span class="od-name">奶黄流沙包</span><span class="od-x">×2</span><span class="od-price">¥40</span></div>
+                  </div>
+                  <div class="od-ft"><span class="od-total">共 3 件，合计 <span class="price"><span class="unit">¥</span><span class="num">228</span></span></span><span class="od-cancel">取消订单</span></div>
+                </div>
+                <div class="order-card">
+                  <div class="od-hd"><span class="od-no">订单号 YS17698888888</span><span class="od-status" style="color:#3a9d6b">✅ 已完成</span></div>
+                  <div class="od-time">🕒 2026-09-20 12:15</div>
+                  <div class="od-items"><div class="od-item"><div class="od-img">🦆</div><span class="od-name">御花园烤鸭</span><span class="od-x">×1</span><span class="od-price">¥128</span></div></div>
+                  <div class="od-ft"><span class="od-total">共 1 件，合计 <span class="price"><span class="unit">¥</span><span class="num">128</span></span></span></div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+          <!-- 底部 tabBar -->
+          <div class="tabbar" id="tabbar">
+            <div class="tab-item on" data-tab="home" onclick="goScreen('home')"><span class="ti">🏮</span><span class="tx">首页</span></div>
+            <div class="tab-item" data-tab="menu" onclick="goScreen('menu')"><span class="ti">🍽️</span><span class="tx">菜单</span></div>
+            <div class="tab-item" data-tab="cart" onclick="goScreen('cart')"><span class="ti">🛒</span><span class="tx">购物车</span></div>
+            <div class="tab-item" data-tab="orders" onclick="goScreen('orders')"><span class="ti">📜</span><span class="tx">订单</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 步骤 -->
+    <div class="steps-col">
+      <div class="steps-head">
+        <div class="h">🧭 一步一步实现</div>
+        <div class="ctrl">
+          <button id="playBtn" onclick="togglePlay()">⏸ 暂停</button>
+          <button onclick="prevStep()">‹ 上一步</button>
+          <button onclick="nextStep()">下一步 ›</button>
+        </div>
+      </div>
+      <div class="progress"><i id="progBar"></i></div>
+      <div id="stepsList"></div>
+    </div>
+  </div>
+
+<script>
+  // ===== 数据：菜品（菜单页用） =====
+  var DISHES = [
+    {e:'🍲',name:'一品佛跳墙',d:'山海珍馐，文火慢炖八小时',t:['招牌','尊享'],p:188,o:218,hot:true},
+    {e:'🦆',name:'御花园烤鸭',d:'果木明炉慢烤，皮脆肉嫩',t:['招牌','果木烤'],p:128,o:158,hot:true},
+    {e:'🍮',name:'芙蓉燕窝羹',d:'燕盏慢熬成羹，丝滑清润',t:['养颜','清润'],p:98,o:128,hot:false},
+    {e:'🦐',name:'宫保虾球',d:'鲜虾弹嫩，荔枝口酸甜微辣',t:['微辣','鲜虾'],p:68,o:0,hot:false},
+    {e:'🍖',name:'红烧狮子头',d:'肥瘦相宜，入口即化',t:['经典'],p:48,o:0,hot:false},
+    {e:'🥬',name:'翡翠炒时蔬',d:'时令鲜蔬，清炒锁鲜',t:['素食'],p:32,o:0,hot:false}
+  ];
+  function renderMenu(){
+    var html='';
+    for(var i=0;i<DISHES.length;i++){var x=DISHES[i];
+      html+='<div class="dish-card" onclick="goScreen(\'detail\')"><div class="dish-img">'+x.e+(x.hot?'<span class="dish-tag">🔥 热销</span>':'')+'</div>'+
+      '<div class="dish-info"><div class="dish-name">'+x.name+'</div><div class="dish-desc">'+x.d+'</div>'+
+      '<div class="dish-tags">'+x.t.map(function(t){return '<span class="d-tag">'+t+'</span>';}).join('')+'</div>'+
+      '<div class="dish-bottom"><span class="price"><span class="unit">¥</span><span class="num">'+x.p+'</span>'+(x.o?'<span class="price-old">¥'+x.o+'</span>':'')+'</span><span class="add-btn">＋</span></div></div></div>';
+    }
+    document.getElementById('dishArea').innerHTML=html;
+  }
+  renderMenu();
+
+  // ===== 手机屏切换 =====
+  var navTitles={home:'御膳房',menu:'菜单',detail:'菜品详情',cart:'购物车',orders:'我的订单'};
+  function goScreen(s){
+    var sc=document.querySelectorAll('.scr');
+    for(var i=0;i<sc.length;i++){ sc[i].classList.toggle('show', sc[i].getAttribute('data-screen')===s); }
+    document.getElementById('navTitle').textContent = navTitles[s]||'御膳房';
+    var tabs=document.querySelectorAll('#tabbar .tab-item');
+    for(var j=0;j<tabs.length;j++){ tabs[j].classList.toggle('on', tabs[j].getAttribute('data-tab')===s); }
+    pausePlay();
+  }
+  function pickSide(el){
+    var sibs=el.parentNode.children;
+    for(var i=0;i<sibs.length;i++) sibs[i].classList.remove('on');
+    el.classList.add('on'); pausePlay();
+  }
+
+  // ===== 步骤 =====
+  var STEPS=[
+    {n:1,st:'项目骨架 + 云开发初始化',screen:'home',
+     desc:'新建 app.json / app.js，调用 wx.cloud.init 初始化云环境；底部导航用「自定义 tabBar + Emoji 图标」，免去任何 PNG 图片资源。',
+     prompt:'用微信云开发搭建小程序骨架，底部导航用自定义 tabBar + Emoji 图标，无需图片资源。'},
+    {n:2,st:'微信授权登录',screen:'home',
+     desc:'新增 login 云函数（wx-server-sdk）换取 openid；首页用 chooseAvatar + nickname 输入框组件做微信头像昵称授权，用户信息落库到 users 集合。',
+     prompt:'新增 login 云函数获取 openid，首页用 chooseAvatar + nickname 组件实现微信授权登录。'},
+    {n:3,st:'首页：品牌 + 推荐 + 榜单',screen:'home',
+     desc:'头部宫廷红渐变品牌区、搜索框、轮播公告、分类快捷入口；下方「招牌推荐」横滑卡与「热销榜单」，数据全部从云端 categories / dishes 读取。',
+     prompt:'首页展示餐厅介绍、招牌推荐和热销榜单，数据从云端 categories、dishes 集合读取。'},
+    {n:4,st:'菜品分类页',screen:'menu',
+     desc:'左侧分类侧边栏（选中项红色高亮）联动右侧菜品列表；每张菜品卡含图片/价格/划线价/标签，列表内支持「＋」一键加购。',
+     prompt:'菜单页用左侧分类侧边栏联动右侧菜品列表，列表内支持一键加购。'},
+    {n:5,st:'菜品详情页',screen:'detail',
+     desc:'菜品大图、价格/评分/销量、标签与说明；底部步进器控制数量，支持「加入购物车」与「立即购买」两种路径。',
+     prompt:'详情页展示菜品大图与说明，底部步进器控制数量，支持加入购物车 / 立即购买。'},
+    {n:6,st:'购物车 + 下单落库',screen:'cart',
+     desc:'购物车用本地 storage 存选中菜品，支持增减/删除与实时合计；点击结算写入云端 orders 集合，并清空本地购物车。',
+     prompt:'购物车用本地 storage 存菜品，结算时写入云端 orders 集合。'},
+    {n:7,st:'订单记录页',screen:'orders',
+     desc:'按 openid 读取云端 orders，展示订单卡片与状态（待处理/制作中/已完成/已取消），提供取消订单操作。',
+     prompt:'订单页按 openid 读取云端 orders，展示状态并提供取消。'},
+    {n:8,st:'开通云开发 + 部署上线',screen:'home',
+     desc:'开通云开发填入环境 ID；上传并部署 login 云函数；在数据库建 4 个集合并导入 data/*.json 种子数据；上传菜品图到云存储后填入 image 字段。',
+     prompt:'开通云开发填入 env，部署 login 云函数，导入 data/*.json 种子数据，上传菜品图到云存储。'}
+  ];
+
+  var cur=0, playing=true, timer=null;
+  function buildSteps(){
+    var box=document.getElementById('stepsList'); box.innerHTML='';
+    STEPS.forEach(function(s,idx){
+      var el=document.createElement('div');
+      el.className='step'; el.setAttribute('data-idx',idx);
+      el.innerHTML='<div class="top"><div class="num">'+s.n+'</div><div class="st">'+s.st+'</div><span class="pill">'+(idx+1)+'/'+STEPS.length+'</span></div>'+
+        '<div class="body"><div class="desc">'+s.desc+'</div><div class="prompt"><span class="lbl">💡 提示词</span>'+s.prompt+'</div></div>';
+      el.onclick=function(){ gotoStep(idx); pausePlay(); };
+      box.appendChild(el);
+    });
+  }
+  function gotoStep(i){
+    cur=(i+STEPS.length)%STEPS.length;
+    var items=document.querySelectorAll('.step');
+    for(var k=0;k<items.length;k++) items[k].classList.toggle('active', k===cur);
+    var active=document.querySelector('.step.active'); if(active) active.scrollIntoView({behavior:'smooth',block:'nearest'});
+    document.getElementById('progBar').style.width=((cur+1)/STEPS.length*100)+'%';
+    goScreen(STEPS[cur].screen);
+  }
+  function nextStep(){ gotoStep(cur+1); }
+  function prevStep(){ gotoStep(cur-1); }
+  function togglePlay(){ playing?pausePlay():resumePlay(); }
+  function pausePlay(){ playing=false; clearInterval(timer); document.getElementById('playBtn').textContent='▶ 播放'; }
+  function resumePlay(){ playing=true; document.getElementById('playBtn').textContent='⏸ 暂停'; clearInterval(timer); timer=setInterval(nextStep,3000); }
+  buildSteps(); gotoStep(0); resumePlay();
+</script>
+</body>
+</html>

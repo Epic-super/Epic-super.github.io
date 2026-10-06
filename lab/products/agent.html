@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>塔台智能体 · Tower Agent</title>
+<meta name="description" content="塔台工作台的全方位智能体：工具调用 + 长期记忆 + 语音，本地与公开站同构，BYOK 自带 Key。">
+<link rel="canonical" href="https://epic-super.github.io/lab/products/agent.html">
+<style>
+:root{
+  --bg:#1D1F27; --panel:#242734; --panel2:#2B2F3E; --line:rgba(255,255,255,.08);
+  --ink:#F2F5FC; --ink2:#D6DCEA; --body:#9AA3B8; --dim:#6E7789;
+  --coral:#FF6B6B; --teal:#4ECDC4; --violet:#A78BFA; --amber:#FFD166;
+  --grad:linear-gradient(90deg,#FF6B6B,#4ECDC4);
+  --ok:#4ECDC4; --err:#FF6B6B;
+  --font:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);display:flex;flex-direction:column;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit}
+
+/* ── 顶栏 ── */
+.top{display:flex;align-items:center;gap:14px;padding:14px 22px;border-bottom:1px solid var(--line);background:rgba(29,31,39,.9)}
+.top .back{font-size:13px;color:var(--body);border:1px solid var(--line);border-radius:10px;padding:7px 13px;transition:.18s}
+.top .back:hover{color:#fff;border-color:rgba(255,255,255,.25)}
+.brand{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
+.dot{width:9px;height:9px;border-radius:999px;background:var(--coral);box-shadow:0 0 10px rgba(255,107,107,.7);flex:none}
+.dot.on{background:var(--teal);box-shadow:0 0 10px rgba(78,205,196,.7)}
+h1{font-size:17px;font-weight:700;white-space:nowrap}
+.sub{font-size:12px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.btn{border:1px solid var(--line);background:var(--panel);color:var(--ink2);border-radius:10px;padding:8px 14px;font-size:13px;cursor:pointer;transition:.18s}
+.btn:hover{border-color:rgba(255,255,255,.25);transform:translateY(-1px)}
+.btn.pri{background:var(--grad);color:#08111A;font-weight:700;border:0}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+
+/* ── 主区 ── */
+.main{flex:1;display:flex;min-height:0}
+.chat-col{flex:1;display:flex;flex-direction:column;min-width:0}
+.stream{flex:1;overflow-y:auto;padding:26px 8%;display:flex;flex-direction:column;gap:16px}
+.msg{max-width:76%;padding:12px 16px;border-radius:16px;font-size:14.5px;line-height:1.75;white-space:pre-wrap;word-break:break-word}
+.msg.user{align-self:flex-end;background:var(--panel2);border:1px solid var(--line);border-bottom-right-radius:5px}
+.msg.agent{align-self:flex-start;background:linear-gradient(135deg,rgba(255,107,107,.12),rgba(78,205,196,.10));border:1px solid rgba(78,205,196,.22);border-bottom-left-radius:5px}
+.msg.err{border-color:rgba(255,107,107,.45);background:rgba(255,107,107,.08)}
+.msg .who{display:block;font-size:11px;color:var(--dim);margin-bottom:5px;letter-spacing:1px}
+.tool{align-self:flex-start;max-width:76%;border:1px dashed rgba(167,139,250,.4);background:rgba(167,139,250,.07);border-radius:12px;padding:10px 14px;font-size:12.5px;color:var(--body)}
+.tool b{color:var(--violet);font-weight:600}
+.tool .args{color:var(--dim);word-break:break-all}
+.tool .res{color:var(--teal);word-break:break-all}
+.typing{align-self:flex-start;color:var(--dim);font-size:13px;padding:6px 2px}
+.composer{padding:16px 8% 22px;display:flex;flex-direction:column;gap:10px}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{font-size:12px;color:var(--body);border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:6px 12px;cursor:pointer;transition:.18s}
+.chip:hover{color:#fff;border-color:rgba(255,255,255,.25)}
+.crow{display:flex;gap:10px}
+.crow textarea{flex:1;resize:none;background:var(--panel);border:1px solid var(--line);border-radius:14px;color:var(--ink);font-size:14.5px;padding:12px 16px;line-height:1.6;min-height:52px;max-height:140px;font-family:inherit;outline:none;transition:border-color .18s}
+.crow textarea:focus{border-color:rgba(78,205,196,.5)}
+.crow .send{align-self:flex-end}
+
+/* ── 右栏 ── */
+.side{width:340px;flex:none;border-left:1px solid var(--line);display:flex;flex-direction:column;background:rgba(36,39,52,.5)}
+.tabs{display:flex;border-bottom:1px solid var(--line)}
+.tab{flex:1;padding:12px 0;text-align:center;font-size:13px;color:var(--dim);cursor:pointer;border-bottom:2px solid transparent;transition:.18s}
+.tab.on{color:var(--ink);border-bottom-color:var(--teal)}
+.tabpane{flex:1;overflow-y:auto;padding:18px;display:none}
+.tabpane.on{display:block}
+.pane h3{font-size:13.5px;margin-bottom:10px;color:var(--ink2)}
+.field{display:flex;flex-direction:column;gap:5px;margin-bottom:13px}
+.field label{font-size:12px;color:var(--dim)}
+.field input,.field select{background:var(--panel);border:1px solid var(--line);border-radius:9px;color:var(--ink);padding:9px 11px;font-size:13px;outline:none;font-family:inherit}
+.field input:focus{border-color:rgba(78,205,196,.5)}
+.row{display:flex;gap:8px}
+.hintbox{font-size:12px;color:var(--dim);line-height:1.7;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:11px 13px;margin-bottom:13px}
+.hintbox b{color:var(--teal)}
+.mem-item{display:flex;align-items:flex-start;gap:8px;padding:9px 11px;border:1px solid var(--line);border-radius:10px;margin-bottom:8px;font-size:12.5px;color:var(--ink2);line-height:1.6}
+.mem-item .x{margin-left:auto;color:var(--dim);cursor:pointer;flex:none;font-size:14px}
+.mem-item .x:hover{color:var(--err)}
+.toollog{font-size:12px;color:var(--body);line-height:1.7}
+.toollog div{padding:6px 0;border-bottom:1px dashed var(--line)}
+.empty{color:var(--dim);font-size:12.5px;text-align:center;padding:26px 0}
+
+/* ── 引导卡 ── */
+.setup{max-width:520px;align-self:center;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px;font-size:13.5px;color:var(--body);line-height:1.9}
+.setup b{color:var(--ink2)}
+.setup .big{font-size:15px;color:var(--ink);font-weight:700;margin-bottom:6px}
+
+@media (max-width:900px){ .side{display:none} .stream{padding:20px 5%} .composer{padding:12px 5% 18px} }
+/* a11y 1.0.226：上方规则移除了 :focus 轮廓，此处为键盘用户补回焦点环（鼠标用户无感） */
+:focus-visible{outline:2px solid var(--wb-focus,#4ecdc4)!important;outline-offset:2px!important}
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+
+<header class="top">
+  <a class="back" href="../index.html">← Lab</a>
+  <div class="brand">
+    <span class="dot" id="stDot"></span>
+    <h1>塔台智能体</h1>
+    <span class="sub" id="stTxt">检查配置中…</span>
+  </div>
+  <button class="btn" id="btnClear">清空对话</button>
+  <button class="btn pri" id="btnSetup">设置</button>
+</header>
+
+<div class="main">
+  <section class="chat-col">
+    <div class="stream" id="stream">
+      <div class="setup" id="setupCard" style="display:none">
+        <div class="big">🤖 欢迎来到塔台智能体</div>
+        这是一个真正会<b>调用工具</b>、有<b>长期记忆</b>的智能体：能帮你跳转站内页面、查工作台版本与变更、记住你交代的事、做计算、报时间——既能在本地 <b>127.0.0.1:8080</b> 用，也能在公开站 <b>epic-super.github.io</b> 用。<br><br>
+        <b>开始只需三步：</b>① 点右上角「设置」→ 选预设（DeepSeek 或 StepFun）→ ② 粘贴你自己的 API Key（只存在你本机浏览器的 localStorage，不上传不入库）→ ③ 保存，开聊。<br>
+        没有账号？<b>DeepSeek</b> 在 platform.deepseek.com 注册即送额度。Key 只走你浏览器到模型商的直连，本站服务器经手不到它。
+      </div>
+    </div>
+    <div class="composer">
+      <div class="chips" id="chips">
+        <span class="chip" data-q="工作台现在什么版本？最近更新了什么？">工作台什么版本</span>
+        <span class="chip" data-q="记住：我每周日晚要复盘本周学习进度。">试试「记住…」</span>
+        <span class="chip" data-q="带我去分享台">带我去分享台</span>
+        <span class="chip" data-q="(128*7+96)/4 等于多少？">算一道题</span>
+        <span class="chip" data-q="你记住了哪些关于我的事？">查看我的记忆</span>
+      </div>
+      <div class="crow">
+        <textarea id="input" rows="2" placeholder="和塔台智能体聊点什么…（Enter 发送，Shift+Enter 换行）" aria-label="和塔台智能体聊点什么…（Enter 发送，Shift+Enter 换行）"></textarea>
+        <button class="btn pri send" id="btnSend">发送</button>
+      </div>
+    </div>
+  </section>
+
+  <aside class="side">
+    <div class="tabs">
+      <div class="tab on" data-pane="pTool">工具</div>
+      <div class="tab" data-pane="pMem">记忆</div>
+      <div class="tab" data-pane="pSet">设置</div>
+    </div>
+    <div class="tabpane on" id="pTool"><div class="pane"><h3>工具调用记录</h3><div class="toollog" id="toolLog"><div class="empty">还没有调用。让智能体帮你查版本、跳页面或记东西试试。</div></div></div></div>
+    <div class="tabpane" id="pMem"><div class="pane">
+      <h3>长期记忆（存在本机）</h3>
+      <div class="row" style="margin-bottom:10px">
+        <input id="memNew" placeholder="手动添加一条记忆…" style="flex:1;background:var(--panel);border:1px solid var(--line);border-radius:9px;color:var(--ink);padding:9px 11px;font-size:12.5px;outline:none" aria-label="手动添加一条记忆…">
+        <button class="btn" id="memAdd">添加</button>
+      </div>
+      <div id="memList"></div>
+      <button class="btn" id="memClear" style="width:100%;margin-top:6px">清空全部记忆</button>
+    </div></div>
+    <div class="tabpane" id="pSet"><div class="pane">
+      <h3>模型连接（BYOK · 只存本机）</h3>
+      <div class="field"><label>预设</label>
+        <select id="fPreset"><option value="">— 选择自动填充 —</option><option value="deepseek">DeepSeek（推荐起步）</option><option value="stepfun">StepFun（带红莉栖音色 TTS）</option></select>
+      </div>
+      <div class="field"><label>Endpoint</label><input id="fEndpoint" placeholder="https://api.deepseek.com/v1" aria-label="https://api.deepseek.com/v1"></div>
+      <div class="field"><label>Model</label><input id="fModel" placeholder="deepseek-chat" aria-label="deepseek-chat"></div>
+      <div class="field"><label>API Key</label><input id="fKey" type="password" placeholder="sk-…（只存本机 localStorage）" aria-label="sk-…（只存本机 localStorage）"></div>
+      <div class="row">
+        <button class="btn pri" id="saveCfg" style="flex:1">保存配置</button>
+        <button class="btn" id="clearCfg">清除</button>
+      </div>
+      <div class="hintbox" style="margin-top:13px">Provider 用 <b>DeepSeek</b>：注册即送额度、浏览器直连免代理。<br>用 <b>StepFun</b>：走 step_plan 端点，桌面悬浮球里可开红莉栖复刻音色朗读。<br>配置保存在浏览器 localStorage（key：<b>wb_ama_llm</b>），换浏览器需重填。</div>
+    </div></div>
+  </aside>
+</div>
+
+<script src="../../amadeus/amadeus-llm.js"></script>
+<script src="../../amadeus/agent-core.js"></script>
+<script>
+(function(){
+  "use strict";
+  var $ = function(id){ return document.getElementById(id); };
+  var stream = $("stream"), input = $("input"), btnSend = $("btnSend");
+  var LLM = function(){ return window.AMADEUS_LLM || null; };
+  var AG = function(){ return window.TOWER_AGENT || null; };
+  var busy = false;
+
+  function esc(s){ var d=document.createElement("div"); d.textContent=String(s==null?"":s); return d.innerHTML; }
+  function scrollEnd(){ stream.scrollTop = stream.scrollHeight; }
+
+  function addBubble(kind, text){
+    var el = document.createElement("div");
+    el.className = "msg " + kind;
+    el.innerHTML = '<span class="who">' + (kind==="user" ? "我" : "塔台智能体") + "</span>" + esc(text);
+    stream.appendChild(el); scrollEnd();
+    return el;
+  }
+  function addToolCard(t){
+    var el = document.createElement("div");
+    el.className = "tool";
+    el.innerHTML = "<b>🛠 " + esc(t.name) + "</b> <span class='args'>" + esc(JSON.stringify(t.args)) + "</span>"
+      + "<br><span class='res'>→ " + esc(JSON.stringify(t.result).slice(0,220)) + "</span>";
+    stream.appendChild(el); scrollEnd();
+    var log = $("toolLog");
+    if(log){ var ph = log.querySelector(".empty"); if(ph) ph.remove();
+      var d = document.createElement("div"); d.textContent = t.name + " · " + JSON.stringify(t.args).slice(0,60);
+      log.insertBefore(d, log.firstChild); }
+  }
+
+  function refreshStatus(){
+    var conf = LLM() ? LLM().getConfig() : null;
+    var on = !!(conf && conf.hasApiKey && conf.endpoint && conf.model);
+    $("stDot").className = "dot" + (on ? " on" : "");
+    $("stTxt").textContent = on ? (conf.provider + " · " + conf.model + " · 已连接") : "未配置模型 — 点右上角「设置」";
+    $("setupCard").style.display = on ? "none" : "";
+  }
+  function fillForm(){
+    var conf = LLM() ? LLM().getConfig() : null;
+    $("fEndpoint").value = conf && conf.endpoint || "";
+    $("fModel").value = conf && conf.model || "";
+    $("fPreset").value = "";
+  }
+
+  async function send(){
+    if(busy) return;
+    var text = input.value.trim();
+    if(!text) return;
+    input.value = "";
+    addBubble("user", text);
+    if(!AG() || !AG().ready()){ addBubble("err", "还没配置模型：点右上角「设置」，选预设并填入你自己的 API Key。"); return; }
+    busy = true; btnSend.disabled = true;
+    var tip = document.createElement("div"); tip.className = "typing"; tip.textContent = "思考中…"; stream.appendChild(tip); scrollEnd();
+    try{
+      var r = await AG().send(text, { onTool: function(t){ tip.remove(); addToolCard(t); stream.appendChild(tip); scrollEnd(); } });
+      tip.remove();
+      addBubble("agent", r.reply || "（空回复）");
+    }catch(e){
+      tip.remove();
+      addBubble("err", "出错：" + (e && e.message || e) + "（若为网络/CORS 问题，确认 Key 有效或换 DeepSeek 预设重试）");
+    }
+    busy = false; btnSend.disabled = false; input.focus();
+  }
+
+  /* ---------- 记忆面板 ---------- */
+  function renderMem(){
+    var list = AG() ? AG().memory.list() : [];
+    var box = $("memList");
+    if(!list.length){ box.innerHTML = '<div class="empty">还没有记忆。对我说「记住：…」就会存到这里（只存本机）。</div>'; return; }
+    box.innerHTML = "";
+    list.forEach(function(m){
+      var d = document.createElement("div"); d.className = "mem-item";
+      var s = document.createElement("span"); s.textContent = m.text;
+      var x = document.createElement("span"); x.className = "x"; x.textContent = "×"; x.title = "删除";
+      x.onclick = function(){ AG().memory.remove(m.id); renderMem(); };
+      d.appendChild(s); d.appendChild(x); box.appendChild(d);
+    });
+  }
+
+  /* ---------- 事件 ---------- */
+  btnSend.onclick = send;
+  input.addEventListener("keydown", function(e){ if(e.key === "Enter" && !e.shiftKey){ e.preventDefault(); send(); } });
+  $("chips").addEventListener("click", function(e){ var c = e.target.closest(".chip"); if(c){ input.value = c.dataset.q; send(); } });
+  $("btnClear").onclick = function(){ if(LLM()) LLM().clearHistory(); stream.querySelectorAll(".msg,.tool,.typing").forEach(function(n){ n.remove(); }); addBubble("agent","对话已清空（长期记忆保留，可在右侧「记忆」面板管理）。"); };
+  $("btnSetup").onclick = function(){ var t = document.querySelector('.tab[data-pane="pSet"]'); if(t) t.click(); };
+  $("fPreset").onchange = function(){ var p = $("fPreset").value; if(p && LLM()){ var c = LLM().applyPreset(p); $("fEndpoint").value = c.endpoint; $("fModel").value = c.model; } };
+  $("saveCfg").onclick = function(){
+    if(!LLM()) return;
+    LLM().setConfig({ endpoint:$("fEndpoint").value, model:$("fModel").value, apiKey:$("fKey").value.trim() });
+    $("fKey").value = ""; refreshStatus(); fillForm();
+    addBubble("agent","配置已保存（只在本机）。现在可以开聊了——试试下面的快捷指令。");
+  };
+  $("clearCfg").onclick = function(){ if(LLM()) LLM().clearConfig(); refreshStatus(); fillForm(); };
+  $("memAdd").onclick = function(){ var v = $("memNew").value.trim(); if(!v) return; AG().memory.add(v); $("memNew").value = ""; renderMem(); };
+  $("memNew").addEventListener("keydown", function(e){ if(e.key === "Enter") $("memAdd").click(); });
+  $("memClear").onclick = function(){ AG().memory.clear(); renderMem(); };
+  document.querySelector(".tabs").addEventListener("click", function(e){
+    var t = e.target.closest(".tab"); if(!t) return;
+    document.querySelectorAll(".tab").forEach(function(n){ n.classList.toggle("on", n === t); });
+    document.querySelectorAll(".tabpane").forEach(function(n){ n.classList.toggle("on", n.id === t.dataset.pane); });
+    if(t.dataset.pane === "pMem") renderMem();
+  });
+
+  /* ---------- 启动 ---------- */
+  window.addEventListener("load", function(){
+    refreshStatus(); fillForm(); renderMem();
+    if(LLM() && LLM().getConfig().hasApiKey) addBubble("agent", "我在。工具、记忆都已就绪——可以让我查版本、跳页面、记住事情、算数、报时。");
+  });
+})();
+</script>
+</body>
+</html>

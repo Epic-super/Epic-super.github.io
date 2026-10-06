@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<!-- TRAE 2026 创造力大赛资料归档 · 统一入口
+     背景：这 6 份资料原先散落在站点根目录，互相之间只以 <code> 写了文件名（不是链接），
+     站内任何页面都没有指向它们的 <a href> —— 只能手输 URL 才能打开。本页把它们串成一组，
+     由主页子系统网格的一张卡进入。样式复用 assets/css/main.css 的全站令牌，不新增硬编码色。 -->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>TRAE 2026 创造力大赛 · 资料归档</title>
+<link rel="icon" type="image/png" href="assets/pwa/icon-192.png">
+<meta name="description" content="TRAE 2026 创造力大赛资料归档：科技/工业/制造方向作品总览、航空方向调研、初赛三大工业作品与苍穹降临的精准解析、图片画廊类优秀作品参考。">
+<link rel="stylesheet" href="assets/css/main.css?v=176">
+  <style>
+    /* 本页局部样式：颜色一律走 main.css 令牌，禁止散写 hex */
+    .ar-sub{font-size:13px;color:var(--muted);line-height:1.7;margin:0 2px 12px}
+    .ar-item{display:flex;flex-direction:column;gap:7px;padding:14px;border:1px solid var(--border);
+      border-radius:var(--radius);background:var(--card);box-shadow:var(--shadow);
+      text-decoration:none;color:var(--text);
+      transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}
+    .ar-item:hover{transform:translateY(-2px);
+      border-color:color-mix(in srgb,var(--primary) 34%,var(--border));box-shadow:var(--shadow-2)}
+    .ar-item:focus-visible{outline:none;box-shadow:var(--ring)}
+    .ar-title{font-size:15px;font-weight:700;line-height:1.4}
+    .ar-desc{font-size:12.5px;color:var(--muted);line-height:1.65}
+    .ar-go{font-size:12.5px;font-weight:700;color:var(--primary)}
+    .ar-item:hover .ar-go{color:var(--primary-2)}
+    @media(max-width:560px){.ar-item{padding:12px}}
+  </style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+<div class="wrap">
+
+  <div class="card" style="border-color:var(--primary-soft);background:linear-gradient(180deg,var(--primary-soft) 0%,var(--card) 72%)">
+    <div class="sec-head">
+      <h2>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16v13H4z"/><path d="M8 7V5h8v2M8 12h8M8 16h5"/></svg>
+        TRAE 2026 创造力大赛 · 资料归档
+      </h2>
+      <button class="btn sm" id="themeBtn" type="button">◐ 切换主题</button>
+    </div>
+    <p class="ar-sub">6 份大赛调研与作品解析资料的统一入口。它们原先散落在站点根目录、站内没有任何页面链得到，只能手输 URL 打开；本页给它们一个能点的家。</p>
+    <p style="margin:0 2px"><a class="btn sm" href="index.html" style="text-decoration:none">← 返回工作台</a></p>
+  </div>
+
+  <div class="card">
+    <div class="sec-head">
+      <h2>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg>
+        方向调研 · 总览
+      </h2>
+      <span class="tag">2 份</span>
+    </div>
+    <div class="grid">
+      <a class="ar-item" href="trae-industrial-2026.html">
+        <span class="ar-title">科技 / 工业 / 制造业相关作品</span>
+        <span class="ar-desc">大赛总览：词元开物、开源太空、听到鸟、芳莲、芯设备博士、检具机器人、数据立方。</span>
+        <span class="ar-go">打开 ↗</span>
+      </a>
+      <a class="ar-item" href="trae-aviation-2026.html">
+        <span class="ar-title">航空方向作品调研</span>
+        <span class="ar-desc">航空制造 / 设计篇，附其余几份解析页的文件名与简介。</span>
+        <span class="ar-go">打开 ↗</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="sec-head">
+      <h2>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2.5l-2 5h-4l3.2 2.4L4.3 15l4.2-3 4.2 3-2.4-5.1L13.5 7.5h-4zM14 13l-1.6 4h-3.2l2.6 2 1-2.1 1 2.1 2.6-2h-3.2z"/></svg>
+        作品精准解析
+      </h2>
+      <span class="tag">3 份</span>
+    </div>
+    <div class="grid">
+      <a class="ar-item" href="trae-prelim-analysis-2026.html">
+        <span class="ar-title">初赛 · 三大工业作品</span>
+        <span class="ar-desc">精准解析 + 复原完整性评估。</span>
+        <span class="ar-go">打开 ↗</span>
+      </a>
+      <a class="ar-item" href="trae-extra-analysis-2026.html">
+        <span class="ar-title">词元开物 / 开源太空 / 听到鸟 / 芳莲</span>
+        <span class="ar-desc">复现概率与价值评估，附论坛与新闻来源链接。</span>
+        <span class="ar-go">打开 ↗</span>
+      </a>
+      <a class="ar-item" href="trae-cangqiong-analysis-2026.html">
+        <span class="ar-title">苍穹降临</span>
+        <span class="ar-desc">精准解析 + 复原完整性（三维空中交通秩序推演沙盒）。</span>
+        <span class="ar-go">打开 ↗</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="sec-head">
+      <h2>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="8.5" cy="9.5" r="1.6"/><path d="M21 16l-5-5L7 19"/></svg>
+        参考资料
+      </h2>
+      <span class="tag">1 份</span>
+    </div>
+    <div class="grid">
+      <a class="ar-item" href="gallery-refs.html">
+        <span class="ar-title">图片画廊类优秀作品参考</span>
+        <span class="ar-desc">大赛图片画廊赛道的优秀作品参考合集。</span>
+        <span class="ar-go">打开 ↗</span>
+      </a>
+    </div>
+  </div>
+
+</div>
+  <script>
+  /* 跟随系统深浅色 + 手动切换（本页不加载 app-main.js，故自带 4 行主题逻辑） */
+  (function () {
+    var mq = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)');
+    function apply(t) { document.documentElement.setAttribute('data-theme', t); }
+    apply(mq && mq.matches ? 'dark' : 'light');
+    if (mq && mq.addEventListener) mq.addEventListener('change', function (e) { apply(e.matches ? 'dark' : 'light'); });
+    var b = document.getElementById('themeBtn');
+    if (b) b.addEventListener('click', function () {
+      apply(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+    });
+  })();
+  </script>
+</body>
+</html>

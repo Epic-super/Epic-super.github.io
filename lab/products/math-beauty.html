@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>数学之美 · 3D 数学可视化（Trae 大赛作品）</title>
+<style>
+  :root{
+    --bg:#0f1311; --panel:#171d1a; --panel2:#1f2723; --ink:#e8efe9; --muted:#8b9b93;
+    --line:#262d29; --primary:#34d399; --primary-soft:#14352b; --accent:#7dd3fc;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    line-height:1.7;font-size:15px;-webkit-font-smoothing:antialiased}
+  a{color:var(--accent);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .bar{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:10px;padding:10px 16px;
+    border-bottom:1px solid var(--line);background:rgba(23,29,26,.92);backdrop-filter:blur(8px)}
+  .back{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:10px;border:1px solid var(--line);
+    background:var(--panel);color:var(--ink);font-size:13px;font-weight:700}
+  .back:hover{border-color:var(--primary);text-decoration:none}
+  .title{font-size:14px;font-weight:800;opacity:.92}
+  .wrap{max-width:880px;margin:0 auto;padding:22px 18px 80px}
+  .hero{background:linear-gradient(135deg,#14352b,#1b2a3a);border:1px solid var(--line);
+    border-radius:var(--radius);padding:20px 22px;margin-bottom:22px}
+  .hero h1{font-size:23px;margin:0 0 6px;background:linear-gradient(90deg,#34d399,#7dd3fc);
+    -webkit-background-clip:text;background-clip:text;color:transparent}
+  .hero p{color:var(--muted);font-size:13.5px;margin:0}
+  .acts{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .btn{display:inline-flex;align-items:center;gap:7px;padding:11px 16px;border-radius:11px;font-weight:700;font-size:14px;cursor:pointer}
+  .btn.primary{background:var(--primary);color:#04221a;border:none}
+  .btn.ghost{background:var(--panel2);color:var(--ink);border:1px solid var(--line)}
+  .btn:hover{filter:brightness(1.08);text-decoration:none}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;margin:16px 0}
+  .card h2{font-size:17px;margin:0 0 10px;color:var(--primary);display:flex;align-items:center;gap:8px}
+  .card h3{font-size:14px;margin:14px 0 6px;color:var(--accent)}
+  .kv{font-size:13.5px;margin:5px 0;display:flex;gap:8px}
+  .kv b{color:#fff;min-width:96px;flex-shrink:0}
+  .kv span{color:var(--muted)}
+  ul{margin:8px 0 4px 20px;font-size:13.5px;color:#cdd8d1}
+  li{margin:4px 0}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px}
+  @media(max-width:640px){.grid{grid-template-columns:1fr}}
+  .box{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+  .box h4{margin:0 0 6px;font-size:13.5px;color:var(--primary)}
+  .box p{margin:0;font-size:12.5px;color:#cdd8d1}
+  pre{background:#0b0f0d;border:1px solid var(--line);border-radius:10px;padding:12px 14px;overflow-x:auto;
+    font-size:12.5px;color:#bfe9d6;line-height:1.5;margin:10px 0}
+  .tag{display:inline-block;background:var(--primary-soft);color:var(--primary);border:1px solid #1f4a3b;
+    border-radius:20px;padding:2px 10px;font-size:12px;margin:3px 4px 3px 0}
+  .note{font-size:13px;color:var(--muted);border-left:3px solid var(--primary);padding:8px 12px;margin:10px 0;background:var(--panel2)}
+  .foot{margin-top:30px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:12.5px}
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+  <div class="bar">
+    <a class="back" href="../index.html" target="_top">← 返回指挥台</a>
+    <div class="title">🧮 数学之美 · 3D 数学可视化</div>
+  </div>
+
+  <div class="wrap">
+    <div class="hero">
+      <h1>数学之美 · AI 驱动的 3D 数学可视化</h1>
+      <p>TRAE 2026 创造力大赛 · 学习工作赛道 · 作者「用户31491」· 发布于 7 月 15 日（初赛帖 topic/151951，报名帖 topic/146429）</p>
+      <div class="acts">
+        <a class="btn primary" href="https://traeai.liufei.fun/math-beauty/" target="_blank" rel="noopener">▶ 在线体验（外部应用）</a>
+        <a class="btn ghost" href="https://forum.trae.cn/t/topic/151951" target="_blank" rel="noopener">ⓘ 大赛原帖 / 源码</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>① 作品简介</h2>
+      <div class="kv"><b>是什么</b><span>结合 AI 大模型（火山方舟）的 Web 应用：输入任意数学知识点，AI 自动生成对应的 3D 可视化图形。</span></div>
+      <div class="kv"><b>面向谁</b><span>数学爱好者、学生、教育工作者，以及对 3D 可视化与数学美学感兴趣的所有人。</span></div>
+      <div class="kv"><b>作者背景</b><span>后端开发工程师（Python / Go），不懂前端与 Three.js；本项目 100% 代码由 TRAE 生成，作者扮演「产品经理 + 测试」角色。</span></div>
+      <div class="kv"><b>体验地址</b><span><a href="https://traeai.liufei.fun/math-beauty/" target="_blank" rel="noopener">https://traeai.liufei.fun/math-beauty/</a></span></div>
+    </div>
+
+    <div class="card">
+      <h2>② 三大核心功能</h2>
+      <div class="grid">
+        <div class="box">
+          <h4>功能一 · AI 一键生成</h4>
+          <p>首页输入任意数学概念，或从 20 个预设模板标签中选择，AI 自动选合适可视化类型（共 7 种），并生成完整 3D 渲染配置。</p>
+        </div>
+        <div class="box">
+          <h4>功能二 · 沉浸式查看器</h4>
+          <p>支持拖拽旋转、滚轮缩放、自动旋转、全屏。左下信息面板展示分类/标题/描述/时间；可看数学公式（KaTeX 渲染 LaTeX）与 AI 生成的测试题。</p>
+        </div>
+        <div class="box">
+          <h4>功能三 · 历史与分类</h4>
+          <p>所有结果自动保存，按技术领域（几何 / 拓扑 / 分析 / 代数 / 混沌 / 分形等）自动分类，支持搜索与排序。</p>
+        </div>
+        <div class="box">
+          <h4>7 种可视化类型</h4>
+          <p>参数曲面 · 混沌吸引子 · 空间曲线 · 递归分形 · 三角函数教学 · 线框结构 · DNA 双螺旋</p>
+        </div>
+      </div>
+      <div class="note">预设模板示例：莫比乌斯环、洛伦兹吸引子、克莱因瓶、DNA 双螺旋、各类分形与三角函数曲面等共 20 个。</div>
+    </div>
+
+    <div class="card">
+      <h2>③ 创作思路</h2>
+      <div class="kv"><b>灵感来源</b><span>对数学「几何之美」着迷——莫比乌斯环的拓扑奇妙、洛伦兹吸引子的混沌优雅、分形的无限自相似；但多数人对「数学之美」只停留在课本枯燥公式与二维示意图。</span></div>
+      <div class="kv"><b>想解决的痛点</b><span>① 数学可视化门槛极高（需同时掌握数学建模 + Three.js/WebGL + 着色器）；② 数学教育缺乏直观体验；③ 没有「输入概念就出图」的工具（GeoGebra/Desmos 仍需手动输方程）。</span></div>
+      <div class="kv"><b>为何做这个方向</b><span>AI 最大价值之一是「降低门槛」——用自然语言输入概念，AI 翻译成精确 3D 渲染参数，让普通人也能「看见」数学。</span></div>
+    </div>
+
+    <div class="card">
+      <h2>④ 技术栈</h2>
+      <div class="kv"><b>前端</b><span>React + TypeScript + Three.js（含自定义 GLSL 着色器、粒子系统、混沌吸引子）</span></div>
+      <div class="kv"><b>后端</b><span>FastAPI + SQLite，通过 Docker Compose 一键部署</span></div>
+      <div class="kv"><b>AI</b><span>火山方舟（Volcano Ark）大模型，负责把数学概念转换为 3D 渲染配置（JSON）</span></div>
+      <div class="kv"><b>其他</b><span>KaTeX 渲染 LaTeX 公式、Framer Motion 动画控制</span></div>
+    </div>
+
+    <div class="card">
+      <h2>⑤ TRAE 实践过程</h2>
+      <p>全程使用 TRAE IDE 开发。作者开发方式：想清楚功能长什么样 → 自然语言描述给 TRAE → 跑起来看效果 → 不对就继续描述调整。示例：描述「两条反向螺旋骨架、横杆连碱基对、球体节点、颜色交替」即生成完整 <code>DNAHelix.tsx</code>。</p>
+      <div class="kv"><b>关键 Session</b><span>TRAE Work CN 0.1.34：2026/7/12 15:17 起多轮迭代，7/13 15:52 收尾（共 4 个记录节点）。</span></div>
+      <div class="kv"><b>报名审核帖</b><span><a href="https://forum.trae.cn/t/topic/146429" target="_blank" rel="noopener">topic/146429</a>（标题：输入一个概念，AI 秒级生成沉浸式 3D 数学可视化）</span></div>
+    </div>
+
+    <div class="card">
+      <h2>⑥ 踩坑复盘</h2>
+      <h3>坑 1 · AI 返回 JSON 格式不稳定</h3>
+      <p>火山方舟偶尔返回缺右括号、尾部多逗号、字符串未转义引号。作者写多层容错 <code>_repair_json</code>（提取 markdown 代码块、定位最外层 {}、修常见格式错误），大幅提升成功率。</p>
+      <h3>坑 2 · Three.js 渲染性能</h3>
+      <p>首页背景同时跑粒子系统 + 形状轮播（5 种 GLSL 着色器）在低性能设备卡顿。TRAE 协助优化粒子数、降着色器复杂度，并用 Framer Motion 在页面切换时及时释放渲染资源。</p>
+      <h3>坑 3 · DNA 渲染与 AI 生成冲突</h3>
+      <p>AI 有时给 DNA 概念生成 structure 而非 dna 类型。后端加 <code>_post_process_config</code>，检测关键词（DNA / 双螺旋 / 碱基对）后强制切到 dna 类型并清理干扰参数。</p>
+    </div>
+
+    <div class="card">
+      <h2>⑦ 经验总结</h2>
+      <ul>
+        <li>清楚描述需求是高效协作关键：越具体，TRAE 生成质量越高（如描述 DNA 时要说清几何体、颜色交替、动画控制）。</li>
+        <li>善用迭代：第一版不完美，多轮对话逐步打磨到满意。</li>
+        <li>不怕不懂的技术栈：后端工程师也能靠 TRAE「翻译」需求跨过 Three.js / GLSL 盲区。</li>
+        <li>保持可维护性：虽是 AI 生成代码，仍要求清晰文件结构、完整 TypeScript 类型、合理组件拆分。</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>⑧ 为何放进「空间训练」板块</h2>
+      <p>数学之美本质是<strong>把抽象数学概念转化为可旋转、可缩放、可全屏观察的 3D 实体</strong>——这恰好训练「空间想象 / 空间感知」能力：拓扑结构（莫比乌斯环、克莱因瓶）、参数曲面、空间曲线、分形自相似，都是立体几何与空间直觉的极佳素材。与本站「空间思维训练 / 心理旋转 / 脑力训练」同属「用可视化锻炼空间认知」范畴，故归入此板块作为开放外部资源。</p>
+      <p class="note">注：本页为作品资料卡（全量收录原帖内容），实际体验请点上方「在线体验」按钮跳转作者部署的在线应用；源码与完整说明见大赛原帖。</p>
+    </div>
+
+    <div class="foot">
+      来源：TRAE 官方中文社区初赛帖 <a href="https://forum.trae.cn/t/topic/151951" target="_blank" rel="noopener">topic/151951</a> + 报名帖 <a href="https://forum.trae.cn/t/topic/146429" target="_blank" rel="noopener">topic/146429</a>。
+      在线应用：<a href="https://traeai.liufei.fun/math-beauty/" target="_blank" rel="noopener">traeai.liufei.fun/math-beauty/</a>。
+      本页为站内资料卡，纯静态，file:// 直接可开。
+    </div>
+  </div>
+</body>
+</html>

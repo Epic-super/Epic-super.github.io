@@ -1,0 +1,30 @@
+# =====================================================================
+# 构建上下文排除 —— 只把「脱敏后产物」送进 Docker 镜像
+# 镜像越小，传输越快、层越少、攻击面越小
+# =====================================================================
+
+# 绝不进镜像：源码编辑区与私有资产（含内部内容 / me/ lab/ tools/，由 sanitize 把关）
+_master/
+_private/
+_archive/
+_backup/
+_refs/
+_tmp_*/
+tools/
+个人成长工作站/
+Trae大赛经验沉淀/
+
+# 版本控制与运行时垃圾
+.git/
+.gitignore
+.gitattributes
+.github/
+node_modules/
+__pycache__/
+*.pyc
+*.log
+.DS_Store
+Thumbs.db
+
+# 避免把 dist 里的隐藏配置文件漏进（dist 本身要保留）
+!dist/**

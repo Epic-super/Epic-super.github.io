@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>个人信息管家 Agent · 记录 → 关联 → 行动</title>
+<style>
+:root{--bg:#0f1115;--panel:#171a21;--panel2:#1f232c;--line:#2a2f3a;--txt:#e6e8ec;--sub:#9aa3b2;--accent:#4ECDC4;--accent2:#FF6B6B;--ok:#3ecf8e;--err:#ff6b6b}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font:14px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;padding:24px;max-width:1120px;margin:0 auto}
+h1{font-size:22px;margin:0 0 2px;display:flex;align-items:center;gap:10px}h1 .dot{width:10px;height:10px;border-radius:50%;background:var(--accent2);animation:pulse 1.4s infinite;flex:none}@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.sub{color:var(--sub);font-size:13px;margin-bottom:18px}.bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:18px}button{background:var(--accent);color:#0f1115;border:none;border-radius:9px;padding:10px 18px;font-size:14px;cursor:pointer;font-weight:700;white-space:nowrap}button.sec{background:var(--panel2);color:var(--txt);border:1px solid var(--line)}button:disabled{opacity:.5;cursor:not-allowed}
+.status{font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;padding:9px 14px;border-radius:10px}.status.ok{background:rgba(62,207,142,.12);color:var(--ok);border:1px solid rgba(62,207,142,.35)}.status.err{background:rgba(255,107,107,.12);color:var(--err);border:1px solid rgba(255,107,107,.35)}.status.check{background:var(--panel2);color:var(--sub);border:1px solid var(--line)}.spin{width:12px;height:12px;border:2px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:sp .7s linear infinite}@keyframes sp{to{transform:rotate(360deg)}}
+.gate{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}@media(max-width:760px){.gate{grid-template-columns:1fr}}.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px}.card h2{font-size:14px;margin:0 0 8px}.card p,.card li{font-size:13px;color:var(--sub);margin:4px 0}.card ul{margin:6px 0;padding-left:18px}code{background:var(--panel2);padding:1px 6px;border-radius:6px;font-size:12px;color:var(--accent)}
+.frame-wrap{margin-top:18px;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--panel);display:none}.frame-wrap.show{display:block}.frame-wrap iframe{width:100%;height:82vh;border:0;display:block;background:#1D1F27}.frame-bar{display:flex;align-items:center;gap:8px;padding:9px 14px;background:var(--panel2);border-bottom:1px solid var(--line);font-size:12px;color:var(--sub)}.frame-bar .live{width:8px;height:8px;border-radius:50%;background:var(--accent2);animation:pulse 1.4s infinite}
+.chain{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:14px;font-size:12px;color:var(--sub)}.chain .step{background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:2px 9px}.foot{color:var(--sub);font-size:11.5px;margin-top:20px;line-height:1.7}.foot b{color:var(--accent)}
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+<h1><span class="dot"></span>个人信息管家 Agent</h1>
+<div class="sub">零散记录 → 自动分类/摘要/关联 → 智能问答 → 阶段总结与行动建议 · 数据与 API Key 留在本机</div>
+<div class="bar"><button id="btnOpen" class="sec" disabled>🚀 打开信息管家</button><button id="btnCheck" class="sec">↻ 重新检测服务</button></div>
+<div class="status check" id="st"><span class="spin"></span><span id="stText">正在检测本地信息管家服务（127.0.0.1:8200）…</span></div>
+<div class="frame-wrap" id="frameWrap"><div class="frame-bar"><span class="live"></span><span>个人信息管家工作台已嵌入 · 数据保存在本机 SQLite</span></div><iframe id="frame" src="" title="个人信息管家 Agent"></iframe></div>
+<div class="gate">
+  <div class="card"><h2>这是干什么的</h2><p>把脑中一闪而过的想法、收藏的资料、正在做的任务和零散笔记，统一交给一个<b style="color:var(--txt)">可检索、会关联、能总结</b>的个人信息管家：</p><ul><li>自动识别想法 / 资料 / 待办 / 笔记</li><li>提取摘要、标签、重点与待办事项</li><li>关键词检索、基于已有内容智能问答</li><li>阶段总结、主题趋势与后续行动建议</li></ul></div>
+  <div class="card"><h2>怎么启动本地服务</h2><p>本页只负责接入工作台，数据和模型调用由本机 Python 服务承担：</p><ul><li>双击 <code><本地路径></code></li><li>首次运行复制 <code>.env.example</code> 为 <code>.env</code>，填入 OpenAI 兼容 API Key</li><li>服务地址：<code>http://127.0.0.1:8200</code></li><li>未启动时，本页会保留这份操作指引，不会出现空白死链</li></ul></div>
+</div>
+<div class="chain"><span class="step">① 启动本地服务 8200</span><span>→</span><span class="step">② 点「打开信息管家」</span><span>→</span><span class="step">③ 随手记录</span><span>→</span><span class="step">④ 问答 / 总结 / 行动</span></div>
+<div class="foot"><b>说明</b>：网关页进入公开站，实际工作台由 <code>tools/personal-info-agent/</code> 本地服务提供；数据库与大模型密钥不进入公开站。服务在线时自动内嵌，不在线时降级为操作指引。</div>
+<script>
+"use strict";
+const API_BASE="http://127.0.0.1:8200",stEl=document.getElementById("st"),stText=document.getElementById("stText"),btnOpen=document.getElementById("btnOpen"),frameWrap=document.getElementById("frameWrap"),frame=document.getElementById("frame");
+function setStatus(kind,text,spin){stEl.className="status "+kind;stText.innerHTML=(spin?'<span class="spin"></span>':"")+text}
+async function checkHealth(){setStatus("check","正在检测本地信息管家服务…",true);btnOpen.disabled=true;frameWrap.classList.remove("show");try{const timeout=new Promise((_,rej)=>setTimeout(()=>rej(new Error("timeout")),4000));const r=await Promise.race([fetch(API_BASE+"/api/health"),timeout]);if(!r.ok)throw new Error("HTTP "+r.status);const h=await r.json();if(!h.ok)throw new Error("服务异常响应");setStatus("ok","✓ 本地信息管家在线（127.0.0.1:8200）· "+(h.entries||0)+" 条记录 · 可正常使用",false);btnOpen.disabled=false;frame.src=API_BASE+"/";frameWrap.classList.add("show")}catch(e){setStatus("err","✗ 未检测到本地服务：请启动 tools/personal-info-agent/start.bat，本页已降级为操作指引。",false)}}
+document.getElementById("btnCheck").onclick=checkHealth;btnOpen.onclick=()=>window.open(API_BASE+"/","_blank","noopener");checkHealth();
+</script>
+</body>
+</html>
