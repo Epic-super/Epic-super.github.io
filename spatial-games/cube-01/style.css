@@ -1,0 +1,501 @@
+/* ===== 基礎 Reset 樣式 ===== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* ===== Body 和 HTML 基礎設定 ===== */
+html, body {
+    width: 100%;
+    height: 100%;
+    height: 100dvh; /* 使用動態視口高度，解決手機瀏覽器地址欄問題 */
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    /* 防止手機上的彈性滾動 */
+    overscroll-behavior: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+}
+
+/* ===== Canvas 容器樣式 ===== */
+#canvas-container {
+    width: 100%;
+    height: 100%;
+    height: 100dvh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    /* 防止觸控時的額外滾動 */
+    touch-action: none;
+}
+
+/* Three.js 畫布樣式 */
+#canvas-container canvas {
+    display: block;
+}
+
+/* ===== 分數顯示區域 (右上角) ===== */
+#score-panel {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 12px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 100;
+}
+
+#score-display {
+    font-size: 18px;
+    font-weight: 600;
+    color: #28a745;
+}
+
+/* ===== 答題區域 ===== */
+#answer-panel {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255, 255, 255, 0.95);
+    padding: 20px 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 100;
+}
+
+#answer-panel label {
+    display: block;
+    margin-bottom: 10px;
+    font-size: 16px;
+    font-weight: 500;
+    color: #333;
+}
+
+#answer-input-group {
+    display: flex;
+    gap: 10px;
+}
+
+#answer-input {
+    padding: 10px 15px;
+    border: 2px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+    width: 120px;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+
+#answer-input:focus {
+    border-color: #007bff;
+}
+
+
+/* ===== Bootstrap 風格按鈕基礎樣式 ===== */
+.btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    outline: none;
+}
+
+/* 主要按鈕 - 藍色 */
+.btn-primary {
+    background-color: #007bff;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+    box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+    transform: translateY(-2px);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);
+}
+
+/* 成功按鈕 - 綠色 */
+.btn-success {
+    background-color: #28a745;
+    color: white;
+}
+
+.btn-success:hover {
+    background-color: #218838;
+    box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+    transform: translateY(-2px);
+}
+
+.btn-success:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(40, 167, 69, 0.2);
+}
+
+/* 危險按鈕 - 紅色 */
+.btn-danger {
+    background-color: #dc3545;
+    color: white;
+}
+
+.btn-danger:hover {
+    background-color: #c82333;
+    box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+    transform: translateY(-2px);
+}
+
+.btn-danger:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(220, 53, 69, 0.2);
+}
+
+/* ===== 過關畫面樣式 ===== */
+#victory-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.5s ease, visibility 0.5s ease;
+}
+
+#victory-screen.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.victory-content {
+    text-align: center;
+    padding: 40px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+    max-width: 400px;
+    width: 90%;
+    animation: victoryPop 0.5s ease forwards;
+}
+
+@keyframes victoryPop {
+    0% {
+        transform: scale(0.5);
+        opacity: 0;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.victory-image {
+    width: 150px;
+    height: 150px;
+    object-fit: contain;
+    margin-bottom: 20px;
+    animation: bounce 1s ease infinite;
+}
+
+@keyframes bounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+.victory-title {
+    font-size: 32px;
+    color: #fff;
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.victory-message {
+    font-size: 18px;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 15px;
+}
+
+.victory-score {
+    font-size: 24px;
+    color: #ffd700;
+    font-weight: 700;
+    margin-bottom: 25px;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+#victory-screen .btn {
+    padding: 15px 40px;
+    font-size: 18px;
+}
+
+/* ===== Dialog 對話框樣式 ===== */
+/* Dialog 容器 (用於放置圖片在 dialog 上方) */
+#dialog-wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+#dialog-wrapper.show {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+#dialog-wrapper::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(5px);
+    z-index: -1;
+}
+
+/* ===== 角色圖片樣式 ===== */
+/* 預設隱藏所有角色圖片 */
+.character-image {
+    position: fixed;
+    bottom: -60px;
+    left: 20px;
+    transform-origin: bottom left;
+    scale: 0.5;
+    z-index: 1001;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(-100%);
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    pointer-events: none; /* 穿透點擊，不阻擋下方元素 */
+}
+
+/* 顯示角色圖片時的動畫 */
+.character-image.show {
+    opacity: 1;
+    visibility: visible;
+    animation: slideIn 0.4s ease forwards;
+}
+
+@keyframes slideIn {
+    0% {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+    100% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+dialog {
+    /* 移除預設樣式 */
+    border: none;
+    padding: 0;
+    background: white;
+
+    /* 尺寸設定 */
+    max-width: 400px;
+    width: 90%;
+
+    /* 視覺效果 */
+    border-radius: 8px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+
+    /* 重置定位 (由 wrapper 控制) */
+    position: relative;
+    top: auto;
+    left: auto;
+    transform: none;
+    margin: 0;
+}
+
+/* 隱藏原本的 backdrop */
+dialog::backdrop {
+    background-color: transparent;
+}
+
+/* Dialog 內容區域 */
+.dialog-content {
+    padding: 24px;
+    text-align: center;
+}
+
+/* Dialog 標題 */
+#dialog-title {
+    margin: 0 0 16px 0;
+    font-size: 20px;
+    font-weight: 600;
+    color: #333;
+}
+
+/* Dialog 訊息 */
+#dialog-message {
+    margin: 0 0 24px 0;
+    font-size: 16px;
+    color: #666;
+    line-height: 1.5;
+}
+
+/* Dialog 按鈕區域 */
+.dialog-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+/* ===== 響應式設計 ===== */
+/* 平板尺寸 */
+@media (max-width: 768px) {
+    #score-panel {
+        top: 15px;
+        right: 15px;
+        padding: 10px 16px;
+    }
+
+    #score-display {
+        font-size: 16px;
+    }
+
+    #answer-panel {
+        bottom: 15px;
+        padding: 15px 20px;
+        width: 90%;
+    }
+
+    #answer-panel label {
+        font-size: 14px;
+    }
+
+    #answer-input {
+        font-size: 14px;
+        width: 100px;
+    }
+
+    .btn {
+        padding: 10px 20px;
+        font-size: 14px;
+    }
+
+    dialog {
+        max-width: 90%;
+    }
+
+    .dialog-content {
+        padding: 20px;
+    }
+
+    #dialog-title {
+        font-size: 18px;
+    }
+
+    #dialog-message {
+        font-size: 14px;
+    }
+}
+
+/* 手機尺寸 */
+@media (max-width: 480px) {
+    #score-panel {
+        top: 10px;
+        right: 10px;
+        padding: 8px 12px;
+    }
+
+    #score-display {
+        font-size: 14px;
+    }
+
+    #answer-panel {
+        bottom: 10px;
+        padding: 15px;
+        width: 90%;
+    }
+
+    #answer-panel label {
+        font-size: 13px;
+        margin-bottom: 8px;
+    }
+
+    #answer-input-group {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    #answer-input {
+        font-size: 14px;
+        width: 100%;
+    }
+
+    #answer-input-group .btn {
+        width: 100%;
+        padding: 10px 16px;
+        font-size: 13px;
+    }
+
+    /* 手機版 Dialog 位置調整：垂直上方、水平置中 */
+    #dialog-wrapper {
+        justify-content: flex-start;
+        padding-top: 80px;
+    }
+
+    /* 手機版過關畫面位置調整：垂直上方 */
+    #victory-screen {
+        align-items: flex-start;
+        padding-top: 80px;
+    }
+
+    .dialog-content {
+        padding: 16px;
+    }
+
+    #dialog-title {
+        font-size: 16px;
+        margin-bottom: 12px;
+    }
+
+    #dialog-message {
+        font-size: 13px;
+        margin-bottom: 20px;
+        white-space: pre-line;
+    }
+
+    .dialog-buttons {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .dialog-buttons .btn {
+        width: 100%;
+    }
+}

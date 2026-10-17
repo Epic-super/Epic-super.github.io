@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#14161f">
+<meta name="description" content="学习驾驶舱：聚合工作台各学习页数据——打卡热力图、自考科目进度、考研倒计时、记忆卡片 SRS 预测、题库正确率、习惯坚持，全部读取本机 localStorage，不上传。">
+<title>学习驾驶舱 · 数据看板</title>
+<style>
+:root{
+  --bg:#f4f5fa; --panel:#ffffff; --panel2:#f7f8fc; --ink:#23263a; --muted:#8a8fa6;
+  --line:#e4e6f0; --line2:#eef0f7; --acc1:#5b5bd6; --acc1-soft:#ecebfb; --acc1-ink:#4545b8;
+  --acc2:#0ea5b7; --acc2-soft:#e3f4f6; --green:#3f9e6f; --green-soft:#e6f4ec;
+  --red:#cf5b4e; --red-soft:#faecea; --gold:#c9a24b; --gold-soft:#f8f1de;
+  --shadow:0 1px 2px rgba(30,30,60,.05),0 8px 24px rgba(30,30,60,.07);
+  --radius:16px; --radius-s:11px;
+  --wb-focus:#4ecdc4;
+  --hm0:#e8eaf2; --hm1:#c9e8e3; --hm2:#7fd0c6; --hm3:#3fb3a6; --hm4:#0e8f84;
+}
+[data-theme="dark"]{
+  --bg:#14161f; --panel:#1c1f2c; --panel2:#202433; --ink:#e7e9f5; --muted:#8f95ad;
+  --line:#2c3044; --line2:#262a3c; --acc1:#8b8bf0; --acc1-soft:#2a2a4d; --acc1-ink:#b3b3ff;
+  --acc2:#3fc6d9; --acc2-soft:#16303a; --green:#5bb98c; --green-soft:#173427;
+  --red:#e07a6e; --red-soft:#3a2320; --gold:#d8b25e; --gold-soft:#38301c;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.35);
+  --wb-focus:#4ecdc4;
+  --hm0:#232839; --hm1:#1d4d4a; --hm2:#23756d; --hm3:#2fa396; --hm4:#4ecdc4;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased;}
+button{font-family:inherit;}
+::-webkit-scrollbar{width:0;height:0;}
+:focus-visible{outline:2px solid var(--wb-focus)!important;outline-offset:2px!important}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+.wrap{max-width:1080px;margin:0 auto;padding:22px 20px 80px;}
+.topbar{display:flex;align-items:center;gap:10px;margin-bottom:18px;flex-wrap:wrap;}
+.topbar .logo{width:40px;height:40px;border-radius:11px;background:linear-gradient(135deg,#FF6B6B,#4ECDC4);display:flex;align-items:center;justify-content:center;flex:none;}
+.topbar .logo svg{width:22px;height:22px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.topbar h1{font-size:19px;margin:0;font-weight:800;}
+.topbar .sub{color:var(--muted);font-size:12.5px;}
+.topbar .spacer{flex:1;}
+.icon-btn{width:36px;height:36px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--ink);font-size:16px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;}
+.icon-btn:hover{border-color:var(--acc1);}
+.back{color:var(--muted);text-decoration:none;font-size:13px;font-weight:600;padding:8px 10px;border-radius:9px;border:1px solid var(--line);background:var(--panel);}
+.back:hover{color:var(--acc2);border-color:var(--acc2);}
+
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px;}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius-s);box-shadow:var(--shadow);padding:13px 15px;}
+.kpi b{font-size:23px;display:block;line-height:1.2;font-weight:800;}
+.kpi b small{font-size:12px;font-weight:600;color:var(--muted);margin-left:2px;}
+.kpi span{font-size:12px;color:var(--muted);}
+.kpi.a1 b{color:var(--acc1);} .kpi.a2 b{color:var(--acc2);} .kpi.g b{color:var(--green);} .kpi.r b{color:var(--red);} .kpi.y b{color:var(--gold);}
+.kpi.none b{color:var(--muted);}
+
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.grid .span2{grid-column:span 2;}
+@media(max-width:860px){.grid{grid-template-columns:1fr}.grid .span2{grid-column:span 1;}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:17px;margin-bottom:14px;}
+.panel h2{margin:0 0 3px;font-size:15.5px;display:flex;align-items:center;gap:8px;}
+.panel h2 .ico{font-size:17px;}
+.panel .desc{color:var(--muted);font-size:12.5px;margin:0 0 13px;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;}
+.panel .desc a{color:var(--acc2);text-decoration:none;font-weight:600;}
+.panel .desc a:hover{text-decoration:underline;}
+
+/* 热力图 */
+.hm-scroll{overflow-x:auto;padding-bottom:4px;}
+.hm{display:grid;grid-auto-flow:column;grid-template-rows:repeat(7,13px);gap:3px;min-width:max-content;}
+.hm i{width:13px;height:13px;border-radius:3px;background:var(--hm0);display:block;}
+.hm i.l1{background:var(--hm1);} .hm i.l2{background:var(--hm2);} .hm i.l3{background:var(--hm3);} .hm i.l4{background:var(--hm4);box-shadow:0 0 6px color-mix(in srgb,var(--hm4) 55%,transparent);}
+.hm-legend{display:flex;align-items:center;gap:5px;margin-top:10px;font-size:11.5px;color:var(--muted);}
+.hm-legend i{width:11px;height:11px;border-radius:3px;display:block;}
+.hm-meta{display:flex;gap:16px;margin-top:10px;font-size:12.5px;color:var(--muted);flex-wrap:wrap;}
+.hm-meta b{color:var(--ink);}
+
+/* 倒计时 */
+.cd-list{display:flex;flex-direction:column;gap:10px;}
+.cd{display:flex;align-items:center;gap:13px;padding:12px 14px;border:1px solid var(--line);border-radius:var(--radius-s);background:var(--panel2);}
+.cd .cd-n{font-size:26px;font-weight:800;min-width:74px;text-align:center;line-height:1;}
+.cd .cd-n small{display:block;font-size:11px;font-weight:600;color:var(--muted);margin-top:3px;}
+.cd .cd-t{flex:1;min-width:0;}
+.cd .cd-t b{font-size:14px;display:block;}
+.cd .cd-t span{font-size:12px;color:var(--muted);}
+.cd.past{opacity:.62;}
+.cd .cd-bar{height:6px;border-radius:4px;background:var(--line);overflow:hidden;margin-top:7px;}
+.cd .cd-bar i{display:block;height:100%;border-radius:4px;background:linear-gradient(90deg,#FF6B6B,#4ECDC4);}
+
+/* 进度分布条 */
+.dist-bar{display:flex;height:26px;border-radius:9px;overflow:hidden;border:1px solid var(--line);}
+.dist-bar i{display:block;height:100%;transition:width .3s;}
+.dist-legend{display:flex;flex-wrap:wrap;gap:12px;margin-top:10px;font-size:12.5px;color:var(--muted);}
+.dist-legend span{display:inline-flex;align-items:center;gap:5px;}
+.dist-legend i{width:10px;height:10px;border-radius:3px;display:block;}
+
+/* 通用小列表 */
+.rows{display:flex;flex-direction:column;gap:8px;}
+.row-i{display:flex;align-items:center;gap:10px;font-size:13.5px;}
+.row-i .ri-t{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.row-i .ri-n{font-size:12px;color:var(--muted);flex:none;}
+.row-i .ri-bar{width:88px;height:6px;border-radius:4px;background:var(--line2);overflow:hidden;flex:none;}
+.row-i .ri-bar i{display:block;height:100%;background:linear-gradient(90deg,#FF6B6B,#4ECDC4);}
+
+/* 预测 */
+.fc{display:flex;align-items:flex-end;gap:7px;height:96px;padding-top:6px;}
+.fc .col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end;}
+.fc .col i{display:block;width:100%;max-width:34px;border-radius:5px 5px 2px 2px;background:linear-gradient(180deg,#FF6B6B,#4ECDC4);min-height:3px;}
+.fc .col b{font-size:11px;color:var(--muted);font-weight:600;}
+.fc .col.today b{color:var(--acc1);}
+
+/* 环形图 */
+.donut-box{display:flex;align-items:center;gap:18px;flex-wrap:wrap;}
+.donut-box svg{flex:none;}
+.donut-box .dl{font-size:13px;color:var(--muted);line-height:1.9;}
+.donut-box .dl b{color:var(--ink);font-size:15px;}
+
+/* 空状态 */
+.empty{ text-align:center;padding:26px 12px;color:var(--muted);}
+.empty .big{font-size:32px;margin-bottom:8px;}
+.empty b{color:var(--ink);display:block;font-size:14px;margin-bottom:4px;}
+.empty a{color:var(--acc2);text-decoration:none;font-weight:600;font-size:13px;}
+.empty a:hover{text-decoration:underline;}
+.foot{margin-top:8px;font-size:12px;color:var(--muted);line-height:1.8;}
+.foot code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:1px 6px;font-size:11px;}
+.toast{position:fixed;left:50%;bottom:34px;transform:translateX(-50%) translateY(16px);background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:10px;font-size:13.5px;font-weight:600;opacity:0;pointer-events:none;transition:.22s;z-index:99;max-width:82vw;}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <div class="logo"><svg viewBox="0 0 24 24"><path d="M3 20h18"/><path d="M6 20V10M11 20V4M16 20v-7M21 20v-3"/></svg></div>
+    <div>
+      <h1>学习驾驶舱</h1>
+      <div class="sub">聚合工作台各学习页的真实数据 · 全部只读本机</div>
+    </div>
+    <span class="spacer"></span>
+    <a class="back" href="../index.html">← 实验室</a>
+    <a class="back" href="../../index.html#sec-subs">← 指挥台</a>
+    <button class="icon-btn" id="btnTheme" title="切换明暗主题" aria-label="切换明暗主题">🌓</button>
+  </div>
+
+  <div class="kpis" id="kpis"></div>
+
+  <div class="grid">
+    <section class="panel span2" id="p-heat">
+      <h2><span class="ico">🔥</span>打卡热力图</h2>
+      <p class="desc"><span>双线作战台 · 每日学习分钟</span><a href="../../zk-ky.html#p1">去打卡 →</a></p>
+      <div id="heatBody"></div>
+    </section>
+
+    <section class="panel" id="p-cd">
+      <h2><span class="ico">⏳</span>考试倒计时</h2>
+      <p class="desc"><span>来自双线作战台设置</span><a href="../../zk-ky.html">去设置 →</a></p>
+      <div id="cdBody"></div>
+    </section>
+
+    <section class="panel" id="p-cs">
+      <h2><span class="ico">🎓</span>自考科目进度</h2>
+      <p class="desc"><span>按状态分布的通过情况</span><a href="../../zk-ky.html#p1">去看板 →</a></p>
+      <div id="csBody"></div>
+    </section>
+
+    <section class="panel" id="p-srs">
+      <h2><span class="ico">🎴</span>记忆卡片 SRS</h2>
+      <p class="desc"><span>到期预测与掌握率</span><a href="srs-cards.html">去学习 →</a></p>
+      <div id="srsBody"></div>
+    </section>
+
+    <section class="panel" id="p-quiz">
+      <h2><span class="ico">📝</span>题库作答</h2>
+      <p class="desc"><span>累计作答与正确率</span><a href="../../zk-ky.html#p4">去刷题 →</a></p>
+      <div id="quizBody"></div>
+    </section>
+
+    <section class="panel span2" id="p-habit">
+      <h2><span class="ico">🌱</span>习惯坚持</h2>
+      <p class="desc"><span>习惯锻造台 · 各习惯当前连续天数</span><a href="habit-forge.html">去打卡 →</a></p>
+      <div id="habitBody"></div>
+    </section>
+  </div>
+
+  <p class="foot" id="footNote"></p>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+"use strict";
+function $id(id){return document.getElementById(id);}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];});}
+function pad(n){return n<10?'0'+n:''+n;}
+function ymd(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
+function today(){return ymd(new Date());}
+function addDays(base,n){var d=new Date(base+'T00:00:00');d.setDate(d.getDate()+n);return ymd(d);}
+function daysBetween(a,b){return Math.round((new Date(b+'T00:00:00')-new Date(a+'T00:00:00'))/86400000);}
+function ls(k){try{var v=localStorage.getItem(k);return v?JSON.parse(v):null;}catch(e){return null;}}
+function toast(m){var t=$id('toast');t.textContent=m;t.classList.add('on');clearTimeout(toast._t);toast._t=setTimeout(function(){t.classList.remove('on');},2200);}
+
+var TD=today();
+var HUB=ls('wb_hub_data')||{};
+var DUAL=ls('wb_example_dual_v1')||{};
+var PUNCH=(DUAL&&DUAL.punch&&typeof DUAL.punch==='object')?DUAL.punch:((HUB.punch&&typeof HUB.punch==='object')?HUB.punch:{});
+var SRS=ls('wb_srs_v1')||null;
+var QUIZ=ls('wb_quiz_progress_v1')||{};
+var HAB=ls('wb_habits_v1')||null;
+
+/* ===== 主题 ===== */
+try{var th=localStorage.getItem('wb_theme_dash');if(th)document.documentElement.dataset.theme=th;}catch(e){}
+$id('btnTheme').addEventListener('click',function(){
+  var h=document.documentElement;
+  h.dataset.theme=h.dataset.theme==='dark'?'light':'dark';
+  try{localStorage.setItem('wb_theme_dash',h.dataset.theme);}catch(e){}
+});
+
+/* ===== 工具计算 ===== */
+function punchStreak(){
+  var n=0,d=new Date();
+  while((PUNCH[ymd(d)]||0)>0){n++;d.setDate(d.getDate()-1);}
+  return n;
+}
+function punchTotal(){
+  var s=0;for(var k in PUNCH)s+=(PUNCH[k]||0);return s;
+}
+function punchDays(){var n=0;for(var k in PUNCH)if((PUNCH[k]||0)>0)n++;return n;}
+
+/* ===== KPI ===== */
+var todayMin=PUNCH[TD]||0;
+var srsCards=(SRS&&SRS.cards)||[];
+var srsToday=((SRS&&SRS.log&&SRS.log[TD])||{}).studied||0;
+var qTried=0,qCorrect=0;
+for(var qid in QUIZ){qTried+=(QUIZ[qid].tried||0);qCorrect+=(QUIZ[qid].correct||0);}
+var qAcc=qTried?Math.round(qCorrect/qTried*100):0;
+var habToday=0,habTotal=0;
+if(HAB&&HAB.logs){
+  if(HAB.logs[TD])for(var hid in HAB.logs[TD])if(HAB.logs[TD][hid])habToday++;
+  for(var ds in HAB.logs)for(var hid2 in HAB.logs[ds])if(HAB.logs[ds][hid2])habTotal++;
+}
+var hasAny=todayMin>0||srsCards.length||qTried||habTotal||punchTotal()>0;
+$id('kpis').innerHTML=
+  kpi(todayMin>0?'a1':'none',todayMin,'今日学习分钟')+
+  kpi(punchStreak()>0?'r':'none',punchStreak(),'连续打卡天数')+
+  kpi(srsToday>0?'a2':'none',srsToday,'今日记忆卡片')+
+  kpi(qTried>0?'g':(hasAny?'':'none'),qTried>0?qAcc+'<small>%</small>':'—','题库正确率')+
+  kpi(habToday>0?'y':'none',habToday,'今日习惯完成');
+
+function kpi(cls,html,label){return '<div class="kpi '+cls+'"><b>'+html+'</b><span>'+label+'</span></div>';}
+
+/* ===== 热力图（17 周 × 7，周一起） ===== */
+(function(){
+  var body=$id('heatBody');
+  if(!punchTotal()&&!todayMin){
+    body.innerHTML=empty('🌱','还没有打卡记录','在双线作战台点一次打卡，这里就会亮起来','../../zk-ky.html#p1');
+    return;
+  }
+  var cells=[];var start=new Date(TD+'T00:00:00');
+  var dow=(start.getDay()+6)%7; /* 0=周一 */
+  start.setDate(start.getDate()-dow-16*7); /* 17 列，最后一列是本周 */
+  for(var w=0;w<17;w++)for(var d=0;d<7;d++){
+    var dd=new Date(start);dd.setDate(start.getDate()+w*7+d);
+    var key=ymd(dd);if(key>TD){cells.push({f:true});continue;}
+    var m=PUNCH[key]||0;
+    cells.push({d:key,m:m,l:m<=0?0:(m<=30?1:(m<=60?2:(m<=120?3:4)))});
+  }
+  var html='<div class="hm-scroll"><div class="hm" role="img" aria-label="近 17 周学习打卡热力图">';
+  cells.forEach(function(c){
+    if(c.f){html+='<i style="opacity:.25" title="未来"></i>';return;}
+    html+='<i class="'+(c.l?'l'+c.l:'')+'" title="'+c.d+' · '+c.m+' 分钟"></i>';
+  });
+  html+='</div></div>'+
+    '<div class="hm-legend"><span>少</span><i style="background:var(--hm0)"></i><i style="background:var(--hm1)"></i><i style="background:var(--hm2)"></i><i style="background:var(--hm3)"></i><i style="background:var(--hm4)"></i><span>多</span></div>'+
+    '<div class="hm-meta"><span>累计 <b>'+punchTotal()+'</b> 分钟</span><span>打卡 <b>'+punchDays()+'</b> 天</span><span>连续 <b>'+punchStreak()+'</b> 天</span></div>';
+  body.innerHTML=html;
+})();
+
+/* ===== 倒计时 ===== */
+(function(){
+  var body=$id('cdBody');var set=HUB.set||{};
+  var items=[
+    {t:'自考（下次统考）',d:set.zkDate,c:'a1'},
+    {t:'考研（初试）',d:set.kyDate,c:'r'},
+    {t:'计算机等级考试',d:set.ncreDate,c:'a2'}
+  ].filter(function(x){return x.d&&/^\d{4}-\d{2}-\d{2}$/.test(x.d);});
+  if(!items.length){
+    body.innerHTML=empty('⏳','还没有设置考试日期','去双线作战台设置里填上，倒计时自动出现','../../zk-ky.html');
+    return;
+  }
+  var now=new Date();var yearStart=new Date(now.getFullYear(),0,1),yearEnd=new Date(now.getFullYear()+1,0,1);
+  body.innerHTML='<div class="cd-list">'+items.map(function(x){
+    var left=daysBetween(TD,x.d);
+    var past=left<0;
+    var pct=Math.max(2,Math.min(100,Math.round((now-yearStart)/(yearEnd-yearStart)*100)));
+    return '<div class="cd'+(past?' past':'')+'">'+
+      '<div class="cd-n" style="color:var(--'+x.c+')">'+(past?'已结束':left)+'<small>'+(past?'':'天后')+'</small></div>'+
+      '<div class="cd-t"><b>'+esc(x.t)+'</b><span>'+x.d+'</span>'+
+      (past?'':'<div class="cd-bar"><i style="width:'+pct+'%"></i></div>')+'</div>'+
+      '</div>';
+  }).join('')+'</div>';
+})();
+
+/* ===== 自考科目 ===== */
+(function(){
+  var body=$id('csBody');var cs=HUB.cs||{};
+  var order=['已通过','复习中','已报考','未开始'],color={'已通过':'var(--green)','复习中':'var(--acc1)','已报考':'var(--gold)','未开始':'var(--line)'};
+  var cnt={'已通过':0,'复习中':0,'已报考':0,'未开始':0},total=0;
+  for(var id in cs){var st=cs[id]&&cs[id].st||'未开始';if(!(st in cnt))st='未开始';cnt[st]++;total++;}
+  if(!total){
+    body.innerHTML=empty('🎓','还没有科目进度','在双线作战台勾选过考状态后，这里显示分布','../../zk-ky.html#p1');
+    return;
+  }
+  var segs=order.map(function(s){
+    var w=Math.round(cnt[s]/total*100);
+    return '<i style="width:'+w+'%;background:'+color[s]+'" title="'+s+' '+cnt[s]+' 门"></i>';
+  }).join('');
+  var legend=order.map(function(s){
+    return '<span><i style="background:'+color[s]+'"></i>'+s+' <b style="color:var(--ink)">'+cnt[s]+'</b></span>';
+  }).join('');
+  body.innerHTML='<div class="dist-bar">'+segs+'</div><div class="dist-legend">'+legend+'</div>'+
+    '<div class="hm-meta"><span>共 <b>'+total+'</b> 门</span><span>通过率 <b>'+Math.round(cnt['已通过']/total*100)+'%</b></span></div>';
+})();
+
+/* ===== SRS ===== */
+(function(){
+  var body=$id('srsBody');
+  if(!SRS||!srsCards.length){
+    body.innerHTML=empty('🎴','还没有记忆卡片','去「考研记忆卡片」开第一轮，数据就接上了','srs-cards.html');
+    return;
+  }
+  var due=srsCards.filter(function(c){return c.due<=TD;}).length;
+  var mature=srsCards.filter(function(c){return c.ivl>=21;}).length;
+  var learned=((SRS.log&&SRS.log[TD])||{}).studied||0;
+  var days=[],max=0;
+  for(var i=0;i<7;i++){
+    var day=addDays(TD,i);
+    var n=i===0?srsCards.filter(function(c){return c.due<=TD;}).length:srsCards.filter(function(c){return c.due===day;}).length;
+    if(n>max)max=n;days.push({d:day,n:n});
+  }
+  var decks=(SRS.decks||[]).map(function(d){
+    var cs2=srsCards.filter(function(c){return c.deck===d.id;});
+    var mat=cs2.filter(function(c){return c.ivl>=21;}).length;
+    var dn=cs2.filter(function(c){return c.due<=TD;}).length;
+    return {name:d.name,total:cs2.length,mat:mat,due:dn,rate:cs2.length?Math.round(mat/cs2.length*100):0};
+  }).sort(function(a,b){return b.due-a.due;});
+  body.innerHTML=
+    '<div class="kpis" style="margin-bottom:12px">'+
+      kpi('',srsCards.length,'卡片总数')+
+      kpi(due>0?'a1':'g',due,'今日待学')+
+      kpi(mature>0?'g':'none',mature,'成熟卡片')+
+      kpi(learned>0?'a2':'none',learned,'今日已学')+
+    '</div>'+
+    '<div class="fc">'+days.map(function(x,i){
+      var h=max?Math.round(x.n/max*100):0;
+      return '<div class="col'+(i===0?' today':'')+'" title="'+x.d+'：'+x.n+' 张"><i style="height:'+Math.max(3,h)+'%"></i><b>'+x.n+'</b><b>'+(i===0?'今天':x.d.slice(5))+'</b></div>';
+    }).join('')+'</div>'+
+    '<div class="sec-title rows" style="margin-top:14px">'+decks.map(function(d){
+      return '<div class="row-i"><span class="ri-t">'+esc(d.name)+'</span>'+
+        '<span class="ri-n">'+d.mat+'/'+d.total+' · '+d.rate+'%</span>'+
+        '<span class="ri-bar"><i style="width:'+d.rate+'%"></i></span></div>';
+    }).join('')+'</div>';
+})();
+
+/* ===== 题库 ===== */
+(function(){
+  var body=$id('quizBody');
+  if(!qTried){
+    body.innerHTML=empty('📝','还没有刷题记录','去题库做几道题，正确率会画成环','../../zk-ky.html#p4');
+    return;
+  }
+  var R=42,C=2*Math.PI*R;
+  var off=C*(1-qAcc/100);
+  body.innerHTML=
+    '<div class="donut-box">'+
+      '<svg width="110" height="110" viewBox="0 0 110 110" role="img" aria-label="题库正确率 '+qAcc+'%">'+
+        '<circle cx="55" cy="55" r="'+R+'" fill="none" stroke="var(--line2)" stroke-width="11"/>'+
+        '<circle cx="55" cy="55" r="'+R+'" fill="none" stroke="url(#gAcc)" stroke-width="11" stroke-linecap="round" stroke-dasharray="'+C+'" stroke-dashoffset="'+off+'" transform="rotate(-90 55 55)"/>'+
+        '<defs><linearGradient id="gAcc" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF6B6B"/><stop offset="1" stop-color="#4ECDC4"/></linearGradient></defs>'+
+        '<text x="55" y="52" text-anchor="middle" style="fill:var(--ink);font-size:21px;font-weight:800">'+qAcc+'%</text>'+
+        '<text x="55" y="68" text-anchor="middle" style="fill:var(--muted);font-size:10px">正确率</text>'+
+      '</svg>'+
+      '<div class="dl">累计作答 <b>'+qTried+'</b> 题<br>答对 <b>'+qCorrect+'</b> 题<br>覆盖题量 <b>'+Object.keys(QUIZ).length+'</b> 题</div>'+
+    '</div>';
+})();
+
+/* ===== 习惯 ===== */
+(function(){
+  var body=$id('habitBody');
+  if(!HAB||!HAB.habits||!HAB.habits.length){
+    body.innerHTML=empty('🌱','还没有习惯数据','去习惯锻造台建几个习惯，坚持曲线就有了','habit-forge.html');
+    return;
+  }
+  var logs=HAB.logs||{};
+  function streakOf(h){
+    var n=0,d=new Date();
+    var key=ymd(d);
+    if(!(logs[key]&&logs[key][h.id]))d.setDate(d.getDate()-1); /* 今天没打卡从昨天起算 */
+    while(true){
+      var k=ymd(d);
+      if(logs[k]&&logs[k][h.id]){n++;d.setDate(d.getDate()-1);}else break;
+    }
+    return n;
+  }
+  function countOf(h){var c=0;for(var ds in logs)if(logs[ds][h.id])c++;return c;}
+  var rows=HAB.habits.map(function(h){
+    return {name:h.name,icon:h.icon||'✅',s:streakOf(h),c:countOf(h)};
+  }).sort(function(a,b){return b.s-a.s||b.c-a.c;});
+  var maxS=Math.max.apply(null,rows.map(function(r){return r.s;}))||1;
+  body.innerHTML=
+    '<div class="hm-meta" style="margin:0 0 12px"><span>习惯 <b>'+HAB.habits.length+'</b> 个</span><span>今日完成 <b>'+habToday+'</b> 个</span><span>累计打卡 <b>'+habTotal+'</b> 次</span><span>经验值 <b>'+(HAB.xp||0)+'</b></span></div>'+
+    '<div class="rows">'+rows.slice(0,10).map(function(r){
+      var pct=Math.round(r.s/maxS*100);
+      return '<div class="row-i"><span class="ri-n" style="flex:none">'+r.icon+'</span>'+
+        '<span class="ri-t">'+esc(r.name)+'</span>'+
+        '<span class="ri-n">连 '+r.s+' 天 · 共 '+r.c+' 次</span>'+
+        '<span class="ri-bar"><i style="width:'+pct+'%"></i></span></div>';
+    }).join('')+'</div>';
+})();
+
+function empty(big,title,desc,href){
+  return '<div class="empty"><div class="big">'+big+'</div><b>'+esc(title)+'</b>'+esc(desc)+
+    (href?'<div style="margin-top:8px"><a href="'+href+'">现在就去 →</a></div>':'')+'</div>';
+}
+
+/* ===== 页脚 ===== */
+$id('footNote').innerHTML='数据全部读取本机浏览器 localStorage（<code>wb_hub_data</code> / <code>wb_example_dual_v1</code> / <code>wb_srs_v1</code> / <code>wb_quiz_progress_v1</code> / <code>wb_habits_v1</code>），无任何网络请求，换设备/清缓存会重置。各面板与对应页面实时互通。';
+if(!hasAny)toast('暂无学习数据——先去任意学习页打卡/刷题/背卡');
+})();
+</script>
+</body>
+</html>

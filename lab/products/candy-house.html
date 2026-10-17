@@ -1,0 +1,1491 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="no-js">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>糖果屋 CANDY HOUSE — 林小糖 · 前端设计工程师作品集</title>
+<meta name="description" content="糖果屋 CANDY HOUSE：独立前端设计工程师林小糖的个人作品集。界面、交互、动效与设计系统，把每一个像素做成一颗会发光的糖。">
+<meta name="theme-color" content="#F5F5F0">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23FFE135'/%3E%3Ccircle cx='16' cy='16' r='8' fill='%23FF1493' stroke='%230A0A0A' stroke-width='2.5'/%3E%3Crect x='1.5' y='1.5' width='29' height='29' fill='none' stroke='%230A0A0A' stroke-width='3'/%3E%3C/svg%3E">
+
+<script>window.addEventListener('error',function(e){try{var v=document.getElementById('app')||document.getElementById('view')||document.body;if(!v||v.dataset.err)return;v.dataset.err='1';var s=(e.error&&e.error.stack)||e.message||'';var b=document.createElement('div');b.style.cssText='padding:16px;margin:14px;font-family:ui-monospace,monospace;font-size:13px;color:#a33;background:#fdeceb;border:1px solid #f5c6cb;border-radius:12px;line-height:1.5';b.innerHTML='<b>⚠ 页面出错了</b><br><span style="color:#555">'+(e.message||'')+'</span><pre style="white-space:pre-wrap;margin-top:8px;font-size:11px">'+(s||'').slice(0,1000)+'</pre><small style="color:#666">建议 Ctrl+Shift+R 强刷；F12 → Application → Local Storage 清本页缓存后刷新。</small>';v.insertBefore(b,v.firstChild);}catch(_){}});
+document.documentElement.classList.replace('no-js','js');</script>
+
+<style>
+/* ============================================================
+   0. 设计令牌 —— 糖果色 + 纯黑硬边框硬阴影
+   ============================================================ */
+:root{
+  /* 饱和糖果色 */
+  --pink:#FF1493;
+  --yellow:#FFE135;
+  --blue:#00BFFF;
+  --lime:#A3E635;
+  --orange:#FF8A3D;
+  --purple:#9D5CFF;
+
+  /* 对应淡色底 */
+  --pink-pale:#FFE0F0;
+  --yellow-pale:#FFF7C9;
+  --blue-pale:#D5F1FF;
+  --lime-pale:#EDFCC9;
+  --orange-pale:#FFE9D6;
+  --purple-pale:#EDE2FF;
+
+  /* 中性 */
+  --ink:#0A0A0A;
+  --ink-soft:#3A3A38;
+  --paper:#F5F5F0;
+  --card:#FFFFFF;
+
+  /* 边框 */
+  --bd:3px solid var(--ink);
+  --bd-thin:2px solid var(--ink);
+  --bd-thick:4px solid var(--ink);
+
+  /* 零模糊纯黑硬阴影 */
+  --sh-xs:2px 2px 0 var(--ink);
+  --sh-sm:3px 3px 0 var(--ink);
+  --sh:5px 5px 0 var(--ink);
+  --sh-lg:8px 8px 0 var(--ink);
+  --sh-xl:12px 12px 0 var(--ink);
+
+  /* 字体 */
+  --f-head:'Plus Jakarta Sans','Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif;
+  --f-body:'Inter','Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif;
+  --f-mono:'JetBrains Mono','SFMono-Regular',Consolas,monospace;
+
+  /* 节奏 */
+  --wrap:1180px;
+  --gap:22px;
+  --ease:cubic-bezier(.2,.9,.25,1);
+
+  /* SVG 质感：噪点 / 斜条纹 / 圆点矩阵 */
+  --noise:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  --stripes:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14'%3E%3Cpath d='M-4,4 L4,-4 M0,14 L14,0 M10,18 L18,10' stroke='%230A0A0A' stroke-width='3'/%3E%3C/svg%3E");
+  --dots:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18'%3E%3Ccircle cx='2.5' cy='2.5' r='1.9' fill='%230A0A0A'/%3E%3C/svg%3E");
+  --dots-lite:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22'%3E%3Ccircle cx='3' cy='3' r='1.7' fill='%230A0A0A' fill-opacity='0.28'/%3E%3C/svg%3E");
+}
+
+/* ============================================================
+   1. 基础
+   ============================================================ */
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--f-body);
+  font-size:17px;
+  line-height:1.68;
+  font-weight:450;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+/* 全局 SVG 噪点覆层 */
+body::after{
+  content:"";
+  position:fixed;
+  inset:0;
+  background-image:var(--noise);
+  opacity:.05;
+  mix-blend-mode:multiply;
+  pointer-events:none;
+  z-index:9999;
+}
+h1,h2,h3,h4{font-family:var(--f-head);font-weight:800;line-height:1.06;letter-spacing:-.025em;margin:0}
+p{margin:0}
+a{color:inherit;text-decoration:none}
+ul,ol{margin:0;padding:0;list-style:none}
+img,svg{display:block;max-width:100%}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+::selection{background:var(--yellow);color:var(--ink)}
+
+:focus-visible{
+  outline:4px solid var(--ink);
+  outline-offset:3px;
+  border-radius:2px;
+}
+.no-js :focus-visible{outline:4px solid var(--ink)}
+
+.skip-link{
+  position:absolute;left:12px;top:-100px;z-index:200;
+  background:var(--yellow);border:var(--bd);box-shadow:var(--sh);
+  padding:10px 18px;font-family:var(--f-mono);font-weight:700;font-size:13px;
+  transition:top .18s var(--ease);
+}
+.skip-link:focus{top:12px}
+
+.wrap{width:min(100% - 40px,var(--wrap));margin-inline:auto}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+
+/* ============================================================
+   2. 通用组件：标签 / 按钮 / 卡片 / 区头
+   ============================================================ */
+.chip{
+  display:inline-flex;align-items:center;gap:7px;
+  font-family:var(--f-mono);font-weight:700;font-size:12px;
+  letter-spacing:.14em;text-transform:uppercase;
+  padding:6px 13px;background:var(--card);
+  border:var(--bd-thin);box-shadow:var(--sh-xs);
+}
+.chip .dot{width:9px;height:9px;border:2px solid var(--ink);flex:none}
+
+.btn{
+  --btn-bg:var(--card);
+  display:inline-flex;align-items:center;justify-content:center;gap:10px;
+  padding:14px 26px;background:var(--btn-bg);
+  border:var(--bd);box-shadow:var(--sh);
+  font-family:var(--f-head);font-weight:800;font-size:16px;letter-spacing:-.01em;
+  transition:transform .13s var(--ease),box-shadow .13s var(--ease);
+  will-change:transform;
+}
+.btn:hover{transform:translate(-3px,-3px);box-shadow:var(--sh-lg)}
+/* 物理按压 */
+.btn:active{transform:translate(3px,3px);box-shadow:1px 1px 0 var(--ink)}
+.btn--pink{--btn-bg:var(--pink);color:#fff}
+.btn--yellow{--btn-bg:var(--yellow)}
+.btn--blue{--btn-bg:var(--blue)}
+.btn--ink{--btn-bg:var(--ink);color:#fff;box-shadow:5px 5px 0 var(--pink)}
+.btn--ink:hover{box-shadow:8px 8px 0 var(--pink)}
+.btn--ink:active{box-shadow:1px 1px 0 var(--pink)}
+.btn--sm{padding:10px 18px;font-size:14px;box-shadow:var(--sh-sm)}
+.btn--sm:hover{box-shadow:var(--sh)}
+
+.card{
+  background:var(--card);
+  border:var(--bd);
+  box-shadow:var(--sh);
+  position:relative;
+}
+.card--hover{transition:transform .18s var(--ease),box-shadow .18s var(--ease)}
+.card--hover:hover,.card--hover:focus-within{transform:translate(-4px,-4px);box-shadow:var(--sh-lg)}
+
+.sec{padding:clamp(64px,9vw,110px) 0;position:relative}
+.sec-head{display:flex;flex-wrap:wrap;align-items:flex-end;gap:18px 28px;margin-bottom:clamp(30px,4vw,48px)}
+.sec-head h2{font-size:clamp(2rem,5.2vw,3.4rem)}
+.sec-head .lead{max-width:44ch;color:var(--ink-soft);font-size:16px;margin-left:auto}
+.sec-num{
+  font-family:var(--f-mono);font-weight:700;font-size:13px;letter-spacing:.2em;
+  display:block;margin-bottom:14px;
+}
+.rule{height:4px;background:var(--ink);margin:0}
+.rule--dots{height:14px;background:var(--dots) repeat;background-size:18px 18px;opacity:.5}
+
+/* ============================================================
+   3. Sticky 导航
+   ============================================================ */
+.site-head{position:sticky;top:0;z-index:80;padding:14px 0 0;transition:padding .2s var(--ease)}
+.site-head.is-stuck{padding-top:8px}
+.navbar{
+  display:flex;align-items:center;gap:16px;
+  background:var(--card);border:var(--bd-thick);box-shadow:var(--sh);
+  padding:10px 12px 10px 16px;
+}
+.brand{display:flex;align-items:center;gap:11px;flex:none}
+.brand-mark{width:38px;height:38px;border:var(--bd-thin);background:var(--yellow);flex:none}
+.brand-txt{display:flex;flex-direction:column;line-height:1}
+.brand-name{font-family:var(--f-head);font-weight:800;font-size:19px;letter-spacing:-.02em}
+.brand-sub{font-family:var(--f-mono);font-size:10px;letter-spacing:.22em;color:var(--ink-soft);margin-top:3px}
+
+.nav-list{display:flex;align-items:center;gap:2px;margin-left:auto}
+.nav-list a{
+  display:block;padding:9px 14px;
+  font-family:var(--f-mono);font-weight:700;font-size:13px;letter-spacing:.04em;
+  border:2px solid transparent;
+  transition:background .14s var(--ease),border-color .14s var(--ease),transform .14s var(--ease);
+}
+.nav-list a:hover{background:var(--yellow);border-color:var(--ink);transform:translateY(-2px)}
+.nav-list a[aria-current="true"]{background:var(--pink);color:#fff;border-color:var(--ink)}
+.nav-cta{flex:none}
+.nav-toggle{
+  display:none;width:46px;height:42px;flex:none;margin-left:auto;
+  border:var(--bd-thin);background:var(--blue);box-shadow:var(--sh-xs);
+  align-items:center;justify-content:center;
+}
+.nav-toggle:active{transform:translate(2px,2px);box-shadow:none}
+.nav-toggle .bars{display:block;width:20px;height:2px;background:var(--ink);position:relative}
+.nav-toggle .bars::before,.nav-toggle .bars::after{content:"";position:absolute;left:0;width:20px;height:2px;background:var(--ink)}
+.nav-toggle .bars::before{top:-6px}
+.nav-toggle .bars::after{top:6px}
+
+/* ============================================================
+   4. Hero
+   ============================================================ */
+.hero{padding:clamp(48px,7vw,86px) 0 clamp(40px,5vw,60px);position:relative;overflow:hidden}
+.hero-grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:clamp(24px,3.4vw,44px);align-items:start}
+.hero-eyebrow{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:24px}
+.hero h1{font-size:clamp(2.6rem,8.2vw,5.5rem);letter-spacing:-.04em;isolation:isolate}
+.hero h1 .mark{
+  display:inline-block;background:var(--pink);color:#fff;
+  border:var(--bd);box-shadow:var(--sh-sm);
+  padding:0 .16em;transform:rotate(-1.6deg);
+}
+.hero h1 .under{
+  display:inline-block;position:relative;
+}
+.hero h1 .under::after{
+  content:"";position:absolute;left:0;right:0;bottom:.04em;height:.16em;
+  background:var(--yellow);border:2px solid var(--ink);z-index:-1;
+}
+.hero-desc{margin-top:26px;font-size:clamp(16px,1.5vw,18px);max-width:52ch;color:var(--ink-soft)}
+.hero-actions{display:flex;flex-wrap:wrap;gap:16px;margin-top:32px}
+.hero-tags{display:flex;flex-wrap:wrap;gap:10px;margin-top:30px}
+.tag{
+  font-family:var(--f-mono);font-size:12px;font-weight:700;letter-spacing:.08em;
+  padding:6px 12px;border:var(--bd-thin);background:var(--card);
+}
+.tag:nth-child(6n+1){background:var(--pink-pale)}
+.tag:nth-child(6n+2){background:var(--blue-pale)}
+.tag:nth-child(6n+3){background:var(--lime-pale)}
+.tag:nth-child(6n+4){background:var(--orange-pale)}
+.tag:nth-child(6n+5){background:var(--purple-pale)}
+.tag:nth-child(6n+6){background:var(--yellow-pale)}
+
+/* Hero 视觉块 */
+.hero-visual{position:relative}
+.hero-panel{
+  background:var(--blue-pale);border:var(--bd-thick);box-shadow:var(--sh-xl);
+  padding:22px;position:relative;overflow:hidden;
+}
+.hero-panel::before{
+  content:"";position:absolute;inset:0;
+  background:var(--dots-lite) repeat;background-size:22px 22px;
+  pointer-events:none;
+}
+.hero-art{position:relative;z-index:1}
+.hero-badge{
+  position:absolute;z-index:2;
+  font-family:var(--f-mono);font-weight:700;font-size:12px;letter-spacing:.1em;
+  padding:8px 12px;border:var(--bd);box-shadow:var(--sh-sm);
+}
+.hero-badge--a{top:-16px;right:-10px;background:var(--yellow);transform:rotate(4deg)}
+.hero-badge--b{bottom:-18px;left:-14px;background:var(--lime);transform:rotate(-3deg)}
+
+/* 统计条 */
+.stats{
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+  margin-top:clamp(34px,4.5vw,54px);
+  border:var(--bd-thick);box-shadow:var(--sh);background:var(--card);
+}
+.stat{padding:20px 18px;border-right:var(--bd);display:flex;flex-direction:column-reverse;justify-content:flex-end}
+.stat dd{margin:0}
+.stat:last-child{border-right:0}
+.stat:nth-child(1){background:var(--pink-pale)}
+.stat:nth-child(2){background:var(--yellow-pale)}
+.stat:nth-child(3){background:var(--lime-pale)}
+.stat:nth-child(4){background:var(--purple-pale)}
+.stat-num{font-family:var(--f-head);font-weight:800;font-size:clamp(1.9rem,3.6vw,2.7rem);line-height:1;letter-spacing:-.03em}
+.stat-num sup{font-size:.45em;vertical-align:super;margin-left:2px}
+.stat-lb{font-family:var(--f-mono);font-size:11px;font-weight:700;letter-spacing:.14em;margin-top:9px;color:var(--ink-soft)}
+
+/* 跑马灯 */
+.marquee{
+  border-block:var(--bd-thick);background:var(--ink);color:var(--paper);
+  overflow:hidden;padding:11px 0;margin-top:clamp(40px,5vw,62px);
+}
+.marquee-track{display:flex;width:max-content;animation:slide 26s linear infinite}
+.marquee-track span{
+  font-family:var(--f-mono);font-weight:700;font-size:14px;letter-spacing:.2em;
+  padding:0 22px;display:inline-flex;align-items:center;gap:22px;white-space:nowrap;
+}
+.marquee-track span::after{content:"";width:10px;height:10px;background:var(--yellow);display:inline-block}
+@keyframes slide{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* ============================================================
+   5. 技能卡 + 进度条
+   ============================================================ */
+.skills-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--gap)}
+.skill{padding:22px 22px 24px;overflow:hidden}
+.skill-top{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.skill-ico{width:44px;height:44px;border:var(--bd-thin);display:grid;place-items:center;flex:none;box-shadow:var(--sh-xs)}
+.skill h3{font-size:1.22rem}
+.skill-pct{margin-left:auto;font-family:var(--f-mono);font-weight:700;font-size:15px}
+.skill p{font-size:14.5px;color:var(--ink-soft);min-height:3.2em}
+.bar{
+  height:26px;border:var(--bd);background:var(--card);margin-top:16px;
+  padding:3px;position:relative;
+}
+.bar-fill{
+  height:100%;width:0;border-right:var(--bd-thin);
+  position:relative;overflow:hidden;
+  transition:width 1.15s var(--ease);
+}
+.bar-fill::after{
+  content:"";position:absolute;inset:0;
+  background:var(--stripes) repeat;background-size:14px 14px;opacity:.22;
+}
+/* JS 完全禁用时的降级：直接用内联 --w 填充，不依赖脚本 */
+.no-js .bar-fill{width:var(--w)}
+.skill:nth-child(1) .skill-ico{background:var(--pink)}   .skill:nth-child(1) .bar-fill{background:var(--pink)}
+.skill:nth-child(2) .skill-ico{background:var(--blue)}   .skill:nth-child(2) .bar-fill{background:var(--blue)}
+.skill:nth-child(3) .skill-ico{background:var(--lime)}   .skill:nth-child(3) .bar-fill{background:var(--lime)}
+.skill:nth-child(4) .skill-ico{background:var(--orange)} .skill:nth-child(4) .bar-fill{background:var(--orange)}
+.skill:nth-child(5) .skill-ico{background:var(--purple)} .skill:nth-child(5) .bar-fill{background:var(--purple)}
+.skill:nth-child(6) .skill-ico{background:var(--yellow)} .skill:nth-child(6) .bar-fill{background:var(--yellow)}
+
+/* ============================================================
+   6. 项目 Bento 网格
+   ============================================================ */
+.bento{
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+  grid-auto-rows:minmax(186px,auto);gap:var(--gap);
+}
+.proj{display:flex;flex-direction:column;padding:22px;overflow:hidden}
+.proj::before{
+  content:"";position:absolute;inset:0;
+  background:var(--dots-lite) repeat;background-size:22px 22px;
+  opacity:.55;pointer-events:none;
+}
+.proj > *{position:relative;z-index:1}
+.proj-head{display:flex;align-items:flex-start;gap:12px;margin-bottom:12px}
+.proj-kind{
+  font-family:var(--f-mono);font-size:11px;font-weight:700;letter-spacing:.14em;
+  border:var(--bd-thin);background:var(--card);padding:5px 10px;box-shadow:var(--sh-xs);
+}
+.proj-year{margin-left:auto;font-family:var(--f-mono);font-size:12px;font-weight:700}
+.proj h3{font-size:clamp(1.25rem,2.2vw,1.7rem);margin-bottom:9px}
+.proj h3 a::after{content:"";position:absolute;inset:0;z-index:2}
+.proj p{font-size:14.5px;color:var(--ink-soft)}
+.proj-foot{margin-top:auto;padding-top:16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.proj-stack{display:flex;flex-wrap:wrap;gap:7px}
+.proj-stack li{
+  font-family:var(--f-mono);font-size:11px;font-weight:700;
+  border:2px solid var(--ink);padding:3px 8px;background:var(--card);
+}
+.proj-go{
+  margin-left:auto;width:38px;height:38px;flex:none;
+  border:var(--bd);background:var(--ink);display:grid;place-items:center;
+  transition:transform .18s var(--ease);
+}
+.card--hover:hover .proj-go{transform:translate(3px,-3px)}
+.proj--a{grid-column:span 2;grid-row:span 2;background:var(--pink-pale)}
+.proj--b{grid-column:span 2;background:var(--blue-pale)}
+.proj--c{background:var(--lime-pale)}
+.proj--d{background:var(--orange-pale)}
+.proj--e{grid-column:span 2;background:var(--purple-pale)}
+.proj--f{grid-column:span 2;background:var(--yellow-pale)}
+.proj--a h3{font-size:clamp(1.7rem,3.4vw,2.5rem)}
+.proj-art{margin:6px 0 18px}
+
+/* ============================================================
+   7. 经历时间线
+   ============================================================ */
+.timeline{display:grid;gap:var(--gap)}
+.tl-item{
+  display:grid;grid-template-columns:132px 34px minmax(0,1fr);
+  align-items:stretch;gap:0;
+}
+.tl-year{
+  font-family:var(--f-mono);font-weight:700;font-size:14px;letter-spacing:.06em;
+  padding:12px 14px;border:var(--bd);box-shadow:var(--sh-sm);
+  height:max-content;text-align:center;background:var(--card);
+}
+.tl-rail{position:relative;display:grid;align-items:start;justify-items:center}
+.tl-rail::before{content:"";position:absolute;top:0;bottom:-22px;left:50%;width:4px;margin-left:-2px;background:var(--ink)}
+.tl-item:last-child .tl-rail::before{bottom:auto;height:34px}
+.tl-node{
+  width:20px;height:20px;background:var(--card);border:var(--bd);
+  position:relative;z-index:1;transform:rotate(45deg);margin-top:14px;
+}
+.tl-item:nth-child(1) .tl-node{background:var(--pink)} .tl-item:nth-child(1) .tl-year{background:var(--pink-pale)}
+.tl-item:nth-child(2) .tl-node{background:var(--blue)} .tl-item:nth-child(2) .tl-year{background:var(--blue-pale)}
+.tl-item:nth-child(3) .tl-node{background:var(--lime)} .tl-item:nth-child(3) .tl-year{background:var(--lime-pale)}
+.tl-item:nth-child(4) .tl-node{background:var(--orange)} .tl-item:nth-child(4) .tl-year{background:var(--orange-pale)}
+.tl-item:nth-child(5) .tl-node{background:var(--purple)} .tl-item:nth-child(5) .tl-year{background:var(--purple-pale)}
+.tl-card{padding:20px 22px}
+.tl-card h3{font-size:1.24rem}
+.tl-org{font-family:var(--f-mono);font-size:12px;font-weight:700;letter-spacing:.1em;color:var(--ink-soft);margin:8px 0 10px}
+.tl-card p{font-size:14.5px;color:var(--ink-soft)}
+.tl-card ul{margin-top:12px;display:flex;flex-wrap:wrap;gap:8px}
+.tl-card ul li{font-family:var(--f-mono);font-size:11px;font-weight:700;border:2px solid var(--ink);padding:3px 8px}
+
+/* ============================================================
+   8. 关于卡片
+   ============================================================ */
+.about-grid{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:var(--gap)}
+.about-face{
+  background:var(--yellow);border:var(--bd-thick);box-shadow:var(--sh-lg);
+  padding:24px;position:relative;overflow:hidden;
+}
+.about-face::before{
+  content:"";position:absolute;inset:0;background:var(--stripes) repeat;background-size:14px 14px;opacity:.1;
+}
+.about-face figcaption{
+  position:relative;margin-top:18px;background:var(--ink);color:var(--paper);
+  padding:12px 14px;font-family:var(--f-mono);font-size:12px;font-weight:700;letter-spacing:.1em;
+}
+.about-body{display:grid;gap:var(--gap);align-content:start}
+.about-card{padding:24px}
+.about-card h3{font-size:1.5rem;margin-bottom:14px}
+.about-card p + p{margin-top:14px}
+.about-card p{color:var(--ink-soft);font-size:15.5px}
+.about-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:20px}
+.about-list li{
+  display:flex;gap:10px;align-items:flex-start;
+  border:var(--bd-thin);padding:12px;background:var(--paper);box-shadow:var(--sh-xs);
+  font-size:14px;
+}
+.about-list b{font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;display:block;color:var(--ink-soft)}
+.about-note{
+  background:var(--lime-pale);border:var(--bd);box-shadow:var(--sh);
+  padding:18px 20px;font-size:15px;display:flex;gap:14px;align-items:flex-start;
+}
+
+/* ============================================================
+   9. 黄底联系 CTA
+   ============================================================ */
+.cta{background:var(--yellow);border-block:var(--bd-thick);position:relative;overflow:hidden;padding:clamp(58px,8vw,96px) 0}
+.cta::before{content:"";position:absolute;inset:0;background:var(--dots-lite) repeat;background-size:22px 22px;opacity:.6;pointer-events:none}
+.cta-inner{position:relative;display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:clamp(26px,4vw,52px);align-items:center}
+.cta h2{font-size:clamp(2.1rem,6vw,4rem)}
+.cta h2 em{font-style:normal;background:var(--ink);color:var(--yellow);padding:0 .12em;display:inline-block;transform:rotate(-1deg)}
+.cta p{margin-top:20px;font-size:17px;max-width:42ch}
+.cta-actions{display:flex;flex-wrap:wrap;gap:14px;margin-top:30px}
+.cta-panel{background:var(--card);border:var(--bd-thick);box-shadow:var(--sh-xl);padding:22px}
+.cta-panel h3{font-family:var(--f-mono);font-size:12px;letter-spacing:.18em;font-weight:700;margin-bottom:16px}
+.contact-list li + li{margin-top:12px}
+.contact-list a{
+  display:flex;align-items:center;gap:12px;padding:12px 14px;
+  border:var(--bd-thin);background:var(--paper);box-shadow:var(--sh-xs);
+  font-family:var(--f-mono);font-size:13.5px;font-weight:700;
+  transition:transform .14s var(--ease),box-shadow .14s var(--ease),background .14s var(--ease);
+}
+.contact-list a:hover{transform:translate(-3px,-3px);box-shadow:var(--sh);background:var(--card)}
+.contact-list a:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
+.contact-list .ico{width:30px;height:30px;border:2px solid var(--ink);display:grid;place-items:center;flex:none}
+.contact-list li:nth-child(1) .ico{background:var(--pink)}
+.contact-list li:nth-child(2) .ico{background:var(--blue)}
+.contact-list li:nth-child(3) .ico{background:var(--lime)}
+.contact-list li:nth-child(4) .ico{background:var(--purple)}
+.contact-list .arrow{margin-left:auto}
+
+/* ============================================================
+   10. 黑底 Footer
+   ============================================================ */
+.site-foot{background:var(--ink);color:var(--paper);padding:clamp(48px,6vw,74px) 0 0}
+.foot-grid{display:grid;grid-template-columns:minmax(0,1.4fr) repeat(3,minmax(0,1fr));gap:clamp(24px,3vw,40px)}
+.foot-brand .brand-name{color:var(--paper);font-size:26px}
+.foot-brand p{margin-top:14px;color:#B9B9B2;font-size:14.5px;max-width:34ch}
+.foot-col h3{font-family:var(--f-mono);font-size:11px;letter-spacing:.2em;font-weight:700;color:var(--yellow);margin-bottom:14px}
+.foot-col li + li{margin-top:9px}
+.foot-col a{font-size:14.5px;color:#D8D8D2;border-bottom:2px solid transparent;transition:color .14s var(--ease),border-color .14s var(--ease)}
+.foot-col a:hover{color:var(--yellow);border-color:var(--yellow)}
+.foot-strip{
+  margin-top:clamp(36px,5vw,56px);border-top:3px solid #2A2A28;
+  padding:20px 0;display:flex;flex-wrap:wrap;gap:14px;align-items:center;
+}
+.foot-strip small{font-family:var(--f-mono);font-size:12px;color:#9C9C95;letter-spacing:.05em}
+.to-top{
+  margin-left:auto;display:inline-flex;align-items:center;gap:9px;
+  background:var(--yellow);color:var(--ink);border:3px solid var(--paper);
+  padding:10px 16px;font-family:var(--f-mono);font-weight:700;font-size:12px;letter-spacing:.1em;
+  box-shadow:4px 4px 0 var(--pink);
+  transition:transform .13s var(--ease),box-shadow .13s var(--ease);
+}
+.to-top:hover{transform:translate(-3px,-3px);box-shadow:7px 7px 0 var(--pink)}
+.to-top:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--pink)}
+.foot-bar{display:flex;height:16px}
+.foot-bar span{flex:1}
+
+/* ============================================================
+   11. 滚动揭示
+   ============================================================ */
+.js .reveal{opacity:0;transform:translateY(26px);transition:opacity .55s var(--ease),transform .55s var(--ease)}
+.js .reveal.is-in{opacity:1;transform:none}
+.js .reveal[data-d="1"]{transition-delay:.08s}
+.js .reveal[data-d="2"]{transition-delay:.16s}
+.js .reveal[data-d="3"]{transition-delay:.24s}
+.js .reveal[data-d="4"]{transition-delay:.32s}
+.js .reveal[data-d="5"]{transition-delay:.4s}
+
+/* ============================================================
+   12. 响应式
+   ============================================================ */
+@media (max-width:1024px){
+  .hero-grid{grid-template-columns:1fr}
+  .hero-visual{max-width:520px}
+  .skills-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .about-grid{grid-template-columns:1fr}
+  .cta-inner{grid-template-columns:1fr}
+  .foot-grid{grid-template-columns:1fr 1fr}
+}
+@media (max-width:860px){
+  .nav-toggle{display:inline-grid}
+  .nav-cta{display:none}
+  .navbar{flex-wrap:wrap;position:relative}
+  .nav-list{
+    order:3;width:100%;margin:0;display:none;
+    flex-direction:column;align-items:stretch;gap:6px;
+    border-top:var(--bd);padding-top:12px;margin-top:12px;
+  }
+  .navbar.is-open .nav-list{display:flex}
+  .nav-list a{border:var(--bd-thin);background:var(--paper)}
+  .bento{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .proj--a,.proj--b,.proj--e,.proj--f{grid-column:span 2}
+  .proj--a{grid-row:span 1}
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .stat:nth-child(2){border-right:0}
+  .stat:nth-child(1),.stat:nth-child(2){border-bottom:var(--bd)}
+}
+@media (max-width:640px){
+  body{font-size:16px}
+  .skills-grid{grid-template-columns:1fr}
+  .bento{grid-template-columns:1fr}
+  .proj--a,.proj--b,.proj--e,.proj--f,.proj--c,.proj--d{grid-column:span 1}
+  .tl-item{grid-template-columns:92px 28px minmax(0,1fr)}
+  .tl-year{font-size:12px;padding:10px 6px}
+  .about-list{grid-template-columns:1fr}
+  .foot-grid{grid-template-columns:1fr}
+  .sec-head .lead{margin-left:0}
+}
+
+/* ============================================================
+   13. 尊重 prefers-reduced-motion
+   ============================================================ */
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{
+    animation-duration:.001ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:.001ms !important;
+    scroll-behavior:auto !important;
+  }
+  .js .reveal{opacity:1;transform:none}
+  .marquee-track{animation:none;transform:none}
+  .btn:hover,.card--hover:hover,.contact-list a:hover,.to-top:hover{transform:none}
+}
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+
+<body>
+<a class="skip-link" href="#main">跳到主要内容</a>
+
+<!-- ============ 1. Sticky 导航 ============ -->
+<header class="site-head" id="top">
+  <div class="wrap">
+    <nav class="navbar" id="navbar" aria-label="主导航">
+      <a class="brand" href="#top">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 38 38" width="34" height="34" focusable="false">
+            <circle cx="19" cy="19" r="8.5" fill="#FF1493" stroke="#0A0A0A" stroke-width="2.6"/>
+            <path d="M10.5 19 L2.5 12.5 L4.5 19 L2.5 25.5 Z" fill="#00BFFF" stroke="#0A0A0A" stroke-width="2.2" stroke-linejoin="round"/>
+            <path d="M27.5 19 L35.5 12.5 L33.5 19 L35.5 25.5 Z" fill="#00BFFF" stroke="#0A0A0A" stroke-width="2.2" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <span class="brand-txt">
+          <span class="brand-name">糖果屋</span>
+          <span class="brand-sub">CANDY HOUSE</span>
+        </span>
+      </a>
+
+      <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="navList">
+        <span class="bars" aria-hidden="true"></span>
+        <span class="sr-only">展开导航菜单</span>
+      </button>
+
+      <ul class="nav-list" id="navList">
+        <li><a href="#hero">首页</a></li>
+        <li><a href="#skills">技能</a></li>
+        <li><a href="#works">作品</a></li>
+        <li><a href="#journey">经历</a></li>
+        <li><a href="#about">关于</a></li>
+        <li><a href="#contact">联系</a></li>
+      </ul>
+
+      <a class="btn btn--sm btn--pink nav-cta" href="#contact">
+        打声招呼
+        <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true" focusable="false">
+          <path d="M1 7h11M7.5 2.5L12 7l-4.5 4.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="square"/>
+        </svg>
+      </a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+
+  <!-- ============ 2. Hero ============ -->
+  <section class="hero" id="hero" aria-labelledby="hero-title">
+    <div class="wrap">
+      <div class="hero-grid">
+        <div>
+          <div class="hero-eyebrow reveal">
+            <span class="chip"><span class="dot" style="background:#A3E635"></span>目前可接新项目</span>
+            <span class="chip">上海 · UTC+8</span>
+          </div>
+
+          <h1 id="hero-title" class="reveal" data-d="1">
+            把界面<br>
+            做成一颗<br>
+            <span class="mark">会发光</span>的<span class="under">糖</span>
+          </h1>
+
+          <p class="hero-desc reveal" data-d="2">
+            我是<strong>林小糖</strong>，独立前端设计工程师。专注界面、交互与动效实现，
+            相信「好看」和「好用」从来不是二选一。六年来把设计稿翻译成能跑满 60fps、
+            键盘也能走通、屏幕阅读器读得懂的真实产品。
+          </p>
+
+          <div class="hero-actions reveal" data-d="3">
+            <a class="btn btn--ink" href="#works">
+              看看作品
+              <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                <path d="M8 1v13M2.5 8.5L8 14l5.5-5.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="square"/>
+              </svg>
+            </a>
+            <a class="btn btn--yellow" href="#contact">聊聊合作</a>
+          </div>
+
+          <ul class="hero-tags reveal" data-d="4" aria-label="技术标签">
+            <li class="tag">TypeScript</li>
+            <li class="tag">React 19</li>
+            <li class="tag">CSS 架构</li>
+            <li class="tag">动效设计</li>
+            <li class="tag">WCAG 2.1 AA</li>
+            <li class="tag">设计系统</li>
+            <li class="tag">Web 性能</li>
+            <li class="tag">SVG / Canvas</li>
+          </ul>
+        </div>
+
+        <!-- Hero 视觉：全部内联 SVG 装饰 -->
+        <div class="hero-visual reveal" data-d="2">
+          <div class="hero-panel">
+            <span class="hero-badge hero-badge--a">100% 手写 CSS</span>
+            <span class="hero-badge hero-badge--b">零框架依赖</span>
+            <svg class="hero-art" viewBox="0 0 320 300" role="img" aria-label="糖果屋插画：一栋屋顶是糖果的小房子，周围散落星星与波浪装饰">
+              <defs>
+                <pattern id="pStripe" width="12" height="12" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+                  <rect width="6" height="12" fill="#0A0A0A" opacity=".85"/>
+                </pattern>
+                <pattern id="pDots" width="14" height="14" patternUnits="userSpaceOnUse">
+                  <circle cx="3" cy="3" r="2.2" fill="#0A0A0A"/>
+                </pattern>
+              </defs>
+
+              <!-- 屋身 -->
+              <rect x="72" y="140" width="176" height="126" fill="#FFFFFF" stroke="#0A0A0A" stroke-width="4"/>
+              <!-- 屋身条纹带 -->
+              <rect x="72" y="234" width="176" height="32" fill="url(#pStripe)" opacity=".18"/>
+              <rect x="72" y="234" width="176" height="32" fill="none" stroke="#0A0A0A" stroke-width="4"/>
+              <!-- 屋顶 -->
+              <path d="M52 142 L160 62 L268 142 Z" fill="#FF1493" stroke="#0A0A0A" stroke-width="4" stroke-linejoin="round"/>
+              <path d="M96 118 L160 71 L224 118" fill="none" stroke="#0A0A0A" stroke-width="3.4" opacity=".55"/>
+              <!-- 屋顶糖球 -->
+              <circle cx="160" cy="56" r="15" fill="#FFE135" stroke="#0A0A0A" stroke-width="4"/>
+              <circle cx="160" cy="56" r="5.5" fill="#0A0A0A"/>
+              <!-- 门 -->
+              <rect x="138" y="196" width="46" height="70" fill="#00BFFF" stroke="#0A0A0A" stroke-width="4"/>
+              <circle cx="174" cy="232" r="4.6" fill="#0A0A0A"/>
+              <!-- 窗 -->
+              <rect x="92" y="164" width="40" height="40" fill="#A3E635" stroke="#0A0A0A" stroke-width="4"/>
+              <path d="M112 164v40M92 184h40" stroke="#0A0A0A" stroke-width="3.4"/>
+              <rect x="190" y="164" width="40" height="40" fill="#9D5CFF" stroke="#0A0A0A" stroke-width="4"/>
+              <path d="M210 164v40M190 184h40" stroke="#0A0A0A" stroke-width="3.4"/>
+              <!-- 烟囱棒棒糖 -->
+              <rect x="214" y="86" width="14" height="42" fill="#FFFFFF" stroke="#0A0A0A" stroke-width="3.4"/>
+              <circle cx="221" cy="76" r="18" fill="#FF8A3D" stroke="#0A0A0A" stroke-width="4"/>
+              <path d="M221 76 m-9 0 a9 9 0 0 1 18 0 a9 -9 0 0 0 -18 0" fill="#0A0A0A" opacity=".2"/>
+              <!-- 地面圆点矩阵 -->
+              <rect x="34" y="272" width="252" height="14" fill="url(#pDots)" opacity=".45"/>
+              <!-- 星芒 -->
+              <path d="M40 60 L46 82 L68 88 L46 94 L40 116 L34 94 L12 88 L34 82 Z" fill="#FFE135" stroke="#0A0A0A" stroke-width="3.2" stroke-linejoin="round"/>
+              <!-- 波浪 -->
+              <path d="M264 200 q12 -14 24 0 t24 0" fill="none" stroke="#0A0A0A" stroke-width="4" stroke-linecap="round"/>
+              <path d="M264 216 q12 -14 24 0 t24 0" fill="none" stroke="#0A0A0A" stroke-width="4" stroke-linecap="round"/>
+              <!-- 小方块 -->
+              <rect x="22" y="176" width="24" height="24" fill="#9D5CFF" stroke="#0A0A0A" stroke-width="3.4" transform="rotate(-12 34 188)"/>
+              <circle cx="288" cy="112" r="11" fill="#A3E635" stroke="#0A0A0A" stroke-width="3.4"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- 统计 -->
+      <dl class="stats reveal" data-d="3">
+        <div class="stat">
+          <dt class="stat-lb">年从业经验</dt>
+          <dd class="stat-num"><span data-count="6">6</span><sup>+</sup></dd>
+        </div>
+        <div class="stat">
+          <dt class="stat-lb">上线项目</dt>
+          <dd class="stat-num"><span data-count="42">42</span></dd>
+        </div>
+        <div class="stat">
+          <dt class="stat-lb">平均 Lighthouse</dt>
+          <dd class="stat-num"><span data-count="98">98</span></dd>
+        </div>
+        <div class="stat">
+          <dt class="stat-lb">技术文章</dt>
+          <dd class="stat-num"><span data-count="27">27</span></dd>
+        </div>
+      </dl>
+    </div>
+
+    <!-- 跑马灯 -->
+    <div class="marquee" aria-hidden="true">
+      <div class="marquee-track" id="marquee">
+        <span>界面 INTERFACE</span><span>交互 INTERACTION</span><span>动效 MOTION</span>
+        <span>无障碍 ACCESSIBILITY</span><span>性能 PERFORMANCE</span><span>设计系统 DESIGN SYSTEM</span>
+        <span>界面 INTERFACE</span><span>交互 INTERACTION</span><span>动效 MOTION</span>
+        <span>无障碍 ACCESSIBILITY</span><span>性能 PERFORMANCE</span><span>设计系统 DESIGN SYSTEM</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 3. 技能卡 + 进度条 ============ -->
+  <section class="sec" id="skills" aria-labelledby="skills-title">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <span class="sec-num">/ 01 — SKILLS</span>
+          <h2 id="skills-title">工具箱里的糖</h2>
+        </div>
+        <p class="lead">每一项都来自真实项目的踩坑与返工，不是简历上的形容词。进度条随滚动填充。</p>
+      </div>
+      <div class="rule"></div>
+
+      <div class="skills-grid" style="margin-top:34px">
+
+        <article class="card card--hover skill reveal">
+          <div class="skill-top">
+            <span class="skill-ico" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 22 22" focusable="false">
+                <path d="M8 4 L2 11 L8 18" fill="none" stroke="#0A0A0A" stroke-width="2.8" stroke-linecap="square"/>
+                <path d="M14 4 L20 11 L14 18" fill="none" stroke="#0A0A0A" stroke-width="2.8" stroke-linecap="square"/>
+              </svg>
+            </span>
+            <h3>前端工程</h3>
+            <span class="skill-pct">92%</span>
+          </div>
+          <p>TypeScript / React / Vite 全链路。组件抽象、状态治理、构建优化，代码要经得起半年后的自己审阅。</p>
+          <div class="bar" role="progressbar" aria-valuenow="92" aria-valuemin="0" aria-valuemax="100" aria-label="前端工程熟练度">
+            <span class="bar-fill" data-pct="92" style="--w:92%"></span>
+          </div>
+        </article>
+
+        <article class="card card--hover skill reveal" data-d="1">
+          <div class="skill-top">
+            <span class="skill-ico" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 22 22" focusable="false">
+                <rect x="2.5" y="2.5" width="8" height="8" fill="none" stroke="#0A0A0A" stroke-width="2.6"/>
+                <rect x="11.5" y="11.5" width="8" height="8" fill="none" stroke="#0A0A0A" stroke-width="2.6"/>
+                <circle cx="15.5" cy="6.5" r="4" fill="none" stroke="#0A0A0A" stroke-width="2.6"/>
+              </svg>
+            </span>
+            <h3>UI 设计</h3>
+            <span class="skill-pct">88%</span>
+          </div>
+          <p>Figma 到代码零翻译损耗。版式、层级、留白与色彩系统，能自己画也能精准还原别人的稿。</p>
+          <div class="bar" role="progressbar" aria-valuenow="88" aria-valuemin="0" aria-valuemax="100" aria-label="UI 设计熟练度">
+            <span class="bar-fill" data-pct="88" style="--w:88%"></span>
+          </div>
+        </article>
+
+        <article class="card card--hover skill reveal" data-d="2">
+          <div class="skill-top">
+            <span class="skill-ico" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 22 22" focusable="false">
+                <path d="M2 15 q5 -12 9 0 t9 -8" fill="none" stroke="#0A0A0A" stroke-width="2.8" stroke-linecap="round"/>
+                <circle cx="18" cy="8" r="2.6" fill="#0A0A0A"/>
+              </svg>
+            </span>
+            <h3>动效交互</h3>
+            <span class="skill-pct">85%</span>
+          </div>
+          <p>缓动曲线、编排节奏、手势反馈。动效服务于理解而非炫技，且永远为 reduced-motion 留后路。</p>
+          <div class="bar" role="progressbar" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100" aria-label="动效交互熟练度">
+            <span class="bar-fill" data-pct="85" style="--w:85%"></span>
+          </div>
+        </article>
+
+        <article class="card card--hover skill reveal">
+          <div class="skill-top">
+            <span class="skill-ico" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 22 22" focusable="false">
+                <circle cx="11" cy="11" r="8.5" fill="none" stroke="#0A0A0A" stroke-width="2.6"/>
+                <circle cx="11" cy="4.6" r="2.2" fill="#0A0A0A"/>
+                <path d="M4.5 9h13M11 9v9M11 13l-4 5M11 13l4 5" fill="none" stroke="#0A0A0A" stroke-width="2.4" stroke-linecap="square"/>
+              </svg>
+            </span>
+            <h3>无障碍 A11y</h3>
+            <span class="skill-pct">83%</span>
+          </div>
+          <p>语义化结构、焦点管理、ARIA 模式、对比度校验。NVDA 与 VoiceOver 实测过才算完成。</p>
+          <div class="bar" role="progressbar" aria-valuenow="83" aria-valuemin="0" aria-valuemax="100" aria-label="无障碍熟练度">
+            <span class="bar-fill" data-pct="83" style="--w:83%"></span>
+          </div>
+        </article>
+
+        <article class="card card--hover skill reveal" data-d="1">
+          <div class="skill-top">
+            <span class="skill-ico" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 22 22" focusable="false">
+                <path d="M12 1.5 L4 12h6l-1.5 8.5L18 9.5h-6z" fill="#0A0A0A" stroke="#0A0A0A" stroke-width="2.2" stroke-linejoin="round"/>
+              </svg>
+            </span>
+            <h3>性能优化</h3>
+            <span class="skill-pct">79%</span>
+          </div>
+          <p>Core Web Vitals 全绿是底线。代码分割、图片策略、关键路径、长任务拆分，用数据说话。</p>
+          <div class="bar" role="progressbar" aria-valuenow="79" aria-valuemin="0" aria-valuemax="100" aria-label="性能优化熟练度">
+            <span class="bar-fill" data-pct="79" style="--w:79%"></span>
+          </div>
+        </article>
+
+        <article class="card card--hover skill reveal" data-d="2">
+          <div class="skill-top">
+            <span class="skill-ico" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 22 22" focusable="false">
+                <rect x="2.5" y="2.5" width="7" height="7" fill="#0A0A0A"/>
+                <rect x="12.5" y="2.5" width="7" height="7" fill="none" stroke="#0A0A0A" stroke-width="2.6"/>
+                <rect x="2.5" y="12.5" width="7" height="7" fill="none" stroke="#0A0A0A" stroke-width="2.6"/>
+                <rect x="12.5" y="12.5" width="7" height="7" fill="#0A0A0A"/>
+              </svg>
+            </span>
+            <h3>设计系统</h3>
+            <span class="skill-pct">90%</span>
+          </div>
+          <p>Token 体系、组件契约、文档站与版本策略。让二十个人写出来像一个人写的。</p>
+          <div class="bar" role="progressbar" aria-valuenow="90" aria-valuemin="0" aria-valuemax="100" aria-label="设计系统熟练度">
+            <span class="bar-fill" data-pct="90" style="--w:90%"></span>
+          </div>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 4. 项目 Bento 网格 ============ -->
+  <section class="sec" id="works" aria-labelledby="works-title" style="padding-top:0">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <span class="sec-num">/ 02 — SELECTED WORKS</span>
+          <h2 id="works-title">橱窗里的六罐糖</h2>
+        </div>
+        <p class="lead">从零到一的独立产品，也有大团队里啃下来的硬骨头。点击卡片查看详情。</p>
+      </div>
+      <div class="rule"></div>
+
+      <div class="bento" style="margin-top:34px">
+
+        <article class="card card--hover proj proj--a reveal">
+          <div class="proj-head">
+            <span class="proj-kind">独立产品</span>
+            <span class="proj-year">2026</span>
+          </div>
+          <h3><a href="#works">甜筒播放器</a></h3>
+          <p>一个只做一件事的本地音乐播放器：把音频波形画成融化的甜筒。Canvas 实时频谱 + Web Audio API，
+             离线可用，冷启动 0.8s，全键盘操作，支持 Media Session 系统级控制。</p>
+          <svg class="proj-art" viewBox="0 0 420 120" role="img" aria-label="音频波形装饰图形">
+            <g stroke="#0A0A0A" stroke-width="3.5">
+              <rect x="10" y="52" width="14" height="26" fill="#FF1493"/>
+              <rect x="32" y="34" width="14" height="62" fill="#FFE135"/>
+              <rect x="54" y="14" width="14" height="102" fill="#00BFFF"/>
+              <rect x="76" y="42" width="14" height="46" fill="#A3E635"/>
+              <rect x="98" y="24" width="14" height="82" fill="#FF8A3D"/>
+              <rect x="120" y="58" width="14" height="20" fill="#9D5CFF"/>
+              <rect x="142" y="30" width="14" height="70" fill="#FF1493"/>
+              <rect x="164" y="46" width="14" height="38" fill="#FFE135"/>
+              <rect x="186" y="18" width="14" height="94" fill="#00BFFF"/>
+              <rect x="208" y="50" width="14" height="30" fill="#A3E635"/>
+              <rect x="230" y="36" width="14" height="58" fill="#FF8A3D"/>
+              <rect x="252" y="60" width="14" height="16" fill="#9D5CFF"/>
+              <rect x="274" y="28" width="14" height="74" fill="#FF1493"/>
+              <rect x="296" y="48" width="14" height="34" fill="#FFE135"/>
+              <rect x="318" y="20" width="14" height="90" fill="#00BFFF"/>
+              <rect x="340" y="54" width="14" height="24" fill="#A3E635"/>
+              <rect x="362" y="38" width="14" height="54" fill="#FF8A3D"/>
+              <rect x="384" y="56" width="14" height="20" fill="#9D5CFF"/>
+            </g>
+          </svg>
+          <div class="proj-foot">
+            <ul class="proj-stack">
+              <li>Web Audio</li><li>Canvas</li><li>PWA</li><li>TypeScript</li>
+            </ul>
+            <span class="proj-go" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 16 16" focusable="false">
+                <path d="M4 12L12 4M6 4h6v6" fill="none" stroke="#F5F5F0" stroke-width="2.6" stroke-linecap="square"/>
+              </svg>
+            </span>
+          </div>
+        </article>
+
+        <article class="card card--hover proj proj--b reveal" data-d="1">
+          <div class="proj-head">
+            <span class="proj-kind">设计系统</span>
+            <span class="proj-year">2025</span>
+          </div>
+          <h3><a href="#works">棉花糖 UI</a></h3>
+          <p>服务 4 条业务线的组件库，62 个组件、三层 Token。文档站自动同步，AA 对比度全量校验，
+             接入后新页面平均开发时间下降 38%。</p>
+          <div class="proj-foot">
+            <ul class="proj-stack"><li>React</li><li>Radix</li><li>Style Dictionary</li></ul>
+            <span class="proj-go" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 16 16" focusable="false">
+                <path d="M4 12L12 4M6 4h6v6" fill="none" stroke="#F5F5F0" stroke-width="2.6" stroke-linecap="square"/>
+              </svg>
+            </span>
+          </div>
+        </article>
+
+        <article class="card card--hover proj proj--c reveal" data-d="2">
+          <div class="proj-head">
+            <span class="proj-kind">开源</span>
+            <span class="proj-year">2025</span>
+          </div>
+          <h3><a href="#works">跳跳糖</a></h3>
+          <p>3.2KB 的微交互库，纯 CSS 变量驱动，自动降级 reduced-motion。</p>
+          <div class="proj-foot">
+            <ul class="proj-stack"><li>CSS</li><li>1.4k ★</li></ul>
+            <span class="proj-go" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 16 16" focusable="false">
+                <path d="M4 12L12 4M6 4h6v6" fill="none" stroke="#F5F5F0" stroke-width="2.6" stroke-linecap="square"/>
+              </svg>
+            </span>
+          </div>
+        </article>
+
+        <article class="card card--hover proj proj--d reveal" data-d="3">
+          <div class="proj-head">
+            <span class="proj-kind">可视化</span>
+            <span class="proj-year">2024</span>
+          </div>
+          <h3><a href="#works">焦糖面板</a></h3>
+          <p>十万级数据点的实时看板，虚拟滚动 + 离屏渲染，帧率稳定 60。</p>
+          <div class="proj-foot">
+            <ul class="proj-stack"><li>D3</li><li>WebGL</li></ul>
+            <span class="proj-go" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 16 16" focusable="false">
+                <path d="M4 12L12 4M6 4h6v6" fill="none" stroke="#F5F5F0" stroke-width="2.6" stroke-linecap="square"/>
+              </svg>
+            </span>
+          </div>
+        </article>
+
+        <article class="card card--hover proj proj--e reveal" data-d="1">
+          <div class="proj-head">
+            <span class="proj-kind">本地优先</span>
+            <span class="proj-year">2024</span>
+          </div>
+          <h3><a href="#works">泡泡糖笔记</a></h3>
+          <p>离线优先的双向链接笔记，CRDT 多端同步，冲突自动合并。IndexedDB 存储 5 万条笔记仍能在 120ms 内完成全文检索。</p>
+          <div class="proj-foot">
+            <ul class="proj-stack"><li>CRDT</li><li>IndexedDB</li><li>Service Worker</li></ul>
+            <span class="proj-go" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 16 16" focusable="false">
+                <path d="M4 12L12 4M6 4h6v6" fill="none" stroke="#F5F5F0" stroke-width="2.6" stroke-linecap="square"/>
+              </svg>
+            </span>
+          </div>
+        </article>
+
+        <article class="card card--hover proj proj--f reveal" data-d="2">
+          <div class="proj-head">
+            <span class="proj-kind">工具</span>
+            <span class="proj-year">2023</span>
+          </div>
+          <h3><a href="#works">糖纸主题生成器</a></h3>
+          <p>输入一个品牌主色，输出整套无障碍达标的配色 Token（含深色模式）。所有输出组合均通过 WCAG AA 对比度检查。</p>
+          <div class="proj-foot">
+            <ul class="proj-stack"><li>OKLCH</li><li>Vite</li><li>a11y</li></ul>
+            <span class="proj-go" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 16 16" focusable="false">
+                <path d="M4 12L12 4M6 4h6v6" fill="none" stroke="#F5F5F0" stroke-width="2.6" stroke-linecap="square"/>
+              </svg>
+            </span>
+          </div>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 5. 经历时间线 ============ -->
+  <section class="sec" id="journey" aria-labelledby="journey-title" style="padding-top:0">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <span class="sec-num">/ 03 — JOURNEY</span>
+          <h2 id="journey-title">一路走来的糖纸</h2>
+        </div>
+        <p class="lead">从改错一个 float 到主理一间工作室，六年时间线。</p>
+      </div>
+      <div class="rule"></div>
+
+      <ol class="timeline" style="margin-top:34px">
+
+        <li class="tl-item reveal">
+          <div class="tl-year">2026 — 至今</div>
+          <div class="tl-rail" aria-hidden="true"><span class="tl-node"></span></div>
+          <article class="card card--hover tl-card">
+            <h3>主理人 / 独立设计工程师</h3>
+            <p class="tl-org">糖果屋工作室 · 上海</p>
+            <p>一个人承接从策略、设计到上线的完整链路。为初创团队做品牌官网、产品 MVP 与设计系统落地，累计交付 11 个项目，复购率 6 成。</p>
+            <ul><li>品牌官网</li><li>产品 MVP</li><li>设计系统咨询</li></ul>
+          </article>
+        </li>
+
+        <li class="tl-item reveal" data-d="1">
+          <div class="tl-year">2024 — 2026</div>
+          <div class="tl-rail" aria-hidden="true"><span class="tl-node"></span></div>
+          <article class="card card--hover tl-card">
+            <h3>高级前端工程师</h3>
+            <p class="tl-org">某互联网公司 · 体验技术部</p>
+            <p>负责「棉花糖 UI」设计系统建设与推广，牵头无障碍专项，把核心链路 Lighthouse 从 61 拉到 96。带过 3 人小组，做过 12 场内部分享。</p>
+            <ul><li>设计系统</li><li>性能专项</li><li>A11y 治理</li></ul>
+          </article>
+        </li>
+
+        <li class="tl-item reveal" data-d="2">
+          <div class="tl-year">2022 — 2024</div>
+          <div class="tl-rail" aria-hidden="true"><span class="tl-node"></span></div>
+          <article class="card card--hover tl-card">
+            <h3>前端 + 设计（一人分饰两角）</h3>
+            <p class="tl-org">一家 12 人的 SaaS 创业公司</p>
+            <p>从 0 搭起产品界面，画稿也写代码。数据看板、编辑器、权限系统全都碰过，学会了在资源有限时如何取舍。</p>
+            <ul><li>0→1 产品</li><li>数据可视化</li><li>富文本编辑器</li></ul>
+          </article>
+        </li>
+
+        <li class="tl-item reveal" data-d="3">
+          <div class="tl-year">2020 — 2022</div>
+          <div class="tl-rail" aria-hidden="true"><span class="tl-node"></span></div>
+          <article class="card card--hover tl-card">
+            <h3>前端工程师（入行）</h3>
+            <p class="tl-org">数字营销代理公司</p>
+            <p>两年做了 30 多个活动页与品牌站，被迫练出对像素的敏感和对兼容性的耐心。第一次意识到：动效做错方向，比没有动效更糟。</p>
+            <ul><li>活动页</li><li>H5 动效</li><li>兼容性</li></ul>
+          </article>
+        </li>
+
+      </ol>
+    </div>
+  </section>
+
+  <!-- ============ 6. 关于卡片 ============ -->
+  <section class="sec" id="about" aria-labelledby="about-title" style="padding-top:0">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <span class="sec-num">/ 04 — ABOUT</span>
+          <h2 id="about-title">拆开糖纸看看我</h2>
+        </div>
+        <p class="lead">工作方式、协作偏好，以及一些不那么重要但挺可爱的事。</p>
+      </div>
+      <div class="rule"></div>
+
+      <div class="about-grid" style="margin-top:34px">
+
+        <figure class="about-face reveal" style="margin:0">
+          <svg viewBox="0 0 300 300" role="img" aria-label="林小糖的头像插画：戴眼镜、扎丸子头的人物肖像">
+            <rect x="26" y="26" width="248" height="248" fill="#FFFFFF" stroke="#0A0A0A" stroke-width="4"/>
+            <!-- 丸子头 -->
+            <circle cx="150" cy="62" r="24" fill="#FF1493" stroke="#0A0A0A" stroke-width="4"/>
+            <!-- 头发 -->
+            <path d="M76 148 q0 -66 74 -66 t74 66 v10 h-148z" fill="#0A0A0A"/>
+            <!-- 脸 -->
+            <rect x="88" y="106" width="124" height="128" rx="10" fill="#FFE9D6" stroke="#0A0A0A" stroke-width="4"/>
+            <!-- 刘海 -->
+            <path d="M88 124 q30 -26 62 -12 q32 -14 62 12 v-14 q-28 -26 -62 -26 t-62 26z" fill="#0A0A0A"/>
+            <!-- 眼镜 -->
+            <rect x="98" y="150" width="42" height="34" fill="#00BFFF" stroke="#0A0A0A" stroke-width="4"/>
+            <rect x="160" y="150" width="42" height="34" fill="#00BFFF" stroke="#0A0A0A" stroke-width="4"/>
+            <path d="M140 166h20" stroke="#0A0A0A" stroke-width="4"/>
+            <circle cx="119" cy="167" r="5.5" fill="#0A0A0A"/>
+            <circle cx="181" cy="167" r="5.5" fill="#0A0A0A"/>
+            <!-- 腮红 -->
+            <rect x="98" y="196" width="20" height="10" fill="#FF1493" stroke="#0A0A0A" stroke-width="3"/>
+            <rect x="182" y="196" width="20" height="10" fill="#FF1493" stroke="#0A0A0A" stroke-width="3"/>
+            <!-- 嘴 -->
+            <path d="M134 208 q16 16 32 0" fill="none" stroke="#0A0A0A" stroke-width="4" stroke-linecap="round"/>
+            <!-- 领子 -->
+            <path d="M96 274 q0 -34 54 -34 t54 34" fill="#A3E635" stroke="#0A0A0A" stroke-width="4"/>
+            <!-- 装饰星 -->
+            <path d="M252 60 l5 15 l15 5 l-15 5 l-5 15 l-5 -15 l-15 -5 l15 -5z" fill="#FFE135" stroke="#0A0A0A" stroke-width="3"/>
+            <circle cx="52" cy="240" r="12" fill="#9D5CFF" stroke="#0A0A0A" stroke-width="3.4"/>
+          </svg>
+          <figcaption>林小糖 / LIN XIAOTANG · 上海</figcaption>
+        </figure>
+
+        <div class="about-body">
+          <article class="card about-card reveal" data-d="1">
+            <h3>我怎么干活</h3>
+            <p>
+              先问「这个界面要帮用户完成什么」，再动手画。我不喜欢先堆效果后补逻辑——
+              结构、语义、状态先立住，视觉和动效是最后一层糖衣，甜但不能腻。
+            </p>
+            <p>
+              交付时你会拿到：能跑的代码、清楚的组件边界、写明白的 README，以及一份
+              我自己跑过的无障碍与性能自查清单。不留「回头再优化」的尾巴。
+            </p>
+            <ul class="about-list">
+              <li>
+                <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true" focusable="false" style="flex:none;margin-top:2px">
+                  <rect x="2" y="2" width="16" height="16" fill="#FFE135" stroke="#0A0A0A" stroke-width="2.6"/>
+                  <path d="M5.5 10.5l3 3 6-7" fill="none" stroke="#0A0A0A" stroke-width="2.6" stroke-linecap="square"/>
+                </svg>
+                <span><b>协作</b>Figma 对稿 / 每周演示 / 异步文字沟通优先</span>
+              </li>
+              <li>
+                <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true" focusable="false" style="flex:none;margin-top:2px">
+                  <rect x="2" y="2" width="16" height="16" fill="#00BFFF" stroke="#0A0A0A" stroke-width="2.6"/>
+                  <path d="M10 5v6l4 2" fill="none" stroke="#0A0A0A" stroke-width="2.6" stroke-linecap="square"/>
+                </svg>
+                <span><b>周期</b>官网 2-3 周 / 产品 MVP 6-8 周</span>
+              </li>
+              <li>
+                <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true" focusable="false" style="flex:none;margin-top:2px">
+                  <rect x="2" y="2" width="16" height="16" fill="#A3E635" stroke="#0A0A0A" stroke-width="2.6"/>
+                  <path d="M6 13l4-7 4 7z" fill="none" stroke="#0A0A0A" stroke-width="2.6" stroke-linejoin="round"/>
+                </svg>
+                <span><b>擅长</b>0→1 界面 / 设计系统 / 动效实现</span>
+              </li>
+              <li>
+                <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true" focusable="false" style="flex:none;margin-top:2px">
+                  <rect x="2" y="2" width="16" height="16" fill="#9D5CFF" stroke="#0A0A0A" stroke-width="2.6"/>
+                  <circle cx="10" cy="10" r="3.4" fill="none" stroke="#0A0A0A" stroke-width="2.6"/>
+                </svg>
+                <span><b>不接</b>纯切图外包 / 只要「像某某站」的需求</span>
+              </li>
+            </ul>
+          </article>
+
+          <div class="about-note reveal" data-d="2">
+            <svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true" focusable="false" style="flex:none">
+              <circle cx="13" cy="13" r="11" fill="#FFE135" stroke="#0A0A0A" stroke-width="3"/>
+              <path d="M13 7v8" stroke="#0A0A0A" stroke-width="3" stroke-linecap="round"/>
+              <circle cx="13" cy="19" r="1.8" fill="#0A0A0A"/>
+            </svg>
+            <p><strong>题外话：</strong>会做甜品，收集老式糖纸 300 多张，这个站的配色就是从其中一张 1987 年的水果硬糖包装上抠下来的。</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 7. 黄底联系 CTA ============ -->
+  <section class="cta" id="contact" aria-labelledby="cta-title">
+    <div class="wrap cta-inner">
+      <div class="reveal">
+        <span class="sec-num">/ 05 — GET IN TOUCH</span>
+        <h2 id="cta-title">来糖果屋<br><em>敲敲门</em>吧</h2>
+        <p>手上有想做的东西？不管是刚冒出来的点子，还是已经卡住的项目，都欢迎聊聊。工作日 24 小时内必回。</p>
+        <div class="cta-actions">
+          <a class="btn btn--ink" href="mailto:hi@candyhouse.dev">
+            hi@candyhouse.dev
+            <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+              <path d="M1 8h13M9.5 3.5L14 8l-4.5 4.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="square"/>
+            </svg>
+          </a>
+          <a class="btn" href="#works">先看看作品</a>
+        </div>
+      </div>
+
+      <div class="cta-panel reveal" data-d="1">
+        <h3>在这些地方也能找到我</h3>
+        <ul class="contact-list">
+          <li>
+            <a href="mailto:hi@candyhouse.dev">
+              <span class="ico" aria-hidden="true">
+                <svg width="16" height="16" viewBox="0 0 16 16" focusable="false">
+                  <rect x="1.5" y="3" width="13" height="10" fill="none" stroke="#0A0A0A" stroke-width="2.2"/>
+                  <path d="M1.5 3.5L8 9l6.5-5.5" fill="none" stroke="#0A0A0A" stroke-width="2.2"/>
+                </svg>
+              </span>
+              电子邮件
+              <span class="arrow" aria-hidden="true">
+                <svg width="14" height="14" viewBox="0 0 14 14" focusable="false">
+                  <path d="M3 11L11 3M5 3h6v6" fill="none" stroke="#0A0A0A" stroke-width="2.4" stroke-linecap="square"/>
+                </svg>
+              </span>
+            </a>
+          </li>
+          <li>
+            <a href="#contact">
+              <span class="ico" aria-hidden="true">
+                <svg width="16" height="16" viewBox="0 0 16 16" focusable="false">
+                  <path d="M5 12L1.5 8L5 4M11 4l3.5 4-3.5 4" fill="none" stroke="#0A0A0A" stroke-width="2.2" stroke-linecap="square"/>
+                </svg>
+              </span>
+              GitHub / @xiaotang
+              <span class="arrow" aria-hidden="true">
+                <svg width="14" height="14" viewBox="0 0 14 14" focusable="false">
+                  <path d="M3 11L11 3M5 3h6v6" fill="none" stroke="#0A0A0A" stroke-width="2.4" stroke-linecap="square"/>
+                </svg>
+              </span>
+            </a>
+          </li>
+          <li>
+            <a href="#contact">
+              <span class="ico" aria-hidden="true">
+                <svg width="16" height="16" viewBox="0 0 16 16" focusable="false">
+                  <rect x="2" y="2" width="12" height="12" fill="none" stroke="#0A0A0A" stroke-width="2.2"/>
+                  <circle cx="8" cy="8" r="3" fill="none" stroke="#0A0A0A" stroke-width="2.2"/>
+                </svg>
+              </span>
+              小红书 / 糖果屋日记
+              <span class="arrow" aria-hidden="true">
+                <svg width="14" height="14" viewBox="0 0 14 14" focusable="false">
+                  <path d="M3 11L11 3M5 3h6v6" fill="none" stroke="#0A0A0A" stroke-width="2.4" stroke-linecap="square"/>
+                </svg>
+              </span>
+            </a>
+          </li>
+          <li>
+            <a href="#contact">
+              <span class="ico" aria-hidden="true">
+                <svg width="16" height="16" viewBox="0 0 16 16" focusable="false">
+                  <path d="M2 12.5V4a1 1 0 011-1h10a1 1 0 011 1v8.5" fill="none" stroke="#0A0A0A" stroke-width="2.2"/>
+                  <path d="M2 12.5h12" stroke="#0A0A0A" stroke-width="2.2"/>
+                </svg>
+              </span>
+              下载简历 PDF
+              <span class="arrow" aria-hidden="true">
+                <svg width="14" height="14" viewBox="0 0 14 14" focusable="false">
+                  <path d="M7 2v9M3 7.5L7 11.5 11 7.5" fill="none" stroke="#0A0A0A" stroke-width="2.4" stroke-linecap="square"/>
+                </svg>
+              </span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 8. 黑底 Footer ============ -->
+</main>
+
+<footer class="site-foot">
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <span class="brand-name">糖果屋 CANDY HOUSE</span>
+        <p>独立前端设计工程师林小糖的个人作品集。手写 HTML / CSS / JS，一个文件，零框架依赖。</p>
+      </div>
+
+      <nav class="foot-col" aria-label="页面导航">
+        <h3>页面</h3>
+        <ul>
+          <li><a href="#hero">首页</a></li>
+          <li><a href="#skills">技能</a></li>
+          <li><a href="#works">作品</a></li>
+          <li><a href="#journey">经历</a></li>
+        </ul>
+      </nav>
+
+      <nav class="foot-col" aria-label="社交链接">
+        <h3>找到我</h3>
+        <ul>
+          <li><a href="mailto:hi@candyhouse.dev">Email</a></li>
+          <li><a href="#contact">GitHub</a></li>
+          <li><a href="#contact">小红书</a></li>
+          <li><a href="#contact">简历 PDF</a></li>
+        </ul>
+      </nav>
+
+      <div class="foot-col">
+        <h3>本站构成</h3>
+        <ul>
+          <li><a href="#about">语义化 HTML5</a></li>
+          <li><a href="#about">手写 CSS · 无预处理</a></li>
+          <li><a href="#about">原生 JS · 无依赖</a></li>
+          <li><a href="#about">WCAG 2.1 AA</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="foot-strip">
+      <small>© 2026 糖果屋 CANDY HOUSE — 用糖纸和像素搭起来的。</small>
+      <a class="to-top" href="#top">
+        回到屋顶
+        <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true" focusable="false">
+          <path d="M6 11V1M1.5 5.5L6 1l4.5 4.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="square"/>
+        </svg>
+      </a>
+    </div>
+  </div>
+
+  <div class="foot-bar" aria-hidden="true">
+    <span style="background:#FF1493"></span>
+    <span style="background:#FFE135"></span>
+    <span style="background:#00BFFF"></span>
+    <span style="background:#A3E635"></span>
+    <span style="background:#FF8A3D"></span>
+    <span style="background:#9D5CFF"></span>
+  </div>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+
+  var mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+  var reduce = mq.matches;
+  if (typeof mq.addEventListener === 'function') {
+    mq.addEventListener('change', function (e) { reduce = e.matches; });
+  }
+
+  /* ---------- 1. 移动端导航 ---------- */
+  var navbar = document.getElementById('navbar');
+  var toggle = document.getElementById('navToggle');
+  var navList = document.getElementById('navList');
+
+  function closeNav() {
+    navbar.classList.remove('is-open');
+    toggle.setAttribute('aria-expanded', 'false');
+  }
+
+  toggle.addEventListener('click', function () {
+    var open = navbar.classList.toggle('is-open');
+    toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+
+  navList.addEventListener('click', function (e) {
+    if (e.target.closest('a')) closeNav();
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && navbar.classList.contains('is-open')) {
+      closeNav();
+      toggle.focus();
+    }
+  });
+
+  /* ---------- 2. 导航吸顶状态 ---------- */
+  var head = document.querySelector('.site-head');
+  var onScroll = function () {
+    head.classList.toggle('is-stuck', window.scrollY > 12);
+  };
+  onScroll();
+  window.addEventListener('scroll', onScroll, { passive: true });
+
+  /* ---------- 3. IntersectionObserver 滚动揭示 ---------- */
+  var revealEls = document.querySelectorAll('.reveal');
+
+  if (!('IntersectionObserver' in window)) {
+    // 优雅降级：不支持时直接全部显示并填满进度条
+    revealEls.forEach(function (el) { el.classList.add('is-in'); });
+    fillAllBars();
+    countAll();
+  } else {
+    var revealIO = new IntersectionObserver(function (entries, obs) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add('is-in');
+        obs.unobserve(entry.target);
+      });
+    }, { threshold: 0.15, rootMargin: '0px 0px -8% 0px' });
+
+    revealEls.forEach(function (el) { revealIO.observe(el); });
+
+    /* ---------- 4. 进度条动画 ---------- */
+    var barIO = new IntersectionObserver(function (entries, obs) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        var fill = entry.target;
+        var pct = fill.getAttribute('data-pct') + '%';
+        if (reduce) {
+          fill.style.transition = 'none';
+          fill.style.width = pct;
+        } else {
+          window.requestAnimationFrame(function () { fill.style.width = pct; });
+        }
+        obs.unobserve(fill);
+      });
+    }, { threshold: 0.4 });
+
+    document.querySelectorAll('.bar-fill').forEach(function (f) { barIO.observe(f); });
+
+    /* ---------- 5. 数字滚动 ---------- */
+    // HTML 里写的是真实数值（无 JS 时可正常阅读），这里先归零再滚动
+    if (!reduce) {
+      document.querySelectorAll('[data-count]').forEach(function (n) { n.textContent = '0'; });
+    }
+
+    var numIO = new IntersectionObserver(function (entries, obs) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        countUp(entry.target);
+        obs.unobserve(entry.target);
+      });
+    }, { threshold: 0.5 });
+
+    document.querySelectorAll('[data-count]').forEach(function (n) { numIO.observe(n); });
+  }
+
+  function fillAllBars() {
+    document.querySelectorAll('.bar-fill').forEach(function (f) {
+      f.style.transition = 'none';
+      f.style.width = f.getAttribute('data-pct') + '%';
+    });
+  }
+
+  function countAll() {
+    document.querySelectorAll('[data-count]').forEach(function (n) {
+      n.textContent = n.getAttribute('data-count');
+    });
+  }
+
+  function countUp(el) {
+    var target = parseInt(el.getAttribute('data-count'), 10);
+    if (reduce || !window.requestAnimationFrame) {
+      el.textContent = String(target);
+      return;
+    }
+    var dur = 1100;
+    var start = null;
+    function step(ts) {
+      if (start === null) start = ts;
+      var p = Math.min((ts - start) / dur, 1);
+      // easeOutCubic
+      var eased = 1 - Math.pow(1 - p, 3);
+      el.textContent = String(Math.round(target * eased));
+      if (p < 1) window.requestAnimationFrame(step);
+    }
+    window.requestAnimationFrame(step);
+  }
+
+  /* ---------- 6. 导航高亮当前区块 ---------- */
+  var links = Array.prototype.slice.call(navList.querySelectorAll('a'));
+  var sections = links
+    .map(function (a) { return document.querySelector(a.getAttribute('href')); })
+    .filter(Boolean);
+
+  if ('IntersectionObserver' in window && sections.length) {
+    var spyIO = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        var id = entry.target.id;
+        links.forEach(function (a) {
+          if (a.getAttribute('href') === '#' + id) {
+            a.setAttribute('aria-current', 'true');
+          } else {
+            a.removeAttribute('aria-current');
+          }
+        });
+      });
+    }, { rootMargin: '-45% 0px -50% 0px', threshold: 0 });
+
+    sections.forEach(function (s) { spyIO.observe(s); });
+  }
+
+  /* ---------- 7. 跑马灯：reduced-motion 下停止 ---------- */
+  if (reduce) {
+    var track = document.getElementById('marquee');
+    if (track) track.style.animation = 'none';
+  }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,36 @@
+# Strix 设备端服务 —— 部署在那台有 Docker 的机器上
+# 经 Tailscale 等私有 overlay 网络，被站点 launcher（hacker/strix-launcher.html）调用。
+#
+# 用法：
+#   1. 复制 .env.example 为 .env 并填好 STRIX_TOKEN / ZHIPU_API_KEY
+#   2. 把 api/server.js 放在 ./api/（本目录已含）
+#   3. docker compose up -d
+#   4. 站点 launcher 填 http://<tailscale-ip>:8787 + 令牌 → 投递任务
+#
+# 注意：服务通过挂载宿主机 docker.sock 来在沙箱内跑 Strix 容器，
+# 因此 API 容器本身只需 Node，不内置 Strix 镜像。
+
+services:
+  strix-api:
+    image: node:20-alpine
+    container_name: strix-api
+    working_dir: /app
+    command: ["node", "api/server.js"]
+    ports:
+      - "${PORT:-8787}:8787"
+    environment:
+      - PORT=8787
+      - STRIX_TOKEN=${STRIX_TOKEN}
+      - ZHIPU_API_KEY=${ZHIPU_API_KEY}
+      - STRIX_IMAGE=${STRIX_IMAGE:-usestrix/strix:latest}
+      - USE_DOCKER=${USE_DOCKER:-true}
+      - ANTHROPIC_BASE_URL=https://open.bigmodel.cn/api/paas/v4
+      - RUN_TIMEOUT=${RUN_TIMEOUT:-1800}
+    volumes:
+      # 让 API 容器能调度宿主机上的 Strix 沙箱容器
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      # 代码仓库（Strix 需要读源码）：把宿主仓库目录挂进来，路径与 launcher 填写的 repo 一致
+      - ${REPO_HOST_DIR:-./repos}:/repos:ro
+      - ./api:/app/api:ro
+      - ./scan-log.jsonl:/app/scan-log.jsonl
+    restart: unless-stopped

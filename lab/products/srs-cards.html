@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#14161f">
+<meta name="description" content="考研记忆卡片：间隔重复（SRS）记忆系统，内置政治/英语/数学入门卡组，支持自建卡组、每日新卡上限、复习预测与数据导入导出，数据存本机。">
+<title>考研记忆卡片 · SRS 间隔重复</title>
+<style>
+:root{
+  --bg:#f4f5fa; --panel:#ffffff; --panel2:#f7f8fc; --ink:#23263a; --muted:#8a8fa6;
+  --line:#e4e6f0; --line2:#eef0f7; --acc1:#5b5bd6; --acc1-soft:#ecebfb; --acc1-ink:#4545b8;
+  --acc2:#0ea5b7; --acc2-soft:#e3f4f6; --green:#3f9e6f; --green-soft:#e6f4ec;
+  --red:#cf5b4e; --red-soft:#faecea; --gold:#c9a24b; --gold-soft:#f8f1de;
+  --shadow:0 1px 2px rgba(30,30,60,.05),0 8px 24px rgba(30,30,60,.07);
+  --radius:16px; --radius-s:11px;
+  --wb-focus:#4ecdc4;
+}
+[data-theme="dark"]{
+  --bg:#14161f; --panel:#1c1f2c; --panel2:#202433; --ink:#e7e9f5; --muted:#8f95ad;
+  --line:#2c3044; --line2:#262a3c; --acc1:#8b8bf0; --acc1-soft:#2a2a4d; --acc1-ink:#b3b3ff;
+  --acc2:#3fc6d9; --acc2-soft:#16303a; --green:#5bb98c; --green-soft:#173427;
+  --red:#e07a6e; --red-soft:#3a2320; --gold:#d8b25e; --gold-soft:#38301c;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.35);
+  --wb-focus:#4ecdc4;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased;}
+button{font-family:inherit;}
+input,textarea,select{font-family:inherit;}
+::-webkit-scrollbar{width:0;height:0;}
+:focus-visible{outline:2px solid var(--wb-focus)!important;outline-offset:2px!important}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+.shell{display:flex;min-height:100vh;min-height:100dvh;}
+.sidebar{width:216px;flex:none;position:sticky;top:0;height:100vh;height:100dvh;padding:20px 12px;border-right:1px solid var(--line);background:var(--panel2);display:flex;flex-direction:column;gap:3px;overflow-y:auto;}
+.brand{display:flex;align-items:center;gap:10px;padding:2px 8px 14px;}
+.brand .logo{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#FF6B6B,#4ECDC4);display:flex;align-items:center;justify-content:center;flex:none;}
+.brand .logo svg{width:21px;height:21px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.brand b{font-size:15.5px;display:block;line-height:1.3;}
+.brand small{color:var(--muted);font-size:11px;}
+.nav-item{display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:10px;cursor:pointer;color:var(--muted);font-size:14px;font-weight:600;user-select:none;border:1px solid transparent;}
+.nav-item .ico{font-size:16px;}
+.nav-item:hover{background:var(--panel);color:var(--ink);}
+.nav-item.active{background:var(--acc1-soft);color:var(--acc1-ink);border-color:color-mix(in srgb,var(--acc1) 25%,transparent);}
+[data-theme="dark"] .nav-item.active{color:var(--acc1-ink);}
+.nav-badge{margin-left:auto;background:var(--acc1);color:#fff;font-size:11px;font-weight:700;border-radius:9px;padding:1px 7px;}
+.side-foot{margin-top:auto;padding:12px 8px 4px;border-top:1px solid var(--line2);font-size:12px;color:var(--muted);line-height:1.7;}
+.side-foot a{color:var(--muted);text-decoration:none;display:block;}
+.side-foot a:hover{color:var(--acc2);}
+.main{flex:1;min-width:0;display:flex;flex-direction:column;}
+.topbar{display:flex;align-items:center;gap:10px;padding:16px 26px;border-bottom:1px solid var(--line);background:var(--panel);position:sticky;top:0;z-index:20;}
+.topbar h1{font-size:18px;margin:0;font-weight:700;}
+.topbar .sub{color:var(--muted);font-size:12.5px;}
+.topbar .spacer{flex:1;}
+.icon-btn{width:36px;height:36px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--ink);font-size:16px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;}
+.icon-btn:hover{border-color:var(--acc1);}
+.wrap{flex:1;padding:22px 26px 90px;max-width:1060px;width:100%;margin:0 auto;}
+.view{display:none;}
+.view.on{display:block;animation:vIn .22s ease;}
+@keyframes vIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;margin-bottom:16px;}
+.panel h2{margin:0 0 4px;font-size:16.5px;}
+.panel .desc{color:var(--muted);font-size:13px;margin:0 0 14px;}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:16px;}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius-s);padding:12px 14px;box-shadow:var(--shadow);}
+.kpi b{font-size:22px;display:block;line-height:1.2;font-weight:800;}
+.kpi span{font-size:12px;color:var(--muted);}
+.kpi.a1 b{color:var(--acc1);} .kpi.a2 b{color:var(--acc2);} .kpi.g b{color:var(--green);} .kpi.r b{color:var(--red);}
+
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;}
+.chip{padding:7px 13px;border-radius:20px;border:1px solid var(--line);background:var(--panel2);color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;user-select:none;}
+.chip:hover{border-color:var(--acc2);color:var(--ink);}
+.chip.on{background:linear-gradient(135deg,#FF6B6B,#4ECDC4);border-color:transparent;color:#fff;}
+.chip .n{opacity:.75;font-weight:500;margin-left:3px;}
+
+/* ===== 学习区 ===== */
+.study-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
+.study-head .grow{flex:1;}
+.pbar{height:8px;border-radius:6px;background:var(--line2);overflow:hidden;margin:6px 0 2px;}
+.pbar i{display:block;height:100%;background:linear-gradient(90deg,#FF6B6B,#4ECDC4);border-radius:6px;transition:width .25s;}
+.ptxt{font-size:12px;color:var(--muted);}
+.card-stage{perspective:1200px;margin:4px 0 14px;}
+.card3d{position:relative;transform-style:preserve-3d;transition:transform .45s cubic-bezier(.2,.7,.3,1);min-height:230px;}
+.card3d.flip{transform:rotateX(180deg);}
+.card-face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;}
+.card-face.back{transform:rotateX(180deg);}
+.fbox{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);min-height:230px;display:flex;flex-direction:column;padding:24px;cursor:pointer;}
+.fbox .tag{font-size:11.5px;font-weight:700;color:var(--muted);letter-spacing:.06em;margin-bottom:10px;display:flex;justify-content:space-between;gap:8px;}
+.fbox .q{font-size:18px;font-weight:700;line-height:1.6;white-space:pre-wrap;}
+.fbox .a{font-size:15.5px;line-height:1.75;white-space:pre-wrap;flex:1;}
+.fbox .hint{margin-top:14px;font-size:12px;color:var(--muted);text-align:center;}
+.grade{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+.gbtn{border:1px solid var(--line);background:var(--panel);border-radius:var(--radius-s);padding:11px 6px;cursor:pointer;text-align:center;font-weight:700;font-size:14px;display:flex;flex-direction:column;gap:2px;align-items:center;}
+.gbtn small{font-weight:500;font-size:11.5px;color:var(--muted);}
+.gbtn:hover{transform:translateY(-1px);box-shadow:var(--shadow);}
+.gbtn kbd{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;border:1px solid var(--line);border-radius:4px;padding:0 4px;color:var(--muted);}
+.gbtn.again{color:var(--red);} .gbtn.again:hover{border-color:var(--red);background:var(--red-soft);}
+.gbtn.hard{color:var(--gold);} .gbtn.hard:hover{border-color:var(--gold);background:var(--gold-soft);}
+.gbtn.good{color:var(--green);} .gbtn.good:hover{border-color:var(--green);background:var(--green-soft);}
+.gbtn.easy{color:var(--acc2);} .gbtn.easy:hover{border-color:var(--acc2);background:var(--acc2-soft);}
+.empty-state{text-align:center;padding:44px 16px;color:var(--muted);}
+.empty-state .big{font-size:40px;margin-bottom:10px;}
+.empty-state b{color:var(--ink);display:block;font-size:16px;margin-bottom:6px;}
+
+/* ===== 卡组 / 卡片管理 ===== */
+.deck-row{display:flex;align-items:center;gap:12px;padding:13px;border:1px solid var(--line);border-radius:var(--radius-s);background:var(--panel);margin-bottom:10px;cursor:pointer;}
+.deck-row:hover{border-color:var(--acc2);}
+.deck-row.on{border-color:var(--acc1);background:var(--acc1-soft);}
+.deck-row .di{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex:none;background:var(--panel2);border:1px solid var(--line);}
+.deck-row .dm{flex:1;min-width:0;}
+.deck-row .dm b{font-size:14.5px;display:block;}
+.deck-row .dm span{font-size:12px;color:var(--muted);}
+.dist{display:flex;height:7px;border-radius:5px;overflow:hidden;margin-top:7px;background:var(--line2);}
+.dist i{display:block;height:100%;}
+.dist .m{background:var(--green);} .dist .y{background:var(--gold);} .dist .n{background:var(--acc1);}
+.deck-row .due-n{text-align:right;flex:none;}
+.deck-row .due-n b{font-size:18px;color:var(--acc1);display:block;line-height:1.1;}
+.deck-row .due-n span{font-size:11px;color:var(--muted);}
+.fld{display:flex;flex-direction:column;gap:5px;margin-bottom:13px;}
+.fld label{font-size:12.5px;color:var(--muted);font-weight:600;}
+.fld input,.fld textarea,.fld select{background:var(--panel2);border:1px solid var(--line);border-radius:var(--radius-s);color:var(--ink);padding:9px 11px;font-size:14px;}
+.fld input:focus,.fld textarea:focus{border-color:var(--acc2);}
+.fld textarea{resize:vertical;min-height:64px;line-height:1.6;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:38px;padding:8px 14px;border-radius:11px;border:1px solid var(--line);background:var(--panel);color:var(--ink);font-size:13.5px;font-weight:700;cursor:pointer;}
+.btn:hover{border-color:var(--acc1);}
+.btn.primary{background:linear-gradient(135deg,#FF6B6B,#4ECDC4);border-color:transparent;color:#fff;}
+.btn.primary:hover{filter:brightness(1.08);}
+.btn.ghost{background:transparent;}
+.btn.danger{color:var(--red);}
+.btn.danger:hover{border-color:var(--red);background:var(--red-soft);}
+.btn.sm{min-height:32px;padding:5px 10px;font-size:12.5px;border-radius:9px;}
+.btn.armed{background:var(--red);border-color:var(--red);color:#fff;animation:pulse 1s infinite;}
+@keyframes pulse{50%{opacity:.72}}
+.card-list{border:1px solid var(--line);border-radius:var(--radius-s);overflow:hidden;}
+.card-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--line2);font-size:13.5px;}
+.card-item:last-child{border-bottom:none;}
+.card-item .ct{flex:1;min-width:0;}
+.card-item .ct b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.card-item .ct span{display:block;color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.card-item .ivl{font-size:11.5px;color:var(--muted);flex:none;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:2px 7px;}
+.sec-title{display:flex;align-items:center;gap:10px;margin:18px 0 10px;}
+.sec-title h3{margin:0;font-size:15px;}
+.sec-title .grow{flex:1;}
+.row{display:flex;gap:10px;flex-wrap:wrap;}
+.row>*{flex:1;min-width:150px;}
+
+/* ===== 统计 ===== */
+.fc{display:flex;align-items:flex-end;gap:8px;height:120px;padding:8px 4px 0;}
+.fc .col{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;height:100%;justify-content:flex-end;}
+.fc .col i{display:block;width:100%;max-width:38px;border-radius:6px 6px 3px 3px;background:linear-gradient(180deg,#FF6B6B,#4ECDC4);min-height:3px;transition:height .3s;}
+.fc .col b{font-size:11px;color:var(--muted);font-weight:600;}
+.fc .col.today i{box-shadow:0 0 0 2px var(--acc1);}
+.fc .col.today b{color:var(--acc1);}
+table.tb{width:100%;border-collapse:collapse;font-size:13.5px;}
+table.tb th,table.tb td{padding:9px 10px;text-align:left;border-bottom:1px solid var(--line2);}
+table.tb th{color:var(--muted);font-size:12px;font-weight:600;}
+table.tb tr:last-child td{border-bottom:none;}
+.toast{position:fixed;left:50%;bottom:34px;transform:translateX(-50%) translateY(16px);background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:10px;font-size:13.5px;font-weight:600;opacity:0;pointer-events:none;transition:.22s;z-index:99;max-width:82vw;}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0);}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;color:var(--muted);}
+@media(max-width:760px){
+  .shell{flex-direction:column;}
+  .sidebar{width:100%;height:auto;position:static;flex-direction:row;flex-wrap:wrap;gap:6px;padding:10px 12px;border-right:none;border-bottom:1px solid var(--line);overflow-x:auto;}
+  .brand,.side-foot{display:none;}
+  .nav-item{padding:7px 11px;font-size:13.5px;white-space:nowrap;}
+  .wrap{padding:16px 14px 110px;}
+  .grade{grid-template-columns:repeat(2,1fr);}
+}
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="13" height="15" rx="2"/><path d="M8 3h11a2 2 0 012 2v11"/><path d="M6.5 9.5h6M6.5 13h4"/></svg></div>
+      <div><b>记忆卡片</b><small>SRS 间隔重复</small></div>
+    </div>
+    <div class="nav-item active" data-v="study"><span class="ico">🎴</span>学习<span class="nav-badge" id="navDue" style="display:none">0</span></div>
+    <div class="nav-item" data-v="decks"><span class="ico">🗂️</span>卡组</div>
+    <div class="nav-item" data-v="stats"><span class="ico">📊</span>统计</div>
+    <div class="nav-item" data-v="data"><span class="ico">🗄️</span>数据</div>
+    <div class="side-foot">
+      <a href="../index.html">← 返回实验室</a>
+      <a href="../../index.html#sec-subs">← 返回指挥台</a>
+      数据仅存本机 localStorage
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <h1 id="tbTitle">考研记忆卡片</h1>
+      <span class="sub" id="tbSub">间隔重复 · 按遗忘曲线安排复习</span>
+      <span class="spacer"></span>
+      <button class="icon-btn" id="btnTheme" title="切换明暗主题" aria-label="切换明暗主题">🌓</button>
+    </div>
+
+    <div class="wrap">
+
+      <!-- ============ 学习 ============ -->
+      <section class="view on" id="v-study">
+        <div class="kpis" id="studyKpis"></div>
+        <div class="panel">
+          <div class="study-head">
+            <div class="grow">
+              <div class="chips" id="deckChips" style="margin-bottom:6px"></div>
+              <div class="pbar"><i id="sessBar" style="width:0%"></i></div>
+              <div class="ptxt" id="sessTxt">选择卡组开始学习</div>
+            </div>
+            <button class="btn ghost sm" id="btnEnd" style="display:none">结束学习</button>
+          </div>
+          <div id="studyBody"></div>
+        </div>
+      </section>
+
+      <!-- ============ 卡组 ============ -->
+      <section class="view" id="v-decks">
+        <div class="panel">
+          <h2>我的卡组</h2>
+          <p class="desc">点击卡组管理卡片；<b>成熟</b>＝间隔 ≥21 天，<b>新生</b>＝未学过。内置卡组不可删除，可随意增删卡片。</p>
+          <div id="deckList"></div>
+          <div class="sec-title"><h3>新建卡组</h3></div>
+          <div class="row">
+            <div class="fld" style="flex:2"><label for="newDeckName">卡组名称</label><input id="newDeckName" placeholder="例如：操作系统错题" maxlength="30"></div>
+            <div class="fld" style="flex:1;justify-content:flex-end"><label>&nbsp;</label><button class="btn primary" id="btnAddDeck">＋ 新建卡组</button></div>
+          </div>
+        </div>
+        <div class="panel" id="deckAdmin" style="display:none">
+          <h2 id="adminTitle">卡片管理</h2>
+          <p class="desc" id="adminDesc"></p>
+          <div class="row">
+            <div class="fld" style="flex:2"><label for="fNew">卡组正面（问题）</label><input id="fNew" placeholder="例如：TCP 三次握手第二步发送什么？" maxlength="200"></div>
+            <div class="fld" style="flex:2"><label for="bNew">卡组背面（答案）</label><textarea id="bNew" placeholder="例如：服务器发送 SYN+ACK（seq=y, ack=x+1）" maxlength="500"></textarea></div>
+            <div class="fld" style="flex:1;justify-content:flex-end"><label>&nbsp;</label><button class="btn primary" id="btnAddCard">＋ 添加卡片</button></div>
+          </div>
+          <div class="fld" style="max-width:220px"><label for="dailyNew">每日新卡上限</label>
+            <select id="dailyNew"><option>5</option><option selected>20</option><option>40</option><option>999</option></select>
+          </div>
+          <div class="sec-title"><h3>卡片列表</h3><span class="grow"></span><button class="btn danger sm" id="btnDelDeck">删除此卡组</button></div>
+          <div class="card-list" id="cardList"></div>
+        </div>
+      </section>
+
+      <!-- ============ 统计 ============ -->
+      <section class="view" id="v-stats">
+        <div class="panel">
+          <h2>学习统计</h2>
+          <p class="desc">连续学习天数按「当天有评分记录」计算。</p>
+          <div class="kpis" id="statKpis"></div>
+          <div class="sec-title"><h3>未来 7 天到期预测</h3><span class="grow"></span><span class="mono" id="fcSum"></span></div>
+          <div class="fc" id="forecast"></div>
+        </div>
+        <div class="panel">
+          <h2>各卡组进度</h2>
+          <p class="desc">按到期日排序；掌握率 = 成熟卡片 / 总卡片。</p>
+          <div style="overflow-x:auto">
+          <table class="tb"><thead><tr><th>卡组</th><th>卡片</th><th>今日到期</th><th>成熟</th><th>新生</th><th>掌握率</th></tr></thead><tbody id="deckStats"></tbody></table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 数据 ============ -->
+      <section class="view" id="v-data">
+        <div class="panel">
+          <h2>数据管理</h2>
+          <p class="desc">所有卡片与学习记录都只存在本机浏览器 localStorage，不上传任何服务器。</p>
+          <div class="row">
+            <button class="btn" id="btnExport">⬇ 导出 JSON 备份</button>
+            <button class="btn" id="btnImport">⬆ 导入 JSON 备份</button>
+            <button class="btn danger" id="btnReset">🗑 清空全部数据</button>
+          </div>
+          <input type="file" id="impFile" accept=".json,application/json" style="display:none" aria-label="选择要导入的 JSON 备份文件">
+          <p class="mono" id="storeInfo" style="margin-top:14px"></p>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+"use strict";
+var KEY='wb_srs_v1';
+function $id(id){return document.getElementById(id);}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];});}
+function pad(n){return n<10?'0'+n:''+n;}
+function ymd(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
+function today(){var d=new Date();return ymd(d);}
+function addDays(base,n){var d=new Date(base+'T00:00:00');d.setDate(d.getDate()+n);return ymd(d);}
+function daysBetween(a,b){return Math.round((new Date(b+'T00:00:00')-new Date(a+'T00:00:00'))/86400000);}
+var $toastTimer=null;
+function toast(m){var t=$id('toast');t.textContent=m;t.classList.add('on');clearTimeout($toastTimer);$toastTimer=setTimeout(function(){t.classList.remove('on');},2200);}
+
+/* ================= 内置卡组 ================= */
+var BUILTIN=[
+ {name:'政治 · 马原核心',icon:'📚',cards:[
+  ['物质的唯一特性是什么？','客观实在性——物质独立于人的意识而存在，不以人的意志为转移。'],
+  ['实践为什么具有直接现实性？','实践是联系主观与客观的桥梁，能把观念的存在变为现实的存在。'],
+  ['矛盾同一性在事物发展中的作用','同一性是事物存在和发展的前提，使矛盾双方相互吸取有利因素；规定事物转化的可能性和趋势。'],
+  ['量变与质变的辩证关系','量变是质变的必要准备，质变是量变的必然结果；量变达到关节点（度）就引起质变，在新质基础上又开始新的量变。'],
+  ['认识过程的第一次飞跃','从实践到认识：感性认识（感觉、知觉、表象）上升为理性认识（概念、判断、推理）。'],
+  ['认识过程的第二次飞跃','从认识到实践——这是更重要的一次飞跃，需要经过中介环节和反复实践。'],
+  ['真理的绝对性与相对性','绝对性：承认真理的客观性及其无限发展；相对性：有待扩展、深化、修正。二者相互渗透、辩证转化。'],
+  ['社会存在与社会意识的关系','社会存在决定社会意识；社会意识有相对独立性，并对社会存在有能动的反作用。'],
+  ['生产关系的三个构成','生产资料所有制关系（基础）、生产中人与人的关系、产品分配关系。'],
+  ['价值规律的作用形式','商品价格围绕价值上下波动（供求关系影响价格，但不改变价值决定价格这一基础）。'],
+  ['剩余价值的唯一源泉','雇佣劳动者的剩余劳动。资本是增殖价值的价值，死劳动是活劳动的吸盘。'],
+  ['垄断利润的来源','垄断企业内部工人创造的剩余价值；非垄断企业利润的转移；对小生产者和国民收入的再分配。'],
+  ['商品经济的基本矛盾','私人劳动与社会劳动的矛盾——它决定商品经济的本质和发展过程。'],
+  ['唯物辩证法的总特征','联系和发展。'],
+  ['唯物辩证法的实质与核心','对立统一规律（矛盾规律）——它揭示了事物发展的源泉和动力。'],
+  ['实践对认识的决定作用（四个表现）','实践是认识的来源、动力、目的，实践是检验认识真理性的唯一标准。']
+ ]},
+ {name:'英语 · 高频核心词',icon:'🔤',cards:[
+  ['mitigate v.','减轻，缓和 — The government took measures to mitigate the impact of the crisis.'],
+  ['substantial adj.','大量的；可观的；实质的 — a substantial increase / substantial evidence'],
+  ['plausible adj.','看似合理的，似乎可信的（未必真实）— a plausible excuse'],
+  ['comprehensive adj.','全面的，综合的 — a comprehensive review of the literature'],
+  ['inevitably adv.','不可避免地 — Rising costs will inevitably lead to higher prices.'],
+  ['ambiguous adj.','模糊的，有歧义的 — an ambiguous wording / ambiguous attitude'],
+  ['prevalent adj.','流行的，普遍的 — The disease is prevalent among the elderly.'],
+  ['vulnerable adj.','易受伤害的，脆弱的 — vulnerable to criticism / a vulnerable group'],
+  ['arbitrary adj.','任意的，专断的 — an arbitrary decision / arbitrary code'],
+  ['coherent adj.','连贯的，条理清晰的 — a coherent argument'],
+  ['discrepancy n.','差异，不一致 — a discrepancy between theory and data'],
+  ['indispensable adj.','不可缺少的 — Sleep is indispensable to health.'],
+  ['notorious adj.','声名狼藉的 — be notorious for cutting corners'],
+  ['meticulous adj.','一丝不苟的 — meticulous preparation / meticulous records'],
+  ['cumulative adj.','累积的 — the cumulative effect of small errors'],
+  ['prospective adj.','预期的，未来的 — prospective students / a prospective study']
+ ]},
+ {name:'数学 · 公式与结论',icon:'📐',cards:[
+  ['x→0 等价无穷小（前五个）','sinx~x；tanx~x；eˣ−1~x；ln(1+x)~x；arctanx~x'],
+  ['x→0 高阶等价无穷小','1−cosx ~ x²/2；(1+x)ᵃ−1 ~ ax；aˣ−1 ~ x·lna'],
+  ['eˣ 的麦克劳林展开（前三项）','eˣ = 1 + x + x²/2! + x³/3! + …'],
+  ['sinx 的麦克劳林展开（前三项）','sinx = x − x³/3! + x⁵/5! − …'],
+  ['∫dx/(1+x²)','arctanx + C'],
+  ['∫dx/√(1−x²)','arcsinx + C'],
+  ['∫sec²x dx / ∫eˣ dx','tanx + C ；eˣ + C'],
+  ['二阶常系数齐次线性微分方程的通解结构','r²+pr+q=0：两不等实根→C₁e^(r₁x)+C₂e^(r₂x)；重根→(C₁+C₂x)e^(rx)；共轭复根→e^(αx)(C₁cosβx+C₂sinβx)'],
+  ['全概率公式','P(A)=ΣP(Bᵢ)P(A|Bᵢ)，{Bᵢ} 为完备事件组'],
+  ['贝叶斯公式','P(Bᵢ|A)=P(Bᵢ)P(A|Bᵢ)/ΣP(Bⱼ)P(A|Bⱼ)'],
+  ['泊松分布 P(X=k)','λᵏe^(−λ)/k!，k=0,1,2…'],
+  ['指数分布的无记忆性','P(T>s+t|T>s)=P(T>t)'],
+  ['常见分布的期望与方差','0-1分布B(1,p)：E=p, D=pq；泊松P(λ)：E=D=λ；均匀U(a,b)：E=(a+b)/2, D=(b−a)²/12；指数E(λ)：E=1/λ, D=1/λ²'],
+  ['矩阵可逆的充要条件','|A|≠0；r(A)=n；A 的特征值全不为零（任一等价表述均可）'],
+  ['施密特正交化','β₁=α₁；β₂=α₂−(α₂,β₁)/(β₁,β₁)·β₁；β₃=α₃−[(α₃,β₁)/(β₁,β₁)]β₁−[(α₃,β₂)/(β₂,β₂)]β₂'],
+  ['泰勒中值定理（带佩亚诺余项）','f(x)=f(x₀)+f′(x₀)(x−x₀)+f″(x₀)/2!·(x−x₀)²+…+o((x−x₀)ⁿ)']
+ ]}
+];
+
+/* ================= 状态 ================= */
+function freshCard(deckId,front,back){
+  return {id:'c'+Date.now().toString(36)+Math.random().toString(36).slice(2,7),deck:deckId,front:front,back:back,
+    due:today(),ivl:0,ef:2.5,reps:0,lapses:0,created:today()};
+}
+function seed(){
+  var decks=BUILTIN.map(function(b,i){return {id:'d'+i,name:b.name,builtin:true,dailyNew:20};});
+  var cards=[];
+  BUILTIN.forEach(function(b,i){
+    b.cards.forEach(function(c){cards.push(freshCard('d'+i,c[0],c[1]));});
+  });
+  return {seeded:true,decks:decks,cards:cards,log:{}};
+}
+function load(){
+  try{
+    var raw=localStorage.getItem(KEY);
+    if(raw){var st=JSON.parse(raw);if(st&&st.decks&&st.cards)return st;}
+  }catch(e){}
+  var s=seed();save(s);return s;
+}
+function save(st){try{localStorage.setItem(KEY,JSON.stringify(st));}catch(e){toast('保存失败：本地存储可能已满');}}
+
+var ST=load();
+var TODAY=today();
+var UI={view:'study',deck:ST.decks[0]?ST.decks[0].id:'',adminDeck:'',session:null};
+
+/* ================= 视图切换 ================= */
+function switchView(v){
+  UI.view=v;
+  document.querySelectorAll('.nav-item').forEach(function(n){n.classList.toggle('active',n.dataset.v===v);});
+  document.querySelectorAll('.view').forEach(function(s){s.classList.toggle('on',s.id==='v-'+v);});
+  if(v==='study')renderStudy();
+  if(v==='decks')renderDecks();
+  if(v==='stats')renderStats();
+  if(v==='data')renderData();
+}
+document.querySelectorAll('.nav-item').forEach(function(n){n.addEventListener('click',function(){switchView(n.dataset.v);});});
+$id('btnTheme').addEventListener('click',function(){
+  var h=document.documentElement;
+  h.dataset.theme=h.dataset.theme==='dark'?'light':'dark';
+  try{localStorage.setItem('wb_theme_srs',h.dataset.theme);}catch(e){}
+});
+try{var th=localStorage.getItem('wb_theme_srs');if(th)document.documentElement.dataset.theme=th;}catch(e){}
+
+/* ================= SRS 调度 ================= */
+function schedule(c,grade){
+  var ef=c.ef||2.5;
+  if(grade===0){
+    c.ef=Math.max(1.3,Math.round((ef-0.2)*100)/100);
+    c.ivl=0;c.lapses=(c.lapses||0)+1;c.reps=0;
+  }else{
+    c.reps=(c.reps||0)+1;
+    if(grade===1){
+      c.ef=Math.max(1.3,Math.round((ef-0.15)*100)/100);
+      c.ivl=c.reps===1?1:Math.max(1,Math.round((c.ivl||0)*1.2));
+    }else if(grade===2){
+      c.ivl=c.reps===1?1:(c.reps===2?3:Math.max(4,Math.round((c.ivl||0)*ef)));
+    }else{
+      c.ef=Math.min(2.8,Math.round((ef+0.15)*100)/100);
+      c.ivl=c.reps===1?2:Math.max(4,Math.round((c.ivl||0)*ef*1.3));
+    }
+  }
+  c.due=addDays(TODAY,c.ivl);
+  return c;
+}
+function preview(c,grade){
+  var t=JSON.parse(JSON.stringify(c));schedule(t,grade);
+  return t.ivl===0?'今天重来':t.ivl+' 天后';
+}
+function dueCards(deckId){
+  return ST.cards.filter(function(c){return c.deck===deckId&&c.due<=TODAY&&c.reps>0;})
+    .sort(function(a,b){return a.due<b.due?-1:a.due>b.due?1:(a.created<b.created?-1:1);});
+}
+function newCards(deckId,limit){
+  return ST.cards.filter(function(c){return c.deck===deckId&&c.due<=TODAY&&c.reps===0;})
+    .sort(function(a,b){return a.created<b.created?-1:1;}).slice(0,limit);
+}
+function deckById(id){for(var i=0;i<ST.decks.length;i++)if(ST.decks[i].id===id)return ST.decks[i];return null;}
+function cardById(id){for(var i=0;i<ST.cards.length;i++)if(ST.cards[i].id===id)return ST.cards[i];return null}
+
+/* ================= 学习视图 ================= */
+function renderStudy(){
+  var dueTotal=0;
+  ST.decks.forEach(function(d){
+    dueTotal+=dueCards(d.id).length+newCards(d.id,d.dailyNew).length;
+  });
+  var nb=$id('navDue');
+  if(dueTotal>0){nb.style.display='';nb.textContent=dueTotal;}else{nb.style.display='none';}
+  var chips=ST.decks.map(function(d){
+    var dn=dueCards(d.id).length+newCards(d.id,d.dailyNew).length;
+    return '<span class="chip'+(UI.deck===d.id?' on':'')+'" data-d="'+d.id+'">'+esc(d.name)+'<span class="n">'+dn+'</span></span>';
+  }).join('');
+  $id('deckChips').innerHTML=chips||'<span class="mono">还没有卡组，去「卡组」页新建</span>';
+  $id('deckChips').querySelectorAll('.chip').forEach(function(ch){
+    ch.addEventListener('click',function(){
+      UI.deck=ch.dataset.d;UI.session=null;renderStudy();
+    });
+  });
+  var learnedToday=(ST.log[TODAY]||{}).studied||0;
+  var streak=calcStreak();
+  var deck=deckById(UI.deck);
+  var deckTotal=deck?ST.cards.filter(function(c){return c.deck===deck.id;}).length:0;
+  $id('studyKpis').innerHTML=
+    kpi('a1',dueTotal,'今日待学')+
+    kpi('g',learnedToday,'今日已学')+
+    kpi('a2',streak,'连续天数')+
+    kpi('',deckTotal,deck?esc(deck.name)+' 卡片':'未选卡组');
+  if(!UI.session)renderStudyBody();
+}
+function kpi(cls,num,label){return '<div class="kpi '+cls+'"><b>'+num+'</b><span>'+label+'</span></div>';}
+function renderStudyBody(){
+  var body=$id('studyBody'),deck=deckById(UI.deck),s=UI.session;
+  if(!deck){body.innerHTML='<div class="empty-state"><div class="big">🗂️</div><b>还没有卡组</b>去「卡组」页新建，或选择一个内置卡组</div>';$id('btnEnd').style.display='none';return;}
+  if(!s){
+    var rev=dueCards(deck.id),nw=newCards(deck.id,deck.dailyNew);
+    var queue=rev.concat(nw).map(function(c){return c.id;});
+    if(queue.length===0){
+      var next=null;
+      ST.cards.forEach(function(c){if(c.deck===deck.id&&c.due>TODAY&&(next===null||c.due<next))next=c.due;});
+      body.innerHTML='<div class="empty-state"><div class="big">🎉</div><b>这个卡组今天已清空</b>'+
+        (next?('下一批 '+next+' 到期'):'暂无到期卡片，去「卡组」页添加新卡片')+'</div>';
+      $id('btnEnd').style.display='none';
+      $id('sessBar').style.width='0%';$id('sessTxt').textContent='已完成';
+      return;
+    }
+    s={q:queue,idx:0,flip:false,done:[],again:[],start:Date.now()};
+    UI.session=s;
+  }
+  $id('btnEnd').style.display='';
+  if(s.idx>=s.q.length){
+    var secs=Math.max(1,Math.round((Date.now()-s.start)/1000));
+    var mm=Math.floor(secs/60),ss=secs%60;
+    body.innerHTML='<div class="empty-state"><div class="big">✅</div><b>本轮学习完成</b>'+
+      '复习 '+s.done.filter(function(g){return g>0;}).length+' 张 · 重来 '+s.done.filter(function(g){return g===0;}).length+
+      ' 张 · 用时 '+(mm?mm+' 分 ':'')+ss+' 秒</div>'+
+      '<div style="text-align:center"><button class="btn primary" id="btnMore">继续清下一批</button></div>';
+    $id('btnMore').addEventListener('click',function(){
+      var rev=dueCards(deck.id),nw=newCards(deck.id,deck.dailyNew);
+      var q2=rev.concat(nw).map(function(c){return c.id;});
+      if(q2.length===0){UI.session=null;renderStudy();return;}
+      UI.session={q:q2,idx:0,flip:false,done:[],again:[],start:Date.now()};
+      renderStudyBody();
+    });
+    $id('sessBar').style.width='100%';
+    $id('sessTxt').textContent='第 '+(s.done.length)+' 张已评分';
+    return;
+  }
+  var c=cardById(s.q[s.idx]);
+  if(!c){s.idx++;renderStudyBody();return;}
+  var pct=s.q.length?Math.round(s.idx/s.q.length*100):0;
+  $id('sessBar').style.width=pct+'%';
+  $id('sessTxt').textContent='第 '+(s.idx+1)+' / '+s.q.length+' 张'+(c.reps===0?' · 新卡':' · 复习')+
+    (c.lapses>0?' · 错 '+c.lapses+' 次':'');
+  body.innerHTML=
+    '<div class="card-stage"><div class="card3d'+(s.flip?' flip':'')+'" id="card3d">'+
+      '<div class="card-face front"><div class="fbox" id="fFront">'+
+        '<div class="tag"><span>'+esc(deck.name)+'</span><span>'+(c.reps===0?'新卡片':'复习')+'</span></div>'+
+        '<div class="q">'+esc(c.front)+'</div>'+
+        '<div class="hint">点击卡片 / 空格 翻面</div>'+
+      '</div></div>'+
+      '<div class="card-face back"><div class="fbox" id="fBack">'+
+        '<div class="tag"><span>'+esc(deck.name)+'</span><span>间隔 '+c.ivl+' 天 · 难度 '+(c.ef||2.5)+'</span></div>'+
+        '<div class="a">'+esc(c.back)+'</div>'+
+        '<div class="hint">这张记住了吗？选择一个评分（键盘 1-4）</div>'+
+      '</div></div>'+
+    '</div></div>'+
+    '<div class="grade" id="gradeRow">'+
+      gbtn('again',0,'忘记','1')+gbtn('hard',1,'困难','2')+gbtn('good',2,'良好','3')+gbtn('easy',3,'简单','4')+
+    '</div>';
+  function gbtn(cls,g,label,k){
+    return '<button class="gbtn '+cls+'" data-g="'+g+'">'+label+'<small>'+preview(c,g)+'</small><kbd>'+k+'</kbd></button>';
+  }
+  $id('fFront').addEventListener('click',function(){s.flip=true;$id('card3d').classList.add('flip');});
+  $id('fBack').addEventListener('click',function(){s.flip=false;$id('card3d').classList.remove('flip');});
+  $id('gradeRow').querySelectorAll('.gbtn').forEach(function(b){
+    b.addEventListener('click',function(){grade(parseInt(b.dataset.g,10));});
+  });
+}
+function grade(g){
+  var s=UI.session;if(!s||s.idx>=s.q.length)return;
+  var c=cardById(s.q[s.idx]);if(!c)return;
+  schedule(c,g);
+  s.done.push(g);
+  if(g===0){s.again.push(c.id);s.q.push(c.id);} // 今天重来：排到本轮队尾，清完其他卡再回来
+  (ST.log[TODAY]=ST.log[TODAY]||{studied:0,again:0,hard:0,good:0,easy:0});
+  var L=ST.log[TODAY];
+  L.studied++;if(g===0)L.again++;if(g===1)L.hard++;if(g===2)L.good++;if(g===3)L.easy++;
+  save(ST);
+  s.idx++;s.flip=false;
+  renderStudyBody();
+}
+$id('btnEnd').addEventListener('click',function(){UI.session=null;renderStudy();});
+document.addEventListener('keydown',function(e){
+  if(UI.view!=='study'||!UI.session)return;
+  if(e.target&&/INPUT|TEXTAREA|SELECT/.test(e.target.tagName))return;
+  if(e.code==='Space'||e.code==='Enter'){
+    e.preventDefault();
+    UI.session.flip=!UI.session.flip;
+    var el=$id('card3d');if(el)el.classList.toggle('flip',UI.session.flip);
+    return;
+  }
+  var map={Digit1:0,Digit2:1,Digit3:2,Digit4:3,Numpad1:0,Numpad2:1,Numpad3:2,Numpad4:3};
+  if(map[e.code]!==undefined&&UI.session.flip!==undefined){
+    e.preventDefault();grade(map[e.code]);
+  }
+});
+
+/* ================= 卡组视图 ================= */
+function renderDecks(){
+  var html=ST.decks.map(function(d){
+    var cards=ST.cards.filter(function(c){return c.deck===d.id;});
+    var mature=cards.filter(function(c){return c.ivl>=21;}).length;
+    var young=cards.filter(function(c){return c.ivl>0&&c.ivl<21;}).length;
+    var nw=cards.filter(function(c){return c.reps===0;}).length;
+    var dn=dueCards(d.id).length+newCards(d.id,d.dailyNew).length;
+    var mp=mature+young+nw?Math.round(mature/(mature+young+nw)*100):0;
+    var my=cards.length?Math.round(young/cards.length*100):0;
+    var mn=nw&&cards.length?Math.round(nw/cards.length*100):0;
+    return '<div class="deck-row'+(UI.adminDeck===d.id?' on':'')+'" data-d="'+d.id+'">'+
+      '<div class="di">'+(d.icon||'🗂️')+'</div>'+
+      '<div class="dm"><b>'+esc(d.name)+(d.builtin?' <span class="mono">内置</span>':'')+'</b>'+
+      '<span>'+cards.length+' 张卡片 · 掌握率 '+mp+'%</span>'+
+      '<div class="dist"><i class="m" style="width:'+mp+'%"></i><i class="y" style="width:'+my+'%"></i><i class="n" style="width:'+mn+'%"></i></div></div>'+
+      '<div class="due-n"><b>'+dn+'</b><span>今日待学</span></div>'+
+      '</div>';
+  }).join('');
+  $id('deckList').innerHTML=html||'<div class="empty-state"><b>还没有卡组</b></div>';
+  $id('deckList').querySelectorAll('.deck-row').forEach(function(r){
+    r.addEventListener('click',function(){
+      UI.adminDeck=r.dataset.d;renderDecks();
+    });
+  });
+  var admin=$id('deckAdmin'),d=deckById(UI.adminDeck);
+  if(!d){admin.style.display='none';return;}
+  admin.style.display='';
+  $id('adminTitle').textContent='卡片管理 · '+d.name;
+  $id('adminDesc').textContent='共 '+ST.cards.filter(function(c){return c.deck===d.id;}).length+
+    ' 张卡片 · 每日新卡上限 '+d.dailyNew+' 张';
+  $id('dailyNew').value=String(d.dailyNew);
+  var list=ST.cards.filter(function(c){return c.deck===d.id;})
+    .sort(function(a,b){return a.due<b.due?-1:1;})
+    .map(function(c){
+      var ivl=c.reps===0?'未学':(c.ivl+' 天');
+      return '<div class="card-item"><div class="ct"><b>'+esc(c.front)+'</b><span>'+esc(c.back)+'</span></div>'+
+        '<span class="ivl">'+ivl+'</span>'+
+        '<button class="btn danger sm" data-del="'+c.id+'" title="删除卡片" aria-label="删除卡片：'+esc(c.front)+'">✕</button></div>';
+    }).join('');
+  $id('cardList').innerHTML=list||'<div class="empty-state"><b>还没有卡片</b>在上方添加第一张</div>';
+  $id('cardList').querySelectorAll('[data-del]').forEach(function(b){
+    b.addEventListener('click',function(){
+      if(b.classList.contains('armed')){
+        ST.cards=ST.cards.filter(function(c){return c.id!==b.dataset.del;});
+        save(ST);toast('已删除卡片');renderDecks();renderStudy();
+      }else{b.classList.add('armed');b.textContent='确认删除?';setTimeout(function(){b.classList.remove('armed');b.textContent='✕';},2600);}
+    });
+  });
+}
+$id('btnAddDeck').addEventListener('click',function(){
+  var n=$id('newDeckName').value.trim();
+  if(!n){toast('先输入卡组名称');return;}
+  ST.decks.push({id:'d'+Date.now().toString(36),name:n,builtin:false,dailyNew:20});
+  save(ST);$id('newDeckName').value='';UI.adminDeck=ST.decks[ST.decks.length-1].id;
+  toast('已创建卡组「'+n+'」');renderDecks();renderStudy();
+});
+$id('btnAddCard').addEventListener('click',function(){
+  var f=$id('fNew').value.trim(),b=$id('bNew').value.trim();
+  var d=deckById(UI.adminDeck);
+  if(!f||!b){toast('正面和背面都要填');return;}
+  ST.cards.push(freshCard(d.id,f,b));save(ST);
+  $id('fNew').value='';$id('bNew').value='';
+  toast('已添加卡片');renderDecks();renderStudy();
+  $id('fNew').focus();
+});
+$id('dailyNew').addEventListener('change',function(){
+  var d=deckById(UI.adminDeck);if(!d)return;
+  d.dailyNew=parseInt($id('dailyNew').value,10)||20;save(ST);toast('每日新卡上限已设为 '+d.dailyNew);renderDecks();renderStudy();
+});
+$id('btnDelDeck').addEventListener('click',function(){
+  var b=this,d=deckById(UI.adminDeck);if(!d)return;
+  if(!b.classList.contains('armed')){
+    if(d.builtin){toast('内置卡组不可删除');return;}
+    b.classList.add('armed');b.textContent='确认删除整个卡组?';
+    setTimeout(function(){b.classList.remove('armed');b.textContent='删除此卡组';},2600);return;
+  }
+  ST.cards=ST.cards.filter(function(c){return c.deck!==d.id;});
+  ST.decks=ST.decks.filter(function(x){return x.id!==d.id;});
+  if(UI.deck===d.id)UI.deck=ST.decks[0]?ST.decks[0].id:'';
+  UI.adminDeck='';UI.session=null;save(ST);
+  b.classList.remove('armed');b.textContent='删除此卡组';
+  toast('已删除卡组');renderDecks();renderStudy();
+});
+
+/* ================= 统计视图 ================= */
+function calcStreak(){
+  var n=0,d=TODAY;
+  while(ST.log[d]&&ST.log[d].studied>0){n++;d=addDays(d,-1);}
+  return n;
+}
+function renderStats(){
+  var total=ST.cards.length;
+  var mature=ST.cards.filter(function(c){return c.ivl>=21;}).length;
+  var dueTotal=0;
+  ST.decks.forEach(function(d){dueTotal+=dueCards(d.id).length+newCards(d.id,d.dailyNew).length;});
+  var learned30=0;
+  for(var i=0;i<30;i++){var L=ST.log[addDays(TODAY,-i)];if(L)learned30+=L.studied;}
+  $id('statKpis').innerHTML=
+    kpi('',total,'卡片总数')+
+    kpi('a1',dueTotal,'今日待学')+
+    kpi('g',mature,'成熟卡片(≥21天)')+
+    kpi('a2',calcStreak(),'连续学习天数')+
+    kpi('',learned30,'近 30 天学习量');
+  var days=[],max=0;
+  for(var i=0;i<7;i++){
+    var day=addDays(TODAY,i),n=0;
+    if(i===0){n=ST.cards.filter(function(c){return c.due<=TODAY;}).length;}
+    else{n=ST.cards.filter(function(c){return c.due===day;}).length;}
+    if(n>max)max=n;
+    days.push({day:day,n:n});
+  }
+  $id('forecast').innerHTML=days.map(function(x,i){
+    var h=max?Math.round(x.n/max*100):0;
+    var lb=i===0?'今天':(i===1?'明天':x.day.slice(5));
+    return '<div class="col'+(i===0?' today':'')+'" title="'+x.day+'：'+x.n+' 张"><i style="height:'+Math.max(3,h)+'%"></i><b>'+x.n+'</b><b>'+lb+'</b></div>';
+  }).join('');
+  var sum=days.reduce(function(a,b){return a+b.n;},0);
+  $id('fcSum').textContent='7 天共 '+sum+' 张到期';
+  var rows=ST.decks.map(function(d){
+    var cards=ST.cards.filter(function(c){return c.deck===d.id;});
+    var mat=cards.filter(function(c){return c.ivl>=21;}).length;
+    var nw=cards.filter(function(c){return c.reps===0;}).length;
+    var dn=dueCards(d.id).length+newCards(d.id,d.dailyNew).length;
+    var rate=cards.length?Math.round(mat/cards.length*100)+'%':'—';
+    return '<tr><td>'+esc(d.name)+'</td><td>'+cards.length+'</td><td>'+dn+'</td><td>'+mat+'</td><td>'+nw+'</td><td>'+rate+'</td></tr>';
+  }).join('');
+  $id('deckStats').innerHTML=rows||'<tr><td colspan="6" class="mono">暂无卡组</td></tr>';
+}
+
+/* ================= 数据视图 ================= */
+function renderData(){
+  var raw='';
+  try{raw=localStorage.getItem(KEY)||'';}catch(e){}
+  $id('storeInfo').textContent='存储键：'+KEY+' · 数据体积约 '+(raw.length/1024).toFixed(1)+' KB · 卡片 '+ST.cards.length+' 张 · 卡组 '+ST.decks.length+' 个';
+}
+$id('btnExport').addEventListener('click',function(){
+  try{
+    var blob=new Blob([JSON.stringify(ST,null,2)],{type:'application/json'});
+    var a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download='kaoyan-srs-backup-'+TODAY+'.json';
+    document.body.appendChild(a);a.click();
+    setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},400);
+    toast('已导出备份文件');
+  }catch(e){toast('导出失败：'+e.message);}
+});
+$id('btnImport').addEventListener('click',function(){$id('impFile').click();});
+$id('impFile').addEventListener('change',function(){
+  var f=this.files&&this.files[0];if(!f)return;
+  var r=new FileReader();
+  r.onload=function(){
+    try{
+      var st=JSON.parse(r.result);
+      if(!st.decks||!st.cards)throw new Error('缺少 decks/cards 字段');
+      ST=st;save(ST);UI.session=null;
+      UI.deck=ST.decks[0]?ST.decks[0].id:'';UI.adminDeck='';
+      toast('导入成功：'+ST.cards.length+' 张卡片');renderStudy();renderData();
+    }catch(e){toast('导入失败：JSON 解析或格式不对');}
+  };
+  r.readAsText(f);
+  this.value='';
+});
+$id('btnReset').addEventListener('click',function(){
+  var b=this;
+  if(!b.classList.contains('armed')){
+    b.classList.add('armed');b.textContent='🗑 确认清空？再点一次';
+    setTimeout(function(){b.classList.remove('armed');b.textContent='🗑 清空全部数据';},2800);return;
+  }
+  ST=seed();save(ST);UI.session=null;UI.deck=ST.decks[0].id;UI.adminDeck='';
+  b.classList.remove('armed');b.textContent='🗑 清空全部数据';
+  toast('已恢复初始内置卡组');switchView('study');
+});
+
+/* ================= 启动 ================= */
+renderStudy();
+})();
+</script>
+</body>
+</html>
