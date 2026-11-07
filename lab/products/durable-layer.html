@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" type="image/png" href="../../assets/pwa/icon-192.png"><!-- 2026-11-06 全站补 rel="icon"：本页此前未声明，浏览器回落请求站点根 /favicon.ico 报 404（控制台红色噪音、标签页无图标）；与 2026-10-03 对 index/zk-ky/share-hub 的处理同一策略 -->
+<title>永恒层 · 十年不过时的技术底座</title>
+<meta name="description" content="永恒层 · 十年不过时的技术底座：按「十年后还能读今天的数据吗」筛出的协议/格式/算法/语料耐久资产">
+<style>
+  :root{
+    --bg:#0f1311; --card:#181d1a; --card2:#1e2420; --text:#e8ece9; --muted:#8f9c95;
+    --line:#2b342e; --teal:#34d399; --teal-2:#2dd4bf; --amber:#fbbf24; --violet:#a78bfa; --red:#f87171;
+    --r:14px; --r-sm:9px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg);color:var(--text);line-height:1.65;padding:18px 16px 40px;font-size:15px}
+  .wrap{max-width:1120px;margin:0 auto}
+  h1{font-size:1.5rem;letter-spacing:.02em;background:linear-gradient(100deg,var(--teal),var(--teal-2) 55%,var(--violet));
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;display:flex;align-items:center;gap:9px}
+  .lead{color:var(--muted);font-size:.9rem;margin:8px 0 18px}
+  .lead b{color:var(--text)}
+
+  /* 判定标准 */
+  .rule{background:linear-gradient(135deg,rgba(52,211,153,.10),rgba(167,139,250,.08));
+    border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;margin-bottom:20px}
+  .rule h2{font-size:.95rem;color:var(--teal);margin-bottom:10px;display:flex;align-items:center;gap:7px}
+  .rule ol{margin-left:18px;font-size:.88rem;color:var(--muted)}
+  .rule ol li{margin-bottom:6px}
+  .rule ol li b{color:var(--text)}
+  .rule .no{margin-top:12px;padding-top:12px;border-top:1px dashed var(--line);font-size:.86rem;color:var(--muted)}
+  .rule .no code{background:rgba(248,113,113,.12);color:var(--red);border-radius:4px;padding:1px 6px;font-size:.82rem}
+
+  /* 工具条 */
+  .bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+  .chip{background:var(--card2);border:1px solid var(--line);color:var(--muted);border-radius:999px;
+    padding:6px 14px;font-size:.83rem;cursor:pointer;transition:.18s}
+  .chip:hover{color:var(--text);border-color:#3a463f}
+  .chip.on{background:linear-gradient(120deg,var(--teal),var(--teal-2));color:#08130e;border-color:transparent;font-weight:700}
+  .chip i{font-style:normal;opacity:.7;font-size:.78rem;margin-left:4px}
+  #q{flex:1;min-width:180px;background:var(--card2);border:1px solid var(--line);border-radius:999px;
+    padding:8px 16px;color:var(--text);font-size:.88rem;font-family:inherit}
+  #q:focus{outline:none;border-color:var(--teal)}
+
+  /* 分组 */
+  .tier{margin:26px 0 10px;display:flex;align-items:center;gap:10px}
+  .tier h2{font-size:1.05rem;color:var(--text)}
+  .tier .lvl{font-size:.72rem;font-weight:800;letter-spacing:.06em;padding:3px 9px;border-radius:6px;
+    background:rgba(52,211,153,.16);color:var(--teal)}
+  .tier .lvl.b{background:rgba(251,191,36,.16);color:var(--amber)}
+  .tier .lvl.c{background:rgba(167,139,250,.16);color:var(--violet)}
+  .tier .note{font-size:.8rem;color:var(--muted)}
+
+  .grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:15px 16px;
+    display:flex;flex-direction:column;gap:9px;transition:.2s;position:relative;overflow:hidden}
+  .card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--teal);opacity:.55}
+  .card:hover{border-color:#3d4a43;transform:translateY(-2px);box-shadow:0 12px 28px -18px rgba(0,0,0,.8)}
+  .card[data-tier="2"]::before{background:var(--amber)}
+  .card[data-tier="3"]::before{background:var(--violet)}
+  .card .hd{display:flex;align-items:flex-start;gap:8px;justify-content:space-between}
+  .card h3{font-size:.98rem;line-height:1.35}
+  .card h3 small{display:block;font-size:.76rem;color:var(--muted);font-weight:400;margin-top:2px}
+  .score{flex:none;text-align:center;line-height:1}
+  .score b{font-size:1.05rem;color:var(--teal);font-variant-numeric:tabular-nums}
+  .score span{display:block;font-size:.62rem;color:var(--muted);margin-top:2px}
+  .card[data-tier="2"] .score b{color:var(--amber)}
+  .card[data-tier="3"] .score b{color:var(--violet)}
+
+  .meta{display:flex;flex-wrap:wrap;gap:6px;font-size:.72rem}
+  .meta span{background:var(--card2);border:1px solid var(--line);border-radius:5px;padding:2px 7px;color:var(--muted)}
+  .meta span.k{color:var(--teal-2)}
+  .why{font-size:.84rem;color:var(--muted)}
+  .why b{color:var(--text);font-weight:600}
+  .use{font-size:.8rem;color:var(--muted);background:rgba(45,212,191,.06);border-left:2px solid var(--teal-2);
+    padding:7px 10px;border-radius:0 6px 6px 0}
+  .use b{color:var(--teal-2)}
+  .card .go{font-size:.8rem;color:var(--teal);text-decoration:none;font-weight:600;margin-top:auto;padding-top:4px}
+  .card .go:hover{color:var(--teal-2)}
+
+  .empty{text-align:center;color:var(--muted);padding:36px 0;font-size:.9rem}
+
+  /* 自查器 */
+  .quiz{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px;margin-top:28px}
+  .quiz h2{font-size:1rem;color:var(--amber);margin-bottom:12px;display:flex;align-items:center;gap:7px}
+  .qrow{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px dashed var(--line);font-size:.87rem}
+  .qrow:last-of-type{border-bottom:none}
+  .qrow input{margin-top:4px;accent-color:var(--teal);width:16px;height:16px;flex:none}
+  .qrow label{color:var(--muted);cursor:pointer}
+  .qrow input:checked+label{color:var(--text)}
+  .verdict{margin-top:14px;padding:12px 14px;border-radius:var(--r-sm);font-size:.88rem;font-weight:600;text-align:center;
+    background:var(--card2);color:var(--muted);border:1px solid var(--line)}
+  .verdict.ok{background:rgba(52,211,153,.12);color:var(--teal);border-color:rgba(52,211,153,.3)}
+  .verdict.bad{background:rgba(248,113,113,.10);color:var(--red);border-color:rgba(248,113,113,.28)}
+
+  footer{margin-top:30px;padding-top:16px;border-top:1px solid var(--line);font-size:.78rem;color:var(--muted);text-align:center;line-height:1.8}
+  @media(max-width:600px){
+    body{padding:14px 12px 32px;font-size:14.5px}
+    h1{font-size:1.25rem}
+    .grid{grid-template-columns:1fr}
+  }
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+  :focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+<div class="wrap">
+  <h1>🗿 永恒层 · 十年不过时的技术底座</h1>
+  <p class="lead">
+    判据只有一条：<b>十年后我还能用它读今天的数据 / 今天写的文件吗？</b>
+    能 → 收进这一层；不能 → 只是一时的实现，别当资产。
+    星数不是耐久度：<b>400k 星的路线图 2036 年要重写，2000 年的 SQLite 文件格式却还要读得开。</b>
+  </p>
+
+  <div class="rule">
+    <h2>🎯 判据：什么才配叫「不过时」</h2>
+    <ol>
+      <li><b>定义的是约定，不是实现</b> —— 协议 / 格式 / 编码 / 算法名。约定由多方共同锁定，单方无法推翻。</li>
+      <li><b>已有存量数据或存量系统押在上面</b> —— 越多人拿它存东西，越不能改（SQLite 官方明文承诺不改文件格式）。</li>
+      <li><b>规范先行、实现可换</b> —— UTF-8 不变，但编辑器换了十代；Markdown 不变，渲染器换了几百个。</li>
+      <li><b>单一职责、极小依赖</b> —— zlib 只做一件事，所以活到今天；功能越多的越早死。</li>
+    </ol>
+    <div class="no">
+      反向信号（看到这些就当“实现层”，别当长期资产）：
+      <code>UI 范式驱动</code> <code>平台绑定</code> <code>内容型路线图</code>
+      <code>版本号一年跳三次大版本</code> <code>离开某家公司就不转</code>
+    </div>
+  </div>
+
+  <div class="bar">
+    <input id="q" type="search" placeholder="搜项目 / 关键词（如 sqlite、压缩、408、协议）…" aria-label="搜索">
+    <button class="chip on" data-f="all">全部 <i id="cAll"></i></button>
+    <button class="chip" data-f="1">协议·格式 <i></i></button>
+    <button class="chip" data-f="2">算法·结构 <i></i></button>
+    <button class="chip" data-f="3">语料·参考 <i></i></button>
+    <button class="chip" data-f="408">对 408 有用 <i></i></button>
+  </div>
+
+  <div id="body"></div>
+
+  <div class="quiz">
+    <h2>🧪 30 秒自查：你手上这个东西能不能活二十年？</h2>
+    <div id="quiz"></div>
+    <div class="verdict" id="verdict">勾选上面符合的项，看判定</div>
+  </div>
+
+  <footer>
+    数据核实：2026-11-05 实测 GitHub API（stars / 创建日 / 许可）。
+    注意「GitHub 创建日 ≠ 项目起始年」—— sqlite/sqlite、git/git、postgres/postgres 均为官方镜像仓，
+    真实起始年已在卡内单独标注（SQLite 2000、Git 2005、PostgreSQL 1996）。
+    本页为纯静态单文件，零外部依赖，可离线打开。
+  </footer>
+</div>
+
+<script>
+(function(){
+  'use strict';
+  // 数据：stars / 建仓日 / 许可 均为 2026-11-05 GitHub API 实测；birth 为项目真实起始年
+  var DATA = [
+    // —— tier 1：协议 / 格式 / 编码（最耐久层） ——
+    {t:'SQLite', sub:'单文件关系数据库 · 世界部署量最大的数据库', tier:1, score:99,
+     birth:'2000', stars:'10.9k', lic:'Public Domain', lang:'C',
+     why:'官方明确承诺<b>文件格式不改</b>，存量 .db 到 2050 年仍要能读。定义的是磁盘格式，不是某个程序。',
+     use:'工作台可把「任务/笔记/进度」导出为 SQLite 当长期存档——比 localStorage 活得久。',
+     url:'https://github.com/sqlite/sqlite', tags:'数据库 存储 格式 408 文件系统'},
+    {t:'Git', sub:'内容寻址的对象模型（blob / tree / commit）', tier:1, score:98,
+     birth:'2005', stars:'64.2k', lic:'GPL-2.0', lang:'C',
+     why:'模型二十年没变：<b>内容决定哈希、历史不可变</b>。CLI 换了、GUI 换了十代，对象格式没动。',
+     use:'你的 <code>.git</code> 目录本身就是这层的活标本；理解它 = 理解任何版本控制。',
+     url:'https://github.com/git/git', tags:'版本控制 哈希 持久化 408 操作系统'},
+    {t:'CommonMark / Markdown', sub:'纯文本描述格式的正式规范', tier:1, score:96,
+     birth:'2004', stars:'5.2k', lic:'CC-BY-SA', lang:'Spec',
+     why:'Markdown 2004 年发明，2014 年固化成 CommonMark 规范。<b>纯文本没有任何私有编码</b>，二十年后仍能读。',
+     use:'你工作台里所有 .md（优化报告、MAP.md、能力地图）都押在这层上——选型本来就是对的。',
+     url:'https://github.com/commonmark/commonmark-spec', tags:'文本 规范 文档 写作'},
+    {t:'HTTP / RFC 体系（curl 为实现）', sub:'1998 年至今的传输协议 + 活的参考实现', tier:1, score:97,
+     birth:'1998', stars:'43.4k', lic:'curl(MIT-like)', lang:'C',
+     why:'协议由 IETF 多方锁定，<b>单方改不了</b>；curl 用它跑了 27 年还在每天发版。学协议比学任何 HTTP 库都保值。',
+     use:'408 计网大题的骨架就是它；配合工作台的 /me 与本地 serve.py 实测请求头。',
+     url:'https://github.com/curl/curl', tags:'网络 协议 计网 408 RFC'},
+    {t:'Unicode / UTF-8', sub:'全世界字符编码的唯一底座', tier:1, score:99,
+     birth:'1991', stars:'3.6k(icu)', lic:'Unicode License', lang:'Spec/C++',
+     why:'<b>不存在替代方案</b>：所有语言的字符串都以它为准。UTF-8 还是「兼容 ASCII 的变长编码」这一设计的胜利。',
+     use:'你踩过的中文路径乱码（这批改动里就有）本质是编码层问题——底层永不变。',
+     url:'https://github.com/unicode-org/icu', tags:'编码 字符 中文 底层'},
+    {t:'zlib / PNG / JPEG', sub:'压缩与图像的事实标准', tier:1, score:95,
+     birth:'1995', stars:'7.2k', lic:'zlib license', lang:'C',
+     why:'存量图片全部依赖，<b>换格式意味着全世界重编码一次</b>。deflate 算法本身成了教材内容。',
+     use:'你导出截图、压缩素材都在这层；理解 Huffman + LZ 就是理解 408 压缩考点。',
+     url:'https://github.com/madler/zlib', tags:'压缩 图像 算法 408'},
+    {t:'TeX（KaTeX / MathJax 为实现）', sub:'数学排版的事实标准', tier:1, score:94,
+     birth:'1978', stars:'20.5k', lic:'KaTeX MIT', lang:'TeX/JS',
+     why:'<b>1978 年至今</b>，学术出版界没有替代品。KaTeX/MathJax 是这层的现代实现——实现可换，语法不变。',
+     use:'双线作战台的数学真题公式渲染已本地化 KaTeX，正是这一层。',
+     url:'https://github.com/KaTeX/KaTeX', tags:'数学 排版 公式 考研 408'},
+    {t:'TOML / YAML / JSON5', sub:'配置文件格式族', tier:1, score:88,
+     birth:'2013', stars:'20.7k', lic:'MIT', lang:'Spec',
+     why:'配置格式一旦被生态锁定就极难更换（想想还得读 20 年前的 ini）。<b>选保守格式 = 给未来省事</b>。',
+     use:'工作台零配置（localStorage）其实是更保守的选择；需要外置配置时优先 TOML。',
+     url:'https://github.com/toml-lang/toml', tags:'配置 格式 工程'},
+    {t:'OpenSSL / libexpat', sub:'加密与 XML 解析的基石库', tier:1, score:92,
+     birth:'1998', stars:'31.2k', lic:'Apache-2.0', lang:'C',
+     why:'<b>被整个互联网的存量系统依赖</b>，接口再丑也换不掉。属于“结构性不可替换”。',
+     use:'你访问 https 的每一跳都在这层；408 计网加密章节的现实落点。',
+     url:'https://github.com/openssl/openssl', tags:'加密 安全 网络 底层'},
+    {t:'WHATWG HTML 规范', sub:'活标准（Living Standard）', tier:1, score:90,
+     birth:'2004', stars:'9.4k', lic:'CC-BY', lang:'Spec',
+     why:'浏览器必须遵守它才能显示网页，<b>所以它只能加不能删</b>——这正是它长寿的原因。',
+     use:'你所有单文件 HTML 页面的行为依据；遇到“为什么这样渲染”先查规范而不是查博客。',
+     url:'https://github.com/whatwg/html', tags:'前端 规范 浏览器'},
+
+    // —— tier 2：算法 / 数据结构（教科书级） ——
+    {t:'TheAlgorithms / Python', sub:'算法全实现（按主题分类）', tier:2, score:93,
+     birth:'2016', stars:'225.9k', lic:'MIT', lang:'Python',
+     why:'算法是<b>数学层</b>：快排二十年后还是快排。这个仓把“可运行的伪代码”给齐了，MIT 可随意取用。',
+     use:'408 数据结构/算法题的代码对照；刷题前先看实现再看题解。',
+     url:'https://github.com/TheAlgorithms/Python', tags:'算法 408 数据结构 Python 刷题'},
+    {t:'javascript-algorithms', sub:'算法 + 图解 + 复杂度', tier:2, score:92,
+     birth:'2018', stars:'196.7k', lic:'MIT', lang:'JS',
+     why:'同样押在算法层，且<b>每个算法带 Big-O 与图解</b>——比干看代码更容易迁移到考试。',
+     use:'408 时间复杂度分析的可视参照。',
+     url:'https://github.com/trekhleb/javascript-algorithms', tags:'算法 复杂度 408 图解'},
+    {t:'algorithm-visualizer', sub:'算法执行过程可视化', tier:2, score:90,
+     birth:'2016', stars:'49.4k', lic:'MIT', lang:'JS',
+     why:'可视化不改变算法本身，<b>但极大降低理解成本</b>；排序/图/DP 的执行轨迹是二十年不变的教具。',
+     use:'408 排序、树、图遍历的手把手演示（把抽象过程看见）。',
+     url:'https://github.com/algorithm-visualizer/algorithm-visualizer', tags:'算法 可视化 408 教学'},
+    {t:'CyC2018 / CS-Notes', sub:'中文计算机基础笔记（四科覆盖）', tier:2, score:89,
+     birth:'2018', stars:'186.5k', lic:'见仓库', lang:'Markdown',
+     why:'押在<b>计算机基础四科</b>（数据结构/操作系统/计网/组成）——这四科的知识半衰期以十年计。',
+     use:'正好覆盖你 408 四门；可当二手复习大纲，配王道校正。',
+     url:'https://github.com/CyC2018/CS-Notes', tags:'408 操作系统 计网 组成 笔记'},
+    {t:'labuladong / 算法套路', sub:'中文算法解题框架', tier:2, score:87,
+     birth:'2020', stars:'136.0k', lic:'见仓库', lang:'Markdown',
+     why:'讲的是<b>套路（框架思维）</b>而非具体题面，题变了套路不变。',
+     use:'考研机试/408 算法大题的“先套框架再填细节”训练。',
+     url:'https://github.com/labuladong/fucking-algorithm', tags:'算法 套路 考研 408'},
+    {t:'ossu / computer-science', sub:'免费 CS 学位课程路径', tier:2, score:88,
+     birth:'2014', stars:'210.8k', lic:'MIT', lang:'Curriculum',
+     why:'课程表押在<b>学科结构</b>上，不是某门课的视频；十年后课程换，结构不换。',
+     use:'对照你自考 080901 的 27 门课，找出缺口（比如离散数学、体系结构）。',
+     url:'https://github.com/ossu/computer-science', tags:'课程 学习路径 自考 考研'},
+
+    // —— tier 3：语料 / 参考（内容耐久，但要接受缓慢过时） ——
+    {t:'free-programming-books', sub:'免费编程书索引（40 万星）', tier:3, score:80,
+     birth:'2013', stars:'400.9k', lic:'CC-BY-4.0', lang:'Markdown',
+     why:'它本身只是<b>索引</b>，链接会烂、分类不会烂；作为“找书入口”比任何具体书单耐久。',
+     use:'遇冷门主题先来这找免费正版书，再去买纸质。',
+     url:'https://github.com/EbookFoundation/free-programming-books', tags:'书籍 资源 学习'},
+    {t:'papers-we-love', sub:'经典论文合集（学术层）', tier:3, score:86,
+     birth:'2013', stars:'111.2k', lic:'见仓库', lang:'Papers',
+     why:'<b>论文是知识的第一手形态</b>；四十年前的论文今天仍被引用，属真正的长效资产。',
+     use:'想搞懂某个机制“为什么这么设计”，读原始论文而不是二手博客。',
+     url:'https://github.com/papers-we-love/papers-we-love', tags:'论文 学术 研究'},
+    {t:'tldr-pages', sub:'命令速查（比 man 快）', tier:3, score:84,
+     birth:'2013', stars:'64.1k', lic:'CC-BY', lang:'Markdown',
+     why:'命令的<b>语义</b>（tar 怎么用）二十年不变；它只收录最常用的例子，所以不会被版本更新淹没。',
+     use:'本机装了 tldr 就能查；也可直接翻仓库当命令字典。',
+     url:'https://github.com/tldr-pages/tldr', tags:'命令 速查 shell 工具'},
+    {t:'the-art-of-command-line', sub:'命令行心法（中文有译本）', tier:3, score:85,
+     birth:'2015', stars:'162.7k', lic:'见仓库', lang:'Markdown',
+     why:'讲的是<b>组合思想（管道/单一职责）</b>，这是 Unix 五十年不变的设计哲学。',
+     use:'你这套工作台“单文件子应用 + 各司其职”的组织方式，本质同源。',
+     url:'https://github.com/jlevy/the-art-of-command-line', tags:'命令行 Unix 设计 哲学'},
+    {t:'system-design-primer', sub:'系统设计原理与案例', tier:3, score:82,
+     birth:'2017', stars:'376.9k', lic:'见仓库', lang:'Markdown',
+     why:'讲的是<b>权衡（缓存/一致/分区）</b>这类原理，具体产品会变，权衡不会变。',
+     use:'面试与架构通用；配合 408 操作系统内存/缓存章节理解。',
+     url:'https://github.com/donnemartin/system-design-primer', tags:'架构 系统设计 面试 408'},
+    {t:'IBM PC / 开源硬件文档类', sub:'硬件接口与时序（以 Arduino-IRremote 为例）', tier:3, score:78,
+     birth:'2010', stars:'5.1k', lic:'见仓库', lang:'C++',
+     why:'<b>红外 NEC 协议、GPIO 时序</b>这类物理层约定不会因为软件换代而失效，属硬件层的“协议”。',
+     use:'配合硬件工坊做实际收发；物理协议是真正的十年资产。',
+     url:'https://github.com/Arduino-IRremote/Arduino-IRremote', tags:'硬件 协议 时序 嵌入式'},
+    {t:'Pandoc', sub:'文档格式转换的万能桥', tier:3, score:84,
+     birth:'2006', stars:'46.8k', lic:'GPL-2.0', lang:'Haskell',
+     why:'押在<b>格式之间的映射关系</b>上；格式越稳它越稳，且能把旧文档迁移成新格式（养老工具）。',
+     use:'把你早年 .doc/.pptx 批量转 md 归档——正是“让旧数据活过二十年”的操作。',
+     url:'https://github.com/jgm/pandoc', tags:'文档 转换 迁移 归档'}
+  ];
+
+  var QUIZ = [
+    '它定义的是<b>约定</b>（协议/格式/编码/算法），而不是某套实现？',
+    '已经有大量<b>存量数据或系统</b>押在它上面，改了就出大事？',
+    '即使主推它的公司明天消失，<b>别人也能自己实现</b>一份？',
+    '我今天用它写下的文件，<b>十年后还有工具能打开</b>？',
+    '它的核心概念能用<b>一页纸讲清</b>（不需要背一整个生态）？'
+  ];
+
+  var tierName = {1:'协议 · 格式 · 编码', 2:'算法 · 数据结构', 3:'语料 · 参考'};
+  var tierNote = {1:'最耐久：定义的是约定，单方改不了', 2:'教科书层：知识半衰期以十年计', 3:'内容层：结构耐久，细节会缓慢过时'};
+
+  var cur = 'all', kw = '';
+
+  function esc(s){ return String(s).replace(/[&<>"]/g, function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+
+  function match(it){
+    if (cur === '408' && it.tags.indexOf('408') < 0) return false;
+    if (cur !== 'all' && cur !== '408' && String(it.tier) !== cur) return false;
+    if (!kw) return true;
+    var hay = (it.t + ' ' + it.sub + ' ' + it.tags + ' ' + it.birth + ' ' + it.lang).toLowerCase();
+    return hay.indexOf(kw) >= 0;
+  }
+
+  function render(){
+    var list = DATA.filter(match);
+    var html = '';
+    [1,2,3].forEach(function(tier){
+      var group = list.filter(function(x){ return x.tier === tier; });
+      if (!group.length) return;
+      html += '<div class="tier" data-tier="' + tier + '">' +
+              '<span class="lvl' + (tier===2?' b':tier===3?' c':'') + '">T' + tier + '</span>' +
+              '<h2>' + tierName[tier] + '</h2>' +
+              '<span class="note">' + tierNote[tier] + ' · ' + group.length + ' 项</span></div>';
+      html += '<div class="grid">';
+      group.forEach(function(it){
+        html += '<div class="card" data-tier="' + it.tier + '">' +
+          '<div class="hd"><h3>' + esc(it.t) + '<small>' + esc(it.sub) + '</small></h3>' +
+          '<div class="score"><b>' + it.score + '</b><span>耐久</span></div></div>' +
+          '<div class="meta">' +
+            '<span class="k">起始 ' + esc(it.birth) + '</span>' +
+            '<span>' + esc(it.stars) + '★</span>' +
+            '<span>' + esc(it.lic) + '</span>' +
+            '<span>' + esc(it.lang) + '</span>' +
+          '</div>' +
+          '<div class="why">' + it.why + '</div>' +
+          '<div class="use"><b>在工作台怎么用：</b>' + it.use + '</div>' +
+          '<a class="go" href="' + it.url + '" target="_blank" rel="noopener">查看仓库 ↗</a>' +
+        '</div>';
+      });
+      html += '</div>';
+    });
+    if (!html) html = '<div class="empty">没有匹配项 —— 换个关键词，或点「全部」</div>';
+    document.getElementById('body').innerHTML = html;
+    // 计数
+    var all = DATA.length;
+    document.getElementById('cAll').textContent = all;
+    var chips = document.querySelectorAll('.chip[data-f]');
+    for (var i = 0; i < chips.length; i++) {
+      var f = chips[i].getAttribute('data-f'), n = 0;
+      if (f === 'all') n = all;
+      else if (f === '408') n = DATA.filter(function(x){ return x.tags.indexOf('408') >= 0; }).length;
+      else n = DATA.filter(function(x){ return String(x.tier) === f; }).length;
+      var em = chips[i].querySelector('i');
+      if (em) em.textContent = n;
+    }
+  }
+
+  document.querySelectorAll('.chip[data-f]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      document.querySelectorAll('.chip[data-f]').forEach(function(b){ b.classList.remove('on'); });
+      btn.classList.add('on');
+      cur = btn.getAttribute('data-f');
+      render();
+    });
+  });
+  var qi = document.getElementById('q');
+  qi.addEventListener('input', function(){ kw = qi.value.trim().toLowerCase(); render(); });
+
+  // 自查器
+  var qh = '';
+  QUIZ.forEach(function(text, i){
+    qh += '<div class="qrow"><input type="checkbox" id="qz' + i + '"><label for="qz' + i + '">' + text + '</label></div>';
+  });
+  document.getElementById('quiz').innerHTML = qh;
+
+  function judge(){
+    var n = document.querySelectorAll('#quiz input:checked').length;
+    var v = document.getElementById('verdict');
+    v.className = 'verdict';
+    if (n >= 4) { v.classList.add('ok'); v.textContent = '✅ ' + n + '/5 —— 可当长期资产，放心押上去。'; }
+    else if (n === 3) { v.classList.add('ok'); v.textContent = '🙂 3/5 —— 值得用，但别把核心数据只存这一份。'; }
+    else if (n === 0) { v.textContent = '勾选上面符合的项，看判定'; }
+    else { v.classList.add('bad'); v.textContent = '⚠️ ' + n + '/5 —— 这是“实现层”，当消耗品对待：随时准备换。'; }
+  }
+  document.getElementById('quiz').addEventListener('change', judge);
+
+  render();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<!-- 开发消耗看板 · Token Ledger | 单文件 HTML 子应用（零外链）
+     给「建这个站 + 在站内 AI 消耗」记账：多平台录入（DeepSeek/智谱/Anthropic/Codex…），
+     自动聚合：总 Token / 总费用 / 运行天数（从 version.json 首发 note 日期起算）/ 日均。
+     数据走本机 localStorage（wb_devledger_v1），支持 CSV 导入导出。 -->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" type="image/png" href="../../assets/pwa/icon-192.png"><!-- 2026-11-06 全站补 rel="icon"：本页此前未声明，浏览器回落请求站点根 /favicon.ico 报 404（控制台红色噪音、标签页无图标）；与 2026-10-03 对 index/zk-ky/share-hub 的处理同一策略 -->
+<title>开发消耗看板 · Token Ledger</title>
+
+<script>
+/* 主题跟随主站（同 anime.html 模式） */
+(function(){
+  function stored(){
+    try{
+      var raw=localStorage.getItem('wb_store');
+      if(raw){var o=JSON.parse(raw); if(o&&o.data&&o.data.theme) return o.data.theme;}
+    }catch(e){}
+    try{ var l=localStorage.getItem('wb_hub_theme'); if(l) return l; }catch(e){}
+    return 'auto';
+  }
+  function mq(){ return window.matchMedia('(prefers-color-scheme: dark)'); }
+  function apply(m){
+    var dark=mq().matches;
+    var act=(m==='dark'||m==='light')?m:(dark?'dark':'light');
+    document.documentElement.setAttribute('data-theme',act);
+  }
+  apply(stored());
+  window.addEventListener('storage',function(e){
+    if(e.key==='wb_store'||e.key==='wb_hub_theme') apply(stored());
+  });
+  try{ mq().addEventListener('change',function(){ if(stored()==='auto') apply('auto'); }); }catch(e){}
+})();
+</script>
+
+<link rel="canonical" href="https://epic-super.github.io/lab/products/dev-token-ledger.html">
+<meta name="description" content="开发消耗看板：为建站与站内 AI 消耗记账——多平台 Token/费用录入、运行天数自动计算、总量聚合。">
+<style>
+:root{
+  --bg:#0c1014; --panel:#131a21; --panel2:#1a232c; --line:#25303a; --line2:#33414f;
+  --txt:#e9f0f2; --sub:#8fa0aa; --teal:#2dd4bf; --gold:#f0b429; --green:#3ecf8e; --blue:#5b8cff; --red:#f87171; --violet:#a78bfa;
+  --r:16px; --r-sm:11px; --r-f:999px;
+  --sh:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.22);
+  --tf:.16s var(--ease);
+}
+html[data-theme="light"]{
+  --bg:#f4f7f8; --panel:#ffffff; --panel2:#eaf1f3; --line:#dbe6e9; --line2:#c2d2d8;
+  --txt:#16221f; --sub:#587078; --teal:#0d9488; --gold:#8a6608; --green:#12945f; --blue:#3b6ae0; --red:#d64545; --violet:#7c5ce0;
+  --sh:0 1px 3px rgba(16,32,28,.06),0 6px 16px rgba(16,32,28,.08);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","HarmonyOS Sans SC","Microsoft YaHei",sans-serif;
+  background:var(--bg);color:var(--txt);font-size:15px;line-height:1.65;
+  padding-bottom:calc(28px + env(safe-area-inset-bottom));-webkit-font-smoothing:antialiased}
+button,input,select{font-family:inherit;font-size:15px;color:inherit}
+button{cursor:pointer;border:none;background:none}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--teal);outline-offset:2px;border-radius:6px}
+.wrap{max-width:1000px;margin:0 auto;padding:0 14px}
+
+.top{position:relative;color:#fff;padding:20px 0 16px;padding-top:calc(20px + env(safe-area-inset-top));
+  background:
+    radial-gradient(110% 150% at 8% -20%,rgba(45,212,191,.26),rgba(45,212,191,0) 50%),
+    radial-gradient(90% 130% at 94% 0%,rgba(240,180,41,.22),rgba(240,180,41,0) 58%),
+    linear-gradient(134deg,#0c1a1a 0%,#123033 55%,#20301c 120%);
+  box-shadow:0 1px 0 rgba(255,255,255,.08) inset,0 6px 22px rgba(6,16,16,.3);overflow:hidden}
+.top::after{content:'';position:absolute;left:0;right:0;bottom:0;height:1px;background:linear-gradient(90deg,transparent,rgba(45,212,191,.55),transparent)}
+.brand h1{margin:0;font-size:21px;font-weight:800;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.brand p{margin:5px 0 0;font-size:12.5px;opacity:.88}
+.bigstats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}
+@media (max-width:680px){.bigstats{grid-template-columns:repeat(2,1fr)}}
+.bigstat{background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.2);border-radius:var(--r-sm);padding:10px 13px;color:#fff}
+.bigstat b{display:block;font-size:20px;font-weight:800;font-variant-numeric:tabular-nums}
+.bigstat.gold b{color:var(--gold)}
+.bigstat small{font-size:11px;opacity:.8}
+
+.tabs{display:flex;gap:8px;margin:16px 0 0;flex-wrap:wrap}
+.tab{padding:9px 16px;border-radius:var(--r-f);border:1.5px solid var(--line2);background:var(--panel);color:var(--sub);font-weight:800;font-size:13.5px;transition:all var(--tf)}
+.tab.on{border-color:var(--teal);background:linear-gradient(135deg,rgba(45,212,191,.14),rgba(45,212,191,.04));color:var(--teal)}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px;box-shadow:var(--sh);margin:14px 0}
+.card h2{margin:0 0 4px;font-size:15.5px;font-weight:800;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.card .desc{color:var(--sub);font-size:12.5px;margin:0 0 12px}
+.viewpane{display:none}
+.viewpane.on{display:block;animation:fin .25s var(--ease)}
+@keyframes fin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+.lbl{display:block;font-size:12px;font-weight:700;color:var(--sub);margin:9px 0 5px}
+.ipt,.sel{background:var(--panel2);border:1px solid var(--line2);border-radius:var(--r-sm);padding:9px 11px;color:var(--txt);width:100%}
+.ipt:focus,.sel:focus{border-color:var(--teal);outline:none}
+.btn{background:linear-gradient(135deg,#1d9e8d,var(--teal));color:#fff;border-radius:var(--r-sm);padding:9px 16px;font-size:13.5px;font-weight:800;min-height:40px;display:inline-flex;align-items:center;gap:6px;transition:transform var(--tf)}
+.btn:hover{filter:brightness(1.07)}
+.btn:active{transform:scale(.97)}
+.btn.ghost{background:var(--panel2);color:var(--txt);border:1px solid var(--line2)}
+.btn.sm{padding:6px 11px;min-height:32px;font-size:12.5px}
+.btn.del{background:transparent;border:1px solid var(--line2);color:var(--sub);min-height:32px;padding:6px 10px}
+.btn.del:hover{color:var(--red);border-color:var(--red)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+@media (max-width:640px){.two{grid-template-columns:1fr}}
+
+.plat-row{display:flex;gap:10px;align-items:flex-start;background:var(--panel2);border:1px solid var(--line);border-radius:var(--r);padding:13px 15px;margin-bottom:10px;position:relative;overflow:hidden}
+.plat-row::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--c,var(--teal))}
+.plat-row .grow{flex:1;min-width:0}
+.plat-row .tt{font-size:14.5px;font-weight:800;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.plat-row .nums{display:flex;gap:14px;flex-wrap:wrap;margin-top:5px}
+.plat-row .nums span{font-size:12px;color:var(--sub)}
+.plat-row .nums b{color:var(--txt);font-variant-numeric:tabular-nums}
+.plat-row .note{font-size:11.5px;color:var(--sub);margin-top:4px;font-style:italic}
+.bar{height:8px;border-radius:var(--r-f);background:var(--panel);margin-top:8px;overflow:hidden;border:1px solid var(--line)}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--teal),var(--gold));transition:width .4s var(--ease)}
+.milestones{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+@media (max-width:680px){.milestones{grid-template-columns:1fr}}
+.ms{background:var(--panel2);border:1px solid var(--line);border-radius:var(--r-sm);padding:11px 13px}
+.ms b{font-size:12.5px;display:block}
+.ms small{color:var(--sub);font-size:11.5px}
+.empty{padding:22px;text-align:center;color:var(--sub);font-size:13px}
+.empty .big{font-size:26px;display:block;margin-bottom:6px;opacity:.8}
+footer.foot{color:var(--sub);font-size:11.5px;text-align:center;margin-top:18px}
+#toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(16px);background:var(--panel);color:var(--txt);border:1px solid var(--line2);border-radius:var(--r-f);padding:9px 18px;font-size:13px;font-weight:700;box-shadow:var(--sh);opacity:0;pointer-events:none;transition:all .25s var(--ease);z-index:99}
+#toast.show{opacity:1;transform:translateX(-50%)}
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <div class="brand">
+      <h1>🧾 开发消耗看板 <span style="font-size:13px;opacity:.8">Token Ledger</span></h1>
+      <p>为「建这个站」和「站内 AI 消耗」记账：多平台 Token/费用录入，运行天数与总量自动聚合。数据仅存本机。</p>
+    </div>
+    <div class="bigstats" id="bigStats"></div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="tabs">
+    <button class="tab on" data-v="ledger">🧾 平台计账</button>
+    <button class="tab" data-v="auto">🤖 自动估算</button>
+  </div>
+
+  <!-- 平台计账 -->
+  <section class="card viewpane on" id="vp-ledger">
+    <h2>🧾 平台计账</h2>
+    <p class="desc">从各 AI 平台的用量页抄累计数据进来（DeepSeek 用量信息 / 智谱财务 / Anthropic Console / Codex…），本页自动聚合。可随时回来改成最新累计值——按「最新快照」记账，不做流水。</p>
+    <div class="two">
+      <div>
+        <label class="lbl">平台名称 *</label>
+        <input class="ipt" id="plName" placeholder="例如：DeepSeek / 智谱 / Anthropic / Codex" maxlength="20">
+        <label class="lbl">标记色</label>
+        <select class="sel" id="plColor">
+          <option value="#2dd4bf">青 · Teal</option>
+          <option value="#f0b429">金 · Gold</option>
+          <option value="#5b8cff">蓝 · Blue</option>
+          <option value="#a78bfa">紫 · Violet</option>
+          <option value="#3ecf8e">绿 · Green</option>
+          <option value="#f87171">红 · Red</option>
+        </select>
+        <label class="lbl">备注（可写 Key 用途 / 截止 / 谁的账号）</label>
+        <input class="ipt" id="plNote" placeholder="例如：主开发号 / 余额 ¥25.97 / 备用" maxlength="40">
+      </div>
+      <div>
+        <label class="lbl">累计 Token（个）*</label>
+        <input class="ipt" id="plTokens" type="number" min="0" placeholder="例如：589044514">
+        <label class="lbl">累计费用（¥，可空）</label>
+        <input class="ipt" id="plCost" type="number" min="0" step="0.01" placeholder="例如：80.14">
+        <label class="lbl">累计请求数（可空）</label>
+        <input class="ipt" id="plReqs" type="number" min="0" placeholder="例如：8265">
+        <button class="btn" id="plAdd" style="width:100%;margin-top:14px">＋ 录入 / 更新该平台</button>
+      </div>
+    </div>
+    <div id="platList" style="margin-top:14px"></div>
+  </section>
+
+  <!-- 自动估算 -->
+  <section class="card viewpane" id="vp-auto">
+    <h2>🤖 本站开发自动估算</h2>
+    <p class="desc">从 version.json 演革自动推算——建站以来的开发强度画像（估算值，仅供参考口径：一次功能迭代 ≈ 数十次 AI 请求）。</p>
+    <div class="milestones" id="autoBox"></div>
+    <div class="note" style="margin-top:12px">🧮 <b>估算口径</b>：变更条数 × 单条迭代 Token 系数（研究+编码+调试+文档 ≈ 18 万 token/条，按主流 agent 工作流经验值）。站点运行天数 = 今天 − 首条变更日期。真实数据请以「平台计账」页录入的平台后台为准——两者对照着看，就知道估算偏差多少。</div>
+  </section>
+
+  <footer class="foot">开发消耗看板 ｜ 数据仅存本机（wb_devledger_v1）· 支持导出/导入 ｜ 为热爱记的每一笔账，都算数 🧾</footer>
+</div>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+'use strict';
+var KEY='wb_devledger_v1';
+var S={plats:[]};
+try{var raw=localStorage.getItem(KEY);if(raw){var o=JSON.parse(raw);S.plats=o.plats||[]}}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){toast('保存失败')}}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function toast(m){var t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(toast._h);toast._h=setTimeout(function(){t.classList.remove('show')},2200)}
+function $(s){return document.querySelector(s)}
+function fmt(n){return Number(n||0).toLocaleString('zh-CN')}
+
+/* 从 version.json 读开发沿革 */
+var V={firstDate:'2026-08-11',notes:0,ver:'?'};
+// 2026-11-06 修：本页位于 lab/products/ 下，version.json 在站点根，此前写成 ../version.json
+// 实际解析到 lab/version.json → 必然 404（catch 静默降级，于是「功能变更条数/版本/Token 估算」长期恒为 0）。
+// 另：version.json 的 notes 条目只有 text 字段、没有 at 字段，故改为从正文里抽日期取最早一天，抽不到再用兜底值。
+fetch('../../version.json',{cache:'no-store'}).then(function(r){return r.json()}).then(function(j){
+  if(j&&j.notes&&j.notes.length){
+    V.notes=j.notes.length;
+    var dates=[];
+    j.notes.forEach(function(n){
+      if(n&&n.at) dates.push(String(n.at).slice(0,10));
+      var m=String(n&&n.text||'').match(/20\d{2}-\d{2}-\d{2}/g);
+      if(m) dates=dates.concat(m);
+    });
+    dates=dates.filter(Boolean).sort();
+    // 注意：version.json 的 notes 只保留近段沿革（更早条目曾被截断/恢复过），
+    // 因此从正文抽到的最早日期可能晚于真实建站日 → 取「兜底日 vs 抽取日」中更早的那个。
+    if(dates.length && dates[0] < V.firstDate)V.firstDate=dates[0];
+    V.ver=j.version;
+  }
+  renderAuto();renderStats();
+}).catch(function(){renderAuto();renderStats()});
+
+document.querySelectorAll('.tab').forEach(function(t){
+  t.onclick=function(){
+    document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('on')});
+    t.classList.add('on');
+    document.querySelectorAll('.viewpane').forEach(function(x){x.classList.remove('on')});
+    var vp=$('#vp-'+t.getAttribute('data-v'));if(vp)vp.classList.add('on');
+    reportH();
+  };
+});
+
+function days(){var d=new Date('2026-08-11T00:00:00');var now=new Date();return Math.max(1,Math.round((now-d)/86400000)+1)}
+function totals(){
+  var t=0,c=0,r=0;
+  S.plats.forEach(function(p){t+=(+p.tokens||0);c+=(+p.cost||0);r+=(+p.reqs||0)});
+  return {t:t,c:c,r:r};
+}
+function renderStats(){
+  var tt=totals(),d=days();
+  $('#bigStats').innerHTML=
+    '<div class="bigstat"><b>'+fmt(tt.t)+'</b><small>总 Token（录入）</small></div>'+
+    '<div class="bigstat gold"><b>¥'+fmt(Math.round(tt.c*100)/100)+'</b><small>总费用</small></div>'+
+    '<div class="bigstat"><b>'+d+'</b><small>建站运行天数</small></div>'+
+    '<div class="bigstat"><b>'+fmt(V.notes)+'</b><small>功能变更条数</small></div>';
+}
+function renderPlats(){
+  var box=$('#platList');
+  var tt=totals();
+  if(!S.plats.length){box.innerHTML='<div class="empty"><span class="big">🧾</span>还没有录入。上面填第一个平台，比如 DeepSeek 的用量页数据。</div>';return}
+  box.innerHTML='';
+  S.plats.forEach(function(p,pi){
+    var share=tt.t?Math.round(p.tokens/tt.t*100):0;
+    var el=document.createElement('div');el.className='plat-row';el.style.setProperty('--c',p.color);
+    el.innerHTML='<div class="grow"><div class="tt">'+esc(p.name)+
+      (p.cost?'<span class="chip" style="color:var(--gold);border-color:var(--gold)">¥'+p.cost+'</span>':'')+
+      (p.reqs?'<span class="chip">'+fmt(p.reqs)+' 请求</span>':'')+'</div>'+
+      '<div class="nums"><span>Token <b>'+fmt(p.tokens)+'</b></span><span>占比 <b>'+share+'%</b></span></div>'+
+      '<div class="bar"><i style="width:'+share+'%"></i></div>'+
+      (p.note?'<div class="note">📌 '+esc(p.note)+'</div>':'')+
+      '<div class="meta" style="font-size:10.5px;color:var(--sub);margin-top:4px">更新于 '+esc(p.at||'—')+'</div></div>';
+    var del=document.createElement('button');del.className='btn del';del.textContent='删';
+    del.onclick=function(){if(!confirm('删除「'+p.name+'」的记录？'))return;S.plats.splice(pi,1);save();renderAll()};
+    var edit=document.createElement('button');edit.className='btn ghost sm';edit.textContent='改';
+    edit.onclick=function(){
+      $('#plName').value=p.name;$('#plTokens').value=p.tokens;$('#plCost').value=p.cost||'';$('#plReqs').value=p.reqs||'';$('#plNote').value=p.note||'';$('#plColor').value=p.color;
+      S.plats.splice(pi,1);save();renderAll();
+      toast('已载入编辑——改完再点「录入」');
+    };
+    var btns=document.createElement('div');btns.style.cssText='display:flex;flex-direction:column;gap:6px';
+    btns.appendChild(edit);btns.appendChild(del);
+    el.appendChild(btns);
+    box.appendChild(el);
+  });
+}
+$('#plAdd').onclick=function(){
+  var name=$('#plName').value.trim();
+  var tokens=+$('#plTokens').value||0;
+  if(!name){toast('先写平台名');return}
+  if(!tokens){toast('Token 数必填');return}
+  S.plats=S.plats.filter(function(p){return p.name!==name});
+  S.plats.push({name:name,tokens:tokens,cost:+$('#plCost').value||0,reqs:+$('#plReqs').value||0,note:$('#plNote').value.trim(),color:$('#plColor').value,at:today()});
+  $('#plName').value='';$('#plTokens').value='';$('#plCost').value='';$('#plReqs').value='';$('#plNote').value='';
+  save();renderAll();toast('已记账 ✓');
+};
+function today(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function renderAuto(){
+  var d=days();
+  var estTokens=Math.round(V.notes*180000);
+  var estDays=Math.max(1,Math.round(estTokens/900000));
+  $('#autoBox').innerHTML=
+    '<div class="ms"><b>'+V.notes+' 条</b><small>功能变更（version.json 演革）</small></div>'+
+    '<div class="ms"><b>'+d+' 天</b><small>建站运行天数（自首条变更 '+esc(V.firstDate)+' 起）</small></div>'+
+    '<div class="ms"><b>≈'+(estTokens/10000).toFixed(0)+' 万</b><small>Token 总消耗估算（' + V.notes + ' × 18万/条）</small></div>'+
+    '<div class="ms"><b>≈'+(estTokens/1000000/d).toFixed(1)+'M</b><small>日均 Token（估）</small></div>'+
+    '<div class="ms"><b>≈'+(d/7).toFixed(1)+' 周</b><small>开发周数 · 周均 '+Math.round(V.notes/(d/7)*10)/10+' 条变更</small></div>'+
+    '<div class="ms"><b>v'+esc(V.ver)+'</b><small>当前版本</small></div>';
+}
+function renderAll(){renderStats();renderPlats();renderAuto()}
+renderAll();
+
+function reportH(){
+  var h=Math.max(document.documentElement.scrollHeight,document.body.scrollHeight);
+  try{parent.postMessage({__wbResize:true,id:'ledgerFrame',h:h},'*')}catch(e){}
+}
+if(window.ResizeObserver){new ResizeObserver(reportH).observe(document.body)}
+window.addEventListener('load',reportH);
+setTimeout(reportH,400);
+})();
+</script>
+</body>
+</html>

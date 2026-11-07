@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<!-- 课程对标实验室 | 单文件 HTML 子应用（零外链）
+     两款市面课程大纲对比（王道·机器人开发 / 王道·AI大模型应用开发）+ 基础自评 → 规则化生成 12 周定制练习路径。
+     数据：自评勾选存 wb_courselab_v1。课程大纲内容来自公开宣传图（2026-10），仅作对标参考。 -->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" type="image/png" href="../../assets/pwa/icon-192.png"><!-- 2026-11-06 全站补 rel="icon"：本页此前未声明，浏览器回落请求站点根 /favicon.ico 报 404（控制台红色噪音、标签页无图标）；与 2026-10-03 对 index/zk-ky/share-hub 的处理同一策略 -->
+<title>课程对标实验室 · 机器人开发 × AI大模型应用</title>
+
+<script>
+/* 主题跟随主站（同 anime.html 模式） */
+(function(){
+  function stored(){
+    try{
+      var raw=localStorage.getItem('wb_store');
+      if(raw){var o=JSON.parse(raw); if(o&&o.data&&o.data.theme) return o.data.theme;}
+    }catch(e){}
+    try{ var l=localStorage.getItem('wb_hub_theme'); if(l) return l; }catch(e){}
+    return 'auto';
+  }
+  function mq(){ return window.matchMedia('(prefers-color-scheme: dark)'); }
+  function apply(m){
+    var dark=mq().matches;
+    var act=(m==='dark'||m==='light')?m:(dark?'dark':'light');
+    document.documentElement.setAttribute('data-theme',act);
+  }
+  apply(stored());
+  window.addEventListener('storage',function(e){
+    if(e.key==='wb_store'||e.key==='wb_hub_theme') apply(stored());
+  });
+  try{ mq().addEventListener('change',function(){ if(stored()==='auto') apply('auto'); }); }catch(e){}
+})();
+</script>
+
+<link rel="canonical" href="https://epic-super.github.io/lab/products/course-lab.html">
+<meta name="description" content="课程对标实验室：机器人开发 vs AI大模型应用开发大纲对比、交集与分歧分析、按基础生成 12 周定制练习路径。">
+<style>
+:root{
+  --bg:#0c1016; --panel:#141b24; --panel2:#1b2430; --line:#263240; --line2:#34455a;
+  --txt:#e8eef6; --sub:#8b98ac; --blue:#5b8cff; --teal:#2dd4bf; --gold:#f0b429; --green:#3ecf8e; --red:#f87171; --violet:#a78bfa; --orange:#ff9f43;
+  --r:16px; --r-sm:11px; --r-f:999px;
+  --sh:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.22);
+  --tf:.16s var(--ease);
+}
+html[data-theme="light"]{
+  --bg:#f5f7fa; --panel:#ffffff; --panel2:#edf1f6; --line:#dfe5ee; --line2:#c8d2e2;
+  --txt:#1b2433; --sub:#5c6a80; --blue:#3b6ae0; --teal:#0b7b71; --gold:#8a6608; --green:#108757; --red:#d64545; --violet:#7557d4; --orange:#c96a0a;
+  --sh:0 1px 3px rgba(16,24,40,.06),0 6px 16px rgba(16,24,40,.07);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","HarmonyOS Sans SC","Microsoft YaHei",sans-serif;
+  background:var(--bg);color:var(--txt);font-size:15px;line-height:1.65;
+  padding-bottom:calc(28px + env(safe-area-inset-bottom));-webkit-font-smoothing:antialiased}
+button,input,select{font-family:inherit;font-size:15px;color:inherit}
+button{cursor:pointer;border:none;background:none}
+button:focus-visible,input:focus-visible{outline:2px solid var(--blue);outline-offset:2px;border-radius:6px}
+.wrap{max-width:1060px;margin:0 auto;padding:0 14px}
+
+.top{position:relative;color:#fff;padding:20px 0 16px;padding-top:calc(20px + env(safe-area-inset-top));
+  background:
+    radial-gradient(110% 150% at 8% -20%,rgba(91,140,255,.3),rgba(91,140,255,0) 50%),
+    radial-gradient(90% 130% at 94% 0%,rgba(45,212,191,.3),rgba(45,212,191,0) 58%),
+    linear-gradient(134deg,#141c30 0%,#1c3050 55%,#153a3f 120%);
+  box-shadow:0 1px 0 rgba(255,255,255,.08) inset,0 6px 22px rgba(8,14,30,.3);overflow:hidden}
+.top::after{content:'';position:absolute;left:0;right:0;bottom:0;height:1px;background:linear-gradient(90deg,transparent,rgba(91,140,255,.55),transparent)}
+.brand h1{margin:0;font-size:21px;font-weight:800;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.brand p{margin:5px 0 0;font-size:12.5px;opacity:.88}
+
+.tabs{display:flex;gap:8px;margin:16px 0 0;flex-wrap:wrap}
+.tab{padding:9px 16px;border-radius:var(--r-f);border:1.5px solid var(--line2);background:var(--panel);color:var(--sub);font-weight:800;font-size:13.5px;transition:all var(--tf)}
+.tab.on{border-color:var(--blue);background:linear-gradient(135deg,rgba(91,140,255,.16),rgba(91,140,255,.04));color:var(--blue)}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px;box-shadow:var(--sh);margin:14px 0}
+.card h2{margin:0 0 4px;font-size:15.5px;font-weight:800;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.card .desc{color:var(--sub);font-size:12.5px;margin:0 0 12px}
+.viewpane{display:none}
+.viewpane.on{display:block;animation:fin .25s var(--ease)}
+@keyframes fin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+.cmp{width:100%;border-collapse:collapse;font-size:13px}
+.cmp th,.cmp td{border:1px solid var(--line);padding:9px 11px;text-align:left;vertical-align:top}
+.cmp th{background:var(--panel2);font-size:12.5px}
+.cmp th.a{color:var(--teal)}
+.cmp th.b{color:var(--violet)}
+.cmp td:first-child{font-weight:700;white-space:nowrap;color:var(--sub)}
+.common{color:var(--green);font-weight:700}
+
+.venn{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;margin-top:6px}
+@media (max-width:720px){.venn{grid-template-columns:1fr}}
+.vn{border-radius:var(--r);padding:13px 15px;border:1px solid var(--line)}
+.vn b{font-size:13.5px;display:block;margin-bottom:6px}
+.vn ul{margin:0;padding-left:18px;font-size:12.5px;color:var(--sub)}
+.vn.only-a{background:rgba(45,212,191,.06);border-color:rgba(45,212,191,.35)}
+.vn.only-a b{color:var(--teal)}
+.vn.both{background:rgba(62,207,142,.06);border-color:rgba(62,207,142,.35)}
+.vn.both b{color:var(--green)}
+.vn.only-b{background:rgba(167,139,250,.06);border-color:rgba(167,139,250,.35)}
+.vn.only-b b{color:var(--violet)}
+
+.lbl{display:block;font-size:12px;font-weight:700;color:var(--sub);margin:10px 0 6px}
+.base{display:flex;gap:8px;flex-wrap:wrap}
+.bs{font-size:12.5px;font-weight:700;padding:7px 13px;border-radius:var(--r-f);border:1.5px solid var(--line2);background:var(--panel2);color:var(--sub);transition:all var(--tf)}
+.bs.on{border-color:var(--green);color:var(--green);background:rgba(62,207,142,.1)}
+.goalrow{display:flex;gap:8px;flex-wrap:wrap}
+.gl{font-size:12.5px;font-weight:700;padding:7px 13px;border-radius:var(--r-f);border:1.5px solid var(--line2);background:var(--panel2);color:var(--sub);transition:all var(--tf)}
+.gl.on-a{border-color:var(--teal);color:var(--teal);background:rgba(45,212,191,.1)}
+.gl.on-b{border-color:var(--violet);color:var(--violet);background:rgba(167,139,250,.1)}
+.btn{background:linear-gradient(135deg,#3b6ae0,var(--blue));color:#fff;border-radius:var(--r-sm);padding:10px 20px;font-size:14px;font-weight:800;min-height:42px;display:inline-flex;align-items:center;gap:7px}
+.btn:hover{filter:brightness(1.07)}
+.btn:active{transform:scale(.97)}
+.plan{margin-top:14px;display:none}
+.plan.on{display:block}
+.wk{border:1px solid var(--line);border-radius:var(--r-sm);background:var(--panel2);padding:11px 13px;margin-bottom:8px}
+.wk b{font-size:13px;color:var(--blue)}
+.wk .src{font-size:10.5px;font-weight:800;padding:1px 8px;border-radius:var(--r-f);margin-left:6px;vertical-align:1px}
+.src-a{color:var(--teal);border:1px solid var(--teal)}
+.src-b{color:var(--violet);border:1px solid var(--violet)}
+.src-mix{color:var(--gold);border:1px solid var(--gold)}
+.wk p{margin:5px 0 0;font-size:12.5px;color:var(--sub)}
+.wk .drill{margin-top:6px;font-size:12px;color:var(--txt);background:var(--panel);border:1px dashed var(--line2);border-radius:9px;padding:7px 10px}
+.wk .drift b2{color:var(--orange);font-weight:800}
+footer.foot{color:var(--sub);font-size:11.5px;text-align:center;margin-top:18px}
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <div class="brand">
+      <h1>🎯 课程对标实验室</h1>
+      <p>两款市面课大纲摊开比，标出交集与分歧；再按你的基础生成 12 周对标练习——用自学逼近课程交付水平。</p>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="tabs">
+    <button class="tab on" data-v="cmp">⚖️ 大纲对比</button>
+    <button class="tab" data-v="gen">🧬 AI 定制练习</button>
+  </div>
+
+  <!-- 对比 -->
+  <section class="card viewpane on" id="vp-cmp">
+    <h2>⚖️ 机器人开发 × AI大模型应用开发 · 逐栏对比</h2>
+    <p class="desc">大纲取自两款课程公开宣传图（王道 2026 版，仅作对标参考）。绿字 = 两课都覆盖。</p>
+    <div style="overflow-x:auto">
+    <table class="cmp">
+      <tr><th style="width:120px">维度</th><th class="a">🤖 机器人开发</th><th class="b">🧬 AI大模型应用开发</th></tr>
+      <tr><td>语言地基</td><td><span class="common">Python</span> 之外还要 <b>C</b>（底座）+ <b>C++</b>（框架核心）</td><td><span class="common">Python</span> 一门走到底（含高级语法/装饰器/异步）</td></tr>
+      <tr><td>系统与运维</td><td>Linux 深入（进程/线程/socket）+ 嵌入式视角</td><td><span class="common">Linux + Git</span> + Docker + SQL/Redis + FastAPI 部署</td></tr>
+      <tr><td>AI 核心</td><td>大模型概念 + 机器学习/DL 基础（回归/CNN）</td><td><span class="common">DL 概念</span> + PyTorch/Transformer/Bert + LoRA 微调实战</td></tr>
+      <tr><td>核心框架</td><td><b>ROS2</b>（DDS/QoS/TF2/URDF）+ Gazebo/RViz2</td><td><b>LangChain/LangGraph</b> + MCP + Function Calling + RAG 全栈</td></tr>
+      <tr><td>工程化交付</td><td>智能车实训：建图→定位→导航→融合→真机联调</td><td>Agent 项目实战：Rasa/DIET、多智能体编排、医疗/金融项目上线</td></tr>
+      <tr><td>独有视角</td><td>物理世界：传感器、激光雷达、电机、坐标变换</td><td>数字世界：向量库、GraphRAG、开源智能体（OpenClaw/Hermes/Harness）</td></tr>
+      <tr><td>就业出口</td><td>机器人/自动驾驶/嵌入式 AI</td><td>大模型应用/AI 产品/Agent 工程师</td></tr>
+      <tr><td>上手门槛</td><td>高（C/C++ + 硬件成本 + Ubuntu 环境）</td><td>中（有 Python 基础即可启动，硬件=一台电脑）</td></tr>
+      <tr><td>与你现状的耦合</td><td>需要从 C 补起；硬件工坊是它的学前班</td><td><span class="common">与现有前端+AI应用基础无缝衔接</span>，考研 408 的数据结构/网络直接复用</td></tr>
+    </table>
+    </div>
+    <div class="venn">
+      <div class="vn only-a"><b>🤖 只有课程 A 有</b><ul><li>C / C++ / STL / OOD</li><li>ROS2 全家桶 + TF2/URDF</li><li>Gazebo 仿真 + SLAM + 激光雷达</li><li>多传感器融合与真机联调</li></ul></div>
+      <div class="vn both"><b>✅ 两课共同覆盖</b><ul><li>Python（深度不同）</li><li>Linux + Git</li><li>机器学习/深度学习概念</li><li>大模型（LLM/VLA vs 应用）</li><li>项目实战 + 模拟面试</li></ul></div>
+      <div class="vn only-b"><b>🧬 只有课程 B 有</b><ul><li>RAG 全栈 + 向量库 + GraphRAG</li><li>LangChain/LangGraph/MCP</li><li>多智能体编排 + 行业项目上线</li><li>PyTorch + LoRA/PEFT 微调</li><li>Vibe Coding 工作流</li></ul></div>
+    </div>
+  </section>
+
+  <!-- 生成器 -->
+  <section class="card viewpane" id="vp-gen">
+    <h2>🧬 AI 定制练习 · 12 周对标生成器</h2>
+    <p class="desc">勾选你已有的基础，选目标课程与每周投入——按「缺什么补什么、已会不重学」生成 12 周路径。规则引擎本地运行。</p>
+    <label class="lbl">✅ 我已有的基础（多选，如实勾）</label>
+    <div class="base" id="baseSel">
+      <button class="bs" data-k="py">Python 能写</button>
+      <button class="bs" data-k="linux">Linux 常用命令</button>
+      <button class="bs" data-k="git">Git 会用</button>
+      <button class="bs" data-k="c">C 语言过关</button>
+      <button class="bs" data-k="cpp">C++ 过关</button>
+      <button class="bs" data-k="web">前端/全栈经验</button>
+      <button class="bs" data-k="ml">ML/DL 概念清楚</button>
+      <button class="bs" data-k="llm">用过 LLM API</button>
+      <button class="bs" data-k="rag">做过 RAG/Agent</button>
+      <button class="bs" data-k="ros">碰过 ROS/硬件</button>
+    </div>
+    <label class="lbl">🎯 目标课程</label>
+    <div class="goalrow" id="goalSel">
+      <button class="gl" data-g="a">🤖 机器人开发</button>
+      <button class="gl on-b" data-g="b">🧬 AI大模型应用开发</button>
+      <button class="gl" data-g="mix">🔀 双修（以 B 为主 A 为辅）</button>
+    </div>
+    <label class="lbl">⏱ 每周投入</label>
+    <div class="goalrow" id="hourSel">
+      <button class="gl" data-h="7">7 小时</button>
+      <button class="gl" data-h="14">14 小时</button>
+      <button class="gl on-b" data-h="21">21 小时</button>
+    </div>
+    <button class="btn" id="genBtn" style="margin-top:14px">🧬 生成 12 周对标路径</button>
+    <div class="plan" id="planBox"></div>
+  </section>
+
+  <footer class="foot">课程对标实验室 ｜ 大纲取自公开宣传图（2026-10），实际以课程方为准 ｜ 自评进度存本机（wb_courselab_v1）</footer>
+</div>
+
+<script>
+(function(){
+'use strict';
+var $=function(s){return document.querySelector(s)};
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+
+document.querySelectorAll('.tab').forEach(function(t){
+  t.onclick=function(){
+    document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('on')});
+    t.classList.add('on');
+    document.querySelectorAll('.viewpane').forEach(function(x){x.classList.remove('on')});
+    var vp=$('#vp-'+t.getAttribute('data-v'));if(vp)vp.classList.add('on');
+    reportH();
+  };
+});
+
+/* ---------------- 选择状态 ---------------- */
+var KEY='wb_courselab_v1';
+var S={base:{},goal:'b',hours:21};
+try{var raw=localStorage.getItem(KEY);if(raw){var o=JSON.parse(raw);S.base=o.base||{};S.goal=o.goal||'b';S.hours=o.hours||21}}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+
+document.querySelectorAll('#baseSel .bs').forEach(function(b){
+  if(S.base[b.getAttribute('data-k')])b.classList.add('on');
+  b.onclick=function(){var k=b.getAttribute('data-k');S.base[k]=!S.base[k];b.classList.toggle('on',S.base[k]);save()};
+});
+function paintGoal(){document.querySelectorAll('#goalSel .gl').forEach(function(g){var v=g.getAttribute('data-g');g.className='gl'+((S.goal===v)?(v==='a'?' on-a':v==='b'?' on-b':' on-b'):'')})}
+document.querySelectorAll('#goalSel .gl').forEach(function(g){
+  g.onclick=function(){S.goal=g.getAttribute('data-g');save();paintGoal()};
+});
+function paintHours(){document.querySelectorAll('#hourSel .gl').forEach(function(g){g.classList.toggle('on-b',+g.getAttribute('data-h')===S.hours)})}
+document.querySelectorAll('#hourSel .gl').forEach(function(g){
+  g.onclick=function(){S.hours=+g.getAttribute('data-h');save();paintHours()};
+});
+paintGoal();paintHours();
+
+/* ---------------- 12 周生成器（规则引擎） ----------------
+   每周 = {t:主题, src:'a/b/mix', d:要点, drill:对标练习}
+   选课规则：goal 决定主轴；base 决定跳过/压缩；hours 决定每周并行度（压缩周数或加实战）。 */
+var CURA=[ /* 课程 A 主轴 */
+  {k:'c',   t:'C 语言',            d:'数据类型/指针/结构体与内存管理',              drill:'手写双向链表 + 在 1KB 内存约束下跑通'},
+  {k:'linux',t:'Linux 与工具链',    d:'常用命令/文件IO/多进程多线程/socket',        drill:'多线程日志采集器：3 线程互斥写同一文件不出错'},
+  {k:'cpp', t:'C++ 与 OOD',       d:'类/继承多态/STL/线程库',                    drill:'用 STL 重写链表，对比两版差异写 200 字'},
+  {k:'cv',  t:'Python + OpenCV',  d:'Python 语法速成 + 机器视觉入门',             drill:'摄像头实时边缘检测 + 颜色追踪小车预演'},
+  {k:'ml',  t:'ML/DL 基础',       d:'回归/分类/神经网络/CNN',                    drill:'不调库手推反向传播一次，再用 PyTorch 复现'},
+  {k:'ros', t:'ROS2 系统开发',    d:'通信机制/DDS/QoS/TF2/URDF/Gazebo/RViz2',    drill:'两节点话题通信 + TF2 坐标树 + Gazebo 里跑通差速小车'},
+  {k:'proj',t:'智能车项目实战',   d:'建图→定位→导航→融合→语音→真机联调',          drill:'SLAM 建图 + 导航到点 + 语音指令「去厨房」全链路'}
+];
+var CURB=[ /* 课程 B 主轴 */
+  {k:'py',  t:'Python 巩固',      d:'面向对象/异常/迭代器/生成器/异步/装饰器',     drill:'用异步 + 生成器写并发爬虫，装饰器计时'},
+  {k:'svc', t:'基础服务',         d:'Linux/Docker/SQL/Redis/FastAPI/Git',       drill:'FastAPI + Redis 做一个带缓存的短链服务并 Docker 化'},
+  {k:'data',t:'数据处理与 AI 基础', d:'Jupyter/Numpy/Pandas',                    drill:'Pandas 清洗一份真实脏数据并出 3 个结论'},
+  {k:'rag', t:'RAG 系统全栈',     d:'LangChain/LangGraph/向量库/GraphRAG/MCP',   drill:'本地知识库 RAG：切分→嵌入→检索→重排，评测命中率'},
+  {k:'agent',t:'Agent 项目实战',  d:'Function Calling/多智能体编排/Rasa',        drill:'医疗问诊多智能体：分诊→检索→总结，部署上线'},
+  {k:'algo',t:'算法与微调',       d:'PyTorch/Transformer/Bert/LoRA/PEFT',       drill:'LoRA 微调一个小模型做分类，写出 Before/After 指标'},
+  {k:'int', t:'面试与作品集',     d:'高频面试题/简历优化/项目叙述',               drill:'把每个项目写成 STAR 简历条目 + 模拟面试三轮'}
+];
+function gen(){
+  var has=function(k){return !!S.base[k]};
+  var pool;
+  if(S.goal==='a') pool=CURA.slice();
+  else if(S.goal==='b') pool=CURB.slice();
+  else { pool=CURB.slice(); pool.splice(6,0,{k:'ros-lite',t:'ROS2 速览（双修）',d:'ROS2 概念 + Gazebo 体验，不深入',drill:'装好 ROS2 + 跑通 turtlesim，理解话题/服务概念'}); }
+  // 基础裁剪：已掌握的压缩为半天复习，空出周给实战
+  var need=[],review=[];
+  pool.forEach(function(m){
+    var knownMap={py:'py',linux:'linux',cv:'py',svc:'linux',data:'ml',algo:'ml',cpp:'cpp',c:'c',ros:'ros',agent:'rag',rag:'rag',proj:'ros','ros-lite':'ros',int:null};
+    var kk=knownMap[m.k];
+    if(kk&&has(kk)) review.push(m); else need.push(m);
+  });
+  var weeks=[];
+  var W=12;
+  // 前置：需要的地基课按序铺
+  var per=Math.max(1,Math.ceil(need.length/Math.max(1,W-3)));
+  var i=0,wk=1;
+  while(i<need.length&&wk<=W-3){
+    var chunk=need.slice(i,i+per);
+    weeks.push({t:chunk.map(function(m){return m.t}).join(' + '),src:chunk.some(function(m){return CURA.indexOf(m)>=0&&CURB.indexOf(m)<0})?'a':(chunk.every(function(m){return CURB.indexOf(m)>=0})?'b':'mix'),
+      d:chunk.map(function(m){return m.d}).join('；'),
+      drill:chunk.map(function(m){return m.drill}).join(' ｜ ')});
+    i+=per;wk++;
+  }
+  // 复习周（已会模块半天回顾）
+  if(review.length&&wk<=W){
+    weeks.push({t:'已会模块 · 快速回顾与查漏',src:'mix',d:review.map(function(m){return m.t}).join('；')+'——只做自测，会的直接跳',
+      drill:'每个模块 30 分钟自测：讲不出就回头补 2 小时，讲得出就划掉'});
+    wk++;
+  }
+  // 实战交付周（对标课程的「上线/联调」交付物）
+  var projTitle=S.goal==='a'?'智能车全链路联调':(S.goal==='b'?'Agent 项目部署上线':'Agent 上线 + ROS2 体验收尾');
+  weeks.push({t:'实战交付：'+projTitle,src:S.goal==='a'?'a':S.goal==='b'?'b':'mix',d:'对标课程期末交付物：能演示、能讲述、能复盘',
+    drill:'产出三件套：可运行 demo + 8 分钟演示视频 + 复盘笔记（坑与解法）'});
+  weeks.push({t:'作品集与模拟面试',src:'mix',d:'简历把项目放第一屏；按课程宣传的「模拟面试」自测',
+    drill:'三轮自模拟面试：技术深挖 / 项目追问 / 系统设计，全部录音回听'});
+  // 渲染
+  var box=$('#planBox');
+  var totalH=weeks.length*S.hours;
+  var html='<div class="desc" style="margin-top:4px">共 '+weeks.length+' 周 · 每周 '+S.hours+'h · 总投入 ≈ '+totalH+'h ｜ <b>已会的不重学，缺的直接补</b></div>';
+  weeks.forEach(function(w2,i){
+    var cls=w2.src==='a'?'src-a':(w2.src==='b'?'src-b':'src-mix');
+    var tag=w2.src==='a'?'🤖 课程A':(w2.src==='b'?'🧬 课程B':'🔀 混合');
+    html+='<div class="wk"><b>W'+(i+1)+' · '+esc(w2.t)+'</b><span class="src '+cls+'">'+tag+'</span><p>'+esc(w2.d)+'</p>'+
+      '<div class="drift drill"><b2>💪 对标练习：</b2>'+esc(w2.drill)+'</div></div>';
+  });
+  html+='<div class="desc" style="margin-top:8px">💡 用法：每周日把「对标练习」的完成度写进每日作战规划器；哪周没交付，下周先补再前进。提示词卡不会写，去 <a href="vibe-coding.html" target="_blank" rel="noopener">Vibe Coding 工作台</a> 拿模式。</div>';
+  box.innerHTML=html;
+  box.classList.add('on');
+  box.scrollIntoView({behavior:'smooth',block:'start'});
+}
+$('#genBtn').onclick=gen;
+
+function reportH(){
+  var h=Math.max(document.documentElement.scrollHeight,document.body.scrollHeight);
+  try{parent.postMessage({__wbResize:true,id:'clabFrame',h:h},'*')}catch(e){}
+}
+if(window.ResizeObserver){new ResizeObserver(reportH).observe(document.body)}
+window.addEventListener('load',reportH);
+setTimeout(reportH,400);
+})();
+</script>
+</body>
+</html>

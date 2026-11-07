@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<!-- 苏州自考信息站 · 大自考 vs 小自考 | 单文件 HTML 子应用（零外链）
+     面向苏州及周边：江苏大自考（一年 4 次）× 跨省小自考（助学专业）× 毕业快 × 学到东西 × 值得学。
+     ⚠️ 政策与开考计划每年可能调整，所有条目仅作决策参考，报名前务必以
+     江苏省教育考试院（jseea.cn）与主考院校当年官方文件为准。
+     数据：wb_zk_sz_v1（仅收藏与笔记）。 -->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" type="image/png" href="../../assets/pwa/icon-192.png"><!-- 2026-11-06 全站补 rel="icon"：本页此前未声明，浏览器回落请求站点根 /favicon.ico 报 404（控制台红色噪音、标签页无图标）；与 2026-10-03 对 index/zk-ky/share-hub 的处理同一策略 -->
+<title>苏州自考信息站 · 大自考 vs 小自考</title>
+
+<script>
+/* 主题跟随主站（同 anime.html 模式） */
+(function(){
+  function stored(){
+    try{
+      var raw=localStorage.getItem('wb_store');
+      if(raw){var o=JSON.parse(raw); if(o&&o.data&&o.data.theme) return o.data.theme;}
+    }catch(e){}
+    try{ var l=localStorage.getItem('wb_hub_theme'); if(l) return l; }catch(e){}
+    return 'auto';
+  }
+  function mq(){ return window.matchMedia('(prefers-color-scheme: dark)'); }
+  function apply(m){
+    var dark=mq().matches;
+    var act=(m==='dark'||m==='light')?m:(dark?'dark':'light');
+    document.documentElement.setAttribute('data-theme',act);
+  }
+  apply(stored());
+  window.addEventListener('storage',function(e){
+    if(e.key==='wb_store'||e.key==='wb_hub_theme') apply(stored());
+  });
+  try{ mq().addEventListener('change',function(){ if(stored()==='auto') apply('auto'); }); }catch(e){}
+})();
+</script>
+
+<link rel="canonical" href="https://epic-super.github.io/lab/products/zk-suzhou.html">
+<meta name="description" content="苏州自考信息站：江苏大自考（一年四次）与跨省小自考对比、院校专业三维评分（毕业快 / 能学到东西 / 值得学）、快毕业路线图与机构避坑。">
+<style>
+:root{
+  --bg:#0c1210; --panel:#131b18; --panel2:#1a2420; --line:#263530; --line2:#32443d;
+  --txt:#e7f0ec; --sub:#8ba097; --green:#3ecf8e; --gold:#f0b429; --blue:#5b8cff; --red:#f87171; --violet:#a78bfa;
+  --r:16px; --r-sm:11px; --r-f:999px;
+  --sh:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.22);
+  --ease:cubic-bezier(.32,.72,0,1); --tf:.16s var(--ease);
+}
+html[data-theme="light"]{
+  --bg:#f4f8f5; --panel:#ffffff; --panel2:#eaf2ed; --line:#dbe7e0; --line2:#c2d4ca;
+  --txt:#182420; --sub:#5b6f66; --green:#0f7d50; --gold:#8a6608; --blue:#3b6ae0; --red:#c04141; --violet:#7c5ce0;
+  --sh:0 1px 3px rgba(20,40,30,.06),0 6px 16px rgba(20,40,30,.07);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","HarmonyOS Sans SC","Microsoft YaHei",sans-serif;
+  background:var(--bg);color:var(--txt);font-size:15px;line-height:1.65;
+  padding-bottom:calc(28px + env(safe-area-inset-bottom));-webkit-font-smoothing:antialiased}
+button,input,select{font-family:inherit;font-size:15px;color:inherit}
+button{cursor:pointer;border:none;background:none}
+button:focus-visible,input:focus-visible{outline:2px solid var(--green);outline-offset:2px;border-radius:6px}
+a{color:var(--green)}
+.wrap{max-width:1020px;margin:0 auto;padding:0 14px}
+
+.top{position:relative;color:#fff;padding:22px 0 18px;padding-top:calc(22px + env(safe-area-inset-top));
+  background:
+    radial-gradient(110% 150% at 8% -20%,rgba(62,207,142,.28),rgba(62,207,142,0) 50%),
+    radial-gradient(90% 130% at 94% 0%,rgba(91,140,255,.32),rgba(91,140,255,0) 58%),
+    linear-gradient(134deg,#0d2b1f 0%,#124537 55%,#15304e 120%);
+  box-shadow:0 1px 0 rgba(255,255,255,.08) inset,0 6px 22px rgba(8,25,18,.3);overflow:hidden}
+.top::after{content:'';position:absolute;left:0;right:0;bottom:0;height:1px;background:linear-gradient(90deg,transparent,rgba(62,207,142,.55),transparent)}
+.brand h1{margin:0;font-size:21px;font-weight:800;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.brand p{margin:5px 0 0;font-size:12.5px;opacity:.88}
+.officials{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.off{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.22);color:#fff;
+  padding:7px 12px;border-radius:var(--r-sm);font-size:12.5px;font-weight:700;text-decoration:none;transition:background var(--tf)}
+.off:hover{background:rgba(255,255,255,.2)}
+.disclaim{margin-top:10px;font-size:11.5px;color:#ffd58a;background:rgba(240,180,41,.1);border:1px solid rgba(240,180,41,.35);border-radius:var(--r-sm);padding:8px 12px;display:inline-block}
+
+.tabs{display:flex;gap:8px;margin:16px 0 0;flex-wrap:wrap}
+.tab{padding:9px 16px;border-radius:var(--r-f);border:1.5px solid var(--line2);background:var(--panel);color:var(--sub);font-weight:800;font-size:13.5px;transition:all var(--tf)}
+.tab.on{border-color:var(--green);background:linear-gradient(135deg,rgba(62,207,142,.16),rgba(62,207,142,.04));color:var(--green)}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px;box-shadow:var(--sh);margin:14px 0}
+.card h2{margin:0 0 4px;font-size:15.5px;font-weight:800;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.card .desc{color:var(--sub);font-size:12.5px;margin:0 0 12px}
+.viewpane{display:none}
+.viewpane.on{display:block;animation:fin .25s var(--ease)}
+@keyframes fin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* 对比表 */
+.cmp{width:100%;border-collapse:collapse;font-size:13px}
+.cmp th,.cmp td{border:1px solid var(--line);padding:9px 11px;text-align:left;vertical-align:top}
+.cmp th{background:var(--panel2);font-size:12.5px}
+.cmp td:first-child{font-weight:700;color:var(--sub);white-space:nowrap}
+.cmp .win{color:var(--green);font-weight:700}
+.timeline{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-top:12px}
+@media (max-width:700px){.timeline{grid-template-columns:repeat(2,1fr)}}
+.tl{background:var(--panel2);border:1px solid var(--line);border-radius:var(--r-sm);padding:10px 12px;text-align:center}
+.tl b{font-size:15px;color:var(--green);display:block}
+.tl small{color:var(--sub);font-size:11px}
+
+/* 专业卡 */
+.filters{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px}
+.fchip{font-size:12px;font-weight:700;padding:5px 12px;border-radius:var(--r-f);border:1px solid var(--line2);background:var(--panel2);color:var(--sub);transition:all var(--tf)}
+.fchip.on{border-color:var(--green);color:var(--green);background:rgba(62,207,142,.1)}
+.sortsel{margin-left:auto;font-size:12.5px;padding:6px 28px 6px 10px;border-radius:var(--r-f);border:1px solid var(--line2);background:var(--panel2);color:var(--txt);appearance:none;
+  background-image:linear-gradient(45deg,transparent 50%,var(--sub) 50%),linear-gradient(135deg,var(--sub) 50%,transparent 50%);background-position:calc(100% - 15px) 55%,calc(100% - 10px) 55%;background-size:4px 4px;background-repeat:no-repeat}
+.mj-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+@media (max-width:760px){.mj-grid{grid-template-columns:1fr}}
+.mj{background:var(--panel2);border:1px solid var(--line);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:8px;position:relative}
+.mj::before{content:'';position:absolute;left:0;top:12px;bottom:12px;width:3px;border-radius:3px;background:var(--green)}
+.mj.xiao::before{background:var(--violet)}
+.mj .tt{font-size:14.5px;font-weight:800;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.mj .sch{font-size:12px;color:var(--sub)}
+.mj .scores{display:flex;gap:6px;flex-wrap:wrap}
+.score{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:800;padding:3px 9px;border-radius:var(--r-f);border:1px solid var(--line2)}
+.score b{font-size:12px}
+.s-good{color:var(--green);border-color:rgba(62,207,142,.4)}
+.s-mid{color:var(--gold);border-color:rgba(240,180,41,.4)}
+.s-bad{color:var(--red);border-color:rgba(248,113,113,.4)}
+.tag-xiao{font-size:10.5px;background:rgba(167,139,250,.14);color:var(--violet);border:1px solid var(--violet);border-radius:var(--r-f);padding:1px 8px;font-weight:800}
+.tag-su{font-size:10.5px;background:rgba(91,140,255,.12);color:var(--blue);border:1px solid var(--blue);border-radius:var(--r-f);padding:1px 8px;font-weight:800}
+.mj .note{font-size:12px;color:var(--sub);line-height:1.6}
+.mj .acts{display:flex;gap:7px;margin-top:2px}
+.mini{font-size:12px;font-weight:700;padding:5px 11px;border-radius:var(--r-f);border:1px solid var(--line2);background:var(--panel);color:var(--sub)}
+.mini:hover{border-color:var(--green);color:var(--green)}
+.mini.star-on{border-color:var(--gold);color:var(--gold);background:rgba(240,180,41,.08)}
+.emptytip{padding:24px;text-align:center;color:var(--sub);font-size:13px}
+
+/* 路线图 */
+.route{border-left:2px solid var(--line2);margin-left:10px;padding-left:18px;display:flex;flex-direction:column;gap:14px}
+.step{position:relative}
+.step::before{content:'';position:absolute;left:-25px;top:5px;width:12px;height:12px;border-radius:50%;background:var(--panel);border:3px solid var(--green)}
+.step.x::before{border-color:var(--violet)}
+.step b{font-size:13.5px}
+.step p{margin:3px 0 0;font-size:12.5px;color:var(--sub)}
+
+/* 避坑 */
+.pit{background:var(--panel2);border:1px solid var(--line);border-radius:var(--r-sm);padding:12px 14px;margin-bottom:10px}
+.pit b{color:var(--red);font-size:13.5px;display:flex;gap:7px}
+.pit p{margin:5px 0 0;font-size:12.5px;color:var(--sub)}
+.pit p b2{color:var(--green);font-weight:700}
+
+footer.foot{color:var(--sub);font-size:11.5px;text-align:center;margin-top:18px}
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <div class="brand">
+      <h1>🎓 苏州自考信息站 <span style="font-size:12px;font-weight:600;opacity:.8">大自考 × 小自考 · 毕业快 × 值得学</span></h1>
+      <p>面向苏州及周边：把「江苏大自考」和「跨省小自考（助学专业）」摊开比清楚，再按「毕业快 × 能学到东西 × 值得」选专业。</p>
+    </div>
+    <div class="officials">
+      <a class="off" href="https://www.jseea.cn" target="_blank" rel="noopener">🏛 江苏省教育考试院 ↗</a>
+      <a class="off" href="https://www.suzhou.gov.cn" target="_blank" rel="noopener">🏙 苏州市政府门户 ↗</a>
+      <a class="off" href="https://www.jseea.cn/webfile/index/indexzkgs/" target="_blank" rel="noopener">📚 自考栏目 ↗</a>
+    </div>
+    <div class="disclaim">⚠️ 政策、开考计划、报名日期每年可能调整——本站条目仅作决策参考，报名前一律以省考试院与主考院校当年官方文件为准。</div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="tabs">
+    <button class="tab on" data-v="cmp">⚖️ 大自考 vs 小自考</button>
+    <button class="tab" data-v="mj">📚 院校 × 专业库</button>
+    <button class="tab" data-v="route">🧭 快毕业路线图</button>
+    <button class="tab" data-v="prac">🛠 实践课 · 知行合一</button>
+    <button class="tab" data-v="pit">🕳 避坑指南</button>
+  </div>
+
+  <!-- 对比 -->
+  <section class="card viewpane on" id="vp-cmp">
+    <h2>⚖️ 大自考 vs 小自考（江苏语境）</h2>
+    <p class="desc">一句话：大自考 = 全统考、便宜、硬碰硬；小自考（江苏多表现为「助学专业」）= 院校开班、部分校考、贵但快。</p>
+    <div style="overflow-x:auto">
+    <table class="cmp">
+      <tr><th>维度</th><th>大自考（社会自考）</th><th>小自考 / 助学专业</th></tr>
+      <tr><td>报名途径</td><td>省考试院官网自行报名</td><td>主考院校 / 官方助学点注册</td></tr>
+      <tr><td>费用</td><td class="win">极低（每科几十元报考费 + 教材）</td><td>较高（学费按年收，常见数千元/年）</td></tr>
+      <tr><td>考试形式</td><td>全部课程国家/省统考</td><td>统考科目少 + 校考/实践课多</td></tr>
+      <tr><td>考试频次（江苏）</td><td class="win">一年 4 次：1 月 / 4 月 / 7 月 / 10 月</td><td>跟随主考院校安排，统考科目同样吃 4 次考期</td></tr>
+      <tr><td>难度</td><td>高，靠自己硬啃</td><td class="win">相对低，助学加分/校考缓冲</td></tr>
+      <tr><td>毕业速度</td><td>江苏一年 4 次，最快约 2 年（全科一次过）</td><td>常见 1.5 年上下（视统考科目数量）</td></tr>
+      <tr><td>含金量</td><td class="win">毕业证完全相同，社会认可一致</td><td class="win">毕业证完全相同，社会认可一致</td></tr>
+      <tr><td>学位证</td><td>看主考院校学位条件（学位课程均分 + 学位英语等）</td><td>同左，条件不因助学而降低</td></tr>
+      <tr><td>适合谁</td><td>预算紧、自律强、想学真东西</td><td>要快拿证、时间碎、需要课程辅导</td></tr>
+    </table>
+    </div>
+    <h2 style="margin-top:16px;font-size:14.5px">📅 江苏考期节奏（2026 年节奏示例）</h2>
+    <div class="timeline">
+      <div class="tl"><b>1 月考期</b><small>1/10–1/11 · 上年 12 月报名</small></div>
+      <div class="tl"><b>4 月考期</b><small>4/11–4/12 · 3 月上旬报名</small></div>
+      <div class="tl"><b>7 月考期</b><small>7/4 起 · 5 月下旬报名</small></div>
+      <div class="tl"><b>10 月考期</b><small>10/24–10/25 · 9/1–9/5 报名</small></div>
+    </div>
+    <p class="desc" style="margin-top:10px">苏州考点以苏州市教育考试院公告为准；每次最多可报 4 门——一年 4 次 = 一年最多 16 门，这就是「江苏大自考也能快毕业」的底气。具体日程以当年通知为准。</p>
+  </section>
+
+  <!-- 专业库 -->
+  <section class="card viewpane" id="vp-mj">
+    <h2>📚 院校 × 专业库 <span style="font-size:11px;color:var(--sub);font-weight:600">三维评分：毕业快 / 能学到东西 / 值得</span></h2>
+    <p class="desc">评分是相对参考（5 分制），综合公开开考计划与普遍考生反馈；每年开考专业目录会变，报名前核对当年《开考课程教材计划》。</p>
+    <div class="filters" id="filters">
+      <button class="fchip on" data-f="all">全部</button>
+      <button class="fchip" data-f="su">苏州本地主考</button>
+      <button class="fchip" data-f="xiao">小自考 / 助学</button>
+      <button class="fchip" data-f="cs">计算机 / 工科</button>
+      <button class="fchip" data-f="edu">教育 / 文科</button>
+      <select class="sortsel" id="sortSel">
+        <option value="fast">排序：毕业快优先</option>
+        <option value="worth">排序：值得优先</option>
+        <option value="learn">排序：能学到东西优先</option>
+      </select>
+    </div>
+    <div class="mj-grid" id="mjGrid"></div>
+  </section>
+
+  <!-- 路线图 -->
+  <section class="card viewpane" id="vp-route">
+    <h2>🧭 快毕业路线图</h2>
+    <p class="desc">两条已被无数人走通的路：选一条，把每一步落到考期上。</p>
+    <h2 style="font-size:14px;color:var(--green)">路线 A · 江苏大自考两年拿证（学费 ≈ 0）</h2>
+    <div class="route" style="margin-bottom:20px">
+      <div class="step"><b>第 0 步 · 锁专业</b><p>在省考试院查「专业计划 + 开考课程表」，数一遍 11–14 门里有多少门能吃满 4 次考期，避开一年只考一次的课。</p></div>
+      <div class="step"><b>第 1 步 · 3 月报名 → 4 月首考</b><p>首考报 3–4 门公共课（毛概 / 近代史 / 英语二），公共课最稳，先拿 8–12 学分建立信心。</p></div>
+      <div class="step"><b>第 2 步 · 7 月 + 10 月连打</b><p>7 月啃专业课 4 门、10 月再 4 门；两次考期之间各留 10 周复习，一周一门的速度足够。</p></div>
+      <div class="step"><b>第 3 步 · 次年 1 月收尾</b><p>补漏 + 论文报名；苏州大学等主考院校的论文答辩一般一年两批，别错过申请窗口。</p></div>
+      <div class="step"><b>第 4 步 · 申请毕业与学位</b><p>全部通过后按主考院校通知申请毕业；学位条件（均分 / 学位英语）在第一年就要开始满足，别等毕业才想起来。</p></div>
+    </div>
+    <h2 style="font-size:14px;color:var(--violet)">路线 B · 跨省小自考一年半（预算数千到万元级）</h2>
+    <div class="route">
+      <div class="step x"><b>第 0 步 · 选省选校</b><p>小自考成熟的省份（如四川、福建等）统考科目通常仅 2–6 门，其余为校考/证书替代；只认「省教育考试院可查学籍/考籍」的正规助学点。</p></div>
+      <div class="step x"><b>第 1 步 · 注册考籍</b><p>通过助学点注册，避开统考大军的全部压力课程；确认「统考科目去外省考是否需要赴考」——这是隐性成本。</p></div>
+      <div class="step x"><b>第 2 步 · 两次统考 + 两次校考</b><p>典型节奏：4 月 / 10 月各一次统考，6 月 / 12 月前后校考；校考通常是过程性考核，跟班走。</p></div>
+      <div class="step x"><b>第 3 步 · 论文与毕业</b><p>一年半左右申请毕业。⚠️ 跨省小自考的「快」建立在过程合规上，任何「不用考试直接出证」都是诈骗。</p></div>
+    </div>
+  </section>
+
+  <!-- 实践课 · 知行合一 -->
+  <section class="card viewpane" id="vp-prac">
+    <h2>🛠 实践课 · 把「学过」变成「做过」</h2>
+    <p class="desc">自考不只笔试：每科主考院校都安排<b>实践考核</b>（非笔试）——这是整个自考里唯一「必须动手产出」的部分，也是「知行合一」的官方入口。各校安排不同，以下为通用打法，一切以主考院校当年通知为准。</p>
+
+    <h2 style="font-size:14px">📌 实践课是什么 · 报名三步</h2>
+    <div class="timeline" style="grid-template-columns:repeat(3,1fr)">
+      <div class="tl"><b>① 盯通知</b><small>主考院校继续教育学院官网「自学考试-实践考核」栏目；每学期初发布，窗口短、名额有限</small></div>
+      <div class="tl"><b>② 按批次报</b><small>在校院系统报名缴费（几十到百元级）；先修完对应笔试课通常才有资格</small></div>
+      <div class="tl"><b>③ 去考核</b><small>到校上机 / 提交作品 / 线上答辩；成绩与笔试一样进档案</small></div>
+    </div>
+    <p class="desc" style="margin-top:9px">常见形式：课程实验 / 课程设计 / 上机考核 / 实习报告 / 外语听说 / 毕业论文（设计）。</p>
+
+    <h2 style="font-size:14px;margin-top:16px">🧭 知行合一四步法 · 每门实践课都要留下「可展示的资产」</h2>
+    <div class="route">
+      <div class="step"><b>① 选题就选交叉点</b><p>论文/设计题目尽量落在「寻找天赋」突触图的远域交叉上——同样是毕业论文，别人写管理信息系统，你可以写「AI 中台在小店进销存的应用」。一次考核 = 一份独一无二的作品。</p></div>
+      <div class="step"><b>② 产出即开源</b><p>上机/课程设计的代码推到 GitHub：代码 + README + 截图。笔试证明你「知道」，仓库证明你「做过」——找工作时后者说话声音大十倍。</p></div>
+      <div class="step"><b>③ 过程文档化</b><p>把踩坑、方案对比写成 md 笔记（可直接进 workbench「我的项目」）。实践课的真正产出不是那张成绩单，是你写下的实现笔记。</p></div>
+      <div class="step"><b>④ 结果反哺笔试</b><p>动手做过一遍，对应笔试科目的主观题基本白送——实践课是最贵的复习资料，也是最便宜的。</p></div>
+    </div>
+
+    <h2 style="font-size:14px;margin-top:16px">📚 专业 × 实践形式对照（苏州周边常见）</h2>
+    <div class="pit" style="border-color:var(--line)">
+      <b style="color:var(--green)">💻 计算机类（苏大等）</b>
+      <p>程序设计实践（上机）· 数据库应用 · 毕业设计（做一个完整系统）——<b2>最优打法</b2>：毕设直接做 AI 中台 / 突触图这类「交叉作品」，答辩与简历一鱼两吃。</p>
+    </div>
+    <div class="pit" style="border-color:var(--line)">
+      <b style="color:var(--green)">📖 文科类（汉语言 / 人力 / 学前）</b>
+      <p>调查报告 / 案例分析 / 论文答辩——<b2>最优打法</b2>：选苏州本地真实场景（园区企业 HR 数字化、幼小衔接调研），调研材料整理成可发布的文章。</p>
+    </div>
+    <div class="pit" style="border-color:var(--line)">
+      <b style="color:var(--green)">🗣 外语听说（英语二配套）</b>
+      <p>人机对话 / 现场问答——<b2>最优打法</b2>：用打气站「每天 20 分钟」节奏练 30 天，考核只是例行公事。</p>
+    </div>
+
+    <div class="path" style="margin-top:14px">⚠️ <b>学位红线</b>：部分主考院校要求实践课（尤其毕业论文良好及以上）达到一定档次才授学士学位——第一年就查清目标院校《学位授予细则》，别到毕业才发现。错过报名窗口 = 等一学期，把它当考试科目一样钉进「每日作战规划器」。</div>
+  </section>
+
+  <!-- 避坑 -->
+    <h2>🕳 避坑指南 · 机构话术对照表</h2>
+    <div class="pit"><b>🚩「一年包过，不过退费」</b><p>自考毕业时间由考期决定，任何机构都无法加速统考。<b2>正解：</b2>承诺「包过」= 违规承诺，退费条款往往设层层门槛。</p></div>
+    <div class="pit"><b>🚩「不用学习，交钱拿证」</b><p>小自考的「小」是校考比例大，不是没有考试。<b2>正解：</b2>学籍/考籍只在省考试院官网可查，录取通知书式「证书」一律是假的。</p></div>
+    <div class="pit"><b>🚩「名额有限，今天截止」</b><p>自考报名窗口由考试院统一公布，不存在机构内部名额。<b2>正解：</b2>所有截止日期以 jseea.cn 通告为准。</p></div>
+    <div class="pit"><b>🚩「我们和主考院校合作办学」</b><p>查证方式：主考院校继续教育学院官网公示的助学合作名单。<b2>正解：</b2>名单上没有的「合作点」，一律按校外商业机构对待。</p></div>
+    <div class="pit"><b>🚩「小自考证书和大自考不一样，含金量低」</b><p>反着说的一样是坑——两证完全相同，不存在差异，也没有「大自考更高贵」。<b2>正解：</b2>差异只在过程（费用/时间/难度），不在证书。</p></div>
+    <div class="pit"><b>🚩「专本套读，三年双证」</b><p>专本套读本身可行（成考/开放大专 + 自考本科并行），但被夸大成「轻松三年」。<b2>正解：</b2>本科毕业前必须先拿到专科证，时间线自己算清楚再报。</p></div>
+  </section>
+
+  <footer class="foot">苏州自考信息站 ｜ 收藏与笔记存本机（wb_zk_sz_v1）｜ 数据整理于 2026-10，报名前以官方文件为准 ｜ 官方：jseea.cn</footer>
+</div>
+
+<script>
+(function(){
+'use strict';
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+var $=function(s){return document.querySelector(s)};
+
+/* ---------------- 院校×专业数据（三维评分 1-5） ----------------
+   su=true 苏州本地主考 · xiao=true 小自考/助学 · cat=cs 计算机/工科, edu 教育/文科, other 其他
+   评分说明：fast=毕业快 learn=能学到东西 worth=值得（性价比/用途广度）
+   ⚠️ 每年开考目录会变，条目仅作决策参考。 */
+var MAJORS=[
+  {n:'计算机及应用',sch:'江苏 · 苏州大学（大自考）',su:true,cat:'cs',fast:3,learn:5,worth:5,xiao:false,
+   note:'统考含高数/离散等硬课，慢但真学东西；苏州本地考，冲 IT 岗位简历最硬。学位条件以苏大当年文件为准。'},
+  {n:'软件工程（助学）',sch:'江苏 · 苏大等主考院校开班',su:true,cat:'cs',fast:4,learn:4,worth:4,xiao:true,
+   note:'助学班校考缓冲多，适合在职转码；费用按年收，报名前核对当年是否开班。'},
+  {n:'机械设计制造及其自动化',sch:'江苏 · 苏州大学 / 南航等',su:true,cat:'cs',fast:2,learn:5,worth:4,xiao:false,
+   note:'苏州制造业底盘大，含金量实；课程量多、实践环节多，适合已有相关工作经验者。'},
+  {n:'电气工程及其自动化',sch:'江苏 · 南航等主考',su:false,cat:'cs',fast:2,learn:5,worth:4,xiao:false,
+   note:'进电网/自动化行业的老牌路径，统考难度高，做好两年以上的准备。'},
+  {n:'工程管理',sch:'跨省小自考（如四川）',su:false,cat:'other',fast:5,learn:3,worth:4,xiao:true,
+   note:'统考科目少、证书替代多，二建/一建持证者路径顺畅；注意赴考成本与助学点资质。'},
+  {n:'学前教育',sch:'江苏 · 南京师范大学（大自考）',su:false,cat:'edu',fast:4,learn:4,worth:4,xiao:false,
+   note:'不考高数、英语可选修，江苏 4 次考期加持下毕业快；苏州幼教缺口稳定。'},
+  {n:'汉语言文学',sch:'江苏 · 南京师范大学（大自考）',su:false,cat:'edu',fast:4,learn:4,worth:4,xiao:false,
+   note:'考公考编岗位数一数二的「万金油」专业，纯背诵友好，一年 4 次考期能吃到满。'},
+  {n:'人力资源管理',sch:'江苏 · 苏州大学（大自考）',su:true,cat:'other',fast:4,learn:3,worth:4,xiao:false,
+   note:'苏州工业园区企业基数大，HR 岗对口；难度适中，性价比高。'},
+  {n:'会计学',sch:'江苏 · 南京财经大学（大自考）',su:false,cat:'other',fast:3,learn:4,worth:4,xiao:false,
+   note:'专业性强、岗位基本盘稳；高数与审计有点硬，配合初级会计证一起拿更香。'},
+  {n:'视觉传达设计（助学）',sch:'跨省小自考 · 院校开班',su:false,cat:'edu',fast:5,learn:4,worth:3,xiao:true,
+   note:'实践课占比高、统考少，作品集导向；费用较高，适合要快速拿证的设计从业者。'}
+];
+var KEY='wb_zk_sz_v1';
+var S={stars:[],notes:{}};
+try{var raw=localStorage.getItem(KEY);if(raw){var o=JSON.parse(raw);S.stars=o.stars||[];S.notes=o.notes||{}}}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+
+var filt='all',sortK='fast';
+function scoreChip(label,v){
+  var cls=v>=4?'s-good':(v>=3?'s-mid':'s-bad');
+  return '<span class="score '+cls+'">'+label+' <b>'+v+'</b>/5</span>';
+}
+function render(){
+  var list=MAJORS.filter(function(m){
+    if(filt==='all')return true;
+    if(filt==='su')return m.su;
+    if(filt==='xiao')return m.xiao;
+    if(filt==='cs')return m.cat==='cs';
+    if(filt==='edu')return m.cat==='edu';
+    return true;
+  });
+  list.sort(function(a,b){return b[sortK]-a[sortK]});
+  var box=$('#mjGrid');box.innerHTML='';
+  if(!list.length){box.innerHTML='<div class="emptytip">该筛选下暂无条目</div>';return}
+  list.forEach(function(m){
+    var id=m.n;
+    var starred=S.stars.indexOf(id)>=0;
+    var d=document.createElement('div');
+    d.className='mj'+(m.xiao?' xiao':'');
+    d.innerHTML='<div class="tt">'+esc(m.n)+
+      (m.xiao?'<span class="tag-xiao">小自考/助学</span>':'<span class="tag-xiao" style="background:rgba(62,207,142,.12);color:var(--green);border-color:var(--green)">大自考</span>')+
+      (m.su?'<span class="tag-su">苏州本地主考</span>':'')+
+      '</div><div class="sch">🏫 '+esc(m.sch)+'</div>'+
+      '<div class="scores">'+scoreChip('毕业快',m.fast)+scoreChip('学得到',m.learn)+scoreChip('值得',m.worth)+'</div>'+
+      '<div class="note">'+esc(m.note)+'</div>'+
+      '<div class="acts"><button class="mini'+(starred?' star-on':'')+'" data-act="star">'+(starred?'★ 已收藏':'☆ 收藏')+'</button>'+
+      '<input class="ipt" data-note="'+esc(id)+'" placeholder="我的备注…" value="'+esc(S.notes[id]||'')+'" style="flex:1;padding:5px 10px;font-size:12.5px"></div>';
+    d.querySelector('[data-act="star"]').onclick=function(){
+      var i=S.stars.indexOf(id);
+      if(i>=0)S.stars.splice(i,1);else S.stars.push(id);
+      save();render();
+    };
+    box.appendChild(d);
+  });
+  box.querySelectorAll('[data-note]').forEach(function(i){
+    i.addEventListener('change',function(){
+      S.notes[i.getAttribute('data-note')]=i.value.trim();save();
+    });
+  });
+}
+document.querySelectorAll('.fchip').forEach(function(c){
+  c.onclick=function(){
+    document.querySelectorAll('.fchip').forEach(function(x){x.classList.remove('on')});
+    c.classList.add('on');filt=c.getAttribute('data-f');render();
+  };
+});
+$('#sortSel').addEventListener('change',function(){sortK=this.value;render()});
+
+/* 视图切换 */
+document.querySelectorAll('.tab').forEach(function(t){
+  t.onclick=function(){
+    document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('on')});
+    t.classList.add('on');
+    document.querySelectorAll('.viewpane').forEach(function(x){x.classList.remove('on')});
+    var vp=$('#vp-'+t.getAttribute('data-v'));if(vp)vp.classList.add('on');
+    reportH();
+  };
+});
+
+render();
+
+function reportH(){
+  var h=Math.max(document.documentElement.scrollHeight,document.body.scrollHeight);
+  try{parent.postMessage({__wbResize:true,id:'zkSzFrame',h:h},'*')}catch(e){}
+}
+if(window.ResizeObserver){new ResizeObserver(reportH).observe(document.body)}
+window.addEventListener('load',reportH);
+setTimeout(reportH,400);
+})();
+</script>
+</body>
+</html>

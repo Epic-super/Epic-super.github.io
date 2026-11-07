@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<!-- 风景实况地图集 · 世界与中国 | 单文件 HTML 子应用
+     ① 3D 星球：canvas 正交投影自绘（零外链，离线可用，可拖拽旋转）
+     ② 2D 地图：Leaflet CDN + OSM 瓦片（在线时可用，离线优雅降级）
+     ③ 云图实况：NASA Worldview 官方嵌入（无需 Key）
+     ④ 实况入口：全球/中国风景实时摄像头精选链接
+     数据：wb_worldviews_v1（仅收藏），其余无状态。 -->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" type="image/png" href="../../assets/pwa/icon-192.png"><!-- 2026-11-06 全站补 rel="icon"：本页此前未声明，浏览器回落请求站点根 /favicon.ico 报 404（控制台红色噪音、标签页无图标）；与 2026-10-03 对 index/zk-ky/share-hub 的处理同一策略 -->
+<title>风景实况地图集 · 世界与中国</title>
+
+<script>
+/* 主题跟随主站（同 anime.html 模式） */
+(function(){
+  function stored(){
+    try{
+      var raw=localStorage.getItem('wb_store');
+      if(raw){var o=JSON.parse(raw); if(o&&o.data&&o.data.theme) return o.data.theme;}
+    }catch(e){}
+    try{ var l=localStorage.getItem('wb_hub_theme'); if(l) return l; }catch(e){}
+    return 'auto';
+  }
+  function mq(){ return window.matchMedia('(prefers-color-scheme: dark)'); }
+  function apply(m){
+    var dark=mq().matches;
+    var act=(m==='dark'||m==='light')?m:(dark?'dark':'light');
+    document.documentElement.setAttribute('data-theme',act);
+  }
+  apply(stored());
+  window.addEventListener('storage',function(e){
+    if(e.key==='wb_store'||e.key==='wb_hub_theme') apply(stored());
+  });
+  try{ mq().addEventListener('change',function(){ if(stored()==='auto') apply('auto'); }); }catch(e){}
+})();
+/* Leaflet 按需加载（jsdelivr，失败优雅降级） */
+window.__leafletReady=new Promise(function(resolve){
+  if(window.L)return resolve(true);
+  var css=document.createElement('link');css.rel='stylesheet';
+  css.href='https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.css';
+  document.head.appendChild(css);
+  var s=document.createElement('script');
+  s.src='https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js';
+  s.onload=function(){resolve(true)};
+  s.onerror=function(){resolve(false)};
+  document.head.appendChild(s);
+});
+</script>
+
+<link rel="canonical" href="https://epic-super.github.io/lab/products/world-views.html">
+<meta name="description" content="风景实况地图集：3D 星球 + 2D 地图双视角看世界与中国精选风景，附 NASA 卫星云图实况与全球实时摄像头入口。">
+<style>
+:root{
+  --bg:#0a0e1a; --panel:#121828; --panel2:#19223a; --line:#243049; --line2:#2d3a58;
+  --txt:#e8edf7; --sub:#8a93a8; --cyan:#2dd4bf; --blue:#5b8cff; --gold:#fbbf24; --green:#34d399; --red:#f87171; --violet:#a78bfa;
+  --r:16px; --r-sm:11px; --r-f:999px;
+  --sh:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.22);
+  --ease:cubic-bezier(.32,.72,0,1); --tf:.16s var(--ease);
+}
+html[data-theme="light"]{
+  --bg:#f5f8fb; --panel:#ffffff; --panel2:#eef3f8; --line:#dde5ee; --line2:#c9d5e2;
+  --txt:#182238; --sub:#5f6c80; --cyan:#0d9488; --blue:#3b6ae0; --gold:#b45309; --green:#12945f; --violet:#7c5ce0;
+  --sh:0 1px 3px rgba(16,24,40,.06),0 6px 16px rgba(16,24,40,.06);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","HarmonyOS Sans SC","Microsoft YaHei",sans-serif;
+  background:var(--bg);color:var(--txt);font-size:15px;line-height:1.65;
+  padding-bottom:calc(28px + env(safe-area-inset-bottom));-webkit-font-smoothing:antialiased}
+button,input,select{font-family:inherit;font-size:15px;color:inherit}
+button{cursor:pointer;border:none;background:none}
+button:focus-visible,input:focus-visible{outline:2px solid var(--cyan);outline-offset:2px;border-radius:6px}
+a{color:var(--cyan)}
+.wrap{max-width:1080px;margin:0 auto;padding:0 14px}
+
+.top{position:relative;color:#fff;padding:22px 0 20px;padding-top:calc(22px + env(safe-area-inset-top));
+  background:
+    radial-gradient(110% 150% at 8% -20%,rgba(45,212,191,.3),rgba(45,212,191,0) 48%),
+    radial-gradient(90% 130% at 95% 0%,rgba(91,140,255,.4),rgba(91,140,255,0) 58%),
+    linear-gradient(134deg,#0c2340 0%,#123c5c 52%,#0c4a48 120%);
+  box-shadow:0 1px 0 rgba(255,255,255,.08) inset,0 6px 22px rgba(10,30,60,.3);overflow:hidden}
+.top::after{content:'';position:absolute;left:0;right:0;bottom:0;height:1px;background:linear-gradient(90deg,transparent,rgba(45,212,191,.55),transparent)}
+.brand h1{margin:0;font-size:21px;font-weight:800;display:flex;align-items:center;gap:9px}
+.brand p{margin:5px 0 0;font-size:12.5px;opacity:.88}
+
+.tabs{display:flex;gap:8px;margin:16px 0 0;flex-wrap:wrap}
+.tab{padding:9px 16px;border-radius:var(--r-f);border:1.5px solid var(--line2);background:var(--panel);color:var(--sub);font-weight:800;font-size:13.5px;transition:all var(--tf)}
+.tab.on{border-color:var(--cyan);background:linear-gradient(135deg,rgba(45,212,191,.18),rgba(45,212,191,.05));color:var(--cyan)}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px;box-shadow:var(--sh);margin:14px 0}
+.card h2{margin:0 0 4px;font-size:15.5px;font-weight:800;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.card .desc{color:var(--sub);font-size:12.5px;margin:0 0 12px}
+.viewpane{display:none}
+.viewpane.on{display:block;animation:fin .25s var(--ease)}
+@keyframes fin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* 3D 星球 */
+.globe-wrap{position:relative;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:radial-gradient(90% 100% at 50% 10%,#0d1730,#070b16);touch-action:none}
+.globe-wrap canvas{display:block;width:100%;height:auto;cursor:grab}
+.globe-wrap.dragging canvas{cursor:grabbing}
+.globe-hint{padding:8px 13px;font-size:12px;color:var(--sub);border-top:1px solid var(--line);background:var(--panel)}
+.ginfo{position:absolute;left:10px;bottom:44px;max-width:290px;background:rgba(10,16,30,.88);border:1px solid var(--line2);border-radius:var(--r-sm);padding:11px 13px;color:#fff;display:none;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.ginfo.show{display:block;animation:fin .2s var(--ease)}
+.ginfo b{font-size:14px}
+.ginfo .dd{font-size:12px;color:#b8c2d8;margin-top:3px;line-height:1.6}
+.ginfo .lv{display:inline-block;margin-top:7px;font-size:12px;font-weight:700;color:var(--cyan);text-decoration:none}
+.gtag{position:absolute;right:10px;top:10px;font-size:11px;color:#7d8aa6;background:rgba(10,16,30,.7);border:1px solid var(--line2);border-radius:var(--r-f);padding:3px 10px}
+
+/* 2D 地图 */
+#map2d{height:480px;border-radius:var(--r);border:1px solid var(--line);background:var(--panel2)}
+.map-fallback{padding:30px 20px;text-align:center;color:var(--sub);font-size:13px}
+.leaflet-popup-content-wrapper{border-radius:12px}
+.pk-list{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.pk{font-size:12px;font-weight:700;padding:5px 11px;border-radius:var(--r-f);border:1px solid var(--line2);background:var(--panel2);color:var(--sub);transition:all var(--tf)}
+.pk:hover{border-color:var(--cyan);color:var(--cyan)}
+
+/* 云图 */
+.frame{width:100%;height:560px;border:0;border-radius:var(--r);border:1px solid var(--line);background:#0b1220;display:block}
+
+/* 实况入口 */
+.cam-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media (max-width:760px){.cam-grid{grid-template-columns:repeat(2,1fr)}}
+.cam{display:block;background:var(--panel2);border:1px solid var(--line);border-radius:var(--r-sm);padding:12px 13px;text-decoration:none;color:var(--txt);transition:all var(--tf)}
+.cam:hover{border-color:var(--cyan);transform:translateY(-2px)}
+.cam b{font-size:13.5px;display:flex;align-items:center;gap:6px}
+.cam small{display:block;color:var(--sub);font-size:11.5px;margin-top:3px}
+.region-h{font-size:12px;color:var(--sub);margin:14px 0 8px;letter-spacing:.4px;font-weight:700}
+footer.foot{color:var(--sub);font-size:11.5px;text-align:center;margin-top:18px}
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <div class="brand">
+      <h1>🌏 风景实况地图集</h1>
+      <p>一颗星球，两种视角（3D / 2D），再加一层卫星云图与全球实时风景——想看看现在的那里，随时都行。</p>
+    </div>
+    <div class="tabs">
+      <button class="tab on" data-v="globe">🌍 3D 星球</button>
+      <button class="tab" data-v="map">🗺 2D 地图</button>
+      <button class="tab" data-v="cloud">🛰 云图实况</button>
+      <button class="tab" data-v="cams">📷 实况入口</button>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- 3D 星球 -->
+  <section class="card viewpane on" id="vp-globe">
+    <h2>🌍 3D 星球</h2>
+    <p class="desc">拖动旋转 · 滚轮缩放 · 点击发光点看风景卡。纯 canvas 自绘，离线也能转。</p>
+    <div class="globe-wrap" id="globeWrap">
+      <canvas id="globe" width="960" height="640"></canvas>
+      <span class="gtag" id="globeTag">自转中</span>
+      <div class="ginfo" id="gInfo"></div>
+      <div class="globe-hint" id="gHint">💡 按住拖动旋转星球，点击发光的风景点。</div>
+    </div>
+    <div class="pk-list" id="globeQuick"></div>
+  </section>
+
+  <!-- 2D 地图 -->
+  <section class="card viewpane" id="vp-map">
+    <h2>🗺 2D 地图</h2>
+    <p class="desc">同一份风景点位，OpenStreetMap 瓦片呈现（首次需联网加载 Leaflet 与瓦片）。</p>
+    <div id="map2d"><div class="map-fallback" id="mapFallback">地图加载中…（需要网络）</div></div>
+    <div class="pk-list" id="mapQuick"></div>
+  </section>
+
+  <!-- 云图实况 -->
+  <section class="card viewpane" id="vp-cloud">
+    <h2>🛰 云图实况 · NASA Worldview</h2>
+    <p class="desc">NASA 官方 Worldview 嵌入：真彩色卫星影像，可缩放、可回看历史（右上角选日期）。中国大陆访问可能较慢，慢请用下方备用入口。</p>
+    <iframe class="frame" id="cloudFrame" loading="lazy" title="NASA Worldview 卫星云图"
+      src="https://worldview.earthdata.nasa.gov/?v=-180,-70,180,80&t=now"></iframe>
+    <div class="pk-list">
+      <a class="pk" href="https://worldview.earthdata.nasa.gov/" target="_blank" rel="noopener">NASA Worldview 全屏 ↗</a>
+      <a class="pk" href="https://rammb-slider.colostate.edu/" target="_blank" rel="noopener">RAMMB 卫星动画 ↗</a>
+      <a class="pk" href="https://zoom.earth/" target="_blank" rel="noopener">Zoom.Earth 实况 ↗</a>
+      <a class="pk" href="https://www.nmc.cn/publish/satellite/FX4.html" target="_blank" rel="noopener">中央气象台云图 ↗</a>
+    </div>
+  </section>
+
+  <!-- 实况入口 -->
+  <section class="card viewpane" id="vp-cams">
+    <h2>📷 实况风景 · 实时摄像头精选</h2>
+    <p class="desc">第三方实况源，点卡片到对应平台看实时画面（平台可能带广告/需允许定位）。</p>
+    <div class="region-h">🇨🇳 中国风景</div>
+    <div class="cam-grid">
+      <a class="cam" href="https://www.skylinepm.com/" target="_blank" rel="noopener"><b>🏙 城市天际线直播</b><small>国内多城高地实况</small></a>
+      <a class="cam" href="https://www.windy.com/webcams" target="_blank" rel="noopener"><b>⛰ 黄山 · 风景实况</b><small>Windy 全球摄像头网络</small></a>
+      <a class="cam" href="https://www.windy.com/-webcams/webcams/f2,131" target="_blank" rel="noopener"><b>🌊 海岸与湖泊</b><small>按地图选点看实况</small></a>
+    </div>
+    <div class="region-h">🌍 世界风景</div>
+    <div class="cam-grid">
+      <a class="cam" href="https://www.skylinewebcams.com/en/webcam/zhongguo.html" target="_blank" rel="noopener"><b>📡 SkylineWebcams</b><small>全球最大实况摄像头库</small></a>
+      <a class="cam" href="https://www.earthcam.com/" target="_blank" rel="noopener"><b>🗽 EarthCam</b><small>纽约/伦敦等地标直播</small></a>
+      <a class="cam" href="https://www.windy.com/webcams" target="_blank" rel="noopener"><b>🗺 Windy Webcams</b><small>5万+ 摄像头按地图选</small></a>
+      <a class="cam" href="https://explore.org/livecams" target="_blank" rel="noopener"><b>🐻 explore.org</b><small>自然/动物实况</small></a>
+      <a class="cam" href="https://www.airpano.com/" target="_blank" rel="noopener"><b>🚁 AirPano</b><small>全球航拍全景（非实时）</small></a>
+      <a class="cam" href="https://www.windows2universe.org/?earth" target="_blank" rel="noopener"><b>🌋 地球自然奇观</b><small>科普向索引</small></a>
+    </div>
+  </section>
+
+  <footer class="foot">风景实况地图集 ｜ 3D 星球离线可用 · 2D/云图需联网 ｜ 点位数据内置，欢迎在 MAP.md 里扩充</footer>
+</div>
+
+<script>
+(function(){
+'use strict';
+/* ---------------- 风景点位（世界与中国） ----------------
+   n=名称 lat/lon=坐标 r=区域 c=中国 d=一句话 live=实况链接(可选) */
+var SPOTS=[
+  {n:'北京 · 故宫与中轴线',lat:39.916,lon:116.397,r:'中国',d:'六百年紫禁城，雪后初晴最像穿越。'},
+  {n:'北京 · 长城慕田峪',lat:40.432,lon:116.566,r:'中国',d:'秋色层染的长城，实况多为四季直播机位。'},
+  {n:'上海 · 外滩天际线',lat:31.240,lon:121.490,r:'中国',d:'浦江两岸百年对望，夜景直播常年在线。'},
+  {n:'杭州 · 西湖',lat:30.241,lon:120.150,r:'中国',d:'苏堤春晓、断桥残雪，官方多机位慢直播。'},
+  {n:'黄山',lat:30.131,lon:118.164,r:'中国',d:'云海日出奇松——云谷/光明顶实况最出片。'},
+  {n:'桂林 · 漓江',lat:25.274,lon:110.290,r:'中国',d:'烟雨漓江，二十元人民币同款山水。'},
+  {n:'张家界',lat:29.315,lon:110.435,r:'中国',d:'三千奇峰，《阿凡达》悬浮山原型。'},
+  {n:'九寨沟',lat:33.262,lon:103.917,r:'中国',d:'彩池叠瀑，十月下旬层林尽染。'},
+  {n:'三亚 · 亚龙湾',lat:18.200,lon:109.630,r:'中国',d:'冬天也能下水的珊瑚海湾。'},
+  {n:'拉萨 · 布达拉宫',lat:29.656,lon:91.117,r:'中国',d:'海拔 3650 米的日光之城地标。'},
+  {n:'丽江古城',lat:26.872,lon:100.235,r:'中国',d:'雪山下的古镇，玉龙雪山倒影机位。'},
+  {n:'青海湖',lat:36.900,lon:100.130,r:'中国',d:'七月油菜花环湖，七月别错过。'},
+  {n:'哈尔滨 · 冰雪大世界',lat:45.800,lon:126.530,r:'中国',d:'十二月一月起冰雕亮灯，零下 20 度的童话。'},
+  {n:'巴黎 · 埃菲尔铁塔',lat:48.858,lon:2.294,r:'世界',d:'整点闪灯五分钟，巴黎机位常年直播。'},
+  {n:'伦敦 · 泰晤士河畔',lat:51.505,lon:-0.076,r:'世界',d:'塔桥与碎片大厦，阴天也有阴天的味道。'},
+  {n:'纽约 · 曼哈顿',lat:40.706,lon:-74.010,r:'世界',d:'时代广场/帝国大厦 24 小时直播。'},
+  {n:'日本 · 富士山',lat:35.361,lon:138.728,r:'世界',d:'河口湖逆富士机位，冬季能见度最高。'},
+  {n:'希腊 · 圣托里尼',lat:36.393,lon:25.462,r:'世界',d:'蓝顶白墙与爱琴海落日。'},
+  {n:'马尔代夫环礁',lat:3.200,lon:73.220,r:'世界',d:'一岛一酒店，潟湖蓝得不像真的。'},
+  {n:'冰岛 · 极光带',lat:64.900,lon:-18.600,r:'世界',d:'九月到次年四月追极光，多机位夜视直播。'},
+  {n:'澳大利亚 · 大堡礁',lat:-18.290,lon:147.700,r:'世界',d:'心形礁与珊瑚海，南半球夏天最佳。'},
+  {n:'迪拜 · 哈利法塔',lat:25.197,lon:55.274,r:'世界',d:'世界最高塔，跨年烟花全球直播。'},
+  {n:'里约 · 基督山',lat:-22.952,lon:-43.210,r:'世界',d:'张开双臂俯瞰瓜纳巴拉湾。'},
+  {n:'东非 · 乞力马扎罗',lat:-3.067,lon:37.356,r:'世界',d:'赤道雪山，大草原上的一顶白帽。'}
+];
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+var $=function(s){return document.querySelector(s)};
+
+/* ---------------- 视图切换 ---------------- */
+document.querySelectorAll('.tab').forEach(function(t){
+  t.onclick=function(){
+    document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('on')});
+    t.classList.add('on');
+    document.querySelectorAll('.viewpane').forEach(function(x){x.classList.remove('on')});
+    var vp=$('#vp-'+t.getAttribute('data-v'));if(vp)vp.classList.add('on');
+    if(t.getAttribute('data-v')==='map')ensureMap();
+    if(t.getAttribute('data-v')==='globe')g.resize();
+    reportH();
+  };
+});
+
+/* ---------------- 3D 星球（canvas 正交投影，零外链） ---------------- */
+function Globe(){
+  var cv=$('#globe'),ctx=cv.getContext('2d');
+  var W=cv.width,H=cv.height,CX=W/2,CY=H/2;
+  var R=Math.min(W,H)*0.34;
+  var rot={lat:18,lon:100};   /* 初始对准中国 */
+  var vel={lon:0.12,lat:0};
+  var dragging=false,lx=0,ly=0,idle=0;
+  var pick=null; /* 悬停/选中点 */
+  function p3(lat,lon){
+    var la=lat*Math.PI/180,lo=(lon+rot.lon)*Math.PI/180,la0=rot.lat*Math.PI/180;
+    var x=Math.cos(la)*Math.sin(lo);
+    var y=Math.cos(la0)*Math.sin(la)-Math.sin(la0)*Math.cos(la)*Math.cos(lo);
+    var z=Math.sin(la0)*Math.sin(la)+Math.cos(la0)*Math.cos(la)*Math.cos(lo);
+    return {x:x,y:y,z:z,front:z>0};
+  }
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    /* 大气辉光 */
+    var g=ctx.createRadialGradient(CX,CY,R*0.9,CX,CY,R*1.35);
+    g.addColorStop(0,'rgba(45,212,191,.18)');g.addColorStop(1,'rgba(45,212,191,0)');
+    ctx.fillStyle=g;ctx.beginPath();ctx.arc(CX,CY,R*1.35,0,7);ctx.fill();
+    /* 海洋球体 */
+    var og=ctx.createRadialGradient(CX-R*0.4,CY-R*0.4,R*0.1,CX,CY,R);
+    og.addColorStop(0,'#1d3a5f');og.addColorStop(0.7,'#122741');og.addColorStop(1,'#0a1526');
+    ctx.fillStyle=og;ctx.beginPath();ctx.arc(CX,CY,R,0,7);ctx.fill();
+    /* 经纬网 */
+    ctx.strokeStyle='rgba(122,150,190,.20)';ctx.lineWidth=1;
+    for(var la=-60;la<=60;la+=30){
+      ctx.beginPath();var first=true;
+      for(var lo=0;lo<=360;lo+=4){
+        var p=p3(la,lo);
+        if(!p.front){first=true;continue}
+        var px=CX+p.x*R,py=CY-p.y*R;
+        if(first){ctx.moveTo(px,py);first=false}else ctx.lineTo(px,py);
+      }
+      ctx.stroke();
+    }
+    for(var lo2=0;lo2<360;lo2+=30){
+      ctx.beginPath();var f2=true;
+      for(var la2=-90;la2<=90;la2+=4){
+        var p2=p3(la2,lo2);
+        if(!p2.front){f2=true;continue}
+        var qx=CX+p2.x*R,qy=CY-p2.y*R;
+        if(f2){ctx.moveTo(qx,qy);f2=false}else ctx.lineTo(qx,qy);
+      }
+      ctx.stroke();
+    }
+    /* 风景点 */
+    SPOTS.forEach(function(s,i){
+      var p=p3(s.lat,s.lon);
+      if(!p.front)return;
+      var px=CX+p.x*R,py=CY-p.y*R;
+      var isSel=pick===i;
+      var col=(s.r==='中国')?'#fbbf24':'#2dd4bf';
+      var halo=ctx.createRadialGradient(px,py,1,px,py,isSel?16:10);
+      halo.addColorStop(0,isSel?'rgba(255,255,255,.9)':'rgba(45,212,191,.55)');
+      halo.addColorStop(1,'rgba(45,212,191,0)');
+      ctx.fillStyle=halo;ctx.beginPath();ctx.arc(px,py,isSel?16:10,0,7);ctx.fill();
+      ctx.fillStyle=col;ctx.beginPath();ctx.arc(px,py,isSel?4.5:3,0,7);ctx.fill();
+      if(isSel){
+        ctx.fillStyle='#fff';ctx.font='700 13px -apple-system,PingFang SC,sans-serif';ctx.textAlign='left';
+        ctx.fillText(s.n,px+9,py-8);
+      }
+    });
+    /* 边缘环 */
+    ctx.strokeStyle='rgba(122,170,220,.35)';ctx.lineWidth=1.4;
+    ctx.beginPath();ctx.arc(CX,CY,R,0,7);ctx.stroke();
+  }
+  function tick(){
+    if(!dragging){
+      idle++;
+      if(idle>90){ /* 15 秒无操作恢复自转 */
+        if(Math.abs(vel.lon)<0.12)vel.lon=0.12;
+      }
+      rot.lon+=vel.lon;rot.lat+=vel.lat;
+      vel.lon*=0.94;vel.lat*=0.94;
+      if(rot.lat>75)rot.lat=75;if(rot.lat<-75)rot.lat=-75;
+    }
+    draw();
+    requestAnimationFrame(tick);
+  }
+  function pos(e){
+    var r=cv.getBoundingClientRect();
+    return {x:(e.clientX-r.left)*(W/r.width),y:(e.clientY-r.top)*(H/r.height)};
+  }
+  cv.addEventListener('pointerdown',function(e){
+    dragging=true;idle=0;
+    $('#globeWrap').classList.add('dragging');
+    var p=pos(e);lx=p.x;ly=p.y;
+    try{cv.setPointerCapture(e.pointerId)}catch(err){}
+  });
+  cv.addEventListener('pointermove',function(e){
+    var p=pos(e);
+    if(dragging){
+      rot.lon+=(p.x-lx)*0.28;rot.lat-=(p.y-ly)*0.28;
+      vel.lon=(p.x-lx)*0.28;vel.lat=0;
+      if(rot.lat>75)rot.lat=75;if(rot.lat<-75)rot.lat=-75;
+      lx=p.x;ly=p.y;idle=0;
+    } else {
+      /* 悬停拾取 */
+      var hit=-1;
+      SPOTS.forEach(function(s,i){
+        var q=p3(s.lat,s.lon);
+        if(!q.front)return;
+        var sx=CX+q.x*R,sy=CY-q.y*R;
+        if((sx-p.x)*(sx-p.x)+(sy-p.y)*(sy-p.y)<196)hit=i;
+      });
+      if(hit!==pick){pick=hit;showInfo(hit);draw()}
+    }
+  });
+  cv.addEventListener('pointerup',function(e){
+    dragging=false;$('#globeWrap').classList.remove('dragging');
+    var p=pos(e);
+    SPOTS.forEach(function(s,i){
+      var q=p3(s.lat,s.lon);
+      if(!q.front)return;
+      var sx=CX+q.x*R,sy=CY-q.y*R;
+      if((sx-p.x)*(sx-p.x)+(sy-p.y)*(sy-p.y)<196){pick=i;showInfo(i);draw()}
+    });
+  });
+  cv.addEventListener('pointerleave',function(){if(!dragging&&pick>=0){/*保留选中*/}});
+  function showInfo(i){
+    var el=$('#gInfo');
+    if(i<0){el.classList.remove('show');return}
+    var s=SPOTS[i];
+    el.innerHTML='<b>'+esc(s.n)+'</b><div class="dd">'+esc(s.d)+'</div>'+
+      '<a class="lv" href="https://www.windy.com/?'+s.lat+','+s.lon+',8" target="_blank" rel="noopener">📍 在地图上看这里 ↗</a>';
+    el.classList.add('show');
+  }
+  function resize(){
+    /* 按容器宽度重设画布，保持清晰度 */
+    var w=$('#globeWrap').clientWidth||960;
+    var scale=Math.min(1,w/960);
+    cv.style.height=(640*scale)+'px';
+  }
+  window.addEventListener('resize',resize);
+  resize();
+  /* 快选按钮 */
+  var qk=$('#globeQuick');
+  ['中国','世界'].forEach(function(rg){
+    SPOTS.filter(function(s){return s.r===rg}).slice(0,4).forEach(function(s){
+      var b=document.createElement('button');b.className='pk';b.textContent=s.n;
+      b.onclick=function(){
+        rot.lat=s.lat*0.6;rot.lon=-s.lon+0; /* 把该点转到正面 */
+        idle=0;vel.lon=0;pick=SPOTS.indexOf(s);showInfo(pick);
+      };
+      qk.appendChild(b);
+    });
+  });
+  tick();
+  return {resize:resize};
+}
+var g=Globe();
+
+/* ---------------- 2D 地图（Leaflet，在线时可用） ---------------- */
+var mapObj=null;
+function ensureMap(){
+  if(mapObj||window.__mapFailed)return;
+  window.__leafletReady.then(function(ok){
+    if(!ok){$('#mapFallback').textContent='Leaflet 加载失败（可能离线或被墙）——2D 地图暂不可用，3D 星球与实况入口不受影响。';window.__mapFailed=true;return}
+    try{
+      var L=window.L;
+      $('#mapFallback').remove();
+      var map=L.map('map2d',{worldCopyJump:true}).setView([30,110],3);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18,attribution:'© OpenStreetMap'}).addTo(map);
+      SPOTS.forEach(function(s){
+        var col=s.r==='中国'?'#fbbf24':'#2dd4bf';
+        var icon=L.divIcon({className:'',html:'<span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:'+col+';box-shadow:0 0 6px '+col+';border:2px solid rgba(255,255,255,.85)"></span>',iconSize:[12,12],iconAnchor:[6,6]});
+        L.marker([s.lat,s.lon],{icon:icon,title:s.n}).addTo(map)
+          .bindPopup('<b>'+esc(s.n)+'</b><br><span style="font-size:12px;color:#666">'+esc(s.d)+'</span><br><a href="https://www.windy.com/webcams" target="_blank" rel="noopener">找这里的实况摄像头 ↗</a>');
+      });
+      mapObj=map;
+    }catch(e){
+      $('#mapFallback').textContent='地图初始化失败：'+e.message;
+    }
+  });
+}
+/* 2D 快选 */
+SPOTS.slice(0,8).forEach(function(s){
+  var b=document.createElement('button');b.className='pk';b.textContent=s.n;
+  b.onclick=function(){ensureMap();
+    if(mapObj)mapObj.setView([s.lat,s.lon],9);
+    else toast('地图尚未就绪（需联网）');
+  };
+  $('#mapQuick').appendChild(b);
+});
+function toast(m){var t=document.createElement('div');t.textContent=m;t.style.cssText='position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--panel);border:1px solid var(--line2);border-radius:999px;padding:8px 16px;font-size:13px;font-weight:700;z-index:999';document.body.appendChild(t);setTimeout(function(){t.remove()},2200)}
+
+function reportH(){
+  var h=Math.max(document.documentElement.scrollHeight,document.body.scrollHeight);
+  try{parent.postMessage({__wbResize:true,id:'worldFrame',h:h},'*')}catch(e){}
+}
+if(window.ResizeObserver){new ResizeObserver(reportH).observe(document.body)}
+window.addEventListener('load',reportH);
+setTimeout(reportH,400);
+})();
+</script>
+</body>
+</html>

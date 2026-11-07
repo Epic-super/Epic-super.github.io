@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<!-- 长难句手术台 · 考研英语长难句拆解训练 | 单文件 HTML 子应用（零外链），数据走自身 localStorage（wb_sentencesurgeon_v1）
+     玩法：句中片段高亮 → 六类语法角色点选自测 → 逐层揭示主干与修饰 → 分层翻译。题库为按考研典型句式自撰的例句。 -->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" type="image/png" href="../../assets/pwa/icon-192.png"><!-- 2026-11-06 全站补 rel="icon"：本页此前未声明，浏览器回落请求站点根 /favicon.ico 报 404（控制台红色噪音、标签页无图标）；与 2026-10-03 对 index/zk-ky/share-hub 的处理同一策略 -->
+<title>长难句手术台 · 考研英语长难句拆解训练</title>
+
+<script>
+/* 主题跟随主站（同 anime.html 模式）：读 wb_store.data.theme（老版 wb_hub_theme），auto 跟随系统 */
+(function(){
+  function stored(){
+    try{
+      var raw=localStorage.getItem('wb_store');
+      if(raw){var o=JSON.parse(raw); if(o&&o.data&&o.data.theme) return o.data.theme;}
+    }catch(e){}
+    try{ var l=localStorage.getItem('wb_hub_theme'); if(l) return l; }catch(e){}
+    return 'auto';
+  }
+  function mq(){ return window.matchMedia('(prefers-color-scheme: dark)'); }
+  function apply(m){
+    var dark=mq().matches;
+    var act=(m==='dark'||m==='light')?m:(dark?'dark':'light');
+    document.documentElement.setAttribute('data-theme',act);
+  }
+  apply(stored());
+  window.addEventListener('storage',function(e){
+    if(e.key==='wb_store'||e.key==='wb_hub_theme') apply(stored());
+  });
+  try{ mq().addEventListener('change',function(){ if(stored()==='auto') apply('auto'); }); }catch(e){}
+})();
+</script>
+
+<link rel="canonical" href="https://epic-super.github.io/lab/products/sentence-surgeon.html">
+<meta name="description" content="长难句手术台：考研英语长难句逐层拆解训练。六类语法角色点选自测、主干提取、分层翻译揭示。">
+<style>
+:root{
+  --bg:#101019; --panel:#191a2b; --panel2:#20213a; --line:#2c2d4d; --line2:#3a3c63;
+  --txt:#edeef8; --sub:#8f93b4; --blue:#5b8cff; --orange:#ff9f43; --pink:#f472b6;
+  --green:#34d399; --red:#f87171; --purple:#a78bfa;
+  --r:16px; --r-sm:11px; --r-f:999px;
+  --sh:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.22);
+  --ease:cubic-bezier(.32,.72,0,1); --tf:.16s var(--ease);
+}
+html[data-theme="light"]{
+  --bg:#f7f8fc; --panel:#ffffff; --panel2:#eef0f8; --line:#e2e5f0; --line2:#ccd2e6;
+  --txt:#20233a; --sub:#5d6280; --blue:#3966d8; --orange:#af6317; --pink:#db2777;
+  --green:#108757; --red:#cf4646; --purple:#7c5cd6;
+  --sh:0 1px 3px rgba(30,30,60,.06),0 6px 16px rgba(30,30,60,.07);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","HarmonyOS Sans SC","Microsoft YaHei",sans-serif;
+  background:var(--bg);color:var(--txt);font-size:15px;line-height:1.65;
+  padding-bottom:calc(28px + env(safe-area-inset-bottom));
+  -webkit-font-smoothing:antialiased;
+}
+button,input,select,textarea{font-family:inherit;font-size:15px;color:inherit}
+button{cursor:pointer;border:none;background:none}
+button:focus-visible,input:focus-visible{outline:2px solid var(--blue);outline-offset:2px;border-radius:6px}
+.wrap{max-width:880px;margin:0 auto;padding:0 14px}
+
+.top{position:relative;color:#fff;padding:22px 0 20px;padding-top:calc(22px + env(safe-area-inset-top));
+  background:
+    radial-gradient(110% 150% at 8% -20%,rgba(91,140,255,.35),rgba(91,140,255,0) 50%),
+    radial-gradient(90% 130% at 92% 0%,rgba(167,139,250,.34),rgba(167,139,250,0) 58%),
+    linear-gradient(134deg,#141b3d 0%,#2b2f6b 55%,#4c3a86 120%);
+  box-shadow:0 1px 0 rgba(255,255,255,.08) inset,0 6px 22px rgba(10,12,30,.3);overflow:hidden}
+.top::after{content:'';position:absolute;left:0;right:0;bottom:0;height:1px;background:linear-gradient(90deg,transparent,rgba(167,139,250,.55),transparent)}
+.brand h1{margin:0;font-size:21px;font-weight:800;display:flex;align-items:center;gap:9px}
+.brand p{margin:5px 0 0;font-size:12.5px;opacity:.88}
+.stats{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}
+.stat{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:var(--r-sm);padding:6px 11px;font-size:12px;display:flex;align-items:baseline;gap:5px;color:#fff}
+.stat b{font-size:16px;font-weight:800;font-variant-numeric:tabular-nums}
+.stat.fire b{color:#c9b8ff}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:18px;box-shadow:var(--sh);margin:14px 0}
+.card h2{margin:0 0 4px;font-size:16px;font-weight:800;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.card .desc{color:var(--sub);font-size:13px;margin:0 0 12px}
+
+/* 手术流程 */
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}
+.step{background:var(--panel2);border:1px solid var(--line);border-radius:var(--r-sm);padding:10px 12px;font-size:12.5px}
+.step b{display:block;font-size:13px;margin-bottom:2px}
+.step span{color:var(--sub)}
+
+/* 句子区 */
+.segline{font-size:17px;line-height:2.1;font-family:Georgia,"Times New Roman",serif}
+.seg{display:inline;border-radius:7px;padding:2px 4px;transition:var(--tf);cursor:default;border:1px dashed transparent}
+.seg .zh{display:none;font-size:12.5px;color:var(--sub);font-family:inherit;padding-left:2px}
+.seg.dim{color:var(--sub)}
+.seg.hot{background:rgba(91,140,255,.16);border-color:var(--blue);animation:pulse 1.1s infinite}
+.seg.done{border-style:solid}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(91,140,255,.35)}55%{box-shadow:0 0 0 5px rgba(91,140,255,0)}}
+.tag{display:inline-block;font-size:10.5px;font-weight:700;border-radius:5px;padding:1px 6px;margin-left:6px;vertical-align:middle;letter-spacing:.5px}
+
+/* 角色色 */
+.r-main{background:rgba(91,140,255,.14);border-color:var(--blue)} .r-main .tag,.t-main{color:var(--blue);border-color:var(--blue)}
+.r-attr{background:rgba(52,211,153,.13);border-color:var(--green)} .r-attr .tag,.t-attr{color:var(--green);border-color:var(--green)}
+.r-adv{background:rgba(255,159,67,.13);border-color:var(--orange)} .r-adv .tag,.t-adv{color:var(--orange);border-color:var(--orange)}
+.r-app{background:rgba(244,114,182,.13);border-color:var(--pink)} .r-app .tag,.t-app{color:var(--pink);border-color:var(--pink)}
+.r-ninf{background:rgba(248,113,113,.13);border-color:var(--red)} .r-ninf .tag,.t-ninf{color:var(--red);border-color:var(--red)}
+.r-nclause{background:rgba(167,139,250,.14);border-color:var(--purple)} .r-nclause .tag,.t-nclause{color:var(--purple);border-color:var(--purple)}
+
+.quiz{margin-top:14px;background:var(--panel2);border:1px solid var(--line);border-radius:var(--r-sm);padding:13px}
+.quiz .q{font-size:13.5px;margin-bottom:10px}
+.quiz .q b{color:var(--blue)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1px solid var(--line2);background:var(--panel);border-radius:var(--r-f);padding:7px 14px;font-size:13px;transition:var(--tf)}
+.chip:hover{border-color:var(--blue);transform:translateY(-1px)}
+.chip.ok{border-color:var(--green);color:var(--green);background:rgba(52,211,153,.1)}
+.chip.bad{border-color:var(--red);color:var(--red);background:rgba(248,113,113,.1);animation:shake .3s}
+@keyframes shake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+.quiz .fb{margin-top:10px;font-size:13px;min-height:20px}
+.fb.good{color:var(--green)} .fb.err{color:var(--red)}
+
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.btn{border:1px solid var(--line2);background:var(--panel2);border-radius:var(--r-f);padding:8px 16px;font-size:13.5px;transition:var(--tf)}
+.btn:hover{border-color:var(--blue)}
+.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff;font-weight:700}
+.btn.primary:hover{filter:brightness(1.08)}
+
+/* 分层翻译 */
+.layers{display:none;margin-top:14px;border-top:1px dashed var(--line);padding-top:12px}
+.layers.show{display:block}
+.layer{margin:8px 0;padding:10px 12px;border-radius:var(--r-sm);background:var(--panel2);border-left:3px solid var(--line2)}
+.layer .lt{font-size:12px;font-weight:800;margin-bottom:3px;display:flex;gap:6px;align-items:center}
+.layer .en{font-family:Georgia,"Times New Roman",serif;font-size:14.5px}
+.layer .cn{font-size:13px;color:var(--sub);margin-top:2px}
+.trans{margin-top:10px;font-size:13.5px;background:rgba(91,140,255,.07);border:1px solid rgba(91,140,255,.25);border-radius:var(--r-sm);padding:10px 12px}
+.trans b{color:var(--blue)}
+.note{margin-top:8px;font-size:12.5px;color:var(--sub)}
+.note b{color:var(--orange)}
+
+/* 进度 */
+.prog{height:7px;background:var(--panel2);border-radius:var(--r-f);overflow:hidden;margin-top:12px;border:1px solid var(--line)}
+.prog i{display:block;height:100%;background:linear-gradient(90deg,var(--blue),var(--purple));border-radius:var(--r-f);transition:width .35s var(--ease)}
+.small{font-size:12px;color:var(--sub)}
+.legend{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.lg{font-size:11px;border:1px solid;border-radius:var(--r-f);padding:2px 9px}
+
+@media (max-width:560px){
+  .segline{font-size:15.5px}
+  .chip{padding:6px 11px;font-size:12.5px}
+}
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+
+<header class="top">
+  <div class="wrap brand">
+    <h1>🔬 长难句手术台</h1>
+    <p>考研英语长难句逐层拆解：点选语法角色 → 揭示主干与修饰 → 分层翻译。句句都是手术，句句都不白挨。</p>
+    <div class="stats">
+      <div class="stat"><span>已练句数</span><b id="stDone">0</b><span>/ 16</span></div>
+      <div class="stat"><span>今日答题</span><b id="stToday">0</b></div>
+      <div class="stat fire"><span>掌握（⭐）</span><b id="stMast">0</b></div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="card">
+    <h2>🩺 五步手术流程</h2>
+    <p class="desc">拿到长难句别慌，按这套动作来，任何句子都能拆。</p>
+    <div class="steps">
+      <div class="step"><b>① 找谓语动词</b><span>谓语决定句子骨架，时态/情态动词是标记</span></div>
+      <div class="step"><b>② 切从句边界</b><span>that / which / when / who 是手术刀口</span></div>
+      <div class="step"><b>③ 抓主谓宾主干</b><span>去掉修饰后剩下的就是句子在说的话</span></div>
+      <div class="step"><b>④ 挂回修饰成分</b><span>定语管名词、状语管动词、同位语管整句</span></div>
+      <div class="step"><b>⑤ 按层串语义</b><span>先主后次直译，再调成中文语序</span></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>🔪 本句手术 <span class="small" id="diffTag"></span></h2>
+    <p class="desc">高亮片段是什么语法角色？点下面正确选项开始「下刀」。答完自动进入分层翻译。</p>
+    <div class="segline" id="segline"></div>
+    <div class="prog"><i id="progBar" style="width:0%"></i></div>
+
+    <div class="quiz" id="quiz">
+      <div class="q">问：<b id="quizWhat">…</b> 的语法角色是？</div>
+      <div class="chips" id="chips"></div>
+      <div class="fb" id="fb"></div>
+    </div>
+
+    <div class="row">
+      <button class="btn" id="btnReveal">直接全部揭示</button>
+      <button class="btn" id="btnSkip">换一句</button>
+      <button class="btn primary" id="btnNext" style="display:none">下一句 →</button>
+    </div>
+
+    <div class="layers" id="layers"></div>
+  </section>
+
+  <section class="card">
+    <h2>🎨 角色图例</h2>
+    <p class="desc">六种成分、六种颜色。同一颜色在所有句子里的含义保持一致。</p>
+    <div class="legend">
+      <span class="lg t-main">主句骨架</span>
+      <span class="lg t-attr">定语从句/定语</span>
+      <span class="lg t-adv">状语(从句)</span>
+      <span class="lg t-app">同位语/插入语</span>
+      <span class="lg t-ninf">非谓语短语</span>
+      <span class="lg t-nclause">名词性从句</span>
+    </div>
+    <p class="small" style="margin-top:10px">题库为按考研典型句式自撰的例句，方便反复练；真题句请结合历年试卷使用。连续全对得 ⭐，三颗即掌握。</p>
+  </section>
+
+</main>
+
+<script>
+(function(){
+'use strict';
+var KEY='wb_sentencesurgeon_v1';
+var $=function(s){return document.querySelector(s)};
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function today(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+
+/* ---------- 题库：按考研典型句式自撰 ---------- */
+var ROLES={
+  main:{n:'主句骨架',c:'t-main'},
+  attr:{n:'定语从句/定语',c:'t-attr'},
+  adv:{n:'状语(从句)',c:'t-adv'},
+  app:{n:'同位语/插入语',c:'t-app'},
+  ninf:{n:'非谓语短语',c:'t-ninf'},
+  nclause:{n:'名词性从句',c:'t-nclause'}
+};
+var BANK=[
+{diff:1,segs:[
+  {t:'The rise of short videos ',r:'main',zh:'短视频的兴起'},
+  {t:', which barely existed a decade ago, ',r:'attr',zh:'——十年前它几乎还不存在——'},
+  {t:'has reshaped how young people spend their evenings.',r:'main',zh:'已重塑了年轻人度过夜晚的方式'}],
+ trans:'短视频的兴起——十年前它几乎还不存在——已经重塑了年轻人度过夜晚的方式。',
+ note:'主干是 The rise … has reshaped …；reshaped 后接 how 引导的<b>宾语从句</b>，一并算进主干语义。'},
+{diff:1,segs:[
+  {t:'Many students fail to see ',r:'main',zh:'许多学生没有看到'},
+  {t:'that consistent effort, not raw talent, separates the top scorers from the rest, ',r:'nclause',zh:'——是持续的投入而非天赋拉开了尖子生与其余人的差距——'},
+  {t:'a lesson that repeated failures usually teach best.',r:'app',zh:'这是屡次失败才能教会的一课'}],
+ trans:'许多学生没有看到：拉开尖子生与其余人差距的是持续的投入而非天赋——这一课，往往要屡次失败才学得最好。',
+ note:'that 引导<b>宾语从句</b>；句尾名词短语作整句的<b>同位语</b>，内含第二个 that 从句修饰 lesson。'},
+{diff:1,segs:[
+  {t:'When the deadline is three days away, ',r:'adv',zh:'当截止日还剩三天时'},
+  {t:'most students suddenly discover ',r:'main',zh:'大多数学生才突然发现'},
+  {t:'that the library closes at ten.',r:'nclause',zh:'图书馆十点就关门'}],
+ trans:'当截止日只剩三天，大多数学生才突然发现图书馆十点就关门了。',
+ note:'when 引导<b>时间状语从句</b>；discover 后 that 引导<b>宾语从句</b>。'},
+{diff:2,segs:[
+  {t:'The professor ',r:'main',zh:'这位教授'},
+  {t:', together with her two assistants, ',r:'app',zh:'——连同她的两名助教——'},
+  {t:'has been reviewing the data ',r:'main',zh:'一直在复核数据'},
+  {t:"collected during last year's field trips.",r:'ninf',zh:'（那些数据是去年实地考察中收集的）'}],
+ trans:'这位教授连同她的两名助教，一直在复核去年实地考察中收集的数据。',
+ note:'逗号间介词短语是<b>插入语</b>，谓语数随主语 The professor；句尾 collected… 是过去分词短语作<b>后置定语</b>。'},
+{diff:1,segs:[
+  {t:'Hardly had the new policy taken effect ',r:'main',zh:'新政策刚刚生效'},
+  {t:'when small businesses began to complain about compliance costs.',r:'adv',zh:'就有小企业开始抱怨合规成本'}],
+ trans:'新政策刚一生效，小企业就开始抱怨合规成本。',
+ note:'Hardly … when … 固定结构；Hardly 前置触发<b>部分倒装</b>（had 提到主语前）。'},
+{diff:2,segs:[
+  {t:'The number of students ',r:'main',zh:'学生数量'},
+  {t:'who choose to take a gap year ',r:'attr',zh:'选择间隔年的（学生）'},
+  {t:'has grown steadily since the pandemic, ',r:'main',zh:'自疫情以来稳步增长'},
+  {t:'a trend that puzzles many employers.',r:'app',zh:'——一个让许多雇主困惑的趋势——'}],
+ trans:'选择间隔年的学生数量自疫情以来稳步增长——这一趋势让许多雇主感到困惑。',
+ note:'who 引导<b>定语从句</b>修饰 students，别误当主语；主谓是 The number … has grown；句尾是<b>同位语</b>概括前句。'},
+{diff:2,segs:[
+  {t:'Only by practicing under real exam conditions ',r:'adv',zh:'只有在真实考试条件下练习'},
+  {t:'can students truly measure ',r:'main',zh:'学生才能真正测出'},
+  {t:'how fast they can write under pressure.',r:'nclause',zh:'自己在压力下的书写速度'}],
+ trans:'只有在真实考试条件下练习，学生才能真正测出自己在压力下能写多快。',
+ note:'Only + 状语置于句首 → 主句<b>部分倒装</b>（can 提前）；measure 后接 how 引导的<b>宾语从句</b>。'},
+{diff:2,segs:[
+  {t:'The report, published last Tuesday, ',r:'ninf',zh:'——上周二发布的——'},
+  {t:'warns that rising sea levels ',r:'main',zh:'警告说海平面上升'},
+  {t:'could displace millions of coastal residents by 2050.',r:'nclause',zh:'可能在2050年前迫使数百万沿海居民迁离'}],
+ trans:'上周二发布的报告警告说，到2050年，海平面上升可能迫使数百万沿海居民迁离。',
+ note:'published… 是过去分词短语作<b>插入性定语</b>；warns 后 that 引导<b>宾语从句</b>，从句主语是动名词短语 rising sea levels。'},
+{diff:2,segs:[
+  {t:'Nobody in the room ',r:'main',zh:'房间里没有人'},
+  {t:'knew exactly why the experiment had failed, ',r:'nclause',zh:'确切知道实验为什么失败'},
+  {t:'nor did anyone volunteer to rerun it.',r:'main',zh:'也没有人主动提出重做'}],
+ trans:'房间里没有人确切知道实验为什么失败，也没有人主动提出重做它。',
+ note:'why 引导<b>宾语从句</b>；nor（否定词）开头的并列句同样<b>倒装</b>：did anyone…。'},
+{diff:1,segs:[
+  {t:'As the interview drew to a close, ',r:'adv',zh:'随着面试接近尾声'},
+  {t:'the candidate asked ',r:'main',zh:'这位候选人问道'},
+  {t:'whether the team valued curiosity over credentials.',r:'nclause',zh:'团队是否把好奇心看得比学历更重'}],
+ trans:'面试接近尾声时，候选人问团队是否更看重好奇心而非学历。',
+ note:'as 引导<b>时间状语从句</b>；asked 后 whether 引导<b>宾语从句</b>。'},
+{diff:3,segs:[
+  {t:'A village once famous for its pottery, ',r:'app',zh:'——一个曾以陶器闻名的村子——'},
+  {t:'which had struggled for decades, ',r:'attr',zh:'它已经挣扎了几十年'},
+  {t:'now hosts workshops ',r:'main',zh:'如今开设工坊'},
+  {t:'attracting young artisans from across the country.',r:'ninf',zh:'吸引着全国各地的年轻手艺人'}],
+ trans:'一个曾以陶器闻名、又挣扎了几十年的村子，如今开设了吸引全国年轻手艺人的工坊。',
+ note:'开头形容词短语作<b>前置同位说明</b>；which 引导<b>非限定从句</b>；句尾现在分词 attracting… 作<b>后置定语</b>修饰 workshops。'},
+{diff:2,segs:[
+  {t:'The hours you put in matter less ',r:'main',zh:'你投入的小时数没那么重要'},
+  {t:'than how awake you are during them.',r:'adv',zh:'比起你在这些时段里有多清醒'}],
+ trans:'你投入多少小时，没有你在这些时段里有多清醒来得重要。',
+ note:'比较级 less … than；than 后接<b>比较状语从句</b>，从句主语又是 how 引导的名词化结构。'},
+{diff:3,segs:[
+  {t:'Should another storm hit the coast, ',r:'adv',zh:'万一另一场风暴袭击海岸'},
+  {t:'the ferry service will be suspended ',r:'main',zh:'渡轮服务将暂停'},
+  {t:'until engineers finish checking the piers.',r:'adv',zh:'直到工程师完成对码头的检查'}],
+ trans:'万一再有一场风暴袭击海岸，渡轮服务将暂停，直到工程师检查完码头。',
+ note:'Should 置句首 = if 虚拟条件句的<b>倒装</b>（= If another storm should hit）；until 引导<b>时间状语从句</b>。'},
+{diff:2,segs:[
+  {t:'The committee rejected the proposal, ',r:'main',zh:'委员会否决了该提案'},
+  {t:'arguing that its benefits were overstated ',r:'ninf',zh:'理由是其收益被夸大了'},
+  {t:'and its risks were poorly quantified.',r:'ninf',zh:'而风险则未被充分量化'}],
+ trans:'委员会否决了提案，理由是提案的收益被夸大，而风险又未被充分量化。',
+ note:'arguing… 现在分词短语作<b>伴随/原因状语</b>；arguing 后 that 从句里 and 并列两个被动分句。'},
+{diff:2,segs:[
+  {t:"Behind the theater's faded curtain ",r:'adv',zh:'在剧院褪色的大幕后'},
+  {t:'hides a story ',r:'main',zh:'藏着一个故事'},
+  {t:'that locals have passed down for three generations.',r:'attr',zh:'当地人已经传承了三代的故事'}],
+ trans:'褪色的幕布后面，藏着一段当地人已经传了三代的故事。',
+ note:'地点状语置于句首 → <b>完全倒装</b>：hides 提到主语 a story 之前；that 引导<b>定语从句</b>。'},
+{diff:3,segs:[
+  {t:'Whether the new battery can survive freezing temperatures ',r:'nclause',zh:'新电池能否在冰点温度下存活'},
+  {t:'remains the question ',r:'main',zh:'仍是问题所在'},
+  {t:'that determines whether the project gets funded.',r:'attr',zh:'决定该项目能否获得资助'}],
+ trans:'新电池能否经受住冰点温度，仍是决定该项目能否获得资助的关键问题。',
+ note:'Whether… 置于句首作<b>主语从句</b>，谓语是 remains；第二个 whether 藏在定语从句里作 determines 的宾语。'}
+];
+
+/* ---------- 存储 ---------- */
+function load(){
+  try{ var o=JSON.parse(localStorage.getItem(KEY)); if(o&&typeof o==='object') return o; }catch(e){}
+  return {sent:{},days:{}};
+}
+function save(S){ try{ localStorage.setItem(KEY,JSON.stringify(S)); }catch(e){} }
+
+/* ---------- 状态 ---------- */
+var S=load();
+var cur=null;          // 当前句 {i, revealed:[bool], correct:[bool], done}
+var answerCount=0, answerOk=0;
+
+function statDone(){ var n=0; for(var k in S.sent){ if(S.sent[k].n>0) n++; } return n; }
+function statMast(){ var n=0; for(var k in S.sent){ if((S.sent[k].s||0)>=1) n++; } return n; }
+function renderStats(){
+  $('#stDone').textContent=statDone();
+  $('#stToday').textContent=(S.days[today()]&&S.days[today()].n)||0;
+  $('#stMast').textContent=statMast();
+}
+
+/* ---------- 选句：练得最少的优先 ---------- */
+function pickSentence(){
+  var order=[];
+  for(var i=0;i<BANK.length;i++){
+    var rec=S.sent[i]||{n:0};
+    order.push({i:i,n:rec.n});
+  }
+  order.sort(function(a,b){ return a.n-b.n || (Math.random()-0.5); });
+  return order[0].i;
+}
+
+/* ---------- 渲染 ---------- */
+function renderSentence(){
+  var d=BANK[cur.i];
+  $('#diffTag').textContent='难度 '+'★'.repeat(d.diff)+'☆'.repeat(3-d.diff)+' · 第 '+(cur.i+1)+' 句';
+  var line=$('#segline'); line.innerHTML='';
+  d.segs.forEach(function(sg,idx){
+    var el=document.createElement('span');
+    el.className='seg dim'; el.id='seg'+idx;
+    el.textContent=sg.t;
+    line.appendChild(el);
+  });
+  $('#progBar').style.width='0%';
+  $('#layers').classList.remove('show');
+  $('#btnNext').style.display='none';
+  $('#btnReveal').style.display='';
+  answerCount=0; answerOk=0;
+  nextQuestion();
+}
+function nextQuestion(){
+  var d=BANK[cur.i];
+  var idx=-1;
+  for(var k=0;k<cur.revealed.length;k++){ if(!cur.revealed[k]){ idx=k; break; } }
+  if(idx<0){ finishSentence(); return; }
+  cur.hot=idx;
+  document.querySelectorAll('.seg').forEach(function(el,n){
+    el.classList.toggle('hot',n===idx);
+    el.classList.toggle('dim',!cur.revealed[n]);
+  });
+  $('#quizWhat').textContent='「…'+d.segs[idx].t.replace(/^\s+|\s+$/g,'').slice(0,26)+'…」';
+  var chips=$('#chips'); chips.innerHTML='';
+  Object.keys(ROLES).forEach(function(rk){
+    var b=document.createElement('button');
+    b.className='chip'; b.type='button';
+    b.textContent=ROLES[rk].n;
+    b.setAttribute('data-r',rk);
+    b.onclick=function(){ answer(rk,b); };
+    chips.appendChild(b);
+  });
+  $('#fb').textContent='';
+  $('#fb').className='fb';
+}
+function answer(rk,btn){
+  if(cur.hot==null||cur.revealed[cur.hot]) return;
+  var d=BANK[cur.i];
+  var right=d.segs[cur.hot].r===rk;
+  answerCount++; if(right) answerOk++;
+  cur.revealed[cur.hot]=true; cur.correct[cur.hot]=right;
+  var seg=$('#seg'+cur.hot);
+  seg.classList.remove('hot','dim');
+  seg.classList.add('done',ROLES[d.segs[cur.hot].r].c.replace('t-','r-'));
+  var tag=document.createElement('span');
+  tag.className='tag '+ROLES[d.segs[cur.hot].r].c;
+  tag.textContent=(right?'✓ ':'✗ ')+ROLES[d.segs[cur.hot].r].n;
+  seg.appendChild(tag);
+  var zh=document.createElement('span');
+  zh.className='zh'; zh.textContent=' '+d.segs[cur.hot].zh;
+  seg.appendChild(zh);
+  btn.classList.add(right?'ok':'bad');
+  var doneN=cur.revealed.filter(Boolean).length;
+  $('#progBar').style.width=Math.round(doneN/d.segs.length*100)+'%';
+  record(right);
+  var fb=$('#fb');
+  if(right){ fb.className='fb good'; fb.textContent='✔ 对！'+ROLES[d.segs[cur.hot].r].n+'。'+d.segs[cur.hot].zh; }
+  else{
+    fb.className='fb err';
+    fb.textContent='✘ 应是「'+ROLES[d.segs[cur.hot].r].n+'」。'+d.segs[cur.hot].zh;
+  }
+  cur.hot=null;
+  setTimeout(function(){
+    document.querySelectorAll('.chip').forEach(function(c){c.classList.remove('ok','bad')});
+    nextQuestion();
+  }, right?700:1500);
+}
+function record(ok){
+  var t=today();
+  if(!S.days[t]) S.days[t]={n:0,ok:0};
+  S.days[t].n++; if(ok) S.days[t].ok++;
+  var rec=S.sent[cur.i]||(S.sent[cur.i]={n:0,ok:0,s:0});
+  rec.n++; if(ok) rec.ok++;
+  save(S); renderStats();
+}
+function finishSentence(){
+  cur.done=true;
+  var acc=answerCount?Math.round(answerOk/answerCount*100):0;
+  var rec=S.sent[cur.i]||(S.sent[cur.i]={n:0,ok:0,s:0});
+  if(answerCount>0&&answerOk===answerCount) rec.s=Math.min(3,(rec.s||0)+1);
+  save(S); renderStats();
+  showLayers();
+  $('#quiz').style.display='none';
+  $('#btnReveal').style.display='none';
+  $('#btnNext').style.display='';
+  $('#progBar').style.width='100%';
+  var bar=document.createElement('div');
+  bar.className='trans'; bar.style.marginBottom='10px';
+  bar.innerHTML='<b>本轮战报</b>　'+(answerCount?('答对 '+answerOk+' / '+answerCount+'（'+acc+'%）'+(acc===100?' ⭐ +1':'')):'本次为直接揭示，不计分');
+  var layers=$('#layers');
+  layers.insertBefore(bar,layers.firstChild);
+}
+function showLayers(){
+  var d=BANK[cur.i];
+  var mainEn=[],mainZh=[];
+  var layers=$('#layers');
+  layers.innerHTML='<div class="lt" style="font-weight:800;font-size:13px;color:var(--sub)">🧬 分层解剖</div>';
+  d.segs.forEach(function(sg){
+    if(sg.r==='main'){ mainEn.push(sg.t.replace(/^\s+|\s+$/g,'')); mainZh.push(sg.zh); }
+  });
+  var l1=document.createElement('div');
+  l1.className='layer r-main';
+  l1.innerHTML='<div class="lt">① 主干</div><div class="en">'+esc(mainEn.join(' '))+'</div><div class="cn">'+esc(mainZh.join(''))+'</div>';
+  layers.appendChild(l1);
+  var l2=document.createElement('div');
+  l2.className='layer';
+  l2.innerHTML='<div class="lt">② 修饰成分（按出现顺序挂回）</div>';
+  d.segs.forEach(function(sg){
+    if(sg.r==='main') return;
+    var row=document.createElement('div');
+    row.style.margin='6px 0';
+    row.innerHTML='<span class="tag '+ROLES[sg.r].c+'">'+ROLES[sg.r].n+'</span> '+
+      '<span class="en" style="font-family:Georgia,serif">'+esc(sg.t.replace(/^\s+|\s+$/g,''))+'</span>'+
+      '<div class="cn">'+esc(sg.zh)+'</div>';
+    l2.appendChild(row);
+  });
+  layers.appendChild(l2);
+  var l3=document.createElement('div');
+  l3.className='trans';
+  l3.innerHTML='<b>全句翻译</b>　'+esc(d.trans);
+  layers.appendChild(l3);
+  if(d.note){
+    var l4=document.createElement('div');
+    l4.className='note';
+    l4.innerHTML='<b>手术笔记</b>　'+d.note;
+    layers.appendChild(l4);
+  }
+  layers.classList.add('show');
+}
+
+/* ---------- 事件 ---------- */
+$('#btnReveal').onclick=function(){
+  if(!cur||cur.done) return;
+  var d=BANK[cur.i];
+  d.segs.forEach(function(sg,idx){
+    if(cur.revealed[idx]) return;
+    cur.revealed[idx]=true; cur.correct[idx]=null;
+    var seg=$('#seg'+idx);
+    seg.classList.remove('hot','dim');
+    seg.classList.add('done',ROLES[sg.r].c.replace('t-','r-'));
+    var tag=document.createElement('span');
+    tag.className='tag '+ROLES[sg.r].c;
+    tag.textContent=ROLES[sg.r].n;
+    seg.appendChild(tag);
+    var zh=document.createElement('span');
+    zh.className='zh'; zh.textContent=' '+sg.zh;
+    seg.appendChild(zh);
+  });
+  $('#progBar').style.width='100%';
+  finishSentence();
+};
+$('#btnSkip').onclick=next;
+$('#btnNext').onclick=next;
+function next(){
+  $('#quiz').style.display='';
+  $('#fb').textContent='';
+  cur={i:pickSentence(),revealed:[],correct:[],done:false};
+  var d=BANK[cur.i];
+  for(var k=0;k<d.segs.length;k++){ cur.revealed.push(false); cur.correct.push(false); }
+  renderSentence();
+}
+
+/* ---------- 高度上报（主站 iframe 自适应） ---------- */
+function reportH(){
+  var h=Math.max(document.documentElement.scrollHeight,document.body.scrollHeight);
+  try{ parent.postMessage({__wbResize:true,id:'sentFrame',h:h},'*') }catch(e){}
+}
+if(window.ResizeObserver){ new ResizeObserver(reportH).observe(document.body); }
+window.addEventListener('load',reportH);
+setTimeout(reportH,400);
+
+next();
+})();
+</script>
+</body>
+</html>

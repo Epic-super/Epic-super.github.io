@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<!-- 政治错题本 · 选择题错题录入 + 艾宾浩斯重测排程 | 单文件 HTML 子应用（零外链），数据走自身 localStorage（wb_polerrors_v1）
+     玩法：录入错题（题干/选项/正确答案/我的错选/错因四选一）→ 按艾宾浩斯间隔 1/2/4/7/15/30 天自动排重测 →
+     重测时先回忆再对答案自评「稳了/又错了」，又错了则回到第一档重来。 -->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" type="image/png" href="../../assets/pwa/icon-192.png"><!-- 2026-11-06 全站补 rel="icon"：本页此前未声明，浏览器回落请求站点根 /favicon.ico 报 404（控制台红色噪音、标签页无图标）；与 2026-10-03 对 index/zk-ky/share-hub 的处理同一策略 -->
+<title>政治错题本 · 艾宾浩斯重测排程</title>
+
+<script>
+/* 主题跟随主站（同 anime.html 模式）：读 wb_store.data.theme（老版 wb_hub_theme），auto 跟随系统 */
+(function(){
+  function stored(){
+    try{
+      var raw=localStorage.getItem('wb_store');
+      if(raw){var o=JSON.parse(raw); if(o&&o.data&&o.data.theme) return o.data.theme;}
+    }catch(e){}
+    try{ var l=localStorage.getItem('wb_hub_theme'); if(l) return l; }catch(e){}
+    return 'auto';
+  }
+  function mq(){ return window.matchMedia('(prefers-color-scheme: dark)'); }
+  function apply(m){
+    var dark=mq().matches;
+    var act=(m==='dark'||m==='light')?m:(dark?'dark':'light');
+    document.documentElement.setAttribute('data-theme',act);
+  }
+  apply(stored());
+  window.addEventListener('storage',function(e){
+    if(e.key==='wb_store'||e.key==='wb_hub_theme') apply(stored());
+  });
+  try{ mq().addEventListener('change',function(){ if(stored()==='auto') apply('auto'); }); }catch(e){}
+})();
+</script>
+
+<link rel="canonical" href="https://epic-super.github.io/lab/products/politics-errors.html">
+<meta name="description" content="政治错题本：考研政治选择题错题录入、错因归类、艾宾浩斯 1/2/4/7/15/30 天重测排程，错题越滚越少。">
+<style>
+:root{
+  --bg:#101019; --panel:#191a2b; --panel2:#20213a; --line:#2c2d4d; --line2:#3a3c63;
+  --txt:#edeef8; --sub:#8f93b4; --blue:#4a72d0;--blue-ink:#6682c8; --orange:#ff9f43; --pink:#f472b6;
+  --green:#34d399; --red:#f87171; --purple:#a78bfa; --yellow:#fbbf24;
+  --r:16px; --r-sm:11px; --r-f:999px;
+  --sh:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.22);
+  --ease:cubic-bezier(.32,.72,0,1); --tf:.16s var(--ease);
+}
+html[data-theme="light"]{--blue-ink:#3966d8;
+  --bg:#f7f8fc; --panel:#ffffff; --panel2:#eef0f8; --line:#e2e5f0; --line2:#ccd2e6;
+  --txt:#20233a; --sub:#5d6280; --blue:#3b6ae0; --orange:#af6317; --pink:#db2777;
+  --green:#12945f; --red:#dc4b4b; --purple:#7c5cd6; --yellow:#b45309;
+  --sh:0 1px 3px rgba(30,30,60,.06),0 6px 16px rgba(30,30,60,.07);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","HarmonyOS Sans SC","Microsoft YaHei",sans-serif;
+  background:var(--bg);color:var(--txt);font-size:15px;line-height:1.65;
+  padding-bottom:calc(28px + env(safe-area-inset-bottom));
+  -webkit-font-smoothing:antialiased;
+}
+button,input,select,textarea{font-family:inherit;font-size:15px;color:inherit}
+button{cursor:pointer;border:none;background:none}
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid var(--blue);outline-offset:2px;border-radius:6px}
+.wrap{max-width:880px;margin:0 auto;padding:0 14px}
+
+.top{position:relative;color:#fff;padding:22px 0 20px;padding-top:calc(22px + env(safe-area-inset-top));
+  background:
+    radial-gradient(110% 150% at 8% -20%,rgba(248,113,113,.32),rgba(248,113,113,0) 50%),
+    radial-gradient(90% 130% at 92% 0%,rgba(251,191,36,.30),rgba(251,191,36,0) 58%),
+    linear-gradient(134deg,#3d1b2b 0%,#6b2b3f 55%,#8a4a2b 120%);
+  box-shadow:0 1px 0 rgba(255,255,255,.08) inset,0 6px 22px rgba(30,10,12,.3);overflow:hidden}
+.top::after{content:'';position:absolute;left:0;right:0;bottom:0;height:1px;background:linear-gradient(90deg,transparent,rgba(251,191,36,.5),transparent)}
+.brand h1{margin:0;font-size:21px;font-weight:800;display:flex;align-items:center;gap:9px}
+.brand p{margin:5px 0 0;font-size:12.5px;opacity:.88}
+.stats{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}
+.stat{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:var(--r-sm);padding:6px 11px;font-size:12px;display:flex;align-items:baseline;gap:5px;color:#fff}
+.stat b{font-size:16px;font-weight:800;font-variant-numeric:tabular-nums}
+.stat.fire b{color:#ffd98a}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:18px;box-shadow:var(--sh);margin:14px 0}
+.card h2{margin:0 0 4px;font-size:16px;font-weight:800;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.card .desc{color:var(--sub);font-size:13px;margin:0 0 12px}
+.small{font-size:12px;color:var(--sub)}
+
+/* 表单 */
+.fgrid{display:grid;gap:10px}
+.frow{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+label.fl{font-size:12.5px;color:var(--sub);font-weight:700;min-width:64px}
+textarea,input[type=text]{background:var(--panel2);border:1px solid var(--line);border-radius:var(--r-sm);padding:9px 11px;width:100%;resize:vertical;line-height:1.5}
+textarea:focus,input:focus{border-color:var(--blue)}
+.optgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.optcell{display:flex;gap:6px;align-items:center}
+.optkey{font-weight:800;font-size:13px;color:var(--sub);flex:none}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1px solid var(--line2);background:var(--panel);border-radius:var(--r-f);padding:6px 13px;font-size:12.5px;transition:var(--tf)}
+.chip:hover{border-color:var(--blue)}
+.chip.on{border-color:var(--blue);color:var(--blue-ink);background:rgba(91,140,255,.12);font-weight:700}
+.btn{border:1px solid var(--line2);background:var(--panel2);border-radius:var(--r-f);padding:8px 16px;font-size:13.5px;transition:var(--tf)}
+.btn:hover{border-color:var(--blue)}
+.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff;font-weight:700}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.good{border-color:var(--green);color:var(--green)}
+.btn.good:hover{background:rgba(52,211,153,.1)}
+.btn.bad{border-color:var(--red);color:var(--red)}
+.btn.bad:hover{background:rgba(248,113,113,.1)}
+.hint{font-size:12px;color:var(--sub);min-height:18px;margin-top:6px}
+.hint.good{color:var(--green)} .hint.err{color:var(--red)}
+
+/* 科目标签 */
+.tag{display:inline-block;font-size:10.5px;font-weight:700;border-radius:5px;padding:1px 7px;letter-spacing:.5px;border:1px solid}
+.t-my{color:var(--blue-ink);border-color:var(--blue)} .t-mz{color:var(--red);border-color:var(--red)}
+.t-sg{color:var(--orange);border-color:var(--orange)} .t-sx{color:var(--green);border-color:var(--green)}
+.t-sz{color:var(--purple);border-color:var(--purple)}
+
+/* 重测卡 */
+.revq{font-size:15.5px;font-weight:600;white-space:pre-wrap;margin:10px 0}
+.revopts{display:grid;gap:6px;margin:10px 0}
+.revopt{background:var(--panel2);border:1px solid var(--line);border-radius:var(--r-sm);padding:8px 12px;font-size:14px}
+.revopt b{margin-right:6px}
+.revopt.right{border-color:var(--green);background:rgba(52,211,153,.1)}
+.revopt.mine{border-color:var(--red);background:rgba(248,113,113,.1)}
+.revnote{margin-top:10px;font-size:13px;background:rgba(91,140,255,.07);border:1px solid rgba(91,140,255,.25);border-radius:var(--r-sm);padding:10px 12px}
+.prog{height:7px;background:var(--panel2);border-radius:var(--r-f);overflow:hidden;margin-top:12px;border:1px solid var(--line)}
+.prog i{display:block;height:100%;background:linear-gradient(90deg,var(--red),var(--yellow),var(--green));border-radius:var(--r-f);transition:width .35s var(--ease)}
+
+/* 艾宾浩斯档位 */
+.stages{display:flex;gap:5px;margin-top:6px;flex-wrap:wrap}
+.stg{font-size:10.5px;border-radius:5px;padding:2px 8px;border:1px solid var(--line2);color:var(--sub);font-variant-numeric:tabular-nums}
+.stg.hit{border-color:var(--orange);color:var(--orange);font-weight:700}
+
+/* 列表 */
+.qitem{background:var(--panel2);border:1px solid var(--line);border-radius:var(--r-sm);padding:12px;margin:9px 0}
+.qitem .qh{display:flex;gap:7px;align-items:center;flex-wrap:wrap;font-size:12px}
+.qitem .qq{font-size:13.5px;margin:7px 0;white-space:pre-wrap}
+.qmeta{display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:11.5px;color:var(--sub)}
+.qmeta b{color:var(--txt)}
+.mini{font-size:11.5px;border:1px solid var(--line2);border-radius:var(--r-f);padding:2px 9px;color:var(--sub);transition:var(--tf)}
+.mini:hover{border-color:var(--red);color:var(--red)}
+select.mini{padding:2px 6px;border-radius:6px;background:var(--panel);color:var(--txt);border:1px solid var(--line2)}
+.empty{text-align:center;color:var(--sub);padding:18px 0;font-size:13px}
+.due{color:var(--yellow);font-weight:700}
+.over{color:var(--red);font-weight:700}
+.filters{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:4px}
+.fchip{border:1px solid var(--line2);border-radius:var(--r-f);padding:4px 12px;font-size:12px;color:var(--sub);transition:var(--tf)}
+.fchip.on{border-color:var(--blue);color:var(--blue-ink);background:rgba(91,140,255,.1);font-weight:700}
+
+@media (max-width:560px){
+  .optgrid{grid-template-columns:1fr}
+  .chip{padding:6px 11px;font-size:12px}
+}
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+
+<header class="top">
+  <div class="wrap brand">
+    <h1>📕 政治错题本</h1>
+    <p>选择题错题录入 + 艾宾浩斯重测排程（1/2/4/7/15/30 天）。错因归类，重测到「稳了」为止——错题越滚越少，分数越滚越高。</p>
+    <div class="stats">
+      <div class="stat"><span>错题总数</span><b id="stTotal">0</b></div>
+      <div class="stat fire"><span>今日待重测</span><b id="stDue">0</b></div>
+      <div class="stat"><span>已消灭</span><b id="stDone">0</b></div>
+      <div class="stat"><span>重测连击</span><b id="stStreak">0</b><span>天</span></div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="card">
+    <h2>✍️ 录入错题</h2>
+    <p class="desc">做完题对答案，错了就随手录进来。选项可不填（纯回忆式重测），但题干和正确答案必填。</p>
+    <div class="fgrid">
+      <div class="frow" id="subChips"></div>
+      <div>
+        <label class="fl">题干</label>
+        <textarea id="inQ" rows="3" placeholder="粘贴或简写题干，例如：剩余价值率 m/v 反映的是…"></textarea>
+      </div>
+      <div class="optgrid">
+        <div class="optcell"><span class="optkey">A.</span><input type="text" id="inA" placeholder="选项 A（可空）"></div>
+        <div class="optcell"><span class="optkey">B.</span><input type="text" id="inB" placeholder="选项 B（可空）"></div>
+        <div class="optcell"><span class="optkey">C.</span><input type="text" id="inC" placeholder="选项 C（可空）"></div>
+        <div class="optcell"><span class="optkey">D.</span><input type="text" id="inD" placeholder="选项 D（可空）"></div>
+      </div>
+      <div class="frow">
+        <label class="fl">正确答案</label><select id="inAns" class="mini"><option>A</option><option>B</option><option>C</option><option>D</option></select>
+        <label class="fl" style="min-width:auto">我的错选</label><select id="inMine" class="mini"><option value="">没选/不记得</option><option>A</option><option>B</option><option>C</option><option>D</option></select>
+      </div>
+      <div class="frow" id="whyChips"></div>
+      <div>
+        <label class="fl">解析备注</label>
+        <textarea id="inNote" rows="2" placeholder="可空。记下正确思路/陷阱点，重测看答案时会展示。"></textarea>
+      </div>
+      <div class="frow">
+        <button class="btn primary" id="btnAdd">＋ 收进错题本</button>
+        <span class="hint" id="addHint"></span>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>🔄 今日重测 <span class="small" id="revCount"></span></h2>
+    <p class="desc">先遮住答案回忆，再点「看答案」自评。记对了进下一档，又错了回第一档——诚实自评才有用。</p>
+    <div class="prog"><i id="revBar" style="width:0%"></i></div>
+    <div id="revBox"><div class="empty">今天没有到期的错题 🎉　去刷题，错了再来录。</div></div>
+  </section>
+
+  <section class="card">
+    <h2>📚 全部错题 <span class="small" id="listCount"></span></h2>
+    <div class="filters" id="filters"></div>
+    <div id="listBox"></div>
+  </section>
+
+  <section class="card">
+    <h2>🧠 艾宾浩斯怎么排的</h2>
+    <p class="desc">每道错题独立计时，六档间隔后「消灭」。</p>
+    <div class="stages" id="stageLegend"></div>
+    <p class="small" style="margin-top:10px">录入当天先重测一次（第 0 档），此后按间隔 1→2→4→7→15→30 天滚动。中途哪次「又错了」，立刻打回第 0 档重来；连击天数按「当天有重测记录」连续计。数据全在本机 localStorage，不上传。</p>
+  </section>
+
+</main>
+
+<script>
+(function(){
+'use strict';
+var KEY='wb_polerrors_v1';
+var $=function(s){return document.querySelector(s)};
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function today(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function addDays(ds,n){var p=ds.split('-');var d=new Date(+p[0],+p[1]-1,+p[2]);d.setDate(d.getDate()+n);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function daysBetween(a,b){var p=a.split('-'),q=b.split('-');return Math.round((new Date(+q[0],+q[1]-1,+q[2])-new Date(+p[0],+p[1]-1,+p[2]))/864e5)}
+
+var SUBS=[
+  {k:'马原',c:'t-my'},{k:'毛中特',c:'t-mz'},{k:'史纲',c:'t-sg'},
+  {k:'思修',c:'t-sx'},{k:'时政',c:'t-sz'}
+];
+var WHYS={
+  mem:{n:'① 知识点没背牢',t:'回课本把这句话原文圈出来，明天重测前先背一遍'},
+  conf:{n:'② 概念混淆',t:'把这对易混概念写在解析备注里，对比记忆'},
+  care:{n:'③ 审题/粗心',t:'下次读题圈出「不正确」「根本原因」等关键词'},
+  trick:{n:'④ 套路技巧不懂',t:'多做题积累这类题型的固定解法'}
+};
+var STAGES=[1,2,4,7,15,30];   // 第 i 档答对后 → i+1 档，间隔 STAGES[i] 天后到期
+
+/* ---------- 存储 ---------- */
+function load(){
+  try{ var o=JSON.parse(localStorage.getItem(KEY)); if(o&&typeof o==='object'&&o.items) return o; }catch(e){}
+  return {items:[],days:{}};
+}
+function save(){ try{ localStorage.setItem(KEY,JSON.stringify(S)); }catch(e){} }
+var S=load();
+var subOn='马原', whyOn='mem', filter='all';
+
+/* ---------- 统计 ---------- */
+function statDue(){ var t=today(),n=0; S.items.forEach(function(it){ if(it.stage<6&&it.due<=t) n++; }); return n; }
+function statDone(){ return S.items.filter(function(it){return it.stage>=6}).length; }
+function statStreak(){
+  var n=0,d=today();
+  if(!S.days[d]){ d=addDays(d,-1); if(!S.days[d]) return 0; }
+  while(S.days[d]&&S.days[d].n>0){ n++; d=addDays(d,-1); }
+  return n;
+}
+function renderStats(){
+  $('#stTotal').textContent=S.items.length;
+  $('#stDue').textContent=statDue();
+  $('#stDone').textContent=statDone();
+  $('#stStreak').textContent=statStreak();
+}
+
+/* ---------- 录入表单 ---------- */
+function renderForm(){
+  var sc=$('#subChips');
+  sc.innerHTML='<label class="fl">科目</label>';
+  SUBS.forEach(function(s){
+    var b=document.createElement('button');
+    b.type='button'; b.className='chip'+(subOn===s.k?' on':''); b.textContent=s.k;
+    b.onclick=function(){ subOn=s.k; renderForm(); };
+    sc.appendChild(b);
+  });
+  var wc=$('#whyChips');
+  wc.innerHTML='<label class="fl">错因</label>';
+  Object.keys(WHYS).forEach(function(k){
+    var b=document.createElement('button');
+    b.type='button'; b.className='chip'+(whyOn===k?' on':''); b.textContent=WHYS[k].n;
+    b.onclick=function(){ whyOn=k; renderForm(); };
+    wc.appendChild(b);
+  });
+}
+$('#btnAdd').onclick=function(){
+  var q=$('#inQ').value.replace(/^\s+|\s+$/g,'');
+  var hint=$('#addHint');
+  if(!q){ hint.className='hint err'; hint.textContent='⚠️ 题干还没填'; return; }
+  var mine=$('#inMine').value;
+  if(mine===($('#inAns').value)) { hint.className='hint err'; hint.textContent='⚠️ 「我的错选」和正确答案一样，检查一下'; return; }
+  var opts=['A','B','C','D'].map(function(k){ return $('#in'+k).value.replace(/^\s+|\s+$/g,''); });
+  if(!opts.some(function(o){return o})){
+    // 选项全空 → 也允许，但正确答案失去意义，重测变纯回忆
+  }
+  S.items.unshift({
+    id:Date.now()+''+Math.floor(Math.random()*1e4),
+    sub:subOn, q:q, opts:opts, ans:$('#inAns').value, mine:mine||null,
+    why:whyOn, note:$('#inNote').value.replace(/^\s+|\s+$/g,''),
+    stage:0, due:today(), right:0, wrong:0, created:today()
+  });
+  save(); renderStats(); renderList(); renderReview();
+  $('#inQ').value=''; $('#inA').value=''; $('#inB').value=''; $('#inC').value=''; $('#inD').value='';
+  $('#inMine').value=''; $('#inNote').value='';
+  hint.className='hint good'; hint.textContent='✔ 已收进错题本，今天稍后就能重测它';
+  setTimeout(function(){ hint.className='hint'; hint.textContent=''; },2600);
+};
+
+/* ---------- 重测 ---------- */
+var queue=[],revIdx=0,revealed=false;
+function buildQueue(){
+  var t=today();
+  queue=S.items.map(function(it,i){return {i:i,it:it}})
+    .filter(function(x){ return x.it.stage<6 && x.it.due<=t; })
+    .sort(function(a,b){ return a.it.due<b.it.due?-1:1; });
+  revIdx=0;
+}
+function renderReview(){
+  buildQueue();
+  $('#revCount').textContent=queue.length?('共 '+queue.length+' 题'):'';
+  $('#revBar').style.width=(queue.length?Math.round(revIdx/queue.length*100):0)+'%';
+  var box=$('#revBox');
+  if(!queue.length){
+    box.innerHTML='<div class="empty">今天没有到期的错题 🎉　去刷题，错了再来录。</div>';
+    return;
+  }
+  var cur=queue[revIdx].it;
+  var h='<div class="qitem" style="margin-top:12px">';
+  h+='<div class="qh"><span class="tag '+subClass(cur.sub)+'">'+esc(cur.sub)+'</span>'+
+     '<span class="tag '+whyClass(cur.why)+'">'+esc(WHYS[cur.why].n)+'</span>'+
+     '<span>第 '+(revIdx+1)+' / '+queue.length+' 题 · 已重测 '+(cur.right+cur.wrong)+' 次</span></div>';
+  h+='<div class="revq">'+esc(cur.q)+'</div>';
+  if(revealed){
+    if(cur.opts.some(function(o){return o})){
+      h+='<div class="revopts">';
+      ['A','B','C','D'].forEach(function(k,idx){
+        var o=cur.opts[idx]; if(!o) return;
+        var cls='revopt';
+        if(k===cur.ans) cls+=' right';
+        if(cur.mine&&k===cur.mine&&k!==cur.ans) cls+=' mine';
+        h+='<div class="'+cls+'"><b>'+k+'.</b>'+esc(o)+(k===cur.ans?' ✅':'')+(cur.mine===k&&k!==cur.ans?' ← 当时选的':'')+'</div>';
+      });
+      h+='</div>';
+    }else{
+      h+='<div class="revnote">正确答案：<b>'+esc(cur.ans)+'</b>（纯回忆题）</div>';
+    }
+    if(cur.mine&&cur.mine!==cur.ans) h+='<div class="small">当时错选：<b class="over">'+esc(cur.mine)+'</b> · 错因：'+esc(WHYS[cur.why].n)+'</div>';
+    if(cur.note) h+='<div class="revnote">📝 '+esc(cur.note)+'</div>';
+    h+='<div class="small" style="margin-top:8px">'+esc(WHYS[cur.why].t)+'</div>';
+    h+='<div class="frow" style="margin-top:12px">'+
+       '<button class="btn good" id="btnOK">✔ 稳了，进下一档</button>'+
+       '<button class="btn bad" id="btnNG">✘ 又错了，回炉</button>'+
+       '<button class="btn" id="btnSkip">跳过（明天再见）</button></div>';
+  }else{
+    h+='<div class="frow" style="margin-top:12px"><button class="btn primary" id="btnReveal">回忆好了，看答案</button></div>';
+  }
+  h+='</div>';
+  box.innerHTML=h;
+  if(revealed){
+    $('#btnOK').onclick=function(){ mark(true); };
+    $('#btnNG').onclick=function(){ mark(false); };
+    $('#btnSkip').onclick=function(){ cur.due=addDays(today(),1); save(); next(); };
+  }else{
+    $('#btnReveal').onclick=function(){ revealed=true; renderReview(); };
+  }
+}
+function mark(ok){
+  var cur=queue[revIdx].it;
+  var t=today();
+  if(!S.days[t]) S.days[t]={n:0,ok:0};
+  S.days[t].n++; if(ok) S.days[t].ok++;
+  if(ok){
+    cur.right++; cur.stage++;
+    cur.due=cur.stage>=6?'':addDays(t,STAGES[cur.stage-1]||1);
+  }else{
+    cur.wrong++; cur.stage=0; cur.due=addDays(t,1);
+  }
+  save(); next();
+}
+function next(){ revealed=false; revIdx++; renderStats(); renderReview(); }
+function subClass(k){ for(var i=0;i<SUBS.length;i++){ if(SUBS[i].k===k) return SUBS[i].c; } return 't-my'; }
+function whyClass(k){ return {'mem':'t-my','conf':'t-mz','care':'t-sg','trick':'t-sz'}[k]||'t-my'; }
+
+/* ---------- 列表 ---------- */
+function renderFilters(){
+  var fs=[{k:'all',n:'全部'},{k:'due',n:'待重测'},{k:'done',n:'已消灭'}];
+  SUBS.forEach(function(s){ fs.push({k:'sub:'+s.k,n:s.k}); });
+  var box=$('#filters'); box.innerHTML='';
+  fs.forEach(function(f){
+    var b=document.createElement('button');
+    b.type='button'; b.className='fchip'+(filter===f.k?' on':''); b.textContent=f.n;
+    b.onclick=function(){ filter=f.k; renderFilters(); renderList(); };
+    box.appendChild(b);
+  });
+}
+function renderList(){
+  var t=today();
+  var arr=S.items.map(function(it,i){return {i:i,it:it}}).filter(function(x){
+    if(filter==='all') return true;
+    if(filter==='due') return x.it.stage<6&&x.it.due<=t;
+    if(filter==='done') return x.it.stage>=6;
+    if(filter.indexOf('sub:')===0) return x.it.sub===filter.slice(4);
+    return true;
+  });
+  $('#listCount').textContent='（'+arr.length+' 题）';
+  var box=$('#listBox');
+  if(!arr.length){ box.innerHTML='<div class="empty">这里还空着。录第一道错题吧。</div>'; return; }
+  box.innerHTML='';
+  arr.forEach(function(x){
+    var it=x.it;
+    var d=document.createElement('div'); d.className='qitem';
+    var dueTxt=it.stage>=6?'已消灭 🎉':(it.due<t?'<span class="over">已过期</span>':(it.due===t?'<span class="due">今天到期</span>':it.due+' 到期'));
+    d.innerHTML='<div class="qh">'+
+      '<span class="tag '+subClass(it.sub)+'">'+esc(it.sub)+'</span>'+
+      '<span class="tag '+whyClass(it.why)+'">'+esc(WHYS[it.why].n)+'</span>'+
+      '<span class="qmeta">答案 <b>'+esc(it.ans)+'</b>'+(it.mine&&it.mine!==it.ans?' · 错选 <b>'+esc(it.mine)+'</b>':'')+
+      ' · 稳 '+it.right+' / 错 '+it.wrong+' · '+dueTxt+'</span>'+
+      '<span style="margin-left:auto;display:flex;gap:6px;align-items:center">'+
+      '<select class="mini whySel">'+Object.keys(WHYS).map(function(k){return '<option value="'+k+'"'+(it.why===k?' selected':'')+'>'+WHYS[k].n+'</option>'}).join('')+'</select>'+
+      '<button class="mini del">删除</button></span></div>';
+    d.innerHTML+='<div class="qq">'+esc(it.q)+'</div>';
+    var stg='<div class="stages">';
+    for(var s=0;s<=6;s++){
+      stg+='<span class="stg'+(it.stage>=s?' hit':'')+'">'+(s===0?'录入':s===6?'消灭':STAGES[s-1]+'天')+'</span>';
+    }
+    d.innerHTML+=stg+'</div>';
+    if(it.note) d.innerHTML+='<div class="small" style="margin-top:5px">📝 '+esc(it.note)+'</div>';
+    var sel=d.querySelector('.whySel');
+    sel.onchange=function(){ it.why=sel.value; save(); renderList(); };
+    d.querySelector('.del').onclick=function(){
+      if(confirm('删除这道错题？')){ S.items.splice(x.i,1); save(); renderStats(); renderList(); renderReview(); }
+    };
+    box.appendChild(d);
+  });
+}
+
+/* ---------- 图例 ---------- */
+function renderLegend(){
+  var h='<span class="stg hit">录入当天</span>';
+  STAGES.forEach(function(v){ h+='<span class="stg">'+v+' 天后</span>'; });
+  h+='<span class="stg">消灭</span>';
+  $('#stageLegend').innerHTML=h;
+}
+
+/* ---------- 高度上报（主站 iframe 自适应） ---------- */
+function reportH(){
+  var h=Math.max(document.documentElement.scrollHeight,document.body.scrollHeight);
+  try{ parent.postMessage({__wbResize:true,id:'polErrFrame',h:h},'*') }catch(e){}
+}
+if(window.ResizeObserver){ new ResizeObserver(reportH).observe(document.body); }
+window.addEventListener('load',reportH);
+setTimeout(reportH,400);
+
+renderForm();
+renderLegend();
+renderFilters();
+renderList();
+renderReview();
+renderStats();
+})();
+</script>
+</body>
+</html>

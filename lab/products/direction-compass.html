@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<!-- 考研方向罗盘 | 单文件 HTML 子应用（零外链）
+     方向细分地图 × 学长学姐经验导航 × 逆风局指南 × 心态锚点
+     数据：收藏存 wb_compass_v1。 -->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" type="image/png" href="../../assets/pwa/icon-192.png"><!-- 2026-11-06 全站补 rel="icon"：本页此前未声明，浏览器回落请求站点根 /favicon.ico 报 404（控制台红色噪音、标签页无图标）；与 2026-10-03 对 index/zk-ky/share-hub 的处理同一策略 -->
+<title>考研方向罗盘 · 找到你的北</title>
+
+<script>
+(function(){
+  function stored(){
+    try{
+      var raw=localStorage.getItem('wb_store');
+      if(raw){var o=JSON.parse(raw); if(o&&o.data&&o.data.theme) return o.data.theme;}
+    }catch(e){}
+    try{ var l=localStorage.getItem('wb_hub_theme'); if(l) return l; }catch(e){}
+    return 'auto';
+  }
+  function mq(){ return window.matchMedia('(prefers-color-scheme: dark)'); }
+  function apply(m){
+    var dark=mq().matches;
+    var act=(m==='dark'||m==='light')?m:(dark?'dark':'light');
+    document.documentElement.setAttribute('data-theme',act);
+  }
+  apply(stored());
+  window.addEventListener('storage',function(e){
+    if(e.key==='wb_store'||e.key==='wb_hub_theme') apply(stored());
+  });
+  try{ mq().addEventListener('change',function(){ if(stored()==='auto') apply('auto'); }); }catch(e){}
+})();
+</script>
+
+<link rel="canonical" href="https://epic-super.github.io/lab/products/direction-compass.html">
+<meta name="description" content="考研方向罗盘：计算机方向细分地图、学长学姐经验导航、双非/自考逆风局指南、心态锚点。">
+<style>
+:root{
+  --bg:#0a0f1e; --panel:#111827; --panel2:#1a2234; --line:#253048; --line2:#34405e;
+  --txt:#e8ecf8; --sub:#8b94b2; --blue:#5b8cff; --gold:#f0b429; --green:#3ecf8e; --red:#f87171; --violet:#a78bfa; --cyan:#7dd3fc; --orange:#ff9f43;
+  --r:16px; --r-sm:11px; --r-f:999px;
+  --sh:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.22);
+  --tf:.16s var(--ease);
+}
+html[data-theme="light"]{
+  --bg:#f4f6fb; --panel:#ffffff; --panel2:#ebeff5; --line:#dde3ee; --line2:#c5cee2;
+  --txt:#1a2136; --sub:#5b6480; --blue:#3b6ae0; --gold:#8a6608; --green:#12945f; --red:#d64545; --violet:#7c5ce0; --cyan:#0284c7; --orange:#c96a0a;
+  --sh:0 1px 3px rgba(20,26,50,.06),0 6px 16px rgba(20,26,50,.08);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","HarmonyOS Sans SC","Microsoft YaHei",sans-serif;
+  background:var(--bg);color:var(--txt);font-size:15px;line-height:1.65;
+  padding-bottom:calc(28px + env(safe-area-inset-bottom));-webkit-font-smoothing:antialiased}
+button,input{font-family:inherit;font-size:15px;color:inherit}
+button{cursor:pointer;border:none;background:none}
+button:focus-visible,input:focus-visible{outline:2px solid var(--blue);outline-offset:2px;border-radius:6px}
+a{color:var(--cyan)}
+.wrap{max-width:1000px;margin:0 auto;padding:0 14px}
+
+.top{position:relative;color:#fff;padding:20px 0 16px;padding-top:calc(20px + env(safe-area-inset-top));
+  background:
+    radial-gradient(110% 150% at 8% -20%,rgba(91,140,255,.3),rgba(91,140,255,0) 50%),
+    radial-gradient(90% 130% at 94% 0%,rgba(240,180,41,.22),rgba(240,180,41,0) 58%),
+    linear-gradient(134deg,#0e1526 0%,#16224a 55%,#1e1830 120%);
+  box-shadow:0 1px 0 rgba(255,255,255,.08) inset,0 6px 22px rgba(6,10,26,.4);overflow:hidden}
+.top::after{content:'';position:absolute;left:0;right:0;bottom:0;height:1px;background:linear-gradient(90deg,transparent,rgba(91,140,255,.55),transparent)}
+.brand h1{margin:0;font-size:21px;font-weight:800;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.brand p{margin:5px 0 0;font-size:12.5px;opacity:.88}
+
+.tabs{display:flex;gap:8px;margin:16px 0 0;flex-wrap:wrap}
+.tab{padding:9px 16px;border-radius:var(--r-f);border:1.5px solid var(--line2);background:var(--panel);color:var(--sub);font-weight:800;font-size:13.5px;transition:all var(--tf)}
+.tab.on{border-color:var(--blue);background:linear-gradient(135deg,rgba(91,140,255,.15),rgba(91,140,255,.04));color:var(--blue)}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px;box-shadow:var(--sh);margin:14px 0}
+.card h2{margin:0 0 4px;font-size:15.5px;font-weight:800;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.card .desc{color:var(--sub);font-size:12.5px;margin:0 0 12px}
+.viewpane{display:none}
+.viewpane.on{display:block;animation:fin .25s var(--ease)}
+@keyframes fin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+.map{display:grid;grid-template-columns:repeat(3,1fr);gap:11px}
+@media (max-width:760px){.map{grid-template-columns:1fr}}
+.dir{background:var(--panel2);border:1px solid var(--line);border-radius:var(--r);padding:14px;position:relative;overflow:hidden;cursor:pointer;transition:all var(--tf)}
+.dir::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--c,var(--blue))}
+.dir:hover{transform:translateY(-2px);border-color:var(--c,var(--blue))}
+.dir b{font-size:14px;display:flex;align-items:center;gap:7px}
+.dir .sub{font-size:11.5px;color:var(--sub);margin-top:4px;line-height:1.6}
+.dir .tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}
+.dir .tag{font-size:10px;font-weight:700;padding:2px 8px;border-radius:var(--r-f);background:var(--panel);border:1px solid var(--line2);color:var(--sub)}
+.dir .hot{color:var(--gold);border-color:rgba(240,180,41,.4);background:rgba(240,180,41,.08)}
+.dir .detail{margin-top:10px;padding-top:10px;border-top:1px dashed var(--line2);display:none}
+.dir.open .detail{display:block}
+.dir .detail p{margin:5px 0 0;font-size:12px;color:var(--sub)}
+.dir .detail p b{color:var(--txt)}
+
+.exp{display:flex;gap:10px;align-items:flex-start;background:var(--panel2);border:1px solid var(--line);border-radius:var(--r-sm);padding:12px 14px;margin-bottom:9px}
+.exp .ic{font-size:22px;flex:none}
+.exp .grow{flex:1;min-width:0}
+.exp .tt{font-size:13.5px;font-weight:800}
+.exp .dd{font-size:12px;color:var(--sub);margin-top:3px}
+.exp .lk{font-size:11.5px;margin-top:5px}
+.starred{border-color:var(--gold);background:rgba(240,180,41,.06)}
+
+.anti{background:var(--panel2);border:1px solid var(--line);border-left:3px solid var(--violet);border-radius:var(--r-sm);padding:13px 15px;margin-bottom:10px}
+.anti b{font-size:13.5px;display:flex;gap:7px;align-items:center;color:var(--violet)}
+.anti p{margin:6px 0 0;font-size:12.5px;color:var(--sub)}
+.anti .do{margin-top:6px;font-size:12px;color:var(--green);font-weight:700}
+.anchor{display:flex;gap:10px;align-items:flex-start;background:linear-gradient(135deg,rgba(91,140,255,.07),rgba(167,139,250,.05));border:1px solid rgba(91,140,255,.25);border-radius:var(--r);padding:14px 16px;margin-bottom:10px}
+.anchor .ic{font-size:24px;flex:none}
+.anchor b{font-size:14px;display:block}
+.anchor p{margin:4px 0 0;font-size:12.5px;color:var(--sub)}
+footer.foot{color:var(--sub);font-size:11.5px;text-align:center;margin-top:18px}
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <div class="brand">
+      <h1>🧭 考研方向罗盘 <span style="font-size:13px;opacity:.8">找到你的北</span></h1>
+      <p>方向细分地图 × 学长学姐经验导航 × 逆风局指南 × 心态锚点——不是所有人都知道路在哪，但罗盘一直都在。</p>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="tabs">
+    <button class="tab on" data-v="map">🗺 方向地图</button>
+    <button class="tab" data-v="exp">📖 学长学姐说</button>
+    <button class="tab" data-v="anti">🛡 逆风局指南</button>
+    <button class="tab" data-v="mind">🧭 心态锚点</button>
+  </div>
+
+  <!-- 方向地图 -->
+  <section class="card viewpane on" id="vp-map">
+    <h2>🗺 计算机考研方向细分</h2>
+    <p class="desc">点卡片展开详情：研究什么、就业出口、适合谁、避坑。方向没有高下，只有「适合你的坐标系」。</p>
+    <div class="map" id="dirMap"></div>
+  </section>
+
+  <!-- 经验导航 -->
+  <section class="card viewpane" id="vp-exp">
+    <h2>📖 学长学姐说 · 经验导航</h2>
+    <p class="desc">精选公开资源入口（搜索直达，不依赖具体链接时效）。遇到好文章存进来，就是你的武器库。</p>
+    <div id="expList"></div>
+  </section>
+
+  <!-- 逆风局 -->
+  <section class="card viewpane" id="vp-anti">
+    <h2>🛡 逆风局指南 · 双非/自考/跨考/专科</h2>
+    <p class="desc">不是鸡汤——是每一类「背景减分项」对应的、被无数学长学姐验证过的实战打法。</p>
+    <div class="anti"><b>🎓 双非本科</b><p>筛简历时确实有人看出身，但初试分是匿名的、复试官更看你做了什么。<span class="do">→ 打法：</span>初试往死里高分（400+ 谁也刷不掉你）；复试拿出 2-3 个硬核项目（GitHub 仓库或竞赛获奖）；提前联系目标院校在读学长摸清导师风格。</p></div>
+    <div class="anti"><b>📝 自考/专升本</b><p>自考本科学历报考时与全日制本科同等对待（教育部明文），个别院校复试可能追问。<span class="do">→ 打法：</span>目标院校选「同等学力报考条件宽松」的（查招生简章）；用自考成绩单证明学习能力；复试主动提「我的路径比统招多走了几步，但我更确定要这条」。</p></div>
+    <div class="anti"><b>🔄 跨考</b><p>跨考不是劣势，是「原领域 × 计算机」的交叉优势——前提是你真的补上了基础课。<span class="do">→ 打法：</span>408 四科必须稳（跨考最大的死因是 408 拖后腿）；把原专业做成「独特视角」（如医学→医疗 AI、金融→量化系统）；复试坦率说跨考原因，别编故事。</p></div>
+    <div class="anti"><b>🏫 专科/同等学力</b><p>需要加试两门本科主干课，且部分院校不收同等学力。<span class="do">→ 打法：</span>先筛「明确接受同等学力」的院校名单（每年 9 月招生简章见分晓）；加试不刷人但必须及格；用自考本科证书可以按本科身份报考（不加试）。</p></div>
+    <div class="anti"><b>😰 大龄/二战/N 战</b><p>年龄和 gap 在复试里是「你为什么坚持」的好故事素材，不是减分项。<span class="do">→ 打法：</span>准备好一句话回答「为什么二战/为什么现在考」；应届生有应届生焦虑，你有社会经验——用你的确定性打他们的迷茫。</p></div>
+  </section>
+
+  <!-- 心态锚点 -->
+  <section class="card viewpane" id="vp-mind">
+    <h2>🧭 心态锚点</h2>
+    <p class="desc">每天翻开一次就够——锚住了，风浪再大也稳。</p>
+    <div class="anchor"><span class="ic">🎯</span><div><b>方向是走出来的，不是想出来的</b><p>没有人是「先确定方向再出发」的。你先走上路，遇到岔路口做选择，走着走着方向就清晰了。所有学长学姐的「我早就决定了」都是事后叙事。</p></div></div>
+    <div class="anchor"><span class="ic">🔬</span><div><b>歧视存在，但它只筛掉「没有证据的人」</b><p>同样双非，有人 400 分被刷，有人 390 被录——差别是复试展示的证据链。把精力从「担心歧视」转移到「积累证据」上，这是你唯一能控制的变量。</p></div></div>
+    <div class="anchor"><span class="ic">🪨</span><div><b>相信自己是每天的动词，不是一次性的形容词</b><p>「我相信自己」不是考前的宣言，是每天早上坐到书桌前的动作。连续做了 30 天，它就变成了事实。</p></div></div>
+    <div class="anchor"><span class="ic">🌊</span><div><b>你的路径比统招多走几步——所以你比他们更确定</b><p>自考、跨考、二战的每一步选择，都在帮你回答「我到底想不想要这个」。统招的犹豫，你没有。这是结构性的优势。</p></div></div>
+  </section>
+
+  <footer class="foot">考研方向罗盘 ｜ 收藏存本机（wb_compass_v1）｜ 路是走出来的，罗盘只是让你不迷路 🧭</footer>
+</div>
+
+<script>
+(function(){
+'use strict';
+var KEY='wb_compass_v1';
+var S={dirs:{},exp:{}};
+try{var raw=localStorage.getItem(KEY);if(raw){var o=JSON.parse(raw);S.dirs=o.dirs||{};S.exp=o.exp||{}}}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+var $=function(s){return document.querySelector(s)};
+
+document.querySelectorAll('.tab').forEach(function(t){
+  t.onclick=function(){
+    document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('on')});
+    t.classList.add('on');
+    document.querySelectorAll('.viewpane').forEach(function(x){x.classList.remove('on')});
+    var vp=$('#vp-'+t.getAttribute('data-v'));if(vp)vp.classList.add('on');
+    reportH();
+  };
+});
+
+/* ── 方向地图 ── */
+var DIRS=[
+  {n:'AI / 机器学习',c:'#5b8cff',hot:true,
+   sub:'大模型训练/推理、CV、NLP、Agent 系统开发',tags:['热度↑↑','数学要求高','算力门槛'],
+   what:'训练/微调/部署大模型，CV/NLP/多模态算法研究与工程化。408 对口 + 数学一。',
+   job:'大厂 AI 团队 ¥35-80w/年 · AI 独角兽 · 研究所（需读博）',
+   fit:'数学扎实（数一 130+）、能读英文论文、愿意追前沿到凌晨的人。',
+   trap:'最大坑：只学调参不学原理 → 面试一问 transformer 细节就露馅。第二坑：没 GPU 只用免费 Colab 训不出有说服力的结果 → 用 Kaggle 30h/周免费额度 + 租 3090。'},
+  {n:'网络空间安全',c:'#f87171',hot:true,
+   sub:'渗透测试、逆向、漏洞挖掘、安全运营',tags:['政策红利','竞赛加分','实践为王'],
+   what:'攻防对抗、漏洞研究、安全审计、应急响应。部分院校单独划线。',
+   job:'安全大厂 ¥25-60w/年 · 甲方安全部 · 等保测评机构 · 体制内需求暴涨',
+   fit:'喜欢「拆开看看里面是什么」、能坚持打 CTF、愿意读协议与二进制的人。',
+   trap:'只会打 CTF 不会写报告 → 实战漏洞报告写作能力决定天花板。另外「渗透红线意识」必须从第一天建立。'},
+  {n:'计算机系统结构',c:'#3ecf8e',
+   sub:'体系结构、并行计算、编译器、芯片设计',tags:['冷门高薪','博士友好','对口 408 深水区'],
+   what:'CPU/GPU/DPU 架构优化、编译器后端、RISC-V、高性能计算。',
+   job:'华为海思/寒武纪/字节火山引擎 ¥40-70w/年 · 中科院计算所 · 芯片创业公司',
+   fit:'408 里体系结构+组成原理能考 90+、对「为什么快」比对「怎么用」更感兴趣的人。',
+   trap:'方向冷门但门槛高——CUDA/编译器自学曲线陡。且好导师集中在顶尖院校。'},
+  {n:'软件工程 / 系统软件',c:'#f0b429',hot:true,
+   sub:'分布式系统、云原生、数据库内核、中间件',tags:['就业面最广','工程导向','开源加分'],
+   what:'分布式一致性、微服务、存储引擎、消息队列、容器编排。',
+   job:'后端开发 ¥30-60w/年 · 基础架构组（最高薪后端方向）· 数据库厂商',
+   fit:'喜欢「让系统跑得又快又稳」、愿意读论文（Raft/Spanner/Dynamo）、能写高并发代码的人。',
+   trap:'项目容易停留在 CRUD → 必须深入一个方向（如手写 Raft、给 TiDB 提 PR）。'},
+  {n:'图形学 / 游戏',c:'#a78bfa',
+   sub:'渲染引擎、物理仿真、游戏引擎、XR/VR',tags:['兴趣驱动','数学密集','岗位少但精'],
+   what:'实时光线追踪、PBR 渲染、物理引擎、VR/AR 交互、游戏引擎开发。',
+   job:'米哈游/网易/腾讯天美 ¥30-70w/年 · GPU 厂商（NVIDIA/AMD）· XR 创业公司',
+   fit:'线性代数好、能对着 pingpong shader 调一下午、真的喜欢画面的人。',
+   trap:'岗位总量远少于后端/AI → 求职地理集中在一线城市；且大厂游戏岗竞争极度内卷。'},
+  {n:'嵌入式 / 物联网',c:'#2dd4bf',
+   sub:'RTOS、边缘计算、车机系统、机器人',tags:['软硬结合','就业稳','跨考友好'],
+   what:'ARM 架构、RTOS 调度、驱动开发、ROS2、边缘 AI 部署。',
+   job:'车企智驾 ¥25-55w/年 · IoT 平台 · 芯片原厂 FAE · 机器人（对接硬件工坊经验）',
+   fit:'动手能力强（焊过板子/烧过固件）、对物理世界和数字世界的接口好奇的人。',
+   trap:'薪资天花板低于纯软件 → 但岗位稳定性高，且「懂硬件的软件工程师」永远稀缺。'},
+  {n:'数据科学 / 大数据',c:'#7dd3fc',
+   sub:'数据挖掘、推荐系统、数据仓库、实时计算',tags:['需求大','SQL 重','偏应用'],
+   what:'推荐算法、数据仓库建模、Flink/Spark 实时计算、AB 测试。',
+   job:'数据工程师/推荐算法 ¥25-50w/年 · 字节/快手/美团 · 传统企业数字化',
+   fit:'SQL 写得好、对数据敏感（能从异常值里发现业务问题）、喜欢「用数据讲故事」的人。',
+   trap:'和纯 AI 方向界限模糊 → 面试可能被问深度学习原理。数据量不够时做不出有说服力的项目。'},
+  {n:'理论 / 科学计算',c:'#ff9f43',
+   sub:'算法理论、密码学、量子计算、生物信息',tags:['博士必选','论文导向','工业界窄'],
+   what:'计算复杂性、密码协议、量子算法、蛋白结构预测、数论应用。',
+   job:'高校教职 · 研究院 · 密码应用企业 · 生物医药 AI（AlphaFold 方向）',
+   fit:'数学系转计算机、能坐冷板凳读三周论文、目标是读博进高校的人。',
+   trap:'工业界岗位少且偏研究 → 如果目标是硕士毕业直接工作，慎选。'}
+];
+function renderMap(){
+  var box=$('#dirMap');box.innerHTML='';
+  DIRS.forEach(function(d,i){
+    var open=!!S.dirs[i];
+    var el=document.createElement('div');el.className='dir'+(open?' open':'');el.style.setProperty('--c',d.c);
+    el.innerHTML='<b>🧭 '+esc(d.n)+(d.hot?' <span class="tag hot">🔥 高热度</span>':'')+'</b>'+
+      '<div class="sub">'+esc(d.sub)+'</div>'+
+      '<div class="tags">'+d.tags.map(function(t){return '<span class="tag">'+esc(t)+'</span>'}).join('')+'</div>'+
+      '<div class="detail"><p><b>研究什么：</b>'+esc(d.what)+'</p><p><b>就业出口：</b>'+esc(d.job)+'</p><p><b>适合谁：</b>'+esc(d.fit)+'</p><p><b>⚠️ 避坑：</b>'+esc(d.trap)+'</p></div>';
+    el.onclick=function(){S.dirs[i]=!S.dirs[i];save();renderMap()};
+    box.appendChild(el);
+  });
+}
+renderMap();
+
+/* ── 经验导航 ── */
+var EXPS=[
+  {ic:'📖',t:'知乎搜索直达：考研经验',d:'搜索「计算机考研 408 经验」「双非 考研 985 计算机」「自考 考研」——按赞数排序，读前 20 篇就够建立框架。',
+   u:'https://www.zhihu.com/search?type=content&q=计算机考研408经验双非',k:'zhihu-exp'},
+  {ic:'📺',t:'B 站搜索直达：复试+方向',d:'搜「计算机考研 复试经验」「计算机方向选择」「双非逆袭」——看上岸 Vlog 比文字更真实。',
+   u:'https://search.bilibili.com/all?keyword=计算机考研复试经验双非',k:'bili-exp'},
+  {ic:'📝',t:'考研帮 / 研招网：院校数据',d:'查报录比、复试线、招生人数——选校前必看，别只看排名。',
+   u:'https://www.kaoyan.com/',k:'kybang'},
+  {ic:'🧑‍🏫',t:'导师评价网 / 导师推荐',d:'搜「计算机 导师评价」看真实学生反馈——选对导师比选对学校更重要。',
+   u:'https://www.daoshipingjia.com/',k:'daoshi'},
+  {ic:'💪',t:'公众号搜索：双非/自考上岸',d:'微信搜一搜「双非计算机考研」「自考考研上岸」——公众号长文含时间线细节最完整。',
+   u:'https://weixin.sogou.com/weixin?type=2&query=自考考研计算机上岸',k:'wx-exp'}
+];
+function renderExp(){
+  var box=$('#expList');box.innerHTML='';
+  EXPS.forEach(function(e,i){
+    var st=S.exp[i];
+    var el=document.createElement('div');el.className='exp'+(st?' starred':'');
+    el.innerHTML='<span class="ic">'+e.ic+'</span><div class="grow"><div class="tt">'+esc(e.t)+'</div><div class="dd">'+esc(e.d)+'</div>'+
+      '<div class="lk"><a href="'+e.u+'" target="_blank" rel="noopener">直达入口 ↗</a></div></div>';
+    var star=document.createElement('button');star.className='btn sm'+(st?'':' ghost');star.textContent=st?'★ 已存':'☆ 存入';
+    star.onclick=function(){S.exp[i]=!S.exp[i];if(!S.exp[i])delete S.exp[i];save();renderExp()};
+    el.appendChild(star);box.appendChild(el);
+  });
+}
+renderExp();
+
+function reportH(){
+  var h=Math.max(document.documentElement.scrollHeight,document.body.scrollHeight);
+  try{parent.postMessage({__wbResize:true,id:'compassFrame',h:h},'*')}catch(e){}
+}
+if(window.ResizeObserver){new ResizeObserver(reportH).observe(document.body)}
+window.addEventListener('load',reportH);
+setTimeout(reportH,400);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<!-- 月读空间 · ツクヨミ | 单文件 + 本地 vendored three.js/three-vrm（零 CDN）
+     ① 2D Live 展台：多层伪 Live2D（差分层驱动：眨眼/视线/口型/呼吸/头倾）
+     ② 3D Live 展台：three-vrm（拖入任意 .vrm 即上台，未载入时用程序化素体）
+     ③ 月读空间场景：夜空·月·鸟居·天际线缩比版 + 自由视角
+     示例角色「月读酱」为程序化致敬形象（原创），支持后续替换正版授权模型。 -->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" type="image/png" href="../../assets/pwa/icon-192.png"><!-- 2026-11-06 全站补 rel="icon"：本页此前未声明，浏览器回落请求站点根 /favicon.ico 报 404（控制台红色噪音、标签页无图标）；与 2026-10-03 对 index/zk-ky/share-hub 的处理同一策略 -->
+<title>月读空间 · ツクヨミ · 2D/3D Live 展台</title>
+
+<script>
+/* 主题跟随主站（同 anime.html 模式） */
+(function(){
+  function stored(){
+    try{
+      var raw=localStorage.getItem('wb_store');
+      if(raw){var o=JSON.parse(raw); if(o&&o.data&&o.data.theme) return o.data.theme;}
+    }catch(e){}
+    try{ var l=localStorage.getItem('wb_hub_theme'); if(l) return l; }catch(e){}
+    return 'auto';
+  }
+  function mq(){ return window.matchMedia('(prefers-color-scheme: dark)'); }
+  function apply(m){
+    var dark=mq().matches;
+    var act=(m==='dark'||m==='light')?m:(dark?'dark':'light');
+    document.documentElement.setAttribute('data-theme',act);
+  }
+  apply(stored());
+  window.addEventListener('storage',function(e){
+    if(e.key==='wb_store'||e.key==='wb_hub_theme') apply(stored());
+  });
+  try{ mq().addEventListener('change',function(){ if(stored()==='auto') apply('auto'); }); }catch(e){}
+})();
+</script>
+
+<link rel="canonical" href="https://epic-super.github.io/lab/products/tsukuyomi.html">
+<meta name="description" content="月读空间：2D Live（多层差分伪 Live2D）与 3D Live（VRM）展台，附夜空鸟居缩比场景。原创致敬形象，支持替换授权模型。">
+<style>
+:root{
+  --bg:#070a18; --panel:#0f1426; --panel2:#161d36; --line:#232c4e; --line2:#303a66;
+  --txt:#e8ecff; --sub:#8b93bd; --moon:#f4f1de; --violet:#a78bfa; --cyan:#7dd3fc; --gold:#f0d98c; --pink:#f9a8d4; --green:#34d399; --red:#f87171;
+  --r:16px; --r-sm:11px; --r-f:999px;
+  --sh:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.3);
+  --tf:.16s var(--ease);
+}
+html[data-theme="light"]{
+  --bg:#eef1fa; --panel:#ffffff; --panel2:#e9edf8; --line:#d9dfef; --line2:#c3cce4;
+  --txt:#1b2138; --sub:#5a638c; --moon:#8a7a3a; --violet:#7c5ce0; --cyan:#0284c7; --gold:#8a6608; --pink:#db2777; --green:#12945f; --red:#d64545;
+  --sh:0 1px 3px rgba(20,24,60,.06),0 6px 16px rgba(20,24,60,.08);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","HarmonyOS Sans SC","Microsoft YaHei",sans-serif;
+  background:var(--bg);color:var(--txt);font-size:15px;line-height:1.65;
+  padding-bottom:calc(28px + env(safe-area-inset-bottom));-webkit-font-smoothing:antialiased}
+button,input,select{font-family:inherit;font-size:15px;color:inherit}
+button{cursor:pointer;border:none;background:none}
+button:focus-visible,input:focus-visible{outline:2px solid var(--violet);outline-offset:2px;border-radius:6px}
+.wrap{max-width:1060px;margin:0 auto;padding:0 14px}
+
+.top{position:relative;color:#fff;padding:20px 0 16px;padding-top:calc(20px + env(safe-area-inset-top));
+  background:
+    radial-gradient(110% 150% at 8% -20%,rgba(167,139,250,.32),rgba(167,139,250,0) 50%),
+    radial-gradient(60% 90% at 88% 10%,rgba(244,241,222,.24),rgba(244,241,222,0) 55%),
+    linear-gradient(134deg,#0b0e22 0%,#1a1f4a 55%,#251a3f 120%);
+  box-shadow:0 1px 0 rgba(255,255,255,.08) inset,0 6px 22px rgba(5,8,24,.4);overflow:hidden}
+.top::after{content:'';position:absolute;left:0;right:0;bottom:0;height:1px;background:linear-gradient(90deg,transparent,rgba(167,139,250,.6),transparent)}
+.brand h1{margin:0;font-size:21px;font-weight:800;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.brand p{margin:5px 0 0;font-size:12.5px;opacity:.88}
+
+.tabs{display:flex;gap:8px;margin:16px 0 0;flex-wrap:wrap}
+.tab{padding:9px 16px;border-radius:var(--r-f);border:1.5px solid var(--line2);background:var(--panel);color:var(--sub);font-weight:800;font-size:13.5px;transition:all var(--tf)}
+.tab.on{border-color:var(--violet);background:linear-gradient(135deg,rgba(167,139,250,.16),rgba(167,139,250,.04));color:var(--violet)}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px;box-shadow:var(--sh);margin:14px 0}
+.card h2{margin:0 0 4px;font-size:15.5px;font-weight:800;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.card .desc{color:var(--sub);font-size:12.5px;margin:0 0 12px}
+.viewpane{display:none}
+.viewpane.on{display:block;animation:fin .25s var(--ease)}
+@keyframes fin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+.stage-wrap{position:relative;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:radial-gradient(120% 100% at 50% 0%,#101538,#070a18)}
+.stage-wrap canvas{display:block;width:100%;height:auto}
+.stage-hint{padding:8px 13px;font-size:12px;color:var(--sub);border-top:1px solid var(--line);background:var(--panel)}
+
+.ctl{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+.chip{font-size:12px;font-weight:700;padding:6px 13px;border-radius:var(--r-f);border:1.5px solid var(--line2);background:var(--panel2);color:var(--sub);transition:all var(--tf)}
+.chip.on{border-color:var(--violet);color:var(--violet);background:rgba(167,139,250,.1)}
+.sld{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--sub)}
+.sld input[type="range"]{flex:1;accent-color:var(--violet)}
+.bubble{position:absolute;left:12px;right:12px;bottom:12px;padding:9px 13px;border-radius:14px;background:rgba(8,12,30,.88);border:1px solid rgba(167,139,250,.4);color:#e8ecff;font-size:13px;display:none;text-align:center}
+.bubble.show{display:block}
+.note{margin-top:12px;font-size:12px;color:var(--sub);background:var(--panel2);border:1px dashed var(--line2);border-radius:var(--r-sm);padding:10px 13px;line-height:1.7}
+.note b{color:var(--txt)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:680px){.grid2{grid-template-columns:1fr}}
+.drop{border:2px dashed var(--line2);border-radius:var(--r);padding:14px;text-align:center;color:var(--sub);font-size:12.5px;cursor:pointer;transition:all var(--tf)}
+.drop:hover,.drop.over{border-color:var(--violet);color:var(--violet)}
+footer.foot{color:var(--sub);font-size:11.5px;text-align:center;margin-top:18px}
+#toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(16px);background:var(--panel);color:var(--txt);border:1px solid var(--line2);border-radius:var(--r-f);padding:9px 18px;font-size:13px;font-weight:700;box-shadow:var(--sh);opacity:0;pointer-events:none;transition:all .25s var(--ease);z-index:99}
+#toast.show{opacity:1;transform:translateX(-50%)}
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <div class="brand">
+      <h1>🌙 月读空间 <span style="font-size:13px;opacity:.8">ツクヨミ · 2D/3D Live 展台</span></h1>
+      <p>致敬《超时空辉耀姬！》的虚拟空间缩比版：多层差分 2D Live、VRM 3D Live、夜空鸟居场景——原创形象，支持替换授权模型。</p>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="tabs">
+    <button class="tab on" data-v="l2d">🎭 2D Live 展台</button>
+    <button class="tab" data-v="l3d">🧊 3D Live 展台</button>
+    <button class="tab" data-v="space">🌌 月读空间场景</button>
+    <button class="tab" id="appModeBtn" title="独立窗口（无地址栏）">📱 APP 模式</button>
+  </div>
+
+  <!-- 2D Live 展台 -->
+  <section class="card viewpane on" id="vp-l2d">
+    <h2>🎭 2D Live 展台 · 多层差分「月读酱」</h2>
+    <p class="desc">程序化 SVG 分层（后发/脸/前发/眉/眼/口/腮红/身体）+ 眨眼·视线跟随·口型·呼吸·头倾驱动——与专业 PNG-tuber 同一套分层原理。示例形象为程序化致敬版，可替换为授权差分 PNG。</p>
+    <div class="ctl">
+      <span style="font-size:12px;color:var(--sub)">表情：</span>
+      <button class="chip on" data-ex="normal">通常</button>
+      <button class="chip" data-ex="genki">元气</button>
+      <button class="chip" data-ex="sad">难过</button>
+      <span style="flex:1"></span>
+      <button class="chip" id="talkBtn">💬 说一句话（TTS + 口型）</button>
+    </div>
+    <div class="stage-wrap" style="max-width:420px;margin:0 auto">
+      <svg id="l2dSvg" viewBox="0 0 300 340" style="display:block;width:100%;height:auto"></svg>
+      <div class="bubble" id="l2dBubble"></div>
+    </div>
+    <div class="ctl" style="margin-top:12px">
+      <div class="sld" style="flex:1;min-width:200px">眨眼频率 <input type="range" id="blinkRate" min="20" max="95" value="55"><span id="blinkVal">55</span></div>
+      <div class="sld" style="flex:1;min-width:200px">视线跟随 <input type="range" id="trackAmt" min="0" max="100" value="70"><span id="trackVal">70</span></div>
+    </div>
+    <div class="note">💡 <b>替换为真实模型</b>：把授权 Live2D 的差分 PNG（身体/眼开闭/口型 A-I-U/眉）按同名图层放入，接上同一套驱动参数即成完整 PNG-tuber——分层原理与 Live2D 完全一致，只是驱动从形变网格换成图层位移。</div>
+  </section>
+
+  <!-- 3D Live 展台 -->
+  <section class="card viewpane" id="vp-l3d">
+    <h2>🧊 3D Live 展台 · VRM 上台</h2>
+    <p class="desc">拖入任意 <b>.vrm</b> 文件（VRoid Studio 免费导出）即可 3D 上台：待机呼吸、表情切换、视线跟随、鼠标环绕视角。未载入时展示程序化素体「月读酱 · 素体号」。</p>
+    <div class="ctl">
+      <span style="font-size:12px;color:var(--sub)">表情：</span>
+      <button class="chip on" data-ve="neutral">neutral</button>
+      <button class="chip" data-ve="happy">happy</button>
+      <button class="chip" data-ve="sad">sad</button>
+      <button class="chip" data-ve="angry">angry</button>
+      <button class="chip" data-ve="relaxed">relaxed</button>
+      <span style="flex:1"></span>
+      <button class="chip" id="vrmClear">↩ 回到素体</button>
+    </div>
+    <div class="stage-wrap" id="vrmStage" style="height:430px">
+      <canvas id="vrmCanvas" style="width:100%;height:100%"></canvas>
+      <div class="drop" id="vrmDrop" style="position:absolute;left:12px;right:12px;bottom:12px;background:rgba(8,12,30,.7)">⬇ 拖入 .vrm 文件到此处，或点击选择（文件仅本地加载，不上传）</div>
+      <input type="file" id="vrmFile" accept=".vrm" hidden>
+    </div>
+    <div class="note">💡 <b>VRM 来源</b>：<b>VRoid Studio</b>（免费捏脸导出 VRM）· Booth 免费 VRM 模型 · three-vrm 官方示例模型。VRM 0.x 与 1.x 均支持。</div>
+  </section>
+
+  <!-- 月读空间场景 -->
+  <section class="card viewpane" id="vp-space">
+    <h2>🌌 月读空间场景 · 缩比版</h2>
+    <p class="desc">夜空星海 + 巨月 + 鸟居 + 天际线灯光 + 舞台素体——剧中〈月读〉虚拟空间的单机网页致敬版。拖拽旋转视角，滚轮缩放。</p>
+    <div class="ctl">
+      <button class="chip on" id="spaceAuto">🎡 自动环绕：开</button>
+      <span style="flex:1"></span>
+      <span class="desc" style="margin:0">VRM 上台后，这里就是她的舞台。</span>
+    </div>
+    <div class="stage-wrap" id="spaceStage" style="height:460px">
+      <canvas id="spaceCanvas" style="width:100%;height:100%"></canvas>
+    </div>
+    <div class="note">🌌 <b>还原边界（诚实声明）</b>：这是单机网页缩比版致敬，非 VRChat 级复刻（官方已众筹把〈月读〉搬进 VRChat）。角色为程序化素体/你自己的 VRM——想用正版辉耀姬形象需官方授权模型。</div>
+  </section>
+
+  <footer class="foot">月读空间 ｜ three.js r151 + @pixiv/three-vrm v1（本地 vendored，零 CDN）｜ 原创致敬形象 · 模型请用授权资产</footer>
+</div>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "./vendor/tsukuyomi/three.module.js"
+  }
+}
+</script>
+
+<script src="./vendor/tsukuyomi/GLTFLoader.module.js" type="module"></script>
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from './vendor/tsukuyomi/GLTFLoader.module.js';
+import { VRMLoaderPlugin } from './vendor/tsukuyomi/three-vrm.module.min.js';
+
+window.__TSK__ = { THREE, GLTFLoader, VRMLoaderPlugin, vrm: null, onVrmLoaded: [] };
+window.dispatchEvent(new Event('tsk-ready'));
+</script>
+
+<script>
+(function(){
+'use strict';
+var $=function(s){return document.querySelector(s)};
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function toast(m){var t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(toast._h);toast._h=setTimeout(function(){t.classList.remove('show')},2200)}
+
+document.querySelectorAll('.tab').forEach(function(t){
+  t.onclick=function(){
+    document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('on')});
+    t.classList.add('on');
+    document.querySelectorAll('.viewpane').forEach(function(x){x.classList.remove('on')});
+    var vp=$('#vp-'+t.getAttribute('data-v'));if(vp)vp.classList.add('on');
+    reportH();
+    // 2026-11-06 修：3D 舞台在隐藏状态下初始化会拿到 clientWidth/Height=0（renderer 被 setSize(0,0)），
+    // 切回该分页时必须重算一次尺寸，否则画布永远是 0×0（此前表现为切到 3D 页一片空白）。
+    try{ window.dispatchEvent(new Event('resize')); }catch(e){}
+  };
+});
+
+/* ============================================================
+   ① 2D Live 展台：多层差分「月读酱」（程序化 SVG 伪 Live2D）
+   ============================================================ */
+(function(){
+  var svg=$('#l2dSvg');
+  var NS='http://www.w3.org/2000/svg';
+  function el(tag,attrs,parent){var e=document.createElementNS(NS,tag);for(var k in attrs)e.setAttribute(k,attrs[k]);(parent||svg).appendChild(e);return e}
+  /* 分层：后发→身→脸→腮红→眼→眉→口→前发 */
+  var backHair=el('g',{});
+  el('path',{d:'M62,150 C56,66 100,34 150,34 C200,34 244,66 238,150 C242,196 252,240 262,300 L212,300 C224,230 210,180 150,180 C90,180 76,230 88,300 L38,300 C48,240 58,196 62,150 Z',fill:'#2c2352'},backHair);
+  el('path',{d:'M84,120 C96,58 128,44 150,44 C172,44 204,58 216,120 C204,96 176,84 150,84 C124,84 96,96 84,120 Z',fill:'#3b2f6e'},backHair);
+  var bodyG=el('g',{});
+  el('path',{d:'M96,340 C96,290 120,268 150,268 C180,268 204,290 204,340 Z',fill:'#e8ecff'});
+  el('path',{d:'M138,268 L150,286 L162,268 L156,340 L144,340 Z',fill:'#a78bfa'});
+  var faceG=el('g',{});
+  el('ellipse',{cx:150,cy:150,rx:62,ry:66,fill:'#ffe8dd'},faceG);
+  el('path',{d:'M96,142 C96,96 118,74 150,74 C182,74 204,96 204,142 C204,120 184,108 150,108 C116,108 96,120 96,142 Z',fill:'#ffe8dd'},faceG);
+  el('ellipse',{cx:150,cy:212,rx:16,ry:10,fill:'#ffe0d2'},faceG);
+  var blushL=el('ellipse',{cx:112,cy:168,rx:12,ry:6,fill:'#ffb3ba',opacity:.55},faceG);
+  var blushR=el('ellipse',{cx:188,cy:168,rx:12,ry:6,fill:'#ffb3ba',opacity:.55},faceG);
+  var eyesG=el('g',{});
+  function eye(cx){
+    var g=el('g',{},eyesG);
+    el('ellipse',{cx:cx,cy:158,rx:13,ry:16,fill:'#ffffff'},g);
+    var iris=el('circle',{cx:cx,cy:160,r:9,fill:'#5b4a9e'},g);
+    el('circle',{cx:cx-3,cy:156,r:3.2,fill:'#ffffff'},g);
+    el('circle',{cx:cx+3,cy:164,r:1.6,fill:'#c9b8ff',opacity:.8},g);
+    var lid=el('rect',{x:cx-14,y:140,width:28,height:0,fill:'#ffe8dd'},g);
+    return {g:g,iris:iris,lid:lid};
+  }
+  var eyeL=eye(124),eyeR=eye(176);
+  var browsG=el('g',{});
+  var browL=el('path',{d:'M110,136 C116,130 130,130 136,134',stroke:'#3b2f6e','stroke-width':3.4,fill:'none','stroke-linecap':'round'},browsG);
+  var browR=el('path',{d:'M164,134 C170,130 184,130 190,136',stroke:'#3b2f6e','stroke-width':3.4,fill:'none','stroke-linecap':'round'},browsG);
+  var mouthG=el('g',{});
+  var mouthArc=el('path',{d:'M138,192 C144,198 156,198 162,192',stroke:'#b0565e','stroke-width':3.4,fill:'none','stroke-linecap':'round'},mouthG);
+  var mouthOpen=el('path',{d:'M138,190 C138,204 162,204 162,190 Z',fill:'#b0565e'},mouthG);
+  mouthOpen.style.display='none';
+  var frontHair=el('g',{});
+  el('path',{d:'M88,142 C84,72 116,44 150,44 C184,44 216,72 212,142 C206,110 196,96 186,90 C190,104 188,112 184,118 C172,96 150,90 128,96 C136,86 144,80 150,78 C122,80 96,104 88,142 Z',fill:'#3b2f6e'},frontHair);
+  el('path',{d:'M150,44 C168,44 186,54 198,72 C186,64 168,58 150,58 Z',fill:'#4b3d84',opacity:.9},frontHair);
+  el('path',{d:'M206,86 C216,108 218,140 214,168 C212,140 208,116 200,100 Z',fill:'#4b3d84'},frontHair);
+  /* 月牙发饰 */
+  el('path',{d:'M196,64 C204,58 214,60 218,68 C212,64 204,66 200,72 Z',fill:'#f0d98c'},frontHair);
+
+  var root=el('g',{});
+  svg.insertBefore(root,backHair);
+  [backHair,bodyG,faceG,eyesG,browsG,mouthG,frontHair].forEach(function(g){root.appendChild(g)});
+
+  var state={ex:'normal',blink:0,blinkTimer:0,eyeLid:0,mouthOpen:0,speaking:false,speakT:0,
+             track:{x:0,y:0,tx:0,ty:0},headTilt:0,mouse:{x:.5,y:.5},blinkRate:.55};
+  var EX={
+    normal:{browY:0,browRot:0,blush:.55,mouth:'arc'},
+    genki:{browY:-4,browRot:-4,blush:.8,mouth:'open'},
+    sad:{browY:3,browRot:8,blush:.25,mouth:'arc'}
+  };
+  var bubble=$('#l2dBubble');
+  var LINES={
+    normal:['月光下也要加油哦，我可是月读酱。','今晚的月色，适合把烦恼说出来。','始终注视着你的，还有月亮和我。'],
+    genki:['耶！月读空间，正式启动！','月亮说：今天也要闪闪发光哦！','元气满格！毕竟我可是月读酱嘛。'],
+    sad:['就算记忆会消失……今晚的月光也会替我记得。','月亮有时候也会躲进云里，没关系的。','难过的时候，就抬头看看月亮吧。']
+  };
+  function speak(){
+    var pool=LINES[state.ex]||LINES.normal;
+    bubble.textContent=pool[Math.floor(Math.random()*pool.length)];
+    bubble.classList.add('show');
+    state.speaking=true;state.speakT=performance.now();
+    try{
+      if(window.speechSynthesis){
+        window.speechSynthesis.cancel();
+        var u=new SpeechSynthesisUtterance(bubble.textContent);
+        u.lang='zh-CN';u.rate=1.05;u.pitch=1.35;
+        u.onend=function(){state.speaking=false};
+        window.speechSynthesis.speak(u);
+        setTimeout(function(){state.speaking=false},6000);
+      }
+    }catch(e){state.speaking=false}
+    clearTimeout(speak._h);
+    speak._h=setTimeout(function(){bubble.classList.remove('show')},4600);
+  }
+  $('#talkBtn').onclick=speak;
+  document.querySelectorAll('[data-ex]').forEach(function(b){
+    b.onclick=function(){
+      document.querySelectorAll('[data-ex]').forEach(function(x){x.classList.remove('on')});
+      b.classList.add('on');state.ex=b.getAttribute('data-ex');
+      if(state.ex==='genki')speak();
+    };
+  });
+  var blinkRate=$('#blinkRate'),trackAmt=$('#trackAmt');
+  blinkRate.oninput=function(){$('#blinkVal').textContent=blinkRate.value;state.blinkRate=blinkRate.value/100};
+  trackAmt.oninput=function(){$('#trackVal').textContent=trackAmt.value;state.trackAmt=trackAmt.value/100};
+  state.trackAmt=.7;
+  window.addEventListener('mousemove',function(e){
+    var r=svg.getBoundingClientRect();
+    if(!r.width)return;
+    state.mouse.x=(e.clientX-r.left)/r.width;
+    state.mouse.y=(e.clientY-r.top)/r.height;
+  });
+  var last=performance.now();
+  function tick(now){
+    var dt=Math.min(.05,(now-last)/1000);last=now;
+    /* 眨眼 */
+    state.blinkTimer+=dt;
+    var period=.9+state.blinkRate*2.2;
+    if(state.blinkTimer>period){state.blinkTimer=0;state.blink=.18}
+    // 2026-11-06 修：眨眼收尾时 blink 可能略大于周期 0.18，导致 (1-blink/.18) 为负、sin 出负值
+  // → lid 的 height 属性被设成负数，SVG 每帧报 "A negative value is not valid"（控制台刷屏）。
+  if(state.blink>0){state.blink-=dt;state.eyeLid=Math.max(0,Math.min(1,Math.sin((1-state.blink/.18)*Math.PI)))}else state.eyeLid=0;
+    /* 视线跟随（幅度受滑杆控制，鼠标在画布外时回中） */
+    state.track.tx=(state.mouse.x-.5)*2*state.trackAmt;
+    state.track.ty=(state.mouse.y-.5)*1.2*state.trackAmt;
+    state.track.x+=(state.track.tx-state.track.x)*.1;
+    state.track.y+=(state.track.ty-state.track.y)*.1;
+    /* 口型：说话时随机开合 */
+    var targetOpen=0;
+    if(state.speaking){state.speakT+=0;targetOpen=.3+.5*Math.abs(Math.sin(now/90))*(Math.sin(now/300)>0?1:.3)}
+    state.mouthOpen+=(targetOpen-state.mouthOpen)*.35;
+    /* 头倾 + 呼吸 */
+    var breathe=Math.sin(now/900)*1.6;
+    var tilt=(state.mouse.x-.5)*4;
+    root.setAttribute('transform','rotate('+tilt.toFixed(2)+' 150 200) translate(0,'+breathe.toFixed(2)+')');
+    /* 应用到图层 */
+    var ex=EX[state.ex];
+    eyeL.iris.setAttribute('transform','translate('+(state.track.x*4)+','+(state.track.y*3)+')');
+    eyeR.iris.setAttribute('transform','translate('+(state.track.x*4)+','+(state.track.y*3)+')');
+    eyeL.lid.setAttribute('height',32*state.eyeLid);
+    eyeR.lid.setAttribute('height',32*state.eyeLid);
+    browL.setAttribute('transform','translate(0,'+ex.browY+') rotate('+ex.browRot+' 123 133)');
+    browR.setAttribute('transform','translate(0,'+ex.browY+') rotate('+(-ex.browRot)+' 177 133)');
+    blushL.setAttribute('opacity',ex.blush);blushR.setAttribute('opacity',ex.blush);
+    if(state.mouthOpen>.12){mouthArc.style.display='none';mouthOpen.style.display='';
+      mouthOpen.setAttribute('transform','translate(0,'+(state.track.y*2)+') scale(1,'+(0.4+state.mouthOpen)+')');
+      mouthOpen.setAttribute('opacity',Math.min(1,state.mouthOpen*1.6));
+    } else {mouthArc.style.display='';mouthOpen.style.display='none'}
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+  /* 起手 greeting */
+  setTimeout(speak,700);
+})();
+
+/* ============================================================
+   ②③ 3D 共用：VRM 装载 / 素体
+   ============================================================ */
+// 2026-11-06 修：three 在本页是 ES module（只挂在 window.__TSK__ 上、模块作用域不外泄，且
+// module 脚本按规范延迟到文档解析后才执行），而下方经典脚本在解析期就裸用 THREE →
+// 第一次用到就 ReferenceError「THREE is not defined」（此前表现为 3D 展台整段不执行、只剩静态壳）。
+// 处置：这里只留空引用 + onTSK() 包装器，把两个 3D 初始化 IIFE 推迟到 'tsk-ready' 之后执行。
+var TSK=window.__TSK__||{};
+var THREE=null;
+function onTSK(fn){
+  var t=window.__TSK__;
+  if(t&&t.THREE){ TSK=t; THREE=t.THREE; fn(); return; }
+  window.addEventListener('tsk-ready', function(){ TSK=window.__TSK__||TSK; THREE=TSK.THREE; fn(); }, {once:true});
+}
+var userVrmLoaded=false;   /* 用户是否已拖入 VRM */
+var pendingLoads=[];      /* 待 VRM 就绪后加载的回调 */
+
+function loadVrmFromArrayBuffer(buf, into){
+  var loader=new TSK.GLTFLoader();
+  loader.register(function(parser){ return new TSK.VRMLoaderPlugin(parser); });
+  loader.parse(buf,'',function(gltf){
+    var vrm=gltf.userData.vrm;
+    TSK.vrm=vrm;
+    into(vrm);
+    userVrmLoaded=true;
+    toast('VRM 已上台');
+  },function(err){ toast('VRM 解析失败：'+(err&&err.message||err)); });
+}
+function makeVrmDrop(dropEl,cb){
+  dropEl.addEventListener('click',function(){ $('#vrmFile').click(); });
+  dropEl.addEventListener('dragover',function(e){e.preventDefault();dropEl.classList.add('over')});
+  dropEl.addEventListener('dragleave',function(){dropEl.classList.remove('over')});
+  dropEl.addEventListener('drop',function(e){
+    e.preventDefault();dropEl.classList.remove('over');
+    var f=e.dataTransfer.files&&e.dataTransfer.files[0];
+    if(!f||!/\.vrm$/i.test(f.name)){toast('请拖入 .vrm 文件');return}
+    var fr=new FileReader();
+    fr.onload=function(){ cb(f.name, fr.result); };
+    fr.readAsArrayBuffer(f);
+  });
+}
+$('#vrmFile').addEventListener('change',function(e){
+  var f=e.target.files&&e.target.files[0];if(!f)return;
+  var fr=new FileReader();
+  fr.onload=function(){ loadVrmFromArrayBuffer(fr.result,function(vrm){ attachVrm('#vrmStage',vrm); }); };
+  fr.readAsArrayBuffer(f);
+  e.target.value='';
+});
+makeVrmDrop($('#vrmDrop'),function(name,buf){
+  loadVrmFromArrayBuffer(buf,function(vrm){ attachVrm('#vrmStage',vrm); });
+});
+
+/* 素体：程序化「月读酱 · 素体号」（球头 + 胶囊身 + 臂） */
+function makeBody(THREE){
+  var g=new THREE.Group();
+  var mat=new THREE.MeshStandardMaterial({color:0xdfe6ff,roughness:.5,metalness:.1});
+  var mat2=new THREE.MeshStandardMaterial({color:0x5b4a9e,roughness:.4,metalness:.2});
+  var head=new THREE.Mesh(new THREE.SphereGeometry(.42,32,24),mat);head.position.y=1.62;head.castShadow=true;g.add(head);
+  var visor=new THREE.Mesh(new THREE.SphereGeometry(.43,32,16,0,Math.PI*2,0,1.1),new THREE.MeshStandardMaterial({color:0x1b2138,roughness:.2,metalness:.6}));
+  visor.position.y=1.66;g.add(visor);
+  var body=new THREE.Mesh(new THREE.CylinderGeometry(.24,.34,.9,24),mat2);body.position.y=.95;body.castShadow=true;g.add(body);
+  [-1,1].forEach(function(s){
+    var arm=new THREE.Mesh(new THREE.CylinderGeometry(.07,.09,.7,16),mat);
+    arm.position.set(.34*s,1.12,0);arm.rotation.z=s*.22;arm.castShadow=true;g.add(arm);
+    var leg=new THREE.Mesh(new THREE.CylinderGeometry(.1,.12,.62,16),mat2);
+    leg.position.set(.16*s,.28,0);leg.castShadow=true;g.add(leg);
+  });
+  var moonDeco=new THREE.Mesh(new THREE.SphereGeometry(.09,16,12),new THREE.MeshStandardMaterial({color:0xf0d98c,emissive:0x8a7a3a,emissiveIntensity:.6}));
+  moonDeco.position.set(-.3,1.9,0);g.add(moonDeco);
+  return g;
+}
+function attachBody(stageSel){
+  var stage=$(stageSel);
+  var canvas=stage.querySelector('canvas');
+  // 2026-11-06 修：舞台在隐藏分页里初始化时 clientWidth/Height=0 → 画布被 setSize(0,0)、
+  // 相机 aspect 还会变成 NaN。这里给保守兜底尺寸，等舞台可见时再由 resize 处理器重算。
+  var W=stage.clientWidth||960, H=stage.clientHeight||430;
+  var renderer=stage.__renderer;
+  if(!renderer){
+    renderer=new THREE.WebGLRenderer({canvas:canvas,antialias:true,alpha:true});
+    renderer.setPixelRatio(Math.min(2,window.devicePixelRatio||1));
+    stage.__renderer=renderer;
+  }
+  renderer.setSize(W,H,false);
+  var scene=stage.__scene;
+  if(!scene){
+    scene=new THREE.Scene();
+    scene.background=new THREE.Color(0x0b0f26);
+    stage.__scene=scene;
+    var hemi=new THREE.HemisphereLight(0xbfd4ff,0x1a1f38,.9);scene.add(hemi);
+    var key=new THREE.DirectionalLight(0xfff4de,1.6);key.position.set(2,4,3);scene.add(key);
+    var rim=new THREE.DirectionalLight(0xa78bfa,1.1);rim.position.set(-3,2,-2);scene.add(rim);
+    var grid=new THREE.GridHelper(8,16,0x303a66,0x1e2646);scene.add(grid);
+    var cam=new THREE.PerspectiveCamera(38,(H?W/H:16/9),.1,60);
+    cam.position.set(0,1.5,3.4);cam.lookAt(0,1.05,0);
+    stage.__cam=cam;
+    /* 手动环绕 */
+    var drag=false,lx=0,ly=0,theta=.0,phi=.35,radius=3.6;
+    function applyCam(){
+      cam.position.set(radius*Math.sin(theta)*Math.cos(phi),1.5+radius*Math.sin(phi),radius*Math.cos(theta)*Math.cos(phi));
+      cam.lookAt(0,1.05,0);
+    }
+    applyCam();
+    canvas.addEventListener('pointerdown',function(e){drag=true;lx=e.clientX;ly=e.clientY;try{canvas.setPointerCapture(e.pointerId)}catch(_){}});
+    canvas.addEventListener('pointermove',function(e){if(!drag)return;theta-=(e.clientX-lx)*.008;phi=Math.max(-.2,Math.min(1.2,phi+(e.clientY-ly)*.006));lx=e.clientX;ly=e.clientY;applyCam()});
+    canvas.addEventListener('pointerup',function(){drag=false});
+    canvas.addEventListener('wheel',function(e){e.preventDefault();radius=Math.max(1.6,Math.min(9,radius+e.deltaY*.004));applyCam()},{passive:false});
+    stage.__applyCam=applyCam;
+    var clock=new THREE.Clock();
+    var blink=0;
+    renderer.setAnimationLoop(function(){
+      var dt=clock.getDelta(),t=clock.elapsedTime;
+      var vrm=stage.__vrm;
+      if(vrm&&vrm.update)vrm.update(dt);
+      var target=stage.__model;
+      if(target){
+        target.rotation.y=Math.sin(t*.5)*.18;
+        target.position.y=Math.sin(t*1.2)*.015;
+      }
+      blink+=dt;
+      if(blink>3+Math.random()*2)blink=0;
+      var v=blink<.12?(blink/.12):0;
+      if(vrm&&vrm.expressionManager)vrm.expressionManager.setValue('blink',v);
+      renderer.render(scene,cam);
+    });
+  }
+  return scene;
+}
+function attachVrm(stageSel,vrm){
+  var stage=$(stageSel);
+  var scene=attachBody(stageSel);
+  if(stage.__model){scene.remove(stage.__model);stage.__model=null}
+  vrm.scene.traverse(function(o){if(o.isMesh){o.castShadow=true}});
+  vrm.scene.rotation.y=Math.PI;
+  scene.add(vrm.scene);
+  stage.__model=vrm.scene;
+  stage.__vrm=vrm;
+}
+
+/* ============================================================
+   ② 3D Live 展台
+   ============================================================ */
+onTSK(function(){
+  var stageSel='#vrmStage';
+  attachBody(stageSel);
+  /* 素体作为默认 model */
+  (function(){
+    var stage=$(stageSel);
+    var scene=stage.__scene;
+    var body=makeBody(THREE);
+    scene.add(body);
+    stage.__body=body;stage.__model=body;
+  })();
+  document.querySelectorAll('[data-ve]').forEach(function(b){
+    b.onclick=function(){
+      document.querySelectorAll('[data-ve]').forEach(function(x){x.classList.remove('on')});
+      b.classList.add('on');
+      var stage=$(stageSel);var vrm=stage.__vrm;
+      if(vrm&&vrm.expressionManager){
+        ['neutral','happy','sad','angry','relaxed'].forEach(function(k){vrm.expressionManager.setValue(k,0)});
+        vrm.expressionManager.setValue(b.getAttribute('data-ve'),1);
+      } else toast('素体模式无表情系统——拖入 VRM 后可用');
+    };
+  });
+  $('#vrmClear').onclick=function(){
+    var stage=$(stageSel);
+    if(stage.__vrm){stage.__scene.remove(stage.__vrm.scene);stage.__vrm=null}
+    if(stage.__model){stage.__scene.remove(stage.__model)}
+    var body=makeBody(THREE);stage.__scene.add(body);stage.__body=body;stage.__model=body;
+    toast('已回到素体');
+  };
+  /* 表情按钮在素体模式给提示 */
+  document.querySelectorAll('[data-ve]').forEach(function(b){
+    b.addEventListener('click',function(){
+      var stage=$(stageSel);
+      if(!stage.__vrm)toast('素体模式无表情系统——拖入 VRM 后可用');
+    });
+  });
+  // 2026-11-06 修：本舞台此前没有任何 resize 处理器，隐藏状态下初始化出的 0×0 画布永远补不回来
+  // （切到 3D 分页只看得到空白）。这里补一个尺寸校正。
+  window.addEventListener('resize',function(){
+    var st=$(stageSel), r=st.__renderer, c=st.__cam;
+    if(!r)return;
+    var w=st.clientWidth,h=st.clientHeight;
+    if(!w||!h)return;
+    r.setSize(w,h,false);
+    if(c){ c.aspect=w/h; c.updateProjectionMatrix(); }
+  });
+});
+
+/* ============================================================
+   ③ 月读空间场景
+   ============================================================ */
+onTSK(function(){
+  var stage=$('#spaceStage');
+  var canvas=$('#spaceCanvas');
+  var W=stage.clientWidth||960,H=stage.clientHeight||460;   // 隐藏分页里初始化会拿到 0，给兜底尺寸
+  var renderer=new THREE.WebGLRenderer({canvas:canvas,antialias:true});
+  renderer.setPixelRatio(Math.min(2,window.devicePixelRatio||1));
+  renderer.setSize(W,H,false);
+  var scene=new THREE.Scene();
+  scene.background=new THREE.Color(0x050814);
+  scene.fog=new THREE.Fog(0x050814,14,42);
+  var cam=new THREE.PerspectiveCamera(50,(H?W/H:16/9),.1,200);
+  cam.position.set(0,2.2,9);cam.lookAt(0,1.6,0);
+  var hemi=new THREE.HemisphereLight(0x8fa3ff,0x0a0e1e,.7);scene.add(hemi);
+  var moonLight=new THREE.DirectionalLight(0xf4f1de,1.2);moonLight.position.set(-6,10,-8);scene.add(moonLight);
+  /* 巨月 */
+  var moon=new THREE.Mesh(new THREE.SphereGeometry(2.4,40,28),new THREE.MeshStandardMaterial({color:0xf4f1de,emissive:0xd8d2a8,emissiveIntensity:.9,roughness:1}));
+  moon.position.set(-8,9,-24);scene.add(moon);
+  var halo=new THREE.Mesh(new THREE.SphereGeometry(2.9,32,24),new THREE.MeshBasicMaterial({color:0xd8d2a8,transparent:true,opacity:.12}));
+  halo.position.copy(moon.position);scene.add(halo);
+  /* 星海 */
+  var starGeo=new THREE.BufferGeometry();
+  var pos=[];
+  for(var i=0;i<900;i++){
+    var r=40+Math.random()*30,th=Math.random()*Math.PI*2,ph=Math.acos(Math.random()*.9);
+    pos.push(r*Math.sin(ph)*Math.cos(th),Math.abs(r*Math.cos(ph))+2,r*Math.sin(ph)*Math.sin(th));
+  }
+  starGeo.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
+  scene.add(new THREE.Points(starGeo,new THREE.PointsMaterial({color:0xcdd8ff,size:.14,transparent:true,opacity:.85})));
+  /* 鸟居（朱红） */
+  var torii=new THREE.Group();
+  var red=new THREE.MeshStandardMaterial({color:0xd64545,roughness:.55});
+  [-2.2,2.2].forEach(function(x){
+    var p=new THREE.Mesh(new THREE.CylinderGeometry(.22,.26,5.2,20),red);
+    p.position.set(x,2.6,0);torii.add(p);
+  });
+  var top=new THREE.Mesh(new THREE.BoxGeometry(6.4,.42,.8),red);top.position.y=5.4;torii.add(top);
+  var top2=new THREE.Mesh(new THREE.BoxGeometry(5.6,.3,.6),red);top2.position.y=4.9;torii.add(top2);
+  var mid=new THREE.Mesh(new THREE.BoxGeometry(4.6,.3,.5),red);mid.position.y=4.1;torii.add(mid);
+  torii.position.set(0,0,-4);scene.add(torii);
+  /* 天际线：发光窗格剪影楼群 */
+  var cityMat=new THREE.MeshStandardMaterial({color:0x0d1226,roughness:.9});
+  var winMat=new THREE.MeshBasicMaterial({color:0x8fa3ff});
+  for(var b=0;b<26;b++){
+    var h=2+Math.random()*7,w=.7+Math.random()*1.4;
+    var bx=new THREE.Mesh(new THREE.BoxGeometry(w,h,w),cityMat);
+    var x=-18+b*1.5+Math.random()*.6;
+    bx.position.set(x,h/2,-16-Math.random()*6);
+    scene.add(bx);
+    var wins=new THREE.Mesh(new THREE.PlaneGeometry(w*.7,h*.8),winMat);
+    wins.position.set(x,h*.55,bx.position.z+w/2+.01);
+    wins.material=new THREE.MeshBasicMaterial({color:0x8fa3ff,transparent:true,opacity:.12+Math.random()*.25});
+    scene.add(wins);
+  }
+  /* 地面 + 网格 */
+  var ground=new THREE.Mesh(new THREE.PlaneGeometry(60,40),new THREE.MeshStandardMaterial({color:0x0a0f1e,roughness:.95}));
+  ground.rotation.x=-Math.PI/2;scene.add(ground);
+  var grid=new THREE.GridHelper(60,60,0x2a3560,0x141a33);grid.position.y=.01;scene.add(grid);
+  /* 舞台圆台 + 素体 */
+  var dais=new THREE.Mesh(new THREE.CylinderGeometry(1.3,1.5,.22,36),new THREE.MeshStandardMaterial({color:0x1b2447,roughness:.4,metalness:.3}));
+  dais.position.set(0,.11,2);scene.add(dais);
+  var body=makeBody(THREE);body.position.set(0,.22,2);scene.add(body);
+  /* 环绕相机 */
+  var theta=.0,phi=.32,radius=11,auto=true,drag=false,lx=0,ly=0;
+  function applyCam(){
+    cam.position.set(radius*Math.sin(theta)*Math.cos(phi),2.2+radius*Math.sin(phi)*.6,radius*Math.cos(theta)*Math.cos(phi));
+    cam.lookAt(0,2.2,-1);
+  }
+  applyCam();
+  canvas.addEventListener('pointerdown',function(e){drag=true;auto=false;lx=e.clientX;ly=e.clientY;$('#spaceAuto').classList.remove('on');$('#spaceAuto').textContent='🎡 自动环绕：关';try{canvas.setPointerCapture(e.pointerId)}catch(_){}});
+  canvas.addEventListener('pointermove',function(e){if(!drag)return;theta-=(e.clientX-lx)*.006;phi=Math.max(-.05,Math.min(.9,phi+(e.clientY-ly)*.005));lx=e.clientX;ly=e.clientY;applyCam()});
+  canvas.addEventListener('pointerup',function(){drag=false});
+  canvas.addEventListener('wheel',function(e){e.preventDefault();radius=Math.max(4,Math.min(26,radius+e.deltaY*.01));applyCam()},{passive:false});
+  $('#spaceAuto').onclick=function(){auto=!auto;this.classList.toggle('on',auto);this.textContent=auto?'🎡 自动环绕：开':'🎡 自动环绕：关'};
+  var clock=new THREE.Clock();
+  renderer.setAnimationLoop(function(){
+    var dt=clock.getDelta(),t=clock.elapsedTime;
+    if(auto)theta+=dt*.12;
+    applyCam();
+    body.rotation.y=Math.sin(t*.4)*.3;
+    body.position.y=.22+Math.sin(t*1.1)*.02;
+    halo.scale.setScalar(1+Math.sin(t*.8)*.03);
+    renderer.render(scene,cam);
+  });
+  window.addEventListener('resize',function(){
+    var w=stage.clientWidth,h=stage.clientHeight;
+    renderer.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix();
+  });
+});
+
+/* APP 模式：独立小窗（420×760），无地址栏，像原生 APP */
+document.getElementById('appModeBtn').onclick=function(){
+  var w=window.open(location.pathname+'?app=1','tsukuyomi_app','width=420,height=760,menubar=no,toolbar=no,location=no,status=no');
+  if(!w) toast('弹窗被拦截——请允许此网站的弹窗');
+};
+if(location.search.indexOf('app=1')>-1){
+  document.body.style.maxWidth='420px';
+  document.body.style.margin='0 auto';
+  document.querySelector('.tabs').style.display='none';
+  /* APP 模式下隐藏场景页签，只保留 2D+3D */
+  var tabs=document.querySelectorAll('.tab[data-v]');
+  tabs.forEach(function(t){if(t.getAttribute('data-v')==='space')t.style.display='none'});
+}
+
+function reportH(){
+  var h=Math.max(document.documentElement.scrollHeight,document.body.scrollHeight);
+  try{parent.postMessage({__wbResize:true,id:'tsukuyomiFrame',h:h},'*')}catch(e){}
+}
+if(window.ResizeObserver){new ResizeObserver(reportH).observe(document.body)}
+window.addEventListener('load',reportH);
+setTimeout(reportH,400);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<!-- 名词解释默写自测 · 看词默写 + 关键词命中打分 + 艾宾浩斯排程 | 单文件 HTML 子应用（零外链），数据走自身 localStorage（wb_termdict_v1）
+     玩法：录入名词（科目/关键词/参考全文）→ 到期默写（打字或纸上写完核对）→ 按关键词命中算覆盖率做参考 →
+     自评「记住了/没记住」进退艾宾浩斯档位。与 srs-cards（翻卡认记）互补：这里是主动产出式回忆。 -->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" type="image/png" href="../../assets/pwa/icon-192.png"><!-- 2026-11-06 全站补 rel="icon"：本页此前未声明，浏览器回落请求站点根 /favicon.ico 报 404（控制台红色噪音、标签页无图标）；与 2026-10-03 对 index/zk-ky/share-hub 的处理同一策略 -->
+<title>名词解释默写自测 · 关键词命中打分</title>
+
+<script>
+/* 主题跟随主站（同 anime.html 模式）：读 wb_store.data.theme（老版 wb_hub_theme），auto 跟随系统 */
+(function(){
+  function stored(){
+    try{
+      var raw=localStorage.getItem('wb_store');
+      if(raw){var o=JSON.parse(raw); if(o&&o.data&&o.data.theme) return o.data.theme;}
+    }catch(e){}
+    try{ var l=localStorage.getItem('wb_hub_theme'); if(l) return l; }catch(e){}
+    return 'auto';
+  }
+  function mq(){ return window.matchMedia('(prefers-color-scheme: dark)'); }
+  function apply(m){
+    var dark=mq().matches;
+    var act=(m==='dark'||m==='light')?m:(dark?'dark':'light');
+    document.documentElement.setAttribute('data-theme',act);
+  }
+  apply(stored());
+  window.addEventListener('storage',function(e){
+    if(e.key==='wb_store'||e.key==='wb_hub_theme') apply(stored());
+  });
+  try{ mq().addEventListener('change',function(){ if(stored()==='auto') apply('auto'); }); }catch(e){}
+})();
+</script>
+
+<link rel="canonical" href="https://epic-super.github.io/lab/products/term-dictation.html">
+<meta name="description" content="名词解释默写自测：看名词默全文，按关键词命中率打分，配合艾宾浩斯 1/2/4/7/15/30 天重默排程，自考文科与考研专业课通用。">
+<style>
+:root{
+  --bg:#101019; --panel:#191a2b; --panel2:#20213a; --line:#2c2d4d; --line2:#3a3c63;
+  --txt:#edeef8; --sub:#8f93b4; --blue:#5b8cff; --orange:#ff9f43; --pink:#f472b6;
+  --green:#34d399; --red:#f87171; --purple:#a78bfa; --yellow:#fbbf24; --cyan:#257ea5;--cyan-ink:#38bdf8;
+  --r:16px; --r-sm:11px; --r-f:999px;
+  --sh:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.22);
+  --ease:cubic-bezier(.32,.72,0,1); --tf:.16s var(--ease);
+}
+html[data-theme="light"]{--cyan-ink:#0e7490;
+  --bg:#f7f8fc; --panel:#ffffff; --panel2:#eef0f8; --line:#e2e5f0; --line2:#ccd2e6;
+  --txt:#20233a; --sub:#5d6280; --blue:#3966d8; --orange:#a25c15; --pink:#db2777;
+  --green:#0f7d50; --red:#c04141; --purple:#7c5cd6; --yellow:#b15209; --cyan:#0e7490;
+  --sh:0 1px 3px rgba(30,30,60,.06),0 6px 16px rgba(30,30,60,.07);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","HarmonyOS Sans SC","Microsoft YaHei",sans-serif;
+  background:var(--bg);color:var(--txt);font-size:15px;line-height:1.65;
+  padding-bottom:calc(28px + env(safe-area-inset-bottom));
+  -webkit-font-smoothing:antialiased;
+}
+button,input,select,textarea{font-family:inherit;font-size:15px;color:inherit}
+button{cursor:pointer;border:none;background:none}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--blue);outline-offset:2px;border-radius:6px}
+.wrap{max-width:880px;margin:0 auto;padding:0 14px}
+
+.top{position:relative;color:#fff;padding:22px 0 20px;padding-top:calc(22px + env(safe-area-inset-top));
+  background:
+    radial-gradient(110% 150% at 8% -20%,rgba(56,189,248,.32),rgba(56,189,248,0) 50%),
+    radial-gradient(90% 130% at 92% 0%,rgba(52,211,153,.28),rgba(52,211,153,0) 58%),
+    linear-gradient(134deg,#0e2a3d 0%,#14524f 55%,#1f6a46 120%);
+  box-shadow:0 1px 0 rgba(255,255,255,.08) inset,0 6px 22px rgba(6,26,24,.3);overflow:hidden}
+.top::after{content:'';position:absolute;left:0;right:0;bottom:0;height:1px;background:linear-gradient(90deg,transparent,rgba(56,189,248,.5),transparent)}
+.brand h1{margin:0;font-size:21px;font-weight:800;display:flex;align-items:center;gap:9px}
+.brand p{margin:5px 0 0;font-size:12.5px;opacity:.88}
+.stats{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}
+.stat{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:var(--r-sm);padding:6px 11px;font-size:12px;display:flex;align-items:baseline;gap:5px;color:#fff}
+.stat b{font-size:16px;font-weight:800;font-variant-numeric:tabular-nums}
+.stat.fire b{color:#a5f3c9}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:18px;box-shadow:var(--sh);margin:14px 0}
+.card h2{margin:0 0 4px;font-size:16px;font-weight:800;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.card .desc{color:var(--sub);font-size:13px;margin:0 0 12px}
+.small{font-size:12px;color:var(--sub)}
+
+/* 表单 */
+.fgrid{display:grid;gap:10px}
+.frow{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+label.fl{font-size:12.5px;color:var(--sub);font-weight:700;min-width:64px}
+textarea,input[type=text]{background:var(--panel2);border:1px solid var(--line);border-radius:var(--r-sm);padding:9px 11px;width:100%;resize:vertical;line-height:1.5}
+textarea:focus,input:focus{border-color:var(--blue)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.chip{border:1px solid var(--line2);background:var(--panel);border-radius:var(--r-f);padding:6px 13px;font-size:12.5px;transition:var(--tf)}
+.chip:hover{border-color:var(--blue)}
+.chip.on{border-color:var(--cyan);color:var(--cyan-ink);background:rgba(56,189,248,.12);font-weight:700}
+.chip.add{border-style:dashed;color:var(--sub)}
+.chip.add:hover{border-color:var(--cyan);color:var(--cyan-ink)}
+.inadd{display:flex;gap:6px;align-items:center}
+.inadd input{width:110px;padding:4px 9px;font-size:12.5px}
+.btn{border:1px solid var(--line2);background:var(--panel2);border-radius:var(--r-f);padding:8px 16px;font-size:13.5px;transition:var(--tf)}
+.btn:hover{border-color:var(--blue)}
+.btn.primary{background:var(--cyan);border-color:var(--cyan);color:#fff;font-weight:700}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.good{border-color:var(--green);color:var(--green)}
+.btn.good:hover{background:rgba(52,211,153,.1)}
+.btn.bad{border-color:var(--red);color:var(--red)}
+.btn.bad:hover{background:rgba(248,113,113,.1)}
+.hint{font-size:12px;color:var(--sub);min-height:18px;margin-top:6px}
+.hint.good{color:var(--green)} .hint.err{color:var(--red)}
+
+/* 科目标签 */
+.tag{display:inline-block;font-size:10.5px;font-weight:700;border-radius:5px;padding:1px 7px;letter-spacing:.5px;border:1px solid}
+.t-my{color:var(--blue);border-color:var(--blue)} .t-mz{color:var(--red);border-color:var(--red)}
+.t-sg{color:var(--orange);border-color:var(--orange)} .t-sx{color:var(--green);border-color:var(--green)}
+.t-sz{color:var(--purple);border-color:var(--purple)}
+
+/* 默写卡 */
+.termBig{font-size:21px;font-weight:800;margin:10px 0 2px}
+.scoreWrap{margin-top:12px;background:rgba(56,189,248,.07);border:1px solid rgba(56,189,248,.25);border-radius:var(--r-sm);padding:12px 14px}
+.scoreBig{font-size:24px;font-weight:800;font-variant-numeric:tabular-nums}
+.scoreBig.hi{color:var(--green)} .scoreBig.mid{color:var(--yellow)} .scoreBig.lo{color:var(--red)}
+.kws{display:flex;flex-wrap:wrap;gap:7px;margin-top:9px}
+.kw{font-size:12px;border:1px solid var(--red);color:var(--red);border-radius:var(--r-f);padding:2px 10px;text-decoration:line-through;opacity:.75}
+.kw.hit{border-color:var(--green);color:var(--green);text-decoration:none;opacity:1}
+.ref{margin-top:10px;font-size:13.5px;background:rgba(91,140,255,.07);border:1px solid rgba(91,140,255,.25);border-radius:var(--r-sm);padding:10px 12px;white-space:pre-wrap}
+.prog{height:7px;background:var(--panel2);border-radius:var(--r-f);overflow:hidden;margin-top:12px;border:1px solid var(--line)}
+.prog i{display:block;height:100%;background:linear-gradient(90deg,var(--red),var(--yellow),var(--green));border-radius:var(--r-f);transition:width .35s var(--ease)}
+
+/* 档位 */
+.stages{display:flex;gap:5px;margin-top:6px;flex-wrap:wrap}
+.stg{font-size:10.5px;border-radius:5px;padding:2px 8px;border:1px solid var(--line2);color:var(--sub);font-variant-numeric:tabular-nums}
+.stg.hit{border-color:var(--cyan);color:var(--cyan-ink);font-weight:700}
+
+/* 列表 */
+.qitem{background:var(--panel2);border:1px solid var(--line);border-radius:var(--r-sm);padding:12px;margin:9px 0}
+.qitem .qh{display:flex;gap:7px;align-items:center;flex-wrap:wrap;font-size:12px}
+.qitem .qq{font-size:15px;font-weight:700;margin:6px 0}
+.qmeta{display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:11.5px;color:var(--sub)}
+.qmeta b{color:var(--txt)}
+.mini{font-size:11.5px;border:1px solid var(--line2);border-radius:var(--r-f);padding:2px 9px;color:var(--sub);transition:var(--tf)}
+.mini:hover{border-color:var(--blue);color:var(--blue)}
+.mini.del:hover,.mini.armed{border-color:var(--red);color:var(--red)}
+.empty{text-align:center;color:var(--sub);padding:18px 0;font-size:13px}
+.due{color:var(--yellow);font-weight:700}
+.over{color:var(--red);font-weight:700}
+.filters{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:4px}
+.fchip{border:1px solid var(--line2);border-radius:var(--r-f);padding:4px 12px;font-size:12px;color:var(--sub);transition:var(--tf)}
+.fchip.on{border-color:var(--cyan);color:var(--cyan-ink);background:rgba(56,189,248,.1);font-weight:700}
+
+@media (max-width:560px){.chip{padding:6px 11px;font-size:12px}.termBig{font-size:19px}}
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+
+<header class="top">
+  <div class="wrap brand">
+    <h1>✒️ 名词解释默写自测</h1>
+    <p>看名词 → 默全文 → 按关键词命中率打分 → 艾宾浩斯重默（1/2/4/7/15/30 天）。与翻卡认记不同，这里是逼自己「写出来」的主动回忆——自考文科与考研专业课通用。</p>
+    <div class="stats">
+      <div class="stat"><span>词条总数</span><b id="stTotal">0</b></div>
+      <div class="stat fire"><span>今日待默</span><b id="stDue">0</b></div>
+      <div class="stat"><span>已记住</span><b id="stDone">0</b></div>
+      <div class="stat"><span>平均命中</span><b id="stAvg">–</b></div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="card">
+    <h2>✍️ 录入名词</h2>
+    <p class="desc">关键词是打分依据：写最能代表答案的词组，用「|」给同一关键词加同义写法（如 无偿占有|被资本家占有）。名词和关键词必填，参考全文建议填（交卷后对照用）。</p>
+    <div class="fgrid">
+      <div class="chips" id="subChips"></div>
+      <div class="inadd">
+        <input type="text" id="inNewSub" placeholder="新科目名" maxlength="10" />
+        <button class="chip add" id="btnAddSub" type="button">＋ 添加科目</button>
+        <span class="small">科目可自定义，点了色标自动分配</span>
+      </div>
+      <div class="frow">
+        <label class="fl">名词</label>
+        <input type="text" id="inTerm" style="flex:1;min-width:200px" placeholder="如：剩余价值 / 遵义会议 / 教育的相对独立性" />
+      </div>
+      <div>
+        <label class="fl">关键词</label>
+        <input type="text" id="inKw" placeholder="逗号或顿号分隔；同义写法用 | 连接。如：雇佣工人的剩余劳动, 被资本家无偿占有|无偿占有" />
+      </div>
+      <div>
+        <label class="fl">参考全文</label>
+        <textarea id="inRef" rows="3" placeholder="教材口径的名词解释原文，交卷打分后对照展示。"></textarea>
+      </div>
+      <div>
+        <label class="fl">备注</label>
+        <input type="text" id="inNote" placeholder="可空。出处章节、易混点等。" />
+      </div>
+      <div class="frow">
+        <button class="btn primary" id="btnAdd">＋ 收进默写本</button>
+        <span class="hint" id="addHint"></span>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>📝 今日默写 <span class="small" id="revCount"></span></h2>
+    <p class="desc">先在纸上或脑子里默写，再打字誊进来交卷——关键词命中率只是参考，记没记住自己说了算。</p>
+    <div class="prog"><i id="revBar" style="width:0%"></i></div>
+    <div id="revBox"><div class="empty">今天没有到期的词条 🎉　去背新的，明天再来。</div></div>
+  </section>
+
+  <section class="card">
+    <h2>📚 全部词条 <span class="small" id="listCount"></span></h2>
+    <div class="filters" id="filters"></div>
+    <div id="listBox"></div>
+  </section>
+
+  <section class="card">
+    <h2>🧠 打分与排程规则</h2>
+    <p class="desc">关键词命中 = 你的默写里包含该关键词（或其任一同义写法）。忽略大小写、空格和标点。</p>
+    <div class="stages" id="stageLegend"></div>
+    <p class="small" style="margin-top:10px">录入当天先默一次（第 0 档），此后按间隔 1→2→4→7→15→30 天滚动，六档后「已记住」。哪次自评「没记住」，立刻打回第 0 档重来。命中率 ≥80% 绿色、≥50% 黄色、否则红色——分数低不代表没记住（写法不同很正常），它只是提醒你对照全文查漏。数据全在本机 localStorage（wb_termdict_v1），不上传。首载自带 6 条示例词条，可删可改。</p>
+  </section>
+
+</main>
+
+<script>
+(function(){
+'use strict';
+var KEY='wb_termdict_v1';
+var $=function(s){return document.querySelector(s)};
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function today(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function addDays(ds,n){var p=ds.split('-');var d=new Date(+p[0],+p[1]-1,+p[2]);d.setDate(d.getDate()+n);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function daysBetween(a,b){var p=a.split('-'),q=b.split('-');return Math.round((new Date(+q[0],+q[1]-1,+q[2])-new Date(+p[0],+p[1]-1,+p[2]))/864e5)}
+
+var SUB_COLORS=['t-my','t-mz','t-sg','t-sx','t-sz'];
+var STAGES=[1,2,4,7,15,30];
+
+/* 首载示例（真实考点名词，教材通行口径，可删） */
+var SAMPLES=[
+ {sub:'马原',term:'剩余价值',kw:'雇佣工人的剩余劳动, 被资本家无偿占有|无偿占有, 超过劳动力价值',ref:'剩余价值是由雇佣工人创造的、被资本家无偿占有的、超过劳动力价值的那部分价值，它体现着资本家对工人的剥削关系。剩余价值是资本主义生产的目的和实质。',note:'示例词条，可删。马原·第五章'},
+ {sub:'马原',term:'矛盾的同一性',kw:'相互依存, 相互贯通, 相互转化',ref:'矛盾的同一性是指矛盾双方相互依存、相互贯通的性质和趋势。矛盾双方相互依存，互为存在的前提；相互贯通，在一定条件下相互转化。',note:'示例词条，可删。易混：斗争性'},
+ {sub:'马原',term:'生产力',kw:'改造和影响自然, 物质力量, 劳动资料, 劳动对象, 劳动者',ref:'生产力是人类在生产实践中形成的改造和影响自然以使其适合社会需要的物质力量。其基本要素包括劳动资料、劳动对象和劳动者。',note:'示例词条，可删。易混：生产关系'},
+ {sub:'史纲',term:'新文化运动',kw:'1915, 陈独秀, 新青年, 民主与科学',ref:'新文化运动是1915年由陈独秀创办《青年杂志》（后改名《新青年》）掀起的思想文化运动，高举民主与科学两面大旗，向封建礼教发起猛烈攻击，为马克思主义在中国的传播创造了条件。',note:'示例词条，可删。史纲·五四前后'},
+ {sub:'史纲',term:'遵义会议',kw:'1935, 军事问题和组织问题, 毛泽东领导地位, 生死攸关的转折点',ref:'遵义会议是1935年1月中共中央在长征途中于贵州遵义召开的政治局扩大会议，集中解决当时具有决定意义的军事问题和组织问题，事实上确立了毛泽东在党和红军中的领导地位，是党的历史上一个生死攸关的转折点。',note:'示例词条，可删。史纲·长征'},
+ {sub:'思修',term:'社会主义核心价值观',kw:'富强民主文明和谐, 自由平等公正法治, 爱国敬业诚信友善',ref:'社会主义核心价值观的基本内容是：富强、民主、文明、和谐，自由、平等、公正、法治，爱国、敬业、诚信、友善。三个层面分别对应国家、社会和个人层面的价值要求。',note:'示例词条，可删。思修·价值观'}
+];
+
+/* ---------- 存储 ---------- */
+function load(){
+  try{ var o=JSON.parse(localStorage.getItem(KEY)); if(o&&typeof o==='object'&&o.items&&o.metas) return o; }catch(e){}
+  var metas=[{k:'马原'},{k:'史纲'},{k:'思修'},{k:'毛中特'}];
+  var items=SAMPLES.map(function(s,idx){
+    return {id:'demo'+idx, sub:s.sub, term:s.term, kw:s.kw.split(/[,，、]/).map(function(x){return x.replace(/^\s+|\s+$/g,'')}).filter(Boolean),
+      ref:s.ref, note:s.note, stage:0, due:today(), right:0, wrong:0, lastScore:null, created:today()};
+  });
+  return {items:items, metas:metas, days:{}};
+}
+function save(){ try{ localStorage.setItem(KEY,JSON.stringify(S)); }catch(e){} }
+var S=load();
+function subClass(k){ var i=S.metas.findIndex(function(m){return m.k===k}); return SUB_COLORS[(i<0?0:i)%SUB_COLORS.length]; }
+
+var subOn=S.metas[0]?S.metas[0].k:'', filter='all';
+
+/* ---------- 打分 ---------- */
+function norm(s){ return String(s).toLowerCase().replace(/[\s，。、,.。;；:：!！?？'’"“”()（）\[\]【】\-—_·…~`*\\/<>《》]/g,''); }
+function scoreText(text,kws){
+  var t=norm(text); if(!t) return {hits:[],miss:kws.length,score:0};
+  var hits=0,detail=[];
+  kws.forEach(function(k){
+    var alts=k.split('|').map(norm).filter(Boolean);
+    var ok=alts.some(function(a){ return t.indexOf(a)>=0; });
+    if(ok){hits++;detail.push({k:k,ok:true});}else detail.push({k:k,ok:false});
+  });
+  return {hits:hits,miss:kws.length-hits,score:Math.round(hits/kws.length*100),detail:detail};
+}
+
+/* ---------- 统计 ---------- */
+function statDue(){ var t=today(),n=0; S.items.forEach(function(it){ if(it.stage<6&&it.due<=t) n++; }); return n; }
+function statDone(){ return S.items.filter(function(it){return it.stage>=6}).length; }
+function statAvg(){
+  var arr=S.items.filter(function(it){return it.lastScore!=null});
+  if(!arr.length) return null;
+  var s=0; arr.forEach(function(it){s+=it.lastScore});
+  return Math.round(s/arr.length);
+}
+function renderStats(){
+  $('#stTotal').textContent=S.items.length;
+  $('#stDue').textContent=statDue();
+  $('#stDone').textContent=statDone();
+  var a=statAvg(); $('#stAvg').textContent=a==null?'–':a+'%';
+}
+
+/* ---------- 科目 ---------- */
+function renderSubs(){
+  var box=$('#subChips'); box.innerHTML='<label class="fl" style="min-width:auto">科目</label>';
+  S.metas.forEach(function(m){
+    var b=document.createElement('button');
+    b.type='button'; b.className='chip'+(subOn===m.k?' on':''); b.textContent=m.k;
+    b.onclick=function(){ subOn=m.k; renderSubs(); };
+    box.appendChild(b);
+  });
+}
+$('#btnAddSub').onclick=function(){
+  var v=$('#inNewSub').value.replace(/^\s+|\s+$/g,'');
+  var hint=$('#addHint');
+  if(!v){ hint.className='hint err'; hint.textContent='⚠️ 先输入科目名'; return; }
+  if(S.metas.some(function(m){return m.k===v})){ hint.className='hint err'; hint.textContent='⚠️ 已有这个科目'; return; }
+  S.metas.push({k:v}); save(); subOn=v;
+  $('#inNewSub').value='';
+  hint.className='hint good'; hint.textContent='✔ 科目「'+v+'」已添加';
+  setTimeout(function(){ hint.className='hint'; hint.textContent=''; },2200);
+  renderSubs();
+};
+
+/* ---------- 录入 ---------- */
+$('#btnAdd').onclick=function(){
+  var term=$('#inTerm').value.replace(/^\s+|\s+$/g,'');
+  var hint=$('#addHint');
+  if(!term){ hint.className='hint err'; hint.textContent='⚠️ 名词还没填'; return; }
+  if(!subOn){ hint.className='hint err'; hint.textContent='⚠️ 先选或先加一个科目'; return; }
+  var kws=$('#inKw').value.split(/[,，、]/).map(function(x){return x.replace(/^\s+|\s+$/g,'')}).filter(Boolean);
+  if(!kws.length){ hint.className='hint err'; hint.textContent='⚠️ 至少写 1 个关键词（打分依据）'; return; }
+  S.items.unshift({
+    id:Date.now()+''+Math.floor(Math.random()*1e4),
+    sub:subOn, term:term, kw:kws,
+    ref:$('#inRef').value.replace(/^\s+|\s+$/g,''), note:$('#inNote').value.replace(/^\s+|\s+$/g,''),
+    stage:0, due:today(), right:0, wrong:0, lastScore:null, created:today()
+  });
+  save(); renderStats(); renderList(); renderReview();
+  $('#inTerm').value=''; $('#inKw').value=''; $('#inRef').value=''; $('#inNote').value='';
+  hint.className='hint good'; hint.textContent='✔ 已收进默写本，今天稍后就能默它';
+  setTimeout(function(){ hint.className='hint'; hint.textContent=''; },2600);
+};
+
+/* ---------- 今日默写 ---------- */
+var queue=[],revIdx=0,submitted=false,lastResult=null;
+function buildQueue(){
+  var t=today();
+  queue=S.items.map(function(it,i){return {i:i,it:it}})
+    .filter(function(x){ return x.it.stage<6 && x.it.due<=t; })
+    .sort(function(a,b){ return a.it.due<b.it.due?-1:1; });
+  revIdx=0;
+}
+function renderReview(){
+  buildQueue();
+  $('#revCount').textContent=queue.length?('共 '+queue.length+' 条'):'';
+  $('#revBar').style.width=(queue.length?Math.round(revIdx/queue.length*100):0)+'%';
+  var box=$('#revBox');
+  if(!queue.length){
+    box.innerHTML='<div class="empty">今天没有到期的词条 🎉　去背新的，明天再来。</div>';
+    return;
+  }
+  var cur=queue[revIdx].it;
+  var h='<div class="qitem" style="margin-top:12px">';
+  h+='<div class="qh"><span class="tag '+subClass(cur.sub)+'">'+esc(cur.sub)+'</span>'+
+     '<span>第 '+(revIdx+1)+' / '+queue.length+' 条 · 已默 '+(cur.right+cur.wrong)+' 次</span></div>';
+  h+='<div class="termBig">'+esc(cur.term)+'</div>';
+  if(!submitted){
+    h+='<div class="small">把它的解释默写出来（打字誊写，或纸上写完凭记忆誊进来）：</div>';
+    h+='<textarea id="inWrite" rows="5" placeholder="在此默写…" style="margin-top:8px"></textarea>';
+    h+='<div class="frow"><button class="btn primary" id="btnSubmit">交卷打分</button></div>';
+  }else{
+    var sc=lastResult.score;
+    var cls=sc>=80?'hi':(sc>=50?'mid':'lo');
+    h+='<div class="scoreWrap"><div class="scoreBig '+cls+'">'+sc+'%</div>'+
+       '<div class="small">关键词命中 '+lastResult.hits+' / '+lastResult.miss+lastResult.miss.length+'</div>';
+    h+='</div>';
+    h+='<div class="kws">';
+    (lastResult.detail||[]).forEach(function(d){
+      h+='<span class="kw'+(d.ok?' hit':'')+'">'+esc(d.k)+(d.ok?' ✔':' ✘')+'</span>';
+    });
+    h+='</div>';
+    if(cur.ref) h+='<div class="ref"><b>参考全文：</b>'+esc(cur.ref)+'</div>';
+    if(cur.note) h+='<div class="small" style="margin-top:6px">📝 '+esc(cur.note)+'</div>';
+    h+='<div class="frow">'+
+       '<button class="btn good" id="btnOK">✔ 记住了，进下一档</button>'+
+       '<button class="btn bad" id="btnNG">✘ 没记住，回炉</button>'+
+       '<button class="btn" id="btnSkip">跳过（明天再见）</button></div>';
+  }
+  h+='</div>';
+  box.innerHTML=h;
+  if(!submitted){
+    $('#btnSubmit').onclick=function(){
+      var text=$('#inWrite').value;
+      lastResult=scoreText(text,cur.kw);
+      submitted=true;
+      renderReview();
+    };
+  }else{
+    $('#btnOK').onclick=function(){ mark(true); };
+    $('#btnNG').onclick=function(){ mark(false); };
+    $('#btnSkip').onclick=function(){ cur.due=addDays(today(),1); save(); next(); };
+  }
+}
+function mark(ok){
+  var cur=queue[revIdx].it;
+  var t=today();
+  if(!S.days[t]) S.days[t]={n:0,ok:0};
+  S.days[t].n++; if(ok) S.days[t].ok++;
+  if(ok){
+    cur.right++; cur.stage++;
+    cur.due=cur.stage>=6?'':addDays(t,STAGES[cur.stage-1]||1);
+  }else{
+    cur.wrong++; cur.stage=0; cur.due=addDays(t,1);
+  }
+  save(); next();
+}
+function next(){ submitted=false; lastResult=null; revIdx++; renderStats(); renderReview(); }
+
+/* ---------- 列表 ---------- */
+function renderFilters(){
+  var fs=[{k:'all',n:'全部'},{k:'due',n:'待默'},{k:'done',n:'已记住'}];
+  S.metas.forEach(function(m){ fs.push({k:'sub:'+m.k,n:m.k}); });
+  var box=$('#filters'); box.innerHTML='';
+  fs.forEach(function(f){
+    var b=document.createElement('button');
+    b.type='button'; b.className='fchip'+(filter===f.k?' on':''); b.textContent=f.n;
+    b.onclick=function(){ filter=f.k; renderFilters(); renderList(); };
+    box.appendChild(b);
+  });
+}
+function renderList(){
+  var t=today();
+  var arr=S.items.map(function(it,i){return {i:i,it:it}}).filter(function(x){
+    if(filter==='all') return true;
+    if(filter==='due') return x.it.stage<6&&x.it.due<=t;
+    if(filter==='done') return x.it.stage>=6;
+    if(filter.indexOf('sub:')===0) return x.it.sub===filter.slice(4);
+    return true;
+  });
+  $('#listCount').textContent='（'+arr.length+' 条）';
+  var box=$('#listBox');
+  if(!arr.length){ box.innerHTML='<div class="empty">这里还空着。录第一个名词吧。</div>'; return; }
+  box.innerHTML='';
+  arr.forEach(function(x){
+    var it=x.it;
+    var d=document.createElement('div'); d.className='qitem';
+    var dueTxt=it.stage>=6?'已记住 🎉':(it.due<t?'<span class="over">已过期</span>':(it.due===t?'<span class="due">今天到期</span>':it.due+' 到期'));
+    d.innerHTML='<div class="qh">'+
+      '<span class="tag '+subClass(it.sub)+'">'+esc(it.sub)+'</span>'+
+      '<span class="qmeta">默 '+it.right+' / 忘 '+it.wrong+
+      (it.lastScore!=null?' · 上次命中 <b>'+it.lastScore+'%</b>':'')+' · '+dueTxt+'</span>'+
+      '<span style="margin-left:auto;display:flex;gap:6px;align-items:center">'+
+      '<button class="mini test1">测它</button>'+
+      '<button class="mini del">删除</button></span></div>';
+    d.innerHTML+='<div class="qq">'+esc(it.term)+'</div>';
+    d.innerHTML+='<div class="kws">'+it.kw.map(function(k){return '<span class="kw hit">'+esc(k)+'</span>'}).join('')+'</div>';
+    var stg='<div class="stages">';
+    for(var s=0;s<=6;s++){
+      stg+='<span class="stg'+(it.stage>=s?' hit':'')+'">'+(s===0?'录入':s===6?'记住':STAGES[s-1]+'天')+'</span>';
+    }
+    d.innerHTML+=stg+'</div>';
+    if(it.note) d.innerHTML+='<div class="small" style="margin-top:5px">📝 '+esc(it.note)+'</div>';
+    d.querySelector('.test1').onclick=function(){
+      buildQueue();
+      var found=-1;
+      queue.forEach(function(q,idx){ if(q.it.id===it.id) found=idx; });
+      if(found<0){ queue.push({i:x.i,it:it}); found=queue.length-1; }
+      revIdx=found; submitted=false; lastResult=null;
+      renderReview();
+      document.querySelector('#revBox').scrollIntoView({behavior:'smooth'});
+    };
+    var del=d.querySelector('.del');
+    del.onclick=function(){
+      if(del.classList.contains('armed')){
+        S.items.splice(x.i,1); save(); renderStats(); renderList(); renderReview();
+      }else{
+        del.classList.add('armed'); del.textContent='确认删除?';
+        setTimeout(function(){ del.classList.remove('armed'); del.textContent='删除'; },2600);
+      }
+    };
+    box.appendChild(d);
+  });
+}
+
+/* ---------- 图例 ---------- */
+function renderLegend(){
+  var h='<span class="stg hit">录入当天</span>';
+  STAGES.forEach(function(v){ h+='<span class="stg">'+v+' 天后</span>'; });
+  h+='<span class="stg">已记住</span>';
+  $('#stageLegend').innerHTML=h;
+}
+
+/* ---------- 高度上报（主站 iframe 自适应） ---------- */
+function reportH(){
+  var h=Math.max(document.documentElement.scrollHeight,document.body.scrollHeight);
+  try{ parent.postMessage({__wbResize:true,id:'termDictFrame',h:h},'*') }catch(e){}
+}
+if(window.ResizeObserver){ new ResizeObserver(reportH).observe(document.body); }
+window.addEventListener('load',reportH);
+setTimeout(reportH,400);
+
+renderSubs();
+renderLegend();
+renderFilters();
+renderList();
+renderReview();
+renderStats();
+})();
+</script>
+</body>
+</html>

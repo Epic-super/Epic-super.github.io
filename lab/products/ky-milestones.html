@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<!-- 考研节点指挥塔 · 关键节点倒计时 + 里程碑清单 | 单文件 HTML 子应用（零外链），数据走自身 localStorage（wb_ky_milestones_v1）
+     所有日期为常规节奏预估，以研招网与省教育考试院官方公告为准。 -->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" type="image/png" href="../../assets/pwa/icon-192.png"><!-- 2026-11-06 全站补 rel="icon"：本页此前未声明，浏览器回落请求站点根 /favicon.ico 报 404（控制台红色噪音、标签页无图标）；与 2026-10-03 对 index/zk-ky/share-hub 的处理同一策略 -->
+<title>考研节点指挥塔 · 关键节点倒计时与里程碑清单</title>
+
+<script>
+/* 主题跟随主站（同 anime.html 模式）：读 wb_store.data.theme（老版 wb_hub_theme），auto 跟随系统 */
+(function(){
+  function stored(){
+    try{
+      var raw=localStorage.getItem('wb_store');
+      if(raw){var o=JSON.parse(raw); if(o&&o.data&&o.data.theme) return o.data.theme;}
+    }catch(e){}
+    try{ var l=localStorage.getItem('wb_hub_theme'); if(l) return l; }catch(e){}
+    return 'auto';
+  }
+  function mq(){ return window.matchMedia('(prefers-color-scheme: dark)'); }
+  function apply(m){
+    var dark=mq().matches;
+    var act=(m==='dark'||m==='light')?m:(dark?'dark':'light');
+    document.documentElement.setAttribute('data-theme',act);
+  }
+  apply(stored());
+  window.addEventListener('storage',function(e){
+    if(e.key==='wb_store'||e.key==='wb_hub_theme') apply(stored());
+  });
+  try{ mq().addEventListener('change',function(){ if(stored()==='auto') apply('auto'); }); }catch(e){}
+})();
+</script>
+
+<link rel="canonical" href="https://epic-super.github.io/lab/products/ky-milestones.html">
+<meta name="description" content="考研节点指挥塔：报名、确认、初试、复试全节点倒计时与里程碑清单，自考本科报名提示。日期以官方公告为准。">
+<style>
+:root{
+  --bg:#101019; --panel:#191a2b; --panel2:#20213a; --line:#2c2d4d; --line2:#3a3c63;
+  --txt:#edeef8; --sub:#8f93b4; --blue:#5b8cff; --orange:#ff9f43; --pink:#f472b6;
+  --green:#34d399; --red:#f87171;
+  --r:16px; --r-sm:11px; --r-f:999px;
+  --sh:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.22);
+  --ease:cubic-bezier(.32,.72,0,1); --tf:.16s var(--ease);
+}
+html[data-theme="light"]{
+  --bg:#f7f8fc; --panel:#ffffff; --panel2:#eef0f8; --line:#e2e5f0; --line2:#ccd2e6;
+  --txt:#20233a; --sub:#5d6280; --blue:#3966d8; --orange:#af6317; --pink:#db2777;
+  --green:#0f7d50; --red:#dc4b4b;
+  --sh:0 1px 3px rgba(30,30,60,.06),0 6px 16px rgba(30,30,60,.07);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","HarmonyOS Sans SC","Microsoft YaHei",sans-serif;
+  background:var(--bg);color:var(--txt);font-size:15px;line-height:1.65;
+  padding-bottom:calc(28px + env(safe-area-inset-bottom));
+  -webkit-font-smoothing:antialiased;
+}
+button,input{font-family:inherit;font-size:15px;color:inherit}
+button{cursor:pointer;border:none;background:none}
+button:focus-visible{outline:2px solid var(--blue);outline-offset:2px;border-radius:6px}
+.wrap{max-width:880px;margin:0 auto;padding:0 14px}
+
+.top{position:relative;color:#fff;padding:22px 0 20px;padding-top:calc(22px + env(safe-area-inset-top));
+  background:
+    radial-gradient(110% 150% at 10% -20%,rgba(91,140,255,.35),rgba(91,140,255,0) 50%),
+    radial-gradient(90% 130% at 92% 0%,rgba(52,211,153,.30),rgba(52,211,153,0) 58%),
+    linear-gradient(134deg,#13203c 0%,#1e3a63 55%,#2c4a44 120%);
+  box-shadow:0 1px 0 rgba(255,255,255,.08) inset,0 6px 22px rgba(10,12,30,.3);overflow:hidden}
+.top::after{content:'';position:absolute;left:0;right:0;bottom:0;height:1px;background:linear-gradient(90deg,transparent,rgba(52,211,153,.5),transparent)}
+.brand h1{margin:0;font-size:21px;font-weight:800;display:flex;align-items:center;gap:9px}
+.brand p{margin:5px 0 0;font-size:12.5px;opacity:.88}
+.years{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.ypill{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);color:#fff;border-radius:var(--r-f);padding:6px 16px;font-size:13px;transition:var(--tf)}
+.ypill.on{background:#fff;color:#1e3a63;font-weight:800;border-color:#fff}
+.ypill small{opacity:.8;font-weight:400}
+.stats{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}
+.stat{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:var(--r-sm);padding:6px 11px;font-size:12px;display:flex;align-items:baseline;gap:5px;color:#fff}
+.stat b{font-size:16px;font-weight:800;font-variant-numeric:tabular-nums}
+.stat.fire b{color:#8dffd2}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:18px;box-shadow:var(--sh);margin:14px 0}
+.card h2{margin:0 0 4px;font-size:16px;font-weight:800;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.card .desc{color:var(--sub);font-size:13px;margin:0 0 12px}
+.warn{background:rgba(255,159,67,.09);border:1px solid rgba(255,159,67,.35);border-radius:var(--r-sm);padding:10px 12px;font-size:12.5px;color:var(--txt)}
+.warn b{color:var(--orange)}
+
+/* 时间线 */
+.tl{position:relative;padding-left:26px}
+.tl::before{content:'';position:absolute;left:8px;top:6px;bottom:6px;width:2px;background:var(--line)}
+.ms{position:relative;margin:0 0 12px;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--panel2);overflow:hidden}
+.ms::before{content:'';position:absolute;left:-24px;top:20px;width:12px;height:12px;border-radius:50%;background:var(--panel);border:2.5px solid var(--line2)}
+.ms.past{opacity:.62}
+.ms.past::before{background:var(--line2);border-color:var(--line2)}
+.ms.active{border-color:var(--blue);box-shadow:0 0 0 1px var(--blue)}
+.ms.active::before{background:var(--blue);border-color:var(--blue);animation:pulse 1.6s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(91,140,255,.5)}55%{box-shadow:0 0 0 6px rgba(91,140,255,0)}}
+.ms-h{display:flex;align-items:center;gap:8px;padding:11px 13px;cursor:pointer;user-select:none}
+.ms-h:hover{background:rgba(91,140,255,.05)}
+.ms-h .nm{font-weight:800;font-size:14px;flex:1}
+.ms-h .dt{font-size:12px;color:var(--sub);font-variant-numeric:tabular-nums;text-align:right}
+.badge{font-size:10.5px;font-weight:700;border-radius:5px;padding:2px 7px;letter-spacing:.5px;white-space:nowrap}
+.badge.past{background:rgba(143,147,180,.15);color:var(--sub)}
+.badge.active{background:rgba(91,140,255,.16);color:var(--blue)}
+.badge.future{background:rgba(52,211,153,.13);color:var(--green)}
+.ms-h .arrow{transition:var(--tf);color:var(--sub);font-size:12px}
+.ms.open .arrow{transform:rotate(90deg)}
+.ms-b{display:none;padding:0 13px 13px;border-top:1px dashed var(--line)}
+.ms.open .ms-b{display:block}
+.ms-b .d{font-size:12.5px;color:var(--sub);margin:9px 0 7px}
+.ck{display:flex;align-items:flex-start;gap:8px;padding:5px 0;font-size:13.5px;cursor:pointer}
+.ck input{margin-top:3px;accent-color:var(--blue);width:15px;height:15px;flex:none;cursor:pointer}
+.ck.done span{color:var(--sub);text-decoration:line-through}
+.ckp{font-size:11.5px;color:var(--sub);margin-top:6px}
+
+@media (max-width:560px){
+  .ms-h{flex-wrap:wrap}
+  .ms-h .dt{width:100%;text-align:left}
+}
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+
+<header class="top">
+  <div class="wrap brand">
+    <h1>🗼 考研节点指挥塔</h1>
+    <p>报名 → 确认 → 准考证 → 初试 → 复试 → 入学：全节点倒计时 + 每站待办清单。日期为常规节奏预估，<b>以研招网与省教育考试院官方公告为准</b>。</p>
+    <div class="years" id="years"></div>
+    <div class="stats">
+      <div class="stat fire"><span>距初试（预估）</span><b id="stExam">--</b><span>天</span></div>
+      <div class="stat"><span>当前阶段</span><b id="stStage" style="font-size:13px">--</b></div>
+      <div class="stat"><span>清单完成</span><b id="stCk">0%</b></div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="card">
+    <h2>🧾 自考本科生报名提示</h2>
+    <div class="warn">
+      自考本科报名考研时：<b>①</b> 学籍校验查不到自考在读，报名表按<b>届时可毕业/同等学力等身份</b>填报——具体以<b>目标院校当年招生简章</b>与报考点公告为准；
+      <b>②</b> 部分院校/专业对自考本科有<b>加试或课程要求</b>，锁定院校前先翻简章正文；
+      <b>③</b> 拟录取后办理<b>毕业证书与档案</b>的时间要提前对齐自考考期，别卡在最后一科上。
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>🗓 里程碑时间线</h2>
+    <p class="desc">点开每一站勾待办；已过的站自动变灰。「进行中」的站会亮起。</p>
+    <div class="tl" id="tl"></div>
+  </section>
+
+</main>
+
+<script>
+(function(){
+'use strict';
+var KEY='wb_ky_milestones_v1';
+var $=function(s){return document.querySelector(s)};
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+
+/* ---------- 里程碑模板（Y=考研年份，初试约在 Y-1 年 12 月末；全部为常规节奏预估） ---------- */
+/* when: [yOff, m, d, m2?, d2?] —— yOff:-1 表示落在 Y-1 年；范围用后两个数 */
+var TEMPLATE=[
+ {nm:'招生简章与考试大纲发布',d:'各校 7-9 月陆续发布；公共课大纲一般 9 月中旬。锁定院校、核对招生人数与考试科目有无变动。',
+  when:[-1,7,1,-1,9,30],
+  ck:['锁定 1 主 1 备目标院校','通读招生简章正文（尤其报考条件）','下载公共课考试大纲','核对考试科目与参考书目变动']},
+ {nm:'网上预报名',d:'预报名与正式报名等效；信息可在正式报名期修改。',
+  when:[-1,9,24,-1,9,27],
+  ck:['学信网账号实名注册','完成考生信息填写','核对学籍学历校验结果']},
+ {nm:'网上正式报名',d:'研招网报名，逾期不补。报名号务必保存。',
+  when:[-1,10,1,-1,10,25],
+  ck:['填报招生单位与报考点','生成并保存报名号','缴纳报名费','截图/下载报名信息表']},
+ {nm:'网上确认 / 现场确认',d:'各省时间和方式不同，以省级考试院公告为准；确认通过才算报名成功。',
+  when:[-1,11,1,-1,11,10],
+  ck:['查省级考试院确认公告','上传身份证与照片','上传学历/户籍材料','确认审核通过状态']},
+ {nm:'打印准考证',d:'研招网开放下载后尽早打印，多备几份并存电子版。',
+  when:[-1,12,10,-1,12,22],
+  ck:['打印准考证 ×3 + 存电子版','核对考点与考场信息','预订考点附近住宿','规划考试两日交通']},
+ {nm:'初试',d:'一般在 12 月倒数第二个周末（预估），具体以准考证为准。',
+  when:[-1,12,26,-1,12,27],
+  ck:['身份证 + 准考证','按考点规定准备文具','前一晚睡眠优先，不再刷新题','提前一天踩点']},
+ {nm:'初试成绩公布',d:'次年 2 月下旬出分，各省先后不一；对成绩有疑义抓紧复核窗口。',
+  when:[0,2,20,0,2,28],
+  ck:['查分并截图留存','需要时申请成绩复核','对照往年复试线估算位置']},
+ {nm:'国家线与院校线',d:'国家线 3 月中旬左右；34 所自划线更早。线出即定复试/调剂两条路。',
+  when:[0,3,10,0,3,20],
+  ck:['关注国家线与目标院校线','高于往年线：全力备复试','低于往年线：启动调剂信息收集']},
+ {nm:'复试与调剂',d:'3 月下旬至 4 月，各校复试密集；调剂系统开放时间短，志愿要提前想好。',
+  when:[0,3,20,0,4,30],
+  ck:['中英文自我介绍打磨','专业课笔试范围复习','至少 2 次模拟面试','了解调剂系统填报策略']},
+ {nm:'拟录取与录取通知',d:'拟录取名单公示后走政审/调档流程，通知书 5-6 月寄出。',
+  when:[0,5,1,0,6,30],
+  ck:['关注拟录取名单公示','按通知提交政审/调档材料','保持联系方式畅通']},
+ {nm:'报到入学',d:'9 月初报到。材料齐全、档案到位，研究生生活开始。',
+  when:[0,9,1,0,9,10],
+  ck:['按通知书清单备齐材料','档案/户口迁移','按规定完成体检']}
+];
+
+function load(){
+  try{ var o=JSON.parse(localStorage.getItem(KEY)); if(o&&typeof o==='object'&&o.checks) return o; }catch(e){}
+  return {year:0,checks:{}};
+}
+function save(){ try{ localStorage.setItem(KEY,JSON.stringify(S)); }catch(e){} }
+var S=load();
+
+function fmt(Y,w){ // w:[yOff,m,d] → 'YYYY-MM-DD'
+  var y=Y+(w[0]||0);
+  return y+'-'+String(w[1]).padStart(2,'0')+'-'+String(w[2]).padStart(2,'0');
+}
+function toDate(Y,w){ return new Date(fmt(Y,w)+'T00:00:00'); }
+function dayDiff(a,b){ return Math.round((a-b)/86400000); }
+function today0(){ var t=new Date(); t.setHours(0,0,0,0); return t; }
+
+/* ---------- 年份 ---------- */
+function examYearList(){
+  var y=new Date().getFullYear();
+  // 初试落在 12 月：今年 12 月末及以后的初试 → 考研年份 = y+1
+  var arr=[];
+  var base=(today0()<=toDate(y+1,[-1,12,27]))?y+1:y+2;
+  for(var k=0;k<3;k++) arr.push(base+k);
+  return arr;
+}
+var YEARS=examYearList();
+if(YEARS.indexOf(S.year)<0) S.year=YEARS[0];
+
+function ckKey(mi,ci){ return S.year+':'+mi+':'+ci; }
+
+/* ---------- 渲染 ---------- */
+function renderYears(){
+  var box=$('#years'); box.innerHTML='';
+  YEARS.forEach(function(y){
+    var b=document.createElement('button');
+    b.className='ypill'+(y===S.year?' on':''); b.type='button';
+    b.innerHTML=y+' <small>考研</small>';
+    b.onclick=function(){ S.year=y; save(); renderAll(); };
+    box.appendChild(b);
+  });
+}
+function renderTimeline(){
+  var Y=S.year, t=today0();
+  var tl=$('#tl'); tl.innerHTML='';
+  var totalCk=0, doneCk=0, stageNm='--';
+  var activeList=[];
+  TEMPLATE.forEach(function(ms,mi){
+    // when 为 6 元范围：[yOff,m,d,yOff2,m2,d2]；3 元单日则首尾同日
+    var w6=ms.when.length>=6;
+    var s=toDate(Y,[ms.when[0],ms.when[1],ms.when[2]]);
+    var e=w6?toDate(Y,[ms.when[3],ms.when[4],ms.when[5]]):s;
+    var st = e<t ? 'past' : (t<=e&&t>=s ? 'active' : 'future');
+    if(st==='active') activeList.push(ms.nm);
+    var rangeStr = ms.when.length>=6 ? (fmt(Y,[ms.when[0],ms.when[1],ms.when[2]])+' ~ '+fmt(Y,[ms.when[3],ms.when[4],ms.when[5]])) : fmt(Y,[ms.when[0],ms.when[1],ms.when[2]]);
+    var dLeft=dayDiff(s,t);
+    var badge = st==='past' ? '<span class="badge past">已过</span>'
+              : st==='active' ? '<span class="badge active">进行中</span>'
+              : '<span class="badge future">'+(dLeft>0?'还有 '+dLeft+' 天':'即将开始')+'</span>';
+
+    var el=document.createElement('div');
+    el.className='ms '+st; el.id='ms'+mi;
+    var head='<div class="ms-h"><span class="nm">'+(mi+1)+'. '+esc(ms.nm)+'</span>'+badge+
+             '<span class="dt">'+rangeStr+'</span><span class="arrow">▶</span></div>';
+    var body='<div class="ms-b"><div class="d">'+esc(ms.d)+'</div>';
+    ms.ck.forEach(function(item,ci){
+      var on=!!S.checks[ckKey(mi,ci)];
+      if(st!=='past'){ totalCk++; if(on) doneCk++; }
+      body+='<label class="ck'+(on?' done':'')+'"><input type="checkbox" data-mi="'+mi+'" data-ci="'+ci+'"'+(on?' checked':'')+'><span>'+esc(item)+'</span></label>';
+    });
+    body+='<div class="ckp">勾选进度会自动保存在本机。</div></div>';
+    el.innerHTML=head+body;
+    el.querySelector('.ms-h').onclick=function(){ el.classList.toggle('open'); };
+    tl.appendChild(el);
+  });
+  if(activeList.length) stageNm=activeList.join(' + ');
+  else{
+    for(var mi=0;mi<TEMPLATE.length;mi++){
+      var w=TEMPLATE[mi].when;
+      var s2=toDate(Y,[w[0],w[1],w[2]]);
+      if(dayDiff(s2,t)>0){ stageNm='等待：'+TEMPLATE[mi].nm; break; }
+    }
+    if(stageNm==='--') stageNm='全部节点已过';
+  }
+  $('#stStage').textContent=stageNm;
+  $('#stCk').textContent=totalCk?Math.round(doneCk/totalCk*100)+'%':'--';
+  tl.addEventListener('change',function(ev){
+    var inp=ev.target;
+    if(inp.tagName!=='INPUT') return;
+    var mi=inp.getAttribute('data-mi'), ci=inp.getAttribute('data-ci');
+    if(inp.checked) S.checks[ckKey(mi,ci)]=1; else delete S.checks[ckKey(mi,ci)];
+    save();
+    inp.parentNode.classList.toggle('done',inp.checked);
+    renderStats();
+  });
+}
+function renderStats(){
+  var Y=S.year, t=today0();
+  var exam=toDate(Y,[-1,12,26]);
+  var d=dayDiff(exam,t);
+  $('#stExam').textContent = d>0 ? d : (d===0?'今天！':'已考');
+  var totalCk=0, doneCk=0;
+  TEMPLATE.forEach(function(ms,mi){
+    var w=ms.when, s=toDate(Y,[w[0],w[1],w[2]]);
+    var e=w.length>=6?toDate(Y,[w[3],w[4],w[5]]):s;
+    var past=e<t;
+    ms.ck.forEach(function(item,ci){
+      if(past) return;
+      totalCk++; if(S.checks[ckKey(mi,ci)]) doneCk++;
+    });
+  });
+  $('#stCk').textContent=totalCk?Math.round(doneCk/totalCk*100)+'%':'--';
+}
+function renderAll(){
+  $('#stExam').textContent='--'; $('#stStage').textContent='--'; $('#stCk').textContent='--';
+  renderYears(); renderTimeline(); renderStats();
+}
+
+/* ---------- 高度上报（主站 iframe 自适应） ---------- */
+function reportH(){
+  var h=Math.max(document.documentElement.scrollHeight,document.body.scrollHeight);
+  try{ parent.postMessage({__wbResize:true,id:'kyMileFrame',h:h},'*') }catch(e){}
+}
+if(window.ResizeObserver){ new ResizeObserver(reportH).observe(document.body); }
+window.addEventListener('load',reportH);
+setTimeout(reportH,400);
+
+renderAll();
+})();
+</script>
+</body>
+</html>

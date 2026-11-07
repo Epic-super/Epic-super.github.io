@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<!-- 网安擂台 · SRC 平台 × 竞赛情报 × 90 天挖洞计划 × Bandit 角落
+     单文件 HTML 子应用（零外链），数据走自身 localStorage（wb_cyber_90d_v1）。
+     ⚠️ 三条铁律常驻：只测授权范围 / 只读验证 / 漏洞细节不出平台。 -->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" type="image/png" href="../../assets/pwa/icon-192.png"><!-- 2026-11-06 全站补 rel="icon"：本页此前未声明，浏览器回落请求站点根 /favicon.ico 报 404（控制台红色噪音、标签页无图标）；与 2026-10-03 对 index/zk-ky/share-hub 的处理同一策略 -->
+<title>网安擂台 · SRC × 竞赛 × 90 天挖洞计划</title>
+
+<script>
+/* 主题跟随主站（同 anime.html 模式） */
+(function(){
+  function stored(){
+    try{
+      var raw=localStorage.getItem('wb_store');
+      if(raw){var o=JSON.parse(raw); if(o&&o.data&&o.data.theme) return o.data.theme;}
+    }catch(e){}
+    try{ var l=localStorage.getItem('wb_hub_theme'); if(l) return l; }catch(e){}
+    return 'auto';
+  }
+  function mq(){ return window.matchMedia('(prefers-color-scheme: dark)'); }
+  function apply(m){
+    var dark=mq().matches;
+    var act=(m==='dark'||m==='light')?m:(dark?'dark':'light');
+    document.documentElement.setAttribute('data-theme',act);
+  }
+  apply(stored());
+  window.addEventListener('storage',function(e){
+    if(e.key==='wb_store'||e.key==='wb_hub_theme') apply(stored());
+  });
+  try{ mq().addEventListener('change',function(){ if(stored()==='auto') apply('auto'); }); }catch(e){}
+})();
+</script>
+
+<link rel="canonical" href="https://epic-super.github.io/lab/products/cyber-hub.html">
+<meta name="description" content="网安擂台：SRC 平台矩阵（补天/漏洞盒子/TSRC/ASRC/Intigriti）、近几年网安竞赛情报、90 天挖洞执行计划（可打卡）与 OverTheWire Bandit 预备课。">
+<style>
+:root{
+  --bg:#0b0d12; --panel:#141821; --panel2:#1b2130; --line:#262d40; --line2:#333c55;
+  --txt:#e9edf5; --sub:#8b94a8; --red:#ff6b6b; --amber:#f0b429; --green:#3ecf8e; --blue:#5b8cff; --violet:#a78bfa; --cyan:#2dd4bf;
+  --r:16px; --r-sm:11px; --r-f:999px;
+  --sh:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.22);
+  --ease:cubic-bezier(.32,.72,0,1); --tf:.16s var(--ease);
+}
+html[data-theme="light"]{
+  --bg:#f6f7fa; --panel:#ffffff; --panel2:#eef0f6; --line:#e0e4ee; --line2:#cbd2e2;
+  --txt:#1c2233; --sub:#5b6377; --red:#d64545; --amber:#8a6608; --green:#0f7d50; --blue:#3966d8; --violet:#7557d4; --cyan:#0d9488;
+  --sh:0 1px 3px rgba(20,24,40,.06),0 6px 16px rgba(20,24,40,.07);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","HarmonyOS Sans SC","Microsoft YaHei",sans-serif;
+  background:var(--bg);color:var(--txt);font-size:15px;line-height:1.65;
+  padding-bottom:calc(28px + env(safe-area-inset-bottom));-webkit-font-smoothing:antialiased}
+button,input,select{font-family:inherit;font-size:15px;color:inherit}
+button{cursor:pointer;border:none;background:none}
+button:focus-visible,input:focus-visible{outline:2px solid var(--amber);outline-offset:2px;border-radius:6px}
+a{color:var(--cyan)}
+.wrap{max-width:1020px;margin:0 auto;padding:0 14px}
+
+.top{position:relative;color:#fff;padding:20px 0 16px;padding-top:calc(20px + env(safe-area-inset-top));
+  background:
+    radial-gradient(110% 150% at 8% -20%,rgba(255,107,107,.22),rgba(255,107,107,0) 48%),
+    radial-gradient(90% 130% at 94% 0%,rgba(91,140,255,.35),rgba(91,140,255,0) 58%),
+    linear-gradient(134deg,#141821 0%,#1c2340 55%,#241630 120%);
+  box-shadow:0 1px 0 rgba(255,255,255,.08) inset,0 6px 22px rgba(8,10,20,.3);overflow:hidden}
+.top::after{content:'';position:absolute;left:0;right:0;bottom:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,107,107,.5),transparent)}
+.brand h1{margin:0;font-size:21px;font-weight:800;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.brand p{margin:5px 0 0;font-size:12.5px;opacity:.88}
+/* 铁律常驻 */
+.law{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap}
+.law span{font-size:12px;font-weight:800;color:#ffd0d0;background:rgba(255,107,107,.14);border:1px solid rgba(255,107,107,.45);border-radius:var(--r-f);padding:6px 12px}
+.law span i{font-style:normal;margin-right:4px}
+
+.tabs{display:flex;gap:8px;margin:16px 0 0;flex-wrap:wrap}
+.tab{padding:9px 16px;border-radius:var(--r-f);border:1.5px solid var(--line2);background:var(--panel);color:var(--sub);font-weight:800;font-size:13.5px;transition:all var(--tf)}
+.tab.on{border-color:var(--amber);background:linear-gradient(135deg,rgba(240,180,41,.15),rgba(240,180,41,.04));color:var(--amber)}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px;box-shadow:var(--sh);margin:14px 0}
+.card h2{margin:0 0 4px;font-size:15.5px;font-weight:800;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.card .desc{color:var(--sub);font-size:12.5px;margin:0 0 12px}
+.viewpane{display:none}
+.viewpane.on{display:block;animation:fin .25s var(--ease)}
+@keyframes fin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* 平台卡 */
+.plat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:11px}
+@media (max-width:720px){.plat-grid{grid-template-columns:1fr}}
+.plat{background:var(--panel2);border:1px solid var(--line);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:7px;position:relative}
+.plat::before{content:'';position:absolute;left:0;top:12px;bottom:12px;width:3px;border-radius:3px;background:var(--green)}
+.plat.locked::before{background:var(--violet)}
+.plat .tt{font-size:14.5px;font-weight:800;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.plat .dd{font-size:12.5px;color:var(--sub);line-height:1.6}
+.plat .acts{display:flex;gap:7px;flex-wrap:wrap}
+.mini{font-size:12px;font-weight:700;padding:6px 12px;border-radius:var(--r-f);border:1px solid var(--line2);background:var(--panel);color:var(--txt);text-decoration:none;transition:all var(--tf)}
+.mini:hover{border-color:var(--amber);color:var(--amber)}
+.badge{font-size:10.5px;font-weight:800;padding:2px 9px;border-radius:var(--r-f);border:1px solid}
+.b-ok{color:var(--green);border-color:var(--green);background:rgba(62,207,142,.1)}
+.b-next{color:var(--violet);border-color:var(--violet);background:rgba(167,139,250,.1)}
+.b-cn{color:var(--blue);border-color:var(--blue);background:rgba(91,140,255,.08)}
+.path{margin-top:12px;background:var(--panel2);border:1px dashed var(--line2);border-radius:var(--r-sm);padding:11px 14px;font-size:12.5px;color:var(--sub)}
+.path b{color:var(--txt)}
+
+/* 竞赛表 */
+.filters{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px}
+.fchip{font-size:12px;font-weight:700;padding:5px 12px;border-radius:var(--r-f);border:1px solid var(--line2);background:var(--panel2);color:var(--sub)}
+.fchip.on{border-color:var(--amber);color:var(--amber);background:rgba(240,180,41,.1)}
+.ev{display:flex;gap:10px;align-items:flex-start;padding:11px 2px;border-top:1px solid var(--line)}
+.ev:first-child{border-top:none}
+.ev .ic{font-size:20px;flex:none;width:30px;text-align:center}
+.ev .grow{flex:1;min-width:0}
+.ev .tt{font-size:13.5px;font-weight:800;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.ev .dd{font-size:12px;color:var(--sub);margin-top:2px}
+.ev .when{font-size:11.5px;color:var(--amber);font-weight:700;white-space:nowrap}
+.stars{color:var(--amber);font-size:11px;letter-spacing:1px}
+
+/* 90 天计划 */
+.prog-head{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.prog-head b{font-size:15px}
+.daypill{font-size:12px;font-weight:800;color:var(--amber);background:rgba(240,180,41,.12);border:1px solid var(--amber);border-radius:var(--r-f);padding:4px 12px}
+.prog{height:8px;border-radius:var(--r-f);background:var(--panel2);border:1px solid var(--line);overflow:hidden;margin-top:9px}
+.prog i{display:block;height:100%;background:linear-gradient(90deg,var(--green),var(--amber));transition:width .3s var(--ease)}
+.week{border:1px solid var(--line);border-radius:var(--r-sm);background:var(--panel2);margin-bottom:9px;overflow:hidden}
+.week-h{display:flex;align-items:center;gap:9px;padding:11px 13px;cursor:pointer;user-select:none}
+.week-h:hover{background:rgba(255,255,255,.03)}
+.week-h .wn{font-size:12px;font-weight:800;color:var(--amber);background:rgba(240,180,41,.1);border:1px solid rgba(240,180,41,.4);border-radius:var(--r-f);padding:2px 10px;white-space:nowrap}
+.week-h .wt{font-size:13.5px;font-weight:800;flex:1;min-width:0}
+.week-h .wd{font-size:11px;color:var(--sub);white-space:nowrap}
+.week-h .arrow{color:var(--sub);transition:transform var(--tf)}
+.week.open .week-h .arrow{transform:rotate(90deg)}
+.week-b{display:none;padding:2px 13px 12px;border-top:1px solid var(--line)}
+.week.open .week-b{display:block}
+.deliver{font-size:12.5px;color:var(--txt);background:rgba(62,207,142,.08);border:1px solid rgba(62,207,143,.3);border-radius:var(--r-sm);padding:8px 11px;margin:9px 0}
+.deliver b2{color:var(--green);font-weight:800}
+.dayrow{display:flex;gap:9px;align-items:flex-start;padding:7px 0;border-top:1px dashed var(--line)}
+.dayrow:first-child{border-top:none}
+.dayrow .dno{font-size:11px;font-weight:800;color:var(--sub);background:var(--panel);border:1px solid var(--line2);border-radius:var(--r-f);padding:1px 8px;white-space:nowrap;margin-top:2px}
+.dayrow .dt{font-size:12.5px;flex:1;min-width:0}
+.dayrow .dt b{color:var(--txt)}
+.chk{width:17px;height:17px;accent-color:var(--green);margin-top:3px;flex:none;cursor:pointer}
+.ms-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px}
+@media (max-width:680px){.ms-grid{grid-template-columns:1fr}}
+.ms{display:flex;gap:9px;align-items:center;background:var(--panel2);border:1px solid var(--line);border-radius:var(--r-sm);padding:9px 12px;cursor:pointer}
+.ms.done{border-color:var(--green);background:rgba(62,207,142,.08)}
+.ms .md{font-size:10.5px;color:var(--sub);font-weight:800;white-space:nowrap}
+.ms .mt{font-size:12.5px;font-weight:700;flex:1}
+.ms.done .mt{color:var(--green);text-decoration:line-through}
+.tpl{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:8px}
+@media (max-width:640px){.tpl{grid-template-columns:1fr}}
+.tpl .ti{background:var(--panel2);border:1px solid var(--line);border-radius:var(--r-sm);padding:10px 12px;text-align:center}
+.tpl .ti b{font-size:15px;color:var(--amber)}
+.tpl .ti small{display:block;color:var(--sub);font-size:11.5px;margin-top:2px}
+
+/* Bandit */
+.term{background:#0a0e14;border:1px solid var(--line2);border-radius:var(--r-sm);padding:13px 15px;font-family:Consolas,Menlo,monospace;font-size:13px;color:#c9e3b4;position:relative;overflow-x:auto}
+html[data-theme="light"] .term{background:#101622;color:#c9e3b4}
+.term .cm{color:#5b6b85}
+.copybtn{position:absolute;right:8px;top:8px;font-size:11px;font-weight:800;color:var(--cyan);border:1px solid var(--cyan);border-radius:var(--r-f);padding:3px 10px;background:rgba(45,212,191,.08)}
+.lvl{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin-top:10px}
+@media (max-width:640px){.lvl{grid-template-columns:1fr}}
+.lvl .li{background:var(--panel2);border:1px solid var(--line);border-radius:var(--r-sm);padding:10px 12px}
+.lvl .li b{font-size:12.5px;color:var(--cyan)}
+.lvl .li p{margin:4px 0 0;font-size:12px;color:var(--sub)}
+.rule{display:flex;gap:9px;align-items:flex-start;background:var(--panel2);border:1px solid var(--line);border-radius:var(--r-sm);padding:10px 12px;margin-bottom:8px}
+.rule .no{font-size:13px;font-weight:800;color:var(--amber);flex:none}
+.rule p{margin:0;font-size:12.5px;color:var(--sub)}
+details.hintbox{border:1px solid var(--line);border-radius:var(--r-sm);background:var(--panel2);padding:0;margin-top:12px}
+details.hintbox summary{cursor:pointer;font-weight:800;font-size:13px;padding:11px 13px;user-select:none;list-style:none}
+details.hintbox summary::before{content:'▸ ';color:var(--amber)}
+details.hintbox[open] summary::before{content:'▾ '}
+details.hintbox .hb{padding:2px 13px 12px}
+details.hintbox .hb p{margin:6px 0;font-size:12.5px;color:var(--sub)}
+details.hintbox .hb b{color:var(--cyan);font-weight:700}
+
+footer.foot{color:var(--sub);font-size:11.5px;text-align:center;margin-top:18px}
+#toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--panel);color:var(--txt);border:1px solid var(--line2);border-radius:var(--r-f);padding:9px 18px;font-size:13px;font-weight:700;box-shadow:var(--sh);opacity:0;pointer-events:none;transition:all .25s var(--ease);z-index:99}
+#toast.show{opacity:1;transform:translateX(-50%)}
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <div class="brand">
+      <h1>🥊 网安擂台 <span style="font-size:12px;font-weight:600;opacity:.8">SRC × 竞赛 × 90 天挖洞计划</span></h1>
+      <p>FelixVec 的 90 天挖洞作战室：平台、竞赛、计划、训练场，四个入口一页打通。</p>
+    </div>
+    <div class="law">
+      <span><i>⛔</i>铁律一 · 只测授权范围</span>
+      <span><i>👀</i>铁律二 · 只读验证，见数据即停</span>
+      <span><i>🔒</i>铁律三 · 漏洞细节不出平台</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="tabs">
+    <button class="tab on" data-v="plat">🏪 平台矩阵</button>
+    <button class="tab" data-v="events">🏆 竞赛情报</button>
+    <button class="tab" data-v="plan">📅 90 天计划</button>
+    <button class="tab" data-v="bandit">🎮 Bandit 角落</button>
+    <button class="tab" data-v="res">🧰 靶场资源</button>
+  </div>
+
+  <!-- 平台矩阵 -->
+  <section class="card viewpane on" id="vp-plat">
+    <h2>🏪 SRC / 众测平台矩阵</h2>
+    <p class="desc">挖洞的「考场」就这五个。先国内练手，攒够作品集再上英文场。</p>
+    <div class="plat-grid" id="platGrid"></div>
+    <div class="path">🧭 <b>推荐路径</b>：<b>补天</b>（已实名，先挖第一单）→ <b>漏洞盒子</b>（同规则多平台同步试）→ <b>TSRC / ASRC</b>（大厂 SRC，简历含金量）→ <b>Intigriti</b>（英文场，竞争小单价高，W+1 启用）。90 天内不贪多：主攻一个，其余注册占位。</div>
+  </section>
+
+  <!-- 竞赛情报 -->
+  <section class="card viewpane" id="vp-events">
+    <h2>🏆 网安竞赛情报 · 近几年常驻赛事</h2>
+    <p class="desc">国内外的年度常驻赛事整理（★ 越多越适合新手）。具体日期每年浮动，以官网与 CTFtime 为准；数据整理于 2026-10。</p>
+    <div class="filters" id="evFilters">
+      <button class="fchip on" data-f="all">全部</button>
+      <button class="fchip" data-f="ctf">CTF 解题</button>
+      <button class="fchip" data-f="bug">众测 / 挖洞</button>
+      <button class="fchip" data-f="conf">大会 / 峰会</button>
+      <button class="fchip" data-f="newbie">只看新手友好</button>
+    </div>
+    <div id="evList"></div>
+    <div class="path">📡 <b>怎么追新</b>：<a href="https://ctftime.org" target="_blank" rel="noopener">CTFtime</a>（全球 CTF 日历）+ 各 SRC 公众号 / 补天&漏洞盒子活动页——「周年庆」「双11 活动」期间经常有翻倍赏金，是新手捡漏窗口。</div>
+  </section>
+
+  <!-- 90 天计划 -->
+  <section class="card viewpane" id="vp-plan">
+    <h2>📅 挖洞 90 天执行计划</h2>
+    <div class="prog-head">
+      <b>2026-10-26 → 2027-01-23</b>
+      <span class="daypill" id="dayPill">第 — 天 / 90</span>
+    </div>
+    <div class="prog"><i id="dayProg" style="width:0%"></i></div>
+    <p class="desc" style="margin-top:10px">每日 2 小时可拆 2×60min；<b>断了当天不补，用周日补；连续断 3 天 = 这周作废重来</b>。点周卡展开逐日任务，勾里程碑自动记忆（本机 wb_cyber_90d_v1）。</p>
+
+    <div class="tpl">
+      <div class="ti"><b>40 min</b><small>📖 学：文档/教程，边看边记</small></div>
+      <div class="ti"><b>60 min</b><small>⌨️ 练：靶场/抓包，必须动手</small></div>
+      <div class="ti"><b>20 min</b><small>✍️ 写：笔记 / writeup 片段</small></div>
+    </div>
+
+    <h2 style="margin-top:16px;font-size:14px">🎯 里程碑（13 个，点击打勾）</h2>
+    <div class="ms-grid" id="msGrid"></div>
+
+    <h2 style="margin-top:16px;font-size:14px">🗓 13 周总表</h2>
+    <div id="weekList" style="margin-top:8px"></div>
+
+    <h2 style="margin-top:16px;font-size:14px">🔁 每周日复盘三问（写进周记）</h2>
+    <p class="desc" style="margin-bottom:0">① 这周我产出了什么<b>可验证</b>的东西？（不是"学了什么"）② 哪一步卡住了？卡在知识、工具还是心态？ ③ 下周要<b>砍掉</b>什么？（每周必须砍掉一件事）</p>
+    <div style="margin-top:12px"><button class="mini" id="resetPlan">♻️ 重置全部勾选</button></div>
+  </section>
+
+  <!-- Bandit -->
+  <section class="card viewpane" id="vp-bandit">
+    <h2>🎮 OverTheWire Bandit · 第 0 周预备课</h2>
+    <p class="desc">免费、免注册的 Linux 命令行闯关：真服务器、真 SSH、34 关。它解决「你在终端里不慌」，和 DVWA（Web 漏洞）不重叠，都要做。</p>
+    <div class="term" id="sshTerm">
+      <button class="copybtn" id="copySsh">复制</button>
+      ssh bandit0@bandit.labs.overthewire.org -p 2220<br>
+      <span class="cm"># 密码：bandit0（输入时屏幕不显示字符，敲完直接回车）</span><br>
+      <span class="cm"># 进去后：</span>ls → cat readme <span class="cm">→ 拿到第 1 关密码，ssh bandit1@… 继续</span>
+    </div>
+    <div class="lvl">
+      <div class="li"><b>0–10 关 · 手感</b><p>ls / cat / file / find / grep、管道、隐藏文件、特殊文件名（-、空格）——看日志翻目录全靠这段</p></div>
+      <div class="li"><b>11–20 关 · 编解码</b><p>base64 / tr / sort uniq / xxd——payload 编码绕过的地基</p></div>
+      <div class="li"><b>21–27 关 · 系统</b><p>cron 定时任务、权限位、SUID——理解「为什么这个文件能以别人身份运行」</p></div>
+      <div class="li"><b>28–34 关 · 进阶</b><p>git、ssh 密钥、端口转发——GitHub 侦察 / 内网穿透的前置</p></div>
+    </div>
+    <h2 style="margin-top:14px;font-size:14px">📏 三条玩法规则（比通关速度重要）</h2>
+    <div class="rule"><span class="no">①</span><p>卡住先自己试 <b>15 分钟</b>再看提示——这 15 分钟才是学习发生的地方。</p></div>
+    <div class="rule"><span class="no">②</span><p>必须用 <b>man 命令</b>查用法（man ls / man find / man grep）。读手册是这辈子最值钱的技能之一。</p></div>
+    <div class="rule"><span class="no">③</span><p><b>别抄 writeup 通关</b>——抄完什么都不会。卡了再对照下面的速查（只给方向不给答案）。</p></div>
+    <details class="hintbox">
+      <summary>🔑 Bandit 0–14 思路速查（卡住再看 · 只给方向）</summary>
+      <div class="hb">
+        <p><b>L0</b> 连上就 cat readme。<b>L1</b> 文件名是 <b>-</b>：用 ./- 或 cat &lt;。-<br>
+        <b>L2</b> 文件名有空格：引号或转义。<b>L3</b> 进目录找<b>隐藏文件</b>（ls -a）。<br>
+        <b>L4</b> 一堆文件里找<b>人类可读</b>的那个：file 命令逐个判。<br>
+        <b>L5</b> 按属性筛：<b>可读 + 1033 字节 + 非 ASCII</b>，find 带三个条件。<br>
+        <b>L6</b> 全盘 find：user/group/size 三条件，2&gt;/dev/null 忽略报错。<br>
+        <b>L7</b> 百万词表里找 <b>millionth 旁边</b>的密码：grep + 相邻行。<br>
+        <b>L8</b> 唯一出现一次的行：sort | uniq -u。<br>
+        <b>L9</b> 二进制里 "= 前面多个 ="：strings + grep。<br>
+        <b>L10</b> base64 -d。<b>L11</b> ROT13：tr 'A-Za-z' 'N-ZA-Mn-za-m'。<br>
+        <b>L12</b> 反复压缩（gzip/bzip2/tar/xxd 还原）：file 判断每一层。<br>
+        <b>L13</b> 拿到 ssh 私钥：chmod 600 后 ssh -i 登下一关。<br>
+        <b>L14</b> 用 nc/ncat 把密码送到本机端口。<br>
+        <b>提示：</b>每关密码都在上一关的输出里——学会把一条命令的输出喂给下一条。</p>
+      </div>
+    </details>
+    <div class="path">🎯 <b>定位</b>：对应 90 天计划的 W0 预备课——建议 4 小时通关前 10 关，再进 W1 的 DVWA。</div>
+  </section>
+
+  <!-- 靶场资源 -->
+  <section class="card viewpane" id="vp-res">
+    <h2>🧰 免费靶场与资源（不用买课）</h2>
+    <div class="plat-grid">
+      <div class="plat"><div class="tt">PortSwigger Web Security Academy <span class="badge b-ok">首选</span></div><div class="dd">全世界最好的免费 Web 安全靶场，有进度记录。W3 起主战场。</div><div class="acts"><a class="mini" href="https://portswigger.net/web-security" target="_blank" rel="noopener">进入 ↗</a></div></div>
+      <div class="plat"><div class="tt">DVWA / pikachu / Juice Shop</div><div class="dd">本地靶场三件套，练手工；W2 的 DVWA Low 全程禁自动化工具。</div><div class="acts"><a class="mini" href="https://github.com/digininja/DVWA" target="_blank" rel="noopener">DVWA ↗</a><a class="mini" href="https://owasp.org/www-project-juice-shop/" target="_blank" rel="noopener">Juice Shop ↗</a></div></div>
+      <div class="plat"><div class="tt">补天新人须知 + 漏洞评级标准</div><div class="dd">规则红线 + 什么算钱；W1 D6 必读，评级表抄成一张卡。</div><div class="acts"><a class="mini" href="https://www.butian.net/newneed" target="_blank" rel="noopener">新人须知 ↗</a></div></div>
+      <div class="plat"><div class="tt">OWASP WSTG 中文版</div><div class="dd">测试项 checklist，实战时当清单用，防漏测。</div><div class="acts"><a class="mini" href="https://owasp.org/www-project-web-security-testing-guide/" target="_blank" rel="noopener">进入 ↗</a></div></div>
+      <div class="plat"><div class="tt">若依 ruoyi / mall 开源系统</div><div class="dd">本地部署练越权（W4-W6 主战场），权限矩阵就在这两套上画。</div><div class="acts"><a class="mini" href="https://github.com/yangzongzhuan/RuoYi" target="_blank" rel="noopener">RuoYi ↗</a><a class="mini" href="https://github.com/macrozheng/mall" target="_blank" rel="noopener">mall ↗</a></div></div>
+      <div class="plat"><div class="tt">crt.sh / fofa 免费额度</div><div class="dd">资产梳理（只用公开数据，不主动扫描）；W7 选目标时用。</div><div class="acts"><a class="mini" href="https://crt.sh/" target="_blank" rel="noopener">crt.sh ↗</a><a class="mini" href="https://fofa.info/" target="_blank" rel="noopener">fofa ↗</a></div></div>
+    </div>
+    <div class="path" style="margin-top:12px">🚫 <b>不要买的</b>：任何「包就业」「包月入过万」的课。免费的 PortSwigger + 靶场 + 平台规则，已经覆盖前 90 天需要的一切。</div>
+  </section>
+
+  <footer class="foot">网安擂台 ｜ 计划勾选存本机（wb_cyber_90d_v1）｜ 一次越界，89 天归零 —— 铁律永远在页首</footer>
+</div>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+'use strict';
+var $=function(s){return document.querySelector(s)};
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function toast(m){var t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(toast._h);toast._h=setTimeout(function(){t.classList.remove('show')},2200)}
+
+/* ---------------- 视图切换 ---------------- */
+document.querySelectorAll('.tab').forEach(function(t){
+  t.onclick=function(){
+    document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('on')});
+    t.classList.add('on');
+    document.querySelectorAll('.viewpane').forEach(function(x){x.classList.remove('on')});
+    var vp=$('#vp-'+t.getAttribute('data-v'));if(vp)vp.classList.add('on');
+    reportH();
+  };
+});
+
+/* ---------------- 平台矩阵 ---------------- */
+var PLATS=[
+  {n:'补天',ic:'🛡',u:'https://www.butian.net/',tags:['b-ok|已实名 ✓','b-cn|国内众测'],
+   dd:'国内最大众测平台之一。先读「新人须知」+ 评级标准；项目页的测试范围写了哪些域名就只测哪些。90 天主战场，第一单从这里来。'},
+  {n:'漏洞盒子',ic:'📦',u:'https://www.vulbox.com/',tags:['b-cn|国内平台'],
+   dd:'Vulbox 漏洞平台，厂商覆盖与补天互补。W1 注册占位，同一份报告可按各平台规则分别投递（注意独家要求）。'},
+  {n:'TSRC · 腾讯',ic:'🐧',u:'https://security.tencent.com/',tags:['b-cn|大厂 SRC'],
+   dd:'腾讯安全应急响应中心。大厂流程规范、评级透明，通过记录是简历硬通货；先读历史公开报告学写法。'},
+  {n:'ASRC · 阿里',ic:'🔧',u:'https://security.alibaba.com/',tags:['b-cn|大厂 SRC'],
+   dd:'阿里安全应急响应中心。活动期（双11/云栖）常有加赏，新手从低危信息类入手熟悉流程。'},
+  {n:'Intigriti',ic:'🌍',u:'https://www.intigriti.com/',tags:['b-next|W+1 启用','b-ok|新手友好'],
+   dd:'欧洲众测平台，英文报告、竞争小、单价高、对新手最友好（官方还有 Hacker in Residence 计划）。90 天后第二阶段的主场，值得投入。'}
+];
+$('#platGrid').innerHTML=PLATS.map(function(p){
+  return '<div class="plat'+(p.tags.some(function(t){return t.indexOf('b-next')===0})?' locked':'')+'">'+
+    '<div class="tt">'+p.ic+' '+esc(p.n)+' '+p.tags.map(function(t){var a=t.split('|');return '<span class="badge '+a[0]+'">'+a[1]+'</span>'}).join(' ')+'</div>'+
+    '<div class="dd">'+esc(p.dd)+'</div>'+
+    '<div class="acts"><a class="mini" href="'+p.u+'" target="_blank" rel="noopener">进入平台 ↗</a></div></div>';
+}).join('');
+
+/* ---------------- 竞赛情报 ---------------- */
+var EVENTS=[
+  {n:'全国大学生信息安全竞赛（CISCN）',t:'ctf',ic:'🎓',when:'每年 5–8 月',s:5,u:'https://www.ciscn.cn/',
+   dd:'大学生网安国赛，从初赛答题到现场攻防；环境新、题目教学性好，在校生身份黄金窗口。'},
+  {n:'强网杯',t:'ctf',ic:'⚔️',when:'近年多为 5–6 月线上赛',s:3,u:'https://www.qiangwangbei.com/',
+   dd:'国家级高规格 CTF，强网先锋题适合练手；决赛攻防激烈，围观 writeup 也是学习。'},
+  {n:'网鼎杯',t:'ctf',ic:'鼎',when:'约两年一届（2018/2020/2022/2024…）',s:3,u:'https://www.wangdingcup.com/',
+   dd:'规模最大的国家级网络安全赛事之一，白组赛道对在校/从业者开放。'},
+  {n:'西湖论剑 · 数字安全大会',t:'conf',ic:'🌊',when:'每年上半年（杭州）',s:4,u:'https://www.swestcon.com/',
+   dd:'大会 + 附带赛事与人才活动，杭州周边参加成本低，适合见行业、投简历。'},
+  {n:'数字中国创新大赛 · 网络安全赛道',t:'ctf',ic:'🔔',when:'每年 3–5 月',s:4,u:'https://dcf.idcd.com/',
+   dd:'数字中国建设峰会配套赛道，有学生组，题量友好。'},
+  {n:'picoCTF',t:'ctf',ic:'🧩',when:'每年 3 月左右（CMU 主办）',s:5,u:'https://picoctf.org/',
+   dd:'卡内基梅隆官方新手 CTF，全球最 recommended 的入门赛——完全零基础也能做几十题。'},
+  {n:'DEF CON CTF（Quals）',t:'ctf',ic:'🇺🇸',when:'资格赛约每年 5 月，总决赛 8 月拉斯维加斯',s:2,u:'https://ctftime.org/event/list',
+   dd:'CTF 奥林匹克；新手以围观 + 赛后 writeup 为主，目标是知道天花板在哪。'},
+  {n:'Google CTF',t:'ctf',ic:'🔍',when:'每年 6–8 月（含新手组 Beginners Bay）',s:3,u:'https://google.github.io/ctf/',
+   dd:'题目质量顶级；赛后官方放出全部源码与题解，是最好的免费教材之一。'},
+  {n:'Hack The Box Business CTF',t:'ctf',ic:'🎁',when:'每年 7 月前后',s:3,u:'https://www.hackthebox.com/',
+   dd:'HTB 年度企业级攻防赛；平时 HTB Free Tier 靶机也足够日常练手。'},
+  {n:'Sekai CTF',t:'ctf',ic:'🌏',when:'每年 8 月前后',s:2,u:'https://ctftime.org/',
+   dd:'新加坡 ORGANIZERS 主办的国际赛，近年题目风向标；赛后 writeup 质量高。'},
+  {n:'看雪 SDC / KCon / ISC 大会',t:'conf',ic:'🎤',when:'看雪 5–6 月 · KCon 8 月 · ISC 7–8 月',s:4,u:'https://www.kanxue.com/',
+   dd:'国内三大行业会议，议题/展台/招聘三合一；按需选一家线下参加。'},
+  {n:'补天 / 漏洞盒子平台活动',t:'bug',ic:'💰',when:'周年庆（补天约 9 月）+ 节日加赏不定期',s:5,u:'https://www.butian.net/',
+   dd:'加赏期挖常规漏洞性价比最高——同一份报告，奖金可能翻倍。盯紧平台公告。'},
+  {n:'各厂商 SRC 日常众测（腾讯/阿里/字节等）',t:'bug',ic:'🏢',when:'全年常驻',s:4,u:'https://security.tencent.com/',
+   dd:'没有赛事门槛，随时能交报告；把 W8-W10 的三次提交分布到大厂 SRC 攒记录。'},
+  {n:'Hackfest / XDCTF 等高校与社区赛',t:'ctf',ic:'🎒',when:'全年分散（盯 CTFtime）',s:4,u:'https://ctftime.org/event/list',
+   dd:'小规模 CTF 适合练节奏：周末 48 小时，专挑 Web/ Misc 题做两道即达标。'}
+];
+var evF='all';
+function renderEvents(){
+  var box=$('#evList');box.innerHTML='';
+  var list=EVENTS.filter(function(e){
+    if(evF==='all')return true;
+    if(evF==='newbie')return e.s>=4;
+    return e.t===evF;
+  });
+  if(!list.length){box.innerHTML='<div class="emptytip" style="padding:20px;text-align:center;color:var(--sub);font-size:13px">暂无条目</div>';return}
+  list.forEach(function(e){
+    var d=document.createElement('div');d.className='ev';
+    d.innerHTML='<span class="ic">'+e.ic+'</span><div class="grow"><div class="tt">'+esc(e.n)+
+      '<span class="stars">'+'★'.repeat(e.s)+'☆'.repeat(5-e.s)+'</span></div>'+
+      '<div class="dd">'+esc(e.dd)+'</div></div>'+
+      '<span class="when">'+esc(e.when)+'<br><a href="'+e.u+'" target="_blank" rel="noopener">官网 ↗</a></span>';
+    box.appendChild(d);
+  });
+}
+document.querySelectorAll('#evFilters .fchip').forEach(function(c){
+  c.onclick=function(){
+    document.querySelectorAll('#evFilters .fchip').forEach(function(x){x.classList.remove('on')});
+    c.classList.add('on');evF=c.getAttribute('data-f');renderEvents();
+  };
+});
+renderEvents();
+
+/* ---------------- 90 天计划 ---------------- */
+var KEY='wb_cyber_90d_v1';
+var S={ms:{},wk:{}};
+try{var raw=localStorage.getItem(KEY);if(raw){var o=JSON.parse(raw);S.ms=o.ms||{};S.wk=o.wk||{}}}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){toast('保存失败')}}
+
+var START=new Date('2026-10-26T00:00:00'),END=new Date('2027-01-23T00:00:00');
+function dayNo(){
+  var now=new Date();now.setHours(0,0,0,0);
+  var d=Math.round((now-START)/86400000)+1;
+  return Math.max(1,Math.min(90,d));
+}
+function renderDay(){
+  var d=dayNo();
+  $('#dayPill').textContent='第 '+d+' 天 / 90'+(d>=90?' · 冲线':'');
+  $('#dayProg').style.width=Math.round(d/90*100)+'%';
+}
+var MILESTONES=[
+  ['11/01','环境齐 + 4 个平台账号齐'],
+  ['11/08','徒手打穿 DVWA Low 五类漏洞'],
+  ['11/15','PortSwigger 完成 15 个 lab'],
+  ['11/22','画出第一张权限矩阵'],
+  ['11/29','本地找到 2 个越权'],
+  ['12/06','两份报告达到「陌生人可复现」'],
+  ['12/13','选定第一个补天项目 + 测试计划'],
+  ['12/20','第一次实战（有无命中都算完成）'],
+  ['12/27','⭐ 第一份正式提交'],
+  ['01/03','累计 3 份提交'],
+  ['01/10','App 抓包跑通'],
+  ['01/17','⭐ 作品集上线'],
+  ['01/24','90 天复盘完成']
+];
+function renderMs(){
+  var box=$('#msGrid');box.innerHTML='';
+  MILESTONES.forEach(function(m,i){
+    var d=document.createElement('div');d.className='ms'+(S.ms[i]?' done':'');
+    d.innerHTML='<input type="checkbox" class="chk" '+(S.ms[i]?'checked':'')+'><span class="md">'+m[0]+'</span><span class="mt">'+esc(m[1])+'</span>';
+    d.onclick=function(){S.ms[i]=!S.ms[i];if(!S.ms[i])delete S.ms[i];save();renderMs()};
+    box.appendChild(d);
+  });
+}
+/* 周数据：w=周号 d=日期 t=主题 dl=周末交付 days=逐日（可选） */
+var WEEKS=[
+  {w:'W1',d:'10/26–11/01',t:'环境与地基',
+   dl:'DVWA 跑起来 + 3 篇笔记 + 4 个平台账号',
+   days:[
+    ['D1','装 <b>Burp Suite Community</b> + Firefox FoxyProxy；配好 8080 代理，能抓本机流量并成功改包'],
+    ['D2','Docker/phpstudy 起 <b>DVWA</b>（或 pikachu）；localhost/dvwa 能登录 admin/password'],
+    ['D3','学 HTTP：方法、状态码（2xx/3xx/4xx/5xx 各记 3 个）、常见头、Cookie vs Session'],
+    ['D4','学同源策略 + CORS：为什么跨域被拦、ACAO 怎么判、* 意味着什么'],
+    ['D5','Burp 四件套练熟：Proxy 拦截、Repeater 重放、Intruder 基础爆破、Decoder 编解码'],
+    ['D6','读补天「新人须知」+ 评级标准，低/中/高/严重各抄 3 例成表'],
+    ['D7','注册漏洞盒子、TSRC、ASRC；GitHub 建 felixvec profile README；写第一篇周记']],
+   ac:'能在 Repeater 里改一个参数让页面返回不同结果 → 懂了「请求可编程」'},
+  {w:'W2',d:'11/02–11/08',t:'DVWA Low 手工打穿（禁脚本）',
+   dl:'5 类漏洞手工复现 + 5 篇 writeup',
+   days:[
+    ['D8','SQL 注入：原理、union 与报错注入；手工拿到库名、表名、user()'],
+    ['D9','反射型 / 存储型 XSS 区别；弹 alert(1)，再试 img onerror'],
+    ['D10','文件包含 / 目录遍历：读到 /etc/passwd（只读到就停）'],
+    ['D11','命令注入：127.0.0.1; whoami'],
+    ['D12','文件上传绕过基础：传一个 php 到本地靶场并访问'],
+    ['D13','补做 CSRF、暴力破解各一遍'],
+    ['D14','复盘：5 篇 writeup 贴 GitHub（脱敏：只写本地靶场）']],
+   ac:'不看教程徒手复现 5 类，各用一句话说出防御方案'},
+  {w:'W3',d:'11/09–11/15',t:'Medium/High 绕过 + PortSwigger 入门',
+   dl:'3 篇绕过笔记 + PortSwigger 3 个 topic',
+   days:[
+    ['D15','DVWA Medium：SQLi 绕过（注释、编码、大小写）'],
+    ['D16','DVWA Medium：XSS 绕过（属性闭合、事件标签）'],
+    ['D17','DVWA High 挑 2 个手工打；理解白名单 vs 黑名单'],
+    ['D18','PortSwigger SQL injection 前 5 个 lab'],
+    ['D19','PortSwigger XSS 前 5 个 lab'],
+    ['D20','PortSwigger CSRF 全部 lab'],
+    ['D21','复盘写《绕过手法清单》：双写、编码、大小写、注释、截断、换行']],
+   ac:'PortSwigger 完成 ≥ 15 个 lab（平台记进度，截图留证）'},
+  {w:'W4',d:'11/16–11/22',t:'越权专项一：把权限模型画出来',
+   dl:'一张「用户-功能-资源」权限矩阵',
+   days:[
+    ['D22','学概念：水平/垂直越权、IDOR、功能级授权缺失、租户越权'],
+    ['D23','本地部署若依 ruoyi 或 OWASP Juice Shop 或 mall'],
+    ['D24','双账号登录，F12 Network 列出所有接口，导出 URL 清单'],
+    ['D25','画权限矩阵：行=接口，列=角色（游客/普通/管理员）'],
+    ['D26','标出「应该只有管理员能访问但普通用户也能」的格'],
+    ['D27','标出「应该只有资源所有者能访问」的接口（带 id/userId/orderId）'],
+    ['D28','产出《权限矩阵.md》+ 候选越权点清单（≥10 个）']],
+   ac:'对着矩阵说清 10 个可疑点为什么可疑'},
+  {w:'W5',d:'11/23–11/29',t:'越权专项二：手工找洞（双账号法）',
+   dl:'本地找到 2 个越权 + 完整请求响应',
+   days:[
+    ['D29','A 账号 token 请求 B 账号资源，逐次记录响应'],
+    ['D30','试「删参数 / 加参数」两类手法（role=admin / isAdmin=true）'],
+    ['D31','试「换方法 / 换 Content-Type」两类手法'],
+    ['D32','低权限 token 打管理接口'],
+    ['D33','命中点用最小请求复现，抓完整请求+响应'],
+    ['D34','写报告 1（水平越权）'],
+    ['D35','写报告 2（垂直越权）']],
+   ac:'2 个真实命中，证据链完整（请求+响应+危害说明）'},
+  {w:'W6',d:'11/30–12/06',t:'越权专项三：把报告写成能过审的样子',
+   dl:'2 份可提交质量报告',
+   days:[
+    ['D36','学「危害升级」写法：数据量、敏感度、可否批量、是否需登录'],
+    ['D37','按报告模板重写两份报告，对照补天评级自评'],
+    ['D38','学「被判忽略」六大原因：重复/无危害/不可复现/超范围/仅理论/公开信息'],
+    ['D39','找一篇公开 writeup 逐句分析结构'],
+    ['D40','让 AI 挑毛病：「这份报告哪里会被判忽略？」再改'],
+    ['D41','定稿 2 份报告，存 reports/ 目录'],
+    ['D42','复盘：这 6 周到底会不会挖洞了？诚实打分']],
+   ac:'报告达到「陌生人照着能复现」的程度'},
+  {w:'W7',d:'12/07–12/13',t:'选定第一个实战目标',
+   dl:'资产清单 + 测试计划',
+   days:[
+    ['D43','补天项目大厅按赏金排序挑 1 个：范围明确 / 低危给钱 / 截止 ≥7 天 / Web 为主'],
+    ['D44','项目规则逐条抄下来（禁止项、可测域名、是否允许扫描）'],
+    ['D45','子域梳理：crt.sh、fofa 免费查询，不主动扫'],
+    ['D46','指纹识别：框架、登录口、swagger/actuator 泄露'],
+    ['D47','列「入口清单」：登录/注册/找回密码/上传/搜索/导出/分享/API'],
+    ['D48','写《测试计划.md》：测什么、怎么测、什么绝不做'],
+    ['D49','把测试计划发给 AI 看，砍掉风险动作']],
+   ac:'一份能说服自己「全部在授权范围内」的计划'},
+  {w:'W8',d:'12/14–12/20',t:'第一次实战（只做只读）',
+   dl:'至少 1 条可提交发现（0 命中换项目也算完成）',
+   days:[
+    ['D50-54','每天挑 2 个入口，手工过一遍六种手法：未授权访问 / IDOR / 信息泄露 / 目录遍历（只看文件名）/ 默认口令（仅试 3 个）'],
+    ['D55','整理可疑点，标注证据强度'],
+    ['D56','0 命中 → 换项目（正常，不是失败）；≥1 命中 → 写报告']],
+   ac:'心态：新人第一周零命中是常态——通常是入口挑错，不是你不行'},
+  {w:'W9',d:'12/21–12/27',t:'提交第一份报告',
+   dl:'⭐ 第一次正式提交（无论成败）',
+   days:[
+    ['D57','按模板写报告 + 提交前自查 10 条'],
+    ['D58','提交：漏洞类型、等级自评、影响资产、复现步骤'],
+    ['D59','等审核，同时看第二个项目'],
+    ['D60-61','被打回/忽略 → 对照原因判断是「我错了」还是「它确实不算」；被判重复 → 记下热点以后避开'],
+    ['D62','继续第二个项目只读测试'],
+    ['D63','周复盘：记录这份提交的完整生命周期']],
+   ac:'⭐ 走完一次「提交 → 审核 → 反馈」——这比拿到钱重要'},
+  {w:'W10',d:'12/28–01/03',t:'二三轮提交 + 建立数据表',
+   dl:'累计 3 份提交 + 提交记录表',
+   days:[
+    ['D64-69','每天推进：新项目测试 / 旧报告补证据 / 学一个新知识点'],
+    ['D70','建《提交记录表》：日期｜项目｜漏洞类型｜自评等级｜结果｜被判原因｜耗时']],
+   ac:'累计 3 份提交'},
+  {w:'W11',d:'01/04–01/10',t:'App 端入门（第二条路）',
+   dl:'1 篇 App 抓包笔记',
+   days:[
+    ['D71','安卓模拟器（夜神/MuMu）+ 导入 Burp CA 证书'],
+    ['D72','抓一个 App 登录流量；遇到 SSL Pinning 记下来'],
+    ['D73','Frida 基础，跑通最简单的 hook'],
+    ['D74','用自己的两个账号做一次接口越权测试（只碰自己的数据）'],
+    ['D75','学 App 常见漏洞：接口无鉴权、硬编码密钥、日志泄露、组件导出'],
+    ['D76','写《App 抓包与绕过笔记》'],
+    ['D77','复盘：更适合 Web 还是 App？']],
+   ac:'App 抓包链路跑通'},
+  {w:'W12',d:'01/11–01/17',t:'作品集（这周决定能不能找到工作）',
+   dl:'⭐ GitHub 作品集 + 1 篇长文',
+   days:[
+    ['D78','GitHub profile README 定稿（补天/H1 链接、方向、联系方式）'],
+    ['D79','5 篇 writeup 脱敏整理进 writeups/'],
+    ['D80','长文《越权漏洞的系统化挖掘方法》（本地靶场+公开案例）'],
+    ['D81','发到先知社区 / FreeBuf / 知乎任一'],
+    ['D82','建 tools/ 目录整理常用请求与脚本'],
+    ['D83','简历初稿：作品放第一屏，学历放最后'],
+    ['D84','找 2 个初级安全岗 JD，逐条对照缺什么']],
+   ac:'⭐ 作品集上线'},
+  {w:'W5x',d:'01/18–01/24',t:'复盘定方向',label:'W13',
+   dl:'90 天总结 + 下季度方向',
+   days:[
+    ['D85','统计：提交数 / 有效数 / 奖金 / 总耗时 / 每小时收益'],
+    ['D86','诚实回答：这 90 天产出了什么「可验证的东西」？'],
+    ['D87','下一阶段只选一个方向：继续越权 / SSRF / 代码审计 / App'],
+    ['D88','写 90 天总结（GitHub Issue 或博客）'],
+    ['D89-90','休息。然后开下一季计划']],
+   ac:'90 天复盘完成——「有作品、走通过流程、知道边界在哪」'}
+];
+function renderWeeks(){
+  var box=$('#weekList');box.innerHTML='';
+  WEEKS.forEach(function(w,idx){
+    var open=!!S.wk[idx];
+    var el=document.createElement('div');el.className='week'+(open?' open':'');
+    var label=w.label||w.w;
+    var daysHtml=(w.days||[]).map(function(d){
+      return '<div class="dayrow"><span class="dno">'+d[0]+'</span><div class="dt">'+d[1]+'</div></div>';
+    }).join('');
+    el.innerHTML='<div class="week-h" data-i="'+idx+'"><span class="wn">'+label+'</span><span class="wt">'+esc(w.t)+'</span><span class="wd">'+w.d+'</span><span class="arrow">▶</span></div>'+
+      '<div class="week-b">'+(w.days?daysHtml:'')+
+      '<div class="deliver"><b2>周末交付</b2> · '+esc(w.dl)+'</div>'+
+      '<div class="deliver" style="background:rgba(91,140,255,.07);border-color:rgba(91,140,255,.3)"><b2 style="color:var(--blue)">验收</b2> · '+esc(w.ac)+'</div>'+
+      '<p style="margin:9px 0 0;font-size:11.5px;color:var(--sub)">🔁 周日复盘三问：可验证产出？卡点（知识/工具/心态）？砍掉什么？</p></div>';
+    el.querySelector('.week-h').onclick=function(){S.wk[idx]=!S.wk[idx];save();renderWeeks()};
+    box.appendChild(el);
+  });
+}
+$('#resetPlan').onclick=function(){
+  if(!confirm('重置全部里程碑勾选与周展开状态？'))return;
+  S={ms:{},wk:{}};save();renderMs();renderWeeks();toast('已重置');
+};
+renderDay();renderMs();renderWeeks();
+
+/* Bandit SSH 复制 */
+$('#copySsh').onclick=function(){
+  var cmd='ssh bandit0@bandit.labs.overthewire.org -p 2220';
+  function done(){toast('已复制：打开 PowerShell 粘贴回车，密码 bandit0')}
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(cmd).then(done).catch(function(){fallback()})}
+  else fallback();
+  function fallback(){
+    var ta=document.createElement('textarea');ta.value=cmd;document.body.appendChild(ta);
+    ta.select();try{document.execCommand('copy');done()}catch(e){toast('复制失败，请手动选择')}
+    ta.remove();
+  }
+};
+
+function reportH(){
+  var h=Math.max(document.documentElement.scrollHeight,document.body.scrollHeight);
+  try{parent.postMessage({__wbResize:true,id:'cyberFrame',h:h},'*')}catch(e){}
+}
+if(window.ResizeObserver){new ResizeObserver(reportH).observe(document.body)}
+window.addEventListener('load',reportH);
+setTimeout(reportH,400);
+})();
+</script>
+</body>
+</html>

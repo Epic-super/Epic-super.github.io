@@ -1,0 +1,301 @@
+:root {
+  --bg-color: rgb(21, 21, 21);
+  --container-bg: rgb(21, 21, 21);
+  --text-color: #93a1a1;
+  --highlight-color: #b58900; /* Solarized Yellow */
+  --blue: #268bd2;
+  --green: #859900;
+  --red: #dc322f;
+}
+
+body {
+  margin: 0;
+  font-family: "Inter", sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+.hidden {
+  display: none !important;
+}
+
+#game-wrapper {
+  width: 100%;
+  height: 100vh;
+  max-width: 500px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Intro and End Screens */
+.fullscreen-overlay {
+  position: absolute;
+  top: 25vh;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--bg-color);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  cursor: pointer;
+  z-index: 100;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.fullscreen-overlay.hidden {
+  display: none;
+}
+
+.title {
+  font-family: "Sixtyfour", sans-serif;
+  font-size: 4.0rem;
+  color: var(--highlight-color);
+  margin: 0;
+  margin-bottom: 0.5em;
+}
+
+.subtitle {
+  font-size: 1.2rem;
+  margin: 10px 0 40px 0;
+}
+
+.cta {
+  font-size: 1rem;
+  font-weight: bold;
+  color: var(--text-color);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Main Game UI */
+#game-ui {
+  width: 100%;
+  padding: 20px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+#game-ui.hidden {
+  display: none;
+}
+
+#top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1.5rem;
+  font-weight: bold;
+  padding: 0 10px;
+}
+
+#timer {
+  cursor: pointer;
+}
+
+#score-display {
+  color: var(--green);
+}
+
+#figures-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+}
+
+.figure-container {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background-color: var(--container-bg);
+  border-radius: 12px;
+  border: 3px solid transparent;
+  cursor: pointer;
+  overflow: hidden;
+  opacity: 0; /* Start invisible */
+  transform: scale(0.8); /* Start slightly smaller */
+  transition:
+    opacity 0.3s ease-out,
+    transform 0.3s ease-out;
+}
+
+.figure-container.visible {
+  opacity: 1; /* This class will make the container fade in */
+  transform: scale(1);
+}
+
+canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+#pause-overlay {
+  justify-content: center;
+  align-items: center;
+  font-size: 2rem;
+  font-weight: bold;
+  color: var(--text-color);
+  text-align: center;
+}
+
+@keyframes shake {
+  10%,
+  90% {
+    transform: scale(1) translate3d(-2px, 0, 0);
+  }
+  20%,
+  80% {
+    transform: scale(1) translate3d(4px, 0, 0);
+  }
+  30%,
+  50%,
+  70% {
+    transform: scale(1) translate3d(-12px, 0, 0);
+  }
+  40%,
+  60% {
+    transform: scale(1) translate3d(12px, 0, 0);
+  }
+}
+
+.shake {
+  animation: shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+.mode-selection {
+  display: flex;
+  justify-content: center;
+  gap: 15px; /* Adds space between the buttons */
+  margin: 20px 0;
+  flex-wrap: wrap; /* Allows buttons to wrap on smaller screens */
+}
+
+/* Base style for all new buttons */
+.mode-selection button,
+#n-back-controls button {
+  background-color: var(--highlight-color);
+  color: var(--bg-color);
+  border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-family: "Inter", sans-serif;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.1s ease;
+}
+
+.mode-selection button:hover,
+#n-back-controls button:hover {
+  transform: scale(1.05);
+}
+
+/* Container for the N-Back level selector */
+.n-level-selector {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.n-level-selector label {
+  font-size: 0.9rem;
+}
+
+.n-level-selector input {
+  width: 40px;
+  background-color: var(--container-bg);
+  border: 1px solid var(--text-color);
+  color: var(--text-color);
+  text-align: center;
+  font-size: 1rem;
+  border-radius: 5px;
+}
+
+/* N-Back specific layout */
+#n-back-game {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  height: 100%;
+}
+
+#n-back-container {
+  width: 70%; /* Makes the single figure larger */
+  max-width: 350px;
+  position: relative;
+}
+
+#n-back-seeding-overlay {
+  background-color: rgba(21, 21, 21, 0.8);
+  color: var(--highlight-color);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.5rem;
+  font-weight: bold;
+  border-radius: 12px;
+  z-index: 5;
+}
+
+#n-back-controls {
+  display: flex;
+  gap: 20px;
+  width: 100%;
+  justify-content: center;
+}
+
+/* For the response timer progress bar */
+#response-timer-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 8px;
+  width: 100%;
+  background-color: var(--highlight-color);
+  border-radius: 0.5em;
+  transform-origin: left;
+  transform: scaleX(1);
+}
+
+@keyframes correct-pulse {
+  0% {
+    transform: scale(1);
+    border-color: var(--green);
+  }
+  50% {
+    transform: scale(1.05);
+    border-color: var(--green);
+  }
+  100% {
+    transform: scale(1);
+    border-color: transparent;
+  }
+}
+
+.correct-match {
+  animation: correct-pulse 0.5s ease-in-out;
+}

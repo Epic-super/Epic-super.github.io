@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="../assets/pwa/icon-192.png"><!-- 2026-11-06 全站补 rel="icon"：本页此前未声明，浏览器回落请求站点根 /favicon.ico 报 404（控制台红色噪音、标签页无图标）；与 2026-10-03 对 index/zk-ky/share-hub 的处理同一策略 -->
+    <title>联系我 - 小待的个人藏宝库</title>
+
+<link rel="canonical" href="https://epic-super.github.io/me/contact.html">
+<meta name="description" content="联系我 - 小待的个人藏宝库">
+    <link rel="stylesheet" href="css/style.css">
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+    <main>
+        <section id="contact-form" class="section reveal">
+            <h2>联系我</h2>
+            <p class="desc">如果你有任何问题、建议或合作意向，欢迎通过以下方式联系我，或者直接填写下面的表单。</p>
+
+            <div class="contact-info">
+                <p><strong>邮箱：</strong> <a href="mailto:contact@example.com">contact@example.com</a></p>
+                <p><strong>GitHub：</strong> <a href="https://github.com/Epic-super" target="_blank" rel="noopener">github.com/Epic-super</a></p>
+                <p><strong>LinkedIn：</strong> <span class="todo-note">待补充 LinkedIn 主页链接与用户名</span> (可选)</p>
+            </div>
+
+            <!-- 表单当前使用 mailto 方式提交（点击后打开邮件客户端）。
+                 如需接入后端或第三方表单服务（如 Formspree），把 action 替换为对应地址即可。 -->
+            <form action="mailto:contact@example.com" method="post" enctype="text/plain">
+                <div>
+                    <label for="name">姓名：</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                <div>
+                    <label for="email">邮箱：</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div>
+                    <label for="subject">主题：</label>
+                    <input type="text" id="subject" name="subject" required>
+                </div>
+                <div>
+                    <label for="message">内容：</label>
+                    <textarea id="message" name="message" rows="5" required></textarea>
+                </div>
+                <button type="submit">发送消息</button>
+            </form>
+        </section>
+    </main>
+
+    <script src="js/script.js"></script>
+    <script src="js/motion.js"></script>
+    <script src="js/components.js"></script>
+</body>
+</html>

@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<!-- 数学每日一题 · 高数/线代/概率轮换题库 | 单文件 HTML 子应用（零外链），数据走自身 localStorage（wb_mathdaily_v1）
+     玩法：按本地日期从 42 题轮换题库取"今日一题"，四选一作答 → 判定 + 解析；连击按连续完成天数计，
+     支持补做昨日；另有"加练一题"随机模式（不计入连击）。题库为按考纲自撰的选择题。 -->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" type="image/png" href="../../assets/pwa/icon-192.png"><!-- 2026-11-06 全站补 rel="icon"：本页此前未声明，浏览器回落请求站点根 /favicon.ico 报 404（控制台红色噪音、标签页无图标）；与 2026-10-03 对 index/zk-ky/share-hub 的处理同一策略 -->
+<title>数学每日一题 · 高数线代概率轮换训练</title>
+
+<script>
+/* 主题跟随主站（同 anime.html 模式）：读 wb_store.data.theme（老版 wb_hub_theme），auto 跟随系统 */
+(function(){
+  function stored(){
+    try{
+      var raw=localStorage.getItem('wb_store');
+      if(raw){var o=JSON.parse(raw); if(o&&o.data&&o.data.theme) return o.data.theme;}
+    }catch(e){}
+    try{ var l=localStorage.getItem('wb_hub_theme'); if(l) return l; }catch(e){}
+    return 'auto';
+  }
+  function mq(){ return window.matchMedia('(prefers-color-scheme: dark)'); }
+  function apply(m){
+    var dark=mq().matches;
+    var act=(m==='dark'||m==='light')?m:(dark?'dark':'light');
+    document.documentElement.setAttribute('data-theme',act);
+  }
+  apply(stored());
+  window.addEventListener('storage',function(e){
+    if(e.key==='wb_store'||e.key==='wb_hub_theme') apply(stored());
+  });
+  try{ mq().addEventListener('change',function(){ if(stored()==='auto') apply('auto'); }); }catch(e){}
+})();
+</script>
+
+<link rel="canonical" href="https://epic-super.github.io/lab/products/math-daily.html">
+<meta name="description" content="数学每日一题：高数/线代/概率按日轮换的选择题训练，连击打卡、答案解析、14 天完成度一览。">
+<style>
+:root{
+  --bg:#0f1519; --panel:#17222a; --panel2:#1e2c36; --line:#28394a; --line2:#374d63;
+  --txt:#e8f0f4; --sub:#8da3b0; --blue:#38bdf8; --teal:#2dd4bf; --orange:#fbbf24;
+  --green:#34d399; --red:#f87171; --purple:#a78bfa;
+  --r:16px; --r-sm:11px; --r-f:999px;
+  --sh:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.22);
+  --ease:cubic-bezier(.32,.72,0,1); --tf:.16s var(--ease);
+}
+html[data-theme="light"]{
+  --bg:#f4f9fb; --panel:#ffffff; --panel2:#eaf2f6; --line:#dce8ee; --line2:#c3d5e0;
+  --txt:#17303d; --sub:#536a79; --blue:#0284c7; --teal:#0c857a; --orange:#b45309;
+  --green:#12945f; --red:#dc4b4b; --purple:#7c5cd6;
+  --sh:0 1px 3px rgba(20,40,60,.06),0 6px 16px rgba(20,40,60,.07);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","HarmonyOS Sans SC","Microsoft YaHei",sans-serif;
+  background:var(--bg);color:var(--txt);font-size:15px;line-height:1.65;
+  padding-bottom:calc(28px + env(safe-area-inset-bottom));
+  -webkit-font-smoothing:antialiased;
+}
+button,input,select,textarea{font-family:inherit;font-size:15px;color:inherit}
+button{cursor:pointer;border:none;background:none}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--blue);outline-offset:2px;border-radius:6px}
+.wrap{max-width:860px;margin:0 auto;padding:0 14px}
+
+.top{position:relative;color:#fff;padding:22px 0 20px;padding-top:calc(22px + env(safe-area-inset-top));
+  background:
+    radial-gradient(110% 150% at 8% -20%,rgba(45,212,191,.32),rgba(45,212,191,0) 50%),
+    radial-gradient(90% 130% at 92% 0%,rgba(56,189,248,.30),rgba(56,189,248,0) 58%),
+    linear-gradient(134deg,#0c2733 0%,#155e75 55%,#0e7490 120%);
+  box-shadow:0 1px 0 rgba(255,255,255,.08) inset,0 6px 22px rgba(6,30,40,.3);overflow:hidden}
+.top::after{content:'';position:absolute;left:0;right:0;bottom:0;height:1px;background:linear-gradient(90deg,transparent,rgba(45,212,191,.55),transparent)}
+.brand h1{margin:0;font-size:21px;font-weight:800;display:flex;align-items:center;gap:9px}
+.brand p{margin:5px 0 0;font-size:12.5px;opacity:.88}
+.stats{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}
+.stat{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:var(--r-sm);padding:6px 11px;font-size:12px;display:flex;align-items:baseline;gap:5px;color:#fff}
+.stat b{font-size:16px;font-weight:800;font-variant-numeric:tabular-nums}
+.stat.fire b{color:#b8f5e8}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:18px;box-shadow:var(--sh);margin:14px 0}
+.card h2{margin:0 0 4px;font-size:16px;font-weight:800;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.card .desc{color:var(--sub);font-size:13px;margin:0 0 12px}
+
+.subjtag{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;border-radius:var(--r-f);padding:2px 10px;letter-spacing:.5px}
+.s-g{color:var(--teal);background:rgba(45,212,191,.12);border:1px solid rgba(45,212,191,.4)}
+.s-x{color:var(--purple);background:rgba(167,139,250,.12);border:1px solid rgba(167,139,250,.4)}
+.s-l{color:var(--orange);background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.4)}
+
+.qtext{font-size:16.5px;line-height:1.9;margin:10px 0 14px;font-variant-numeric:tabular-nums}
+.qtext .lim,.qtext .int{font-family:"Times New Roman",Georgia,serif}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px}
+.opt{display:flex;align-items:flex-start;gap:9px;text-align:left;border:1px solid var(--line2);background:var(--panel2);border-radius:var(--r-sm);padding:10px 12px;font-size:14px;transition:var(--tf)}
+.opt:hover{border-color:var(--blue);transform:translateY(-1px)}
+.opt .abc{flex:0 0 auto;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;background:var(--line);color:var(--sub);margin-top:1px}
+.opt.ok{border-color:var(--green);background:rgba(52,211,153,.1)} .opt.ok .abc{background:var(--green);color:#06281c}
+.opt.bad{border-color:var(--red);background:rgba(248,113,113,.1)} .opt.bad .abc{background:var(--red);color:#2b0808}
+.opt.miss{opacity:.75}
+.fb{margin-top:12px;font-size:13.5px;min-height:20px;font-weight:700}
+.fb.good{color:var(--green)} .fb.err{color:var(--red)}
+
+.sol{margin-top:10px;background:var(--panel2);border:1px dashed var(--line2);border-radius:var(--r-sm);padding:12px 13px;font-size:13.5px;color:var(--sub)}
+.sol b{color:var(--txt);display:block;margin-bottom:4px;font-size:13px}
+
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.btn{border:1px solid var(--line2);background:var(--panel2);border-radius:var(--r-f);padding:8px 16px;font-size:13.5px;transition:var(--tf)}
+.btn:hover{border-color:var(--blue);transform:translateY(-1px)}
+.btn.pri{background:linear-gradient(135deg,var(--teal),var(--blue));border-color:transparent;color:#fff;font-weight:700}
+
+.strip{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px}
+.day{flex:1;min-width:18px;max-width:34px;aspect-ratio:1/1.25;border-radius:7px;background:var(--panel2);border:1px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:9px;color:var(--sub)}
+.day i{width:7px;height:7px;border-radius:50%;background:var(--line2)}
+.day.hit i{background:var(--green)} .day.miss i{background:var(--red)} .day.today{border-color:var(--blue)}
+.dates{display:flex;gap:4px;flex-wrap:wrap;font-size:10px;color:var(--sub);margin-top:6px}
+.legend{display:flex;gap:12px;margin-top:10px;font-size:11.5px;color:var(--sub)}
+.legend i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px}
+
+.pill{border:1px solid var(--line2);background:var(--panel2);border-radius:var(--r-f);padding:4px 12px;font-size:12px;transition:var(--tf)}
+.pill.on{border-color:var(--blue);color:var(--blue);background:rgba(56,189,248,.1)}
+.muted{color:var(--sub)}
+.empty{text-align:center;color:var(--sub);font-size:13px;padding:18px 0}
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+<div class="top">
+  <div class="wrap">
+    <div class="brand">
+      <h1>➗ 数学每日一题</h1>
+      <p>高数 · 线代 · 概率按日轮换，一天一题保持手感；连击不断，解析随做随看。</p>
+    </div>
+    <div class="stats">
+      <div class="stat fire"><b id="stStreak">0</b><span>天连击</span></div>
+      <div class="stat"><b id="stTotal">0</b><span>累计做题</span></div>
+      <div class="stat"><b id="stAcc">—</b><span>正确率</span></div>
+      <div class="stat"><b id="stToday">待做</b><span>今日状态</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="card">
+    <h2>📅 近 14 天</h2>
+    <div class="strip" id="strip"></div>
+    <div class="legend">
+      <span><i style="background:var(--green)"></i>已做</span>
+      <span><i style="background:var(--red)"></i>漏做</span>
+      <span><i style="background:var(--line2)"></i>未到/未来</span>
+      <span class="muted" style="margin-left:auto">连击按"连续完成天数"计，补做昨日可接上。</span>
+    </div>
+  </div>
+
+  <div class="card" id="mainCard">
+    <h2 id="qTitle">今日一题 <span class="subjtag" id="qSubj">—</span></h2>
+    <div class="desc" id="qDate"></div>
+    <div class="qtext" id="qText"></div>
+    <div class="opts" id="qOpts"></div>
+    <div class="fb" id="qFb"></div>
+    <div class="sol" id="qSol" style="display:none"></div>
+    <div class="row" id="qRow">
+      <button class="btn" id="btnPractice">🎲 加练一题</button>
+      <button class="btn" id="btnBack" style="display:none">← 返回今日</button>
+      <span class="muted" id="qHint" style="font-size:12px;align-self:center"></span>
+    </div>
+  </div>
+
+  <div class="card" id="catchCard" style="display:none">
+    <h2>🩹 昨日漏做</h2>
+    <div class="desc">补上昨天那一题，连击就能接上（已答则自动隐藏）。</div>
+    <button class="btn pri" id="btnCatch">补做昨日题</button>
+  </div>
+
+  <div class="card">
+    <h2>📖 玩法说明</h2>
+    <div class="desc" style="margin-bottom:0">
+      题库 42 题（高数 18 / 线代 12 / 概率 12）按"高→线→概"轮转排布，每天按本地日期推进一题，
+      42 天一循环；连击中断会清零，靠补做昨日抢救。<b>加练</b>从全库随机抽题，不计入连击与统计，
+      适合当日题不过瘾时刷手感。数据保存在本机浏览器（wb_mathdaily_v1）。
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+'use strict';
+function $(s){ return document.querySelector(s); }
+function esc(s){ return String(s).replace(/[&<>"']/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];}); }
+
+/* ---------- 题库（高数 18 / 线代 12 / 概率 12，按 考纲自撰，答案已核对） ---------- */
+var G=[
+ {q:'lim<span class="lim"> <i>x</i>→0</span> sin 3<i>x</i> / <i>x</i> = ?',o:['1','3','1/3','∞'],a:1,e:'重要极限：sin kx / x → k（x→0），这里 k=3。'},
+ {q:'f(<i>x</i>) = <i>x</i>³ − 3<i>x</i> 的单调递增区间是？',o:['(−1, 1)','(−∞, −1) ∪ (1, +∞)','(0, +∞)','(−∞, 0)'],a:1,e:'f′=3x²−3>0 ⇔ x²>1 ⇔ |x|>1。注意增区间要分开写两段。'},
+ {q:'lim<span class="lim"> <i>x</i>→∞</span> (1 + 2/<i>x</i>)<sup><i>x</i></sup> = ?',o:['e','e²','2','∞'],a:1,e:'(1+k/x)^x → e^k，本题 k=2，故极限为 e²。'},
+ {q:'ln(1+<i>x</i>) 的带佩亚诺余项二阶麦克劳林公式是？',o:['<i>x</i> + <i>x</i>²/2 + o(<i>x</i>²)','<i>x</i> − <i>x</i>²/2 + o(<i>x</i>²)','<i>x</i> − <i>x</i>² + o(<i>x</i>²)','<i>x</i> + <i>x</i>² + o(<i>x</i>²)'],a:1,e:'y′=1/(1+x)，y″=−1/(1+x)²，y″(0)=−1，故二次项为 −x²/2。'},
+ {q:'∫₀¹ <i>x</i>e<sup><i>x</i></sup> d<i>x</i> = ?',o:['e − 1','e','1','e + 1'],a:2,e:'分部积分：[x·eˣ − eˣ]₀¹ = (e−e) − (0−1) = 1。'},
+ {q:'∫₀<sup>π</sup> sin²<i>x</i> d<i>x</i> = ?',o:['π','π/2','1','2'],a:1,e:'sin²x=(1−cos2x)/2，在 [0,π] 上积得 π/2（也可用对称性）。'},
+ {q:'曲线 <i>y</i> = <i>x</i>² 在点 (1, 1) 处的切线方程是？',o:['<i>y</i> = 2<i>x</i>','<i>y</i> = 2<i>x</i> − 1','<i>y</i> = <i>x</i>','<i>y</i> = 2<i>x</i> + 1'],a:1,e:'y′=2x，切线斜率 k=2；由点斜式 y−1=2(x−1)，即 y=2x−1。'},
+ {q:'函数 <i>y</i> = <i>x</i>·e<sup>−<i>x</i></sup> 的极大值是？',o:['e⁻¹','1','e','2e'],a:0,e:'y′=e⁻ˣ(1−x)=0 得 x=1，两侧左正右负，极大值 y(1)=1/e。'},
+ {q:'设 <i>f</i> 连续，F(<i>x</i>) = ∫₀<sup><i>x</i></sup> <i>t</i>·<i>f</i>(<i>t</i>²) d<i>t</i>，则 F′(<i>x</i>) = ?',o:['<i>f</i>(<i>x</i>²)','<i>x</i>·<i>f</i>(<i>x</i>²)','<i>t</i>·<i>f</i>(<i>t</i>²)','2<i>x</i>·<i>f</i>(<i>x</i>²)'],a:1,e:'变限积分求导：把被积函数里的积分变量 t 换成上限 x 即可，得 x·f(x²)。'},
+ {q:'积分 ∫₀¹d<i>x</i> ∫₀<sup><i>x</i></sup> <i>f</i>(<i>x</i>,<i>y</i>)d<i>y</i> 交换积分次序后为？',o:['∫₀¹d<i>y</i> ∫₀<sup><i>y</i></sup> <i>f</i> d<i>x</i>','∫₀¹d<i>y</i> ∫<sub><i>y</i></sub><sup>1</sup> <i>f</i> d<i>x</i>','∫₀¹d<i>y</i> ∫<sub>1</sub><sup><i>y</i></sup> <i>f</i> d<i>x</i>','∫₀¹d<i>y</i> ∫<sub><i>y</i></sub><sup>0</sup> <i>f</i> d<i>x</i>'],a:1,e:'积分区域为 0≤y≤x≤1，先 x 后 y 时：y∈[0,1]，x 从 y 积到 1。'},
+ {q:'<i>z</i> = <i>x</i>² + <i>y</i>² 在点 (1, 1) 处的全微分 d<i>z</i> = ?',o:['d<i>x</i> + d<i>y</i>','2d<i>x</i> + 2d<i>y</i>','d<i>x</i> − d<i>y</i>','2d<i>x</i> − 2d<i>y</i>'],a:1,e:'∂z/∂x=2x=2，∂z/∂y=2y=2，故 dz=2dx+2dy。'},
+ {q:'级数 ∑<sub>n=1</sub><sup>∞</sup> n/2ⁿ 的和为？',o:['1','2','4','发散'],a:1,e:'比值判别收敛；由 ∑n·xⁿ = x/(1−x)²，取 x=1/2 得和为 2。'},
+ {q:'微分方程 <i>y</i>″ + <i>y</i> = 0 的通解是？',o:['C₁eˣ + C₂e⁻ˣ','C₁cos <i>x</i> + C₂sin <i>x</i>','C₁ + C₂<i>x</i>','eˣ(C₁cos <i>x</i> + C₂sin <i>x</i>)'],a:1,e:'特征方程 r²+1=0，特征根 r=±i（一对共轭虚根），对应余弦型通解。'},
+ {q:'lim<span class="lim"> <i>x</i>→0⁺</span> <i>x</i>·ln <i>x</i> = ?',o:['∞','1','0','−1'],a:2,e:'0·∞ 型：化为 ln x / (1/x)，洛必达得 (1/x)/(−1/x²) = −x → 0。'},
+ {q:'设 <i>y</i> = <i>f</i>(<i>u</i>) 可微，<i>u</i> = e<sup><i>x</i></sup>，则 d<i>y</i>/d<i>x</i> = ?',o:['<i>f</i>′(<i>u</i>)','<i>f</i>′(e<sup><i>x</i></sup>)','e<sup><i>x</i></sup>·<i>f</i>′(e<sup><i>x</i></sup>)','<i>f</i>′(e<sup><i>x</i></sup>)·<i>x</i>'],a:2,e:'链式法则：dy/dx = f′(u)·u′ = f′(eˣ)·eˣ，别漏乘外层导。'},
+ {q:'广义积分 ∫₁<sup>+∞</sup> d<i>x</i>/<i>x</i>² = ?',o:['发散','1','1/2','2'],a:1,e:'[−1/x]₁^{+∞} = 0 − (−1) = 1。p=2>1 收敛。'},
+ {q:'罗尔定理的结论是：存在 ξ∈(a,b)，使？',o:['<i>f</i>(ξ) = 0','<i>f</i>′(ξ) = 0','<i>f</i>″(ξ) = 0','lim<sub>ξ→a</sub> <i>f</i> = 0'],a:1,e:'三个条件（[a,b] 连续、(a,b) 可导、f(a)=f(b)）推出存在水平切线：f′(ξ)=0。'},
+ {q:'曲线 <i>y</i> = <i>x</i>³ − 3<i>x</i>² + 1 的拐点是？',o:['(0, 1)','(1, −1)','(2, −3)','(3, 1)'],a:1,e:'y″=6x−6=0 得 x=1，两侧凹凸性改变，拐点 (1, y(1)=1−3+1=−1)。'}
+];
+var X=[
+ {q:'行列式 | 1 2 ; 3 4 |（两行分别为 1,2 与 3,4）的值是？',o:['2','−2','10','−10'],a:1,e:'按对角线法则：1×4 − 2×3 = −2。'},
+ {q:'A 为 3 阶方阵，|A| = 2，则 |2A| = ?',o:['4','8','16','2'],a:2,e:'|kA| = kⁿ|A|，这里 n=3：2³×2 = 16。'},
+ {q:'A、B 均可逆，则 (AB)⁻¹ = ?',o:['A⁻¹B⁻¹','B⁻¹A⁻¹','AB','BA⁻¹'],a:1,e:'穿脱原则（反序律）：逆矩阵要"反着穿"。'},
+ {q:'矩阵 A = [1 2 3 4; 2 4 6 8; 1 1 1 1] 的秩 r(A) = ?',o:['1','2','3','4'],a:1,e:'第 2 行是第 1 行的 2 倍，划去；剩下两行不成比例，故秩为 2。'},
+ {q:'n 元齐次线性方程组 Ax = 0 有非零解的充要条件是？',o:['r(A) = n','r(A) < n','r(A) > n','|A| ≠ 0'],a:1,e:'自由未知量个数 n − r(A) > 0 时才有非零解。r(A)=n 时只有零解。'},
+ {q:'向量组 α₁=(1,0)，α₂=(0,1)，α₃=(1,1) 是？',o:['线性无关','线性相关','正交向量组','无法判断'],a:1,e:'α₃ = α₁ + α₂，能线性表出即相关；且 3 个 2 维向量必相关。'},
+ {q:'矩阵 A = [1 2; 2 1] 的特征值中较大的一个是？',o:['3','−1','2','1'],a:0,e:'|λE−A| = (λ−1)²−4 = (λ−3)(λ+1)，特征值 3 和 −1。'},
+ {q:'实对称矩阵不同特征值对应的特征向量？',o:['线性相关','相互正交','相等','成比例但不正交'],a:1,e:'实对称矩阵的重要性质：不同特征值的特征向量必正交。'},
+ {q:'二次型 f = x₁² + 4x₁x₂ + x₂² 的正负性是？',o:['正定','负定','不定','半正定'],a:2,e:'矩阵 [1 2; 2 1]：顺序主子式 1>0，行列式 1−4=−3<0，不正定也不负定 → 不定。'},
+ {q:'若 P⁻¹AP = B，则称 A 与 B ？',o:['相等','相似','合同','等价'],a:1,e:'这正是相似的定义；相似矩阵有相同的特征值（但特征向量一般不同）。'},
+ {q:'A = [1 1; 0 1]，则 A² = ?',o:['[1 2; 0 1]','[2 1; 0 2]','[1 0; 0 1]','[1 1; 0 2]'],a:0,e:'直接矩阵乘法：右上角 1×1+1×1=2，其余不变。'},
+ {q:'n 阶矩阵 A 可对角化的充要条件是？',o:['有 n 个互不相同的特征值','有 n 个线性无关的特征向量','A 是实对称矩阵','|A| ≠ 0'],a:1,e:'n 个线性无关特征向量是充要条件；"特征值互异"和"实对称"只是充分条件。'}
+];
+var L=[
+ {q:'P(A)=0.5，P(B)=0.4，A、B 相互独立，则 P(A∪B) = ?',o:['0.9','0.7','0.2','0.6'],a:1,e:'加法公式 + 独立：0.5 + 0.4 − 0.5×0.4 = 0.7。'},
+ {q:'同时掷两枚均匀硬币，至少一枚正面向上的概率是？',o:['1/2','1/3','3/4','1/4'],a:2,e:'对立事件"两枚都反面"概率 1/4，故 1 − 1/4 = 3/4。'},
+ {q:'袋中 3 红 2 白共 5 球，任取 2 个恰为 2 红的概率是？',o:['3/10','1/2','3/5','9/25'],a:0,e:'古典概型：C(3,2)/C(5,2) = 3/10。'},
+ {q:'X ~ B(5, 1/2)，则 E(X) = ?',o:['1.5','2.5','5','0.5'],a:1,e:'二项分布期望 E(X) = np = 5 × 1/2 = 2.5。'},
+ {q:'X ~ N(μ, σ²)，则 P(|X − μ| ≤ 3σ) ≈ ?',o:['0.6826','0.9544','0.9974','1'],a:2,e:'3σ 原则：一倍 0.6826、两倍 0.9544、三倍 0.9974。'},
+ {q:'P(A) = 0.3，P(B|A) = 0.5，则 P(AB) = ?',o:['0.15','0.8','0.6','0.35'],a:0,e:'乘法公式：P(AB) = P(A)·P(B|A) = 0.3 × 0.5。'},
+ {q:'A、B 互斥，P(A) = P(B) = 0.3，则 P(A∪B) = ?',o:['0.6','0.09','0.51','0.3'],a:0,e:'互斥时 P(A∪B) = P(A) + P(B) = 0.6。注意互斥不等于独立。'},
+ {q:'E(X) = 2，则 E(2X + 3) = ?',o:['4','7','10','5'],a:1,e:'期望的线性性：E(aX+b) = aE(X)+b = 2×2+3 = 7。'},
+ {q:'D(X) = 2，则 D(2X) = ?',o:['2','4','8','16'],a:2,e:'D(cX) = c²D(X) = 4 × 2 = 8。方差没有平移项，D(2X+3) 也是 8。'},
+ {q:'甲厂产量占 60%、次品率 1%；乙厂占 40%、次品率 2%。任取一件是次品的概率为？',o:['0.014','0.015','0.02','0.03'],a:0,e:'全概率公式：0.6×0.01 + 0.4×0.02 = 0.006+0.008 = 0.014。'},
+ {q:'X 与 Y 相互独立，则 Cov(X, Y) = ?',o:['1','E(X)E(Y)','0','D(X)'],a:2,e:'独立 ⇒ 协方差为 0（反之不然：Cov=0 推不出独立）。'},
+ {q:'X ~ P(λ)（泊松分布），λ = 2，则 D(X) = ?',o:['1','2','4','√2'],a:1,e:'泊松分布的期望与方差都等于 λ，故 D(X)=2。'}
+];
+/* 轮转排布：高→线→概 依次轮流，直到三列取尽；科目随条目自带，避免尾段映射错位 */
+var BANK=[];
+(function(){
+  var i,all=Math.max(G.length,Math.max(X.length,L.length));
+  for(i=0;i<all;i++){
+    if(i<G.length) BANK.push({s:'g',q:G[i].q,o:G[i].o,a:G[i].a,e:G[i].e});
+    if(i<X.length) BANK.push({s:'x',q:X[i].q,o:X[i].o,a:X[i].a,e:X[i].e});
+    if(i<L.length) BANK.push({s:'l',q:L[i].q,o:L[i].o,a:L[i].a,e:L[i].e});
+  }
+})();
+
+/* ---------- 存取 ---------- */
+var KEY='wb_mathdaily_v1';
+var S={done:{}};
+try{ var raw=localStorage.getItem(KEY); if(raw){ var o=JSON.parse(raw); if(o&&o.done) S=o; } }catch(e){}
+function save(){ try{ localStorage.setItem(KEY,JSON.stringify(S)); }catch(e){} }
+
+/* ---------- 日期工具（本地时区） ---------- */
+function dkey(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function dayNum(d){ var t=new Date(d.getFullYear(),d.getMonth(),d.getDate()); return Math.floor(t.getTime()/86400000); }
+function today(){ return new Date(); }
+function dateFromNum(n){ var t=new Date(); t=new Date(t.getFullYear(),t.getMonth(),t.getDate()); t.setDate(t.getDate()+n); return t; }
+
+/* ---------- 连击（连续完成天数；今天没做则从昨天起数） ---------- */
+function streak(){
+  var s=0,start=S.done[dkey(today())]?0:-1;
+  for(var off=start;off>-1000&&S.done[dkey(dateFromNum(off))];off--) s++;
+  return s;
+}
+
+/* ---------- 渲染 ---------- */
+var SUBJ={g:{n:'高等数学',c:'s-g'},x:{n:'线性代数',c:'s-x'},l:{n:'概率论',c:'s-l'}};
+
+var cur=null; /* {dayOffset, pick, answered} dayOffset: 0=今天, -1=昨天 */
+
+function bankFor(dayOffset){
+  var d=dateFromNum(dayOffset);
+  var idx=dayNum(d)%BANK.length;
+  return {idx:idx,d:d,b:BANK[idx]};
+}
+
+function renderStats(){
+  var done=0,ok=0;
+  for(var k in S.done){ done++; if(S.done[k].ok) ok++; }
+  $('#stStreak').textContent=streak();
+  $('#stTotal').textContent=done;
+  $('#stAcc').textContent=done?(Math.round(ok*100/done)+'%'):'—';
+  var t=S.done[dkey(today())];
+  $('#stToday').textContent=t?(t.ok?'✓对':'✗错'):'待做';
+}
+
+function renderStrip(){
+  var el=$('#strip'); el.innerHTML='';
+  /* 最早一次做题日之前的天数不算"漏做"，只显示中性色 */
+  var minOff=1;
+  for(var k in S.done){
+    var p=k.split('-');
+    var off=dayNum(new Date(+p[0],+p[1]-1,+p[2]))-dayNum(today());
+    if(off<minOff) minOff=off;
+  }
+  for(var off=-13;off<=0;off++){
+    var d=dateFromNum(off);
+    var rec=S.done[dkey(d)];
+    var cls='day'+(off===0?' today':'');
+    if(rec) cls+=rec.ok?' hit':' miss';
+    else if(off<0&&off>=minOff) cls+=' miss';
+    var div=document.createElement('div');
+    div.className=cls;
+    div.title=dkey(d)+(rec?(rec.ok?' · 答对':' · 答错'):' · 未做');
+    div.innerHTML='<span>'+d.getDate()+'</span><i></i>';
+    el.appendChild(div);
+  }
+}
+
+function renderQuestion(){
+  if(!cur) return;
+  var info;
+  if(cur.practice){
+    if(cur.practiceIdx==null){
+      var tIdx=dayNum(today())%BANK.length,r;
+      do{ r=Math.floor(Math.random()*BANK.length); }while(r===tIdx&&BANK.length>1);
+      cur.practiceIdx=r;
+    }
+    info={idx:cur.practiceIdx,d:null,b:BANK[cur.practiceIdx]};
+  }else{
+    info=bankFor(cur.dayOffset);
+  }
+  cur.info=info;
+  var rec=cur.practice?null:S.done[dkey(info.d)];
+  var answered=rec||cur.answered;
+  $('#qTitle').innerHTML=(cur.practice?'加练一题':(cur.dayOffset===0?'今日一题':'昨日补做'))+
+    ' <span class="subjtag '+SUBJ[info.b.s].c+'">'+SUBJ[info.b.s].n+'</span>'+
+    '<span class="muted" style="font-size:12px;font-weight:400;margin-left:auto">第 '+(info.idx+1)+' / '+BANK.length+' 题</span>';
+  $('#qDate').textContent=cur.practice?'随机抽题 · 不计入连击与正确率':(dkey(info.d)+' · 四选一，答完即出解析');
+  $('#qText').innerHTML='Q. '+info.b.q;
+  var box=$('#qOpts'); box.innerHTML='';
+  var letters=['A','B','C','D'];
+  info.b.o.forEach(function(t,i){
+    var b=document.createElement('button');
+    b.className='opt';
+    b.innerHTML='<span class="abc">'+letters[i]+'</span><span>'+t+'</span>';
+    b.onclick=function(){ answer(i); };
+    box.appendChild(b);
+  });
+  $('#qFb').textContent=''; $('#qFb').className='fb';
+  var sol=$('#qSol');
+  if(answered){
+    var pick=rec?rec.pick:cur.pick;
+    var okAns=rec?rec.ok:(pick===info.b.a);
+    box.querySelectorAll('.opt').forEach(function(b,i){
+      if(i===info.b.a) b.classList.add('ok');
+      else if(i===pick&&!okAns) b.classList.add('bad');
+      else b.classList.add('miss');
+    });
+    $('#qFb').textContent=okAns?'✅ 答对了！':'❌ 答错了，正确答案是 '+'ABCD'[info.b.a];
+    $('#qFb').className='fb '+(okAns?'good':'err');
+    sol.style.display='';
+    sol.innerHTML='<b>💡 解析</b>'+info.b.e;
+    $('#qHint').textContent=cur.dayOffset===0?'明天同一时间来下一题，别断连击':'';
+  }else{
+    sol.style.display='none'; sol.innerHTML='';
+    $('#qHint').textContent='';
+  }
+  $('#btnPractice').style.display=cur.practice?'none':'';
+  $('#btnBack').style.display=cur.practice||cur.dayOffset!==0?'':'none';
+}
+
+function answer(i){
+  if(!cur||cur.answered) return;
+  var info=cur.info||bankFor(cur.dayOffset);
+  cur.pick=i; cur.answered=true;
+  var ok=(i===info.b.a);
+  if(!cur.practice){
+    S.done[dkey(info.d)]={pick:i,ok:ok};
+    save();
+  }
+  renderStats(); renderStrip(); renderQuestion(); refreshCards();
+}
+
+/* ---------- 卡片显隐 ---------- */
+function refreshCards(){
+  var y=dateFromNum(-1);
+  var missed=!S.done[dkey(y)];
+  $('#catchCard').style.display=(missed&&cur&&cur.dayOffset===0)?'':'none';
+}
+
+/* ---------- 事件 ---------- */
+$('#btnPractice').onclick=function(){ cur={dayOffset:0,practice:true,answered:false,pick:-1,practiceIdx:null}; renderQuestion(); };
+$('#btnBack').onclick=function(){ cur={dayOffset:0,answered:!!S.done[dkey(today())],pick:-1}; renderQuestion(); refreshCards(); };
+$('#btnCatch').onclick=function(){ cur={dayOffset:-1,answered:false,pick:-1}; renderQuestion(); $('#catchCard').style.display='none'; };
+
+/* ---------- 高度上报（主站 iframe 自适应） ---------- */
+function reportH(){
+  var h=Math.max(document.documentElement.scrollHeight,document.body.scrollHeight);
+  try{ parent.postMessage({__wbResize:true,id:'mathDailyFrame',h:h},'*') }catch(e){}
+}
+if(window.ResizeObserver){ new ResizeObserver(reportH).observe(document.body); }
+window.addEventListener('load',reportH);
+setTimeout(reportH,400);
+
+/* ---------- 启动 ---------- */
+cur={dayOffset:0,answered:!!S.done[dkey(today())],pick:-1};
+renderStats();
+renderStrip();
+renderQuestion();
+refreshCards();
+})();
+</script>
+</body>
+</html>

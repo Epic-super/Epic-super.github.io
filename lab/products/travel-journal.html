@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<!-- 旅游日记 · Travel Journal | 单文件 HTML 子应用（零外链）
+     旅程卡片 × 逐日记账 × 愿望清单，数据走自身 localStorage（wb_travel_v1）。 -->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" type="image/png" href="../../assets/pwa/icon-192.png"><!-- 2026-11-06 全站补 rel="icon"：本页此前未声明，浏览器回落请求站点根 /favicon.ico 报 404（控制台红色噪音、标签页无图标）；与 2026-10-03 对 index/zk-ky/share-hub 的处理同一策略 -->
+<title>旅游日记 · Travel Journal</title>
+
+<script>
+/* 主题跟随主站（同 anime.html 模式） */
+(function(){
+  function stored(){
+    try{
+      var raw=localStorage.getItem('wb_store');
+      if(raw){var o=JSON.parse(raw); if(o&&o.data&&o.data.theme) return o.data.theme;}
+    }catch(e){}
+    try{ var l=localStorage.getItem('wb_hub_theme'); if(l) return l; }catch(e){}
+    return 'auto';
+  }
+  function mq(){ return window.matchMedia('(prefers-color-scheme: dark)'); }
+  function apply(m){
+    var dark=mq().matches;
+    var act=(m==='dark'||m==='light')?m:(dark?'dark':'light');
+    document.documentElement.setAttribute('data-theme',act);
+  }
+  apply(stored());
+  window.addEventListener('storage',function(e){
+    if(e.key==='wb_store'||e.key==='wb_hub_theme') apply(stored());
+  });
+  try{ mq().addEventListener('change',function(){ if(stored()==='auto') apply('auto'); }); }catch(e){}
+})();
+</script>
+
+<link rel="canonical" href="https://epic-super.github.io/lab/products/travel-journal.html">
+<meta name="description" content="旅游日记：旅程卡片、逐日游记、花费统计与愿望清单。">
+<style>
+:root{
+  --bg:#0c1216; --panel:#141c22; --panel2:#1b252d; --line:#26323b; --line2:#33424e;
+  --txt:#e9f0f2; --sub:#8fa0aa; --teal:#2dd4bf; --coral:#ff8a65; --gold:#f0b429; --green:#3ecf8e; --red:#f87171; --blue:#5b8cff;
+  --r:16px; --r-sm:11px; --r-f:999px;
+  --sh:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.22);
+  --ease:cubic-bezier(.32,.72,0,1); --tf:.16s var(--ease);
+}
+html[data-theme="light"]{
+  --bg:#f4f8f7; --panel:#ffffff; --panel2:#eaf2f0; --line:#dbe7e4; --line2:#c2d4cf;
+  --txt:#182420; --sub:#5b6f66; --teal:#0b7b71; --coral:#d4622f; --gold:#8a6608; --green:#12945f; --red:#d64545; --blue:#3b6ae0;
+  --sh:0 1px 3px rgba(20,40,30,.06),0 6px 16px rgba(20,40,30,.07);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","HarmonyOS Sans SC","Microsoft YaHei",sans-serif;
+  background:var(--bg);color:var(--txt);font-size:15px;line-height:1.65;
+  padding-bottom:calc(28px + env(safe-area-inset-bottom));-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font-family:inherit;font-size:15px;color:inherit}
+button{cursor:pointer;border:none;background:none}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--teal);outline-offset:2px;border-radius:6px}
+.wrap{max-width:1000px;margin:0 auto;padding:0 14px}
+
+.top{position:relative;color:#fff;padding:20px 0 16px;padding-top:calc(20px + env(safe-area-inset-top));
+  background:
+    radial-gradient(110% 150% at 8% -20%,rgba(45,212,191,.3),rgba(45,212,191,0) 50%),
+    radial-gradient(90% 130% at 94% 0%,rgba(255,138,101,.32),rgba(255,138,101,0) 58%),
+    linear-gradient(134deg,#0e2a33 0%,#134a44 55%,#3a2c22 120%);
+  box-shadow:0 1px 0 rgba(255,255,255,.08) inset,0 6px 22px rgba(8,20,24,.3);overflow:hidden}
+.top::after{content:'';position:absolute;left:0;right:0;bottom:0;height:1px;background:linear-gradient(90deg,transparent,rgba(45,212,191,.55),transparent)}
+.brand h1{margin:0;font-size:21px;font-weight:800;display:flex;align-items:center;gap:9px}
+.brand p{margin:5px 0 0;font-size:12.5px;opacity:.88}
+.tstats{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.tstat{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:var(--r-sm);padding:6px 11px;font-size:12px;display:flex;align-items:baseline;gap:5px;color:#fff}
+.tstat b{font-size:16px;font-weight:800;font-variant-numeric:tabular-nums}
+
+.tabs{display:flex;gap:8px;margin:16px 0 0;flex-wrap:wrap}
+.tab{padding:9px 16px;border-radius:var(--r-f);border:1.5px solid var(--line2);background:var(--panel);color:var(--sub);font-weight:800;font-size:13.5px;transition:all var(--tf)}
+.tab.on{border-color:var(--teal);background:linear-gradient(135deg,rgba(45,212,191,.15),rgba(45,212,191,.04));color:var(--teal)}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px;box-shadow:var(--sh);margin:14px 0}
+.card h2{margin:0 0 4px;font-size:15.5px;font-weight:800;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.card .desc{color:var(--sub);font-size:12.5px;margin:0 0 12px}
+.viewpane{display:none}
+.viewpane.on{display:block;animation:fin .25s var(--ease)}
+@keyframes fin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+.lbl{display:block;font-size:12px;font-weight:700;color:var(--sub);margin:9px 0 5px}
+.ipt,.txa,.sel{background:var(--panel2);border:1px solid var(--line2);border-radius:var(--r-sm);padding:9px 11px;color:var(--txt);width:100%}
+.ipt:focus,.txa:focus,.sel:focus{border-color:var(--teal);outline:none}
+.txa{resize:vertical;min-height:70px}
+.btn{background:linear-gradient(135deg,#1d9e8d,var(--teal));color:#fff;border-radius:var(--r-sm);padding:9px 16px;font-size:13.5px;font-weight:800;min-height:40px;display:inline-flex;align-items:center;gap:6px;transition:transform var(--tf),filter var(--tf)}
+.btn:hover{filter:brightness(1.07)}
+.btn:active{transform:scale(.97)}
+.btn.ghost{background:var(--panel2);color:var(--txt);border:1px solid var(--line2)}
+.btn.sm{padding:6px 11px;min-height:32px;font-size:12.5px}
+.btn.del{background:transparent;border:1px solid var(--line2);color:var(--sub);min-height:32px;padding:6px 10px}
+.btn.del:hover{color:var(--red);border-color:var(--red)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+@media (max-width:680px){.two{grid-template-columns:1fr}}
+
+.trip{background:var(--panel2);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin-bottom:11px;display:flex;gap:13px;align-items:flex-start;cursor:pointer;transition:all var(--tf);position:relative;overflow:hidden}
+.trip::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:linear-gradient(180deg,var(--teal),var(--coral))}
+.trip:hover{transform:translateY(-2px);border-color:var(--teal)}
+.trip .emoji{font-size:34px;width:56px;height:56px;border-radius:14px;background:var(--panel);display:grid;place-items:center;flex:none}
+.trip .grow{flex:1;min-width:0}
+.trip .tt{font-size:15px;font-weight:800;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.trip .meta{font-size:12px;color:var(--sub);margin-top:3px}
+.trip .days{font-size:11px;font-weight:800;padding:2px 9px;border-radius:var(--r-f);background:rgba(45,212,191,.12);color:var(--teal);border:1px solid var(--teal)}
+.trip .cost{font-size:11.5px;color:var(--gold);font-weight:700}
+
+.entry{border-top:1px solid var(--line);padding:12px 2px}
+.entry:first-child{border-top:none}
+.entry .hd{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.entry .hd b{font-size:13.5px}
+.entry .day{font-size:10.5px;font-weight:800;color:var(--teal);background:rgba(45,212,191,.1);border:1px solid var(--teal);border-radius:var(--r-f);padding:1px 9px}
+.entry .tx{font-size:13px;margin-top:5px;white-space:pre-wrap;word-break:break-word}
+.entry .ft{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;align-items:center}
+.chip{font-size:11px;font-weight:700;padding:2px 9px;border-radius:var(--r-f);background:var(--panel2);border:1px solid var(--line2);color:var(--sub)}
+.chip.gold{color:var(--gold);border-color:var(--gold);background:rgba(240,180,41,.08)}
+.empty{padding:22px;text-align:center;color:var(--sub);font-size:13px}
+.empty .big{font-size:26px;display:block;margin-bottom:6px;opacity:.8}
+
+.wish{display:flex;gap:9px;align-items:center;background:var(--panel2);border:1px solid var(--line);border-radius:var(--r-sm);padding:10px 12px;margin-bottom:8px}
+.wish .grow{flex:1;min-width:0;font-size:13px}
+.wish .grow b{display:block;font-size:13.5px}
+.wish .grow small{color:var(--sub)}
+footer.foot{color:var(--sub);font-size:11.5px;text-align:center;margin-top:18px}
+#toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(16px);background:var(--panel);color:var(--txt);border:1px solid var(--line2);border-radius:var(--r-f);padding:9px 18px;font-size:13px;font-weight:700;box-shadow:var(--sh);opacity:0;pointer-events:none;transition:all .25s var(--ease);z-index:99}
+#toast.show{opacity:1;transform:translateX(-50%)}
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <div class="brand">
+      <h1>🧭 旅游日记</h1>
+      <p>把走过的路变成可翻阅的资产：旅程、逐日、花费、愿望——下一次出发前翻一翻。</p>
+    </div>
+    <div class="tstats" id="statStrip"></div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="tabs">
+    <button class="tab on" data-v="trips">🧳 我的旅程</button>
+    <button class="tab" data-v="wish">🌟 愿望清单</button>
+  </div>
+
+  <!-- 旅程 -->
+  <section class="card viewpane on" id="vp-trips">
+    <h2>🧳 旅程与日记</h2>
+    <p class="desc">新建旅程 → 逐日添加游记（地点 / 天气 / 花费 / 心得）。数据存本机。</p>
+    <div class="two">
+      <div>
+        <label class="lbl">目的地 *</label>
+        <input class="ipt" id="tpDest" placeholder="例如：苏州 · 平江路" maxlength="24">
+        <label class="lbl">日期范围</label>
+        <div style="display:flex;gap:8px">
+          <input class="ipt" id="tpStart" type="date" style="flex:1">
+          <input class="ipt" id="tpEnd" type="date" style="flex:1">
+        </div>
+        <label class="lbl">同伴</label>
+        <input class="ipt" id="tpWith" placeholder="一个人 / 和家人 / 和搭子…" maxlength="20">
+      </div>
+      <div>
+        <label class="lbl">封面 Emoji</label>
+        <input class="ipt" id="tpEmoji" value="🧳" maxlength="4" style="font-size:20px;text-align:center">
+        <label class="lbl">总预算（¥，可选）</label>
+        <input class="ipt" id="tpBudget" type="number" min="0" placeholder="0">
+        <button class="btn" id="tpAdd" style="margin-top:14px;width:100%">＋ 新建旅程</button>
+      </div>
+    </div>
+    <div id="tripList" style="margin-top:14px"></div>
+  </section>
+
+  <!-- 愿望清单 -->
+  <section class="card viewpane" id="vp-wish">
+    <h2>🌟 想去的地方</h2>
+    <p class="desc">先把愿望写下来，攒够假期就出发。完成后一键转成正式旅程。</p>
+    <div style="display:flex;gap:8px">
+      <input class="ipt" id="wishIpt" placeholder="例如：景德镇 · 捏一只自己的碗" maxlength="30" style="flex:1">
+      <input class="ipt" id="wishWhy" placeholder="为什么想去（可选）" maxlength="40" style="flex:1">
+      <button class="btn" id="wishAdd">＋</button>
+    </div>
+    <div id="wishList" style="margin-top:12px"></div>
+  </section>
+
+  <footer class="foot">旅游日记 ｜ 数据仅存本机（wb_travel_v1）· 支持导出 ｜ 世界很大，慢慢走 🌏</footer>
+</div>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+'use strict';
+var KEY='wb_travel_v1';
+var S={trips:[],wish:[]};
+try{var raw=localStorage.getItem(KEY);if(raw){var o=JSON.parse(raw);S.trips=o.trips||[];S.wish=o.wish||[]}}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){toast('保存失败')}}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function toast(m){var t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(toast._h);toast._h=setTimeout(function(){t.classList.remove('show')},2200)}
+function $(s){return document.querySelector(s)}
+function today(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+
+document.querySelectorAll('.tab').forEach(function(t){
+  t.onclick=function(){
+    document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('on')});
+    t.classList.add('on');
+    document.querySelectorAll('.viewpane').forEach(function(x){x.classList.remove('on')});
+    var vp=$('#vp-'+t.getAttribute('data-v'));if(vp)vp.classList.add('on');
+    reportH();
+  };
+});
+
+function days(start,end){
+  if(!start||!end)return null;
+  var d=Math.round((new Date(end)-new Date(start))/86400000)+1;
+  return d>0?d:null;
+}
+function tripCost(t){var c=0;(t.entries||[]).forEach(function(e){c+=(+e.cost||0)});return c}
+function renderStats(){
+  var cities=S.trips.length,days_=0,cost=0;
+  S.trips.forEach(function(t){days_+=days(t.start,t.end)||0;cost+=tripCost(t)});
+  $('#statStrip').innerHTML=
+    '<span class="tstat"><b>'+cities+'</b>段旅程</span>'+
+    '<span class="tstat"><b>'+days_+'</b>在天路上</span>'+
+    '<span class="tstat"><b>¥'+cost+'</b>在途花费</span>'+
+    '<span class="tstat"><b>'+S.wish.length+'</b>个愿望</span>';
+}
+function renderTrips(){
+  var box=$('#tripList');
+  if(!S.trips.length){box.innerHTML='<div class="empty"><span class="big">🧭</span>还没有旅程。新建一段，从周末的苏州平江路开始也行。</div>';return}
+  box.innerHTML='';
+  S.trips.forEach(function(t,ti){
+    var d=days(t.start,t.end),cost=tripCost(t);
+    var el=document.createElement('div');el.className='trip';
+    el.innerHTML='<div class="emoji">'+esc(t.emoji||'🧳')+'</div><div class="grow">'+
+      '<div class="tt">'+esc(t.dest)+(d?'<span class="days">'+d+' 天</span>':'')+'</div>'+
+      '<div class="meta">'+esc(t.start||'')+(t.end?' → '+esc(t.end):'')+(t.with?' · 与 '+esc(t.with):'')+'</div>'+
+      '<div class="meta">📝 '+(t.entries||[]).length+' 篇日记'+(t.budget?' · 预算 ¥'+t.budget:'')+(cost?' · 已记 ¥'+cost:'')+'</div></div>';
+    var del=document.createElement('button');del.className='btn del';del.textContent='删';
+    del.onclick=function(e){e.stopPropagation();if(!confirm('删除旅程「'+t.dest+'」及其全部日记？'))return;S.trips.splice(ti,1);save();renderAll()};
+    el.appendChild(del);
+    el.onclick=function(){openTrip(ti)};
+    box.appendChild(el);
+    // 日记区（点开才渲染）
+    if(t._open){
+      var jw=document.createElement('div');jw.style.cssText='margin:-6px 0 14px;padding:0 6px';
+      var addRow=document.createElement('div');addRow.className='two';addRow.style.marginBottom='10px';
+      addRow.innerHTML='<div><label class="lbl">第几天 · 地点 · 天气</label><input class="ipt" placeholder="D2 · 平江路 · 晴" id="je-h-'+ti+'" maxlength="30"></div>'+
+        '<div><label class="lbl">花费（¥，可选）</label><input class="ipt" type="number" min="0" placeholder="0" id="je-c-'+ti+'"></div>';
+      var ta=document.createElement('textarea');ta.className='txa';ta.placeholder='今天看见了什么、吃了什么、想到什么——写给一年后的自己';
+      ta.id='je-t-'+ti;
+      var addB=document.createElement('button');addB.className='btn sm';addB.textContent='＋ 记这一天';
+      var wrap2=document.createElement('div');wrap2.style.marginBottom='10px';wrap2.appendChild(ta);
+      var list=document.createElement('div');
+      (t.entries||[]).slice().reverse().forEach(function(e){
+        var div=document.createElement('div');div.className='entry';
+        div.innerHTML='<div class="hd"><b>'+esc(e.head||'这一天')+'</b>'+(e.date?'<span class="chip">'+esc(e.date)+'</span>':'')+'</div>'+
+          '<div class="tx">'+esc(e.text)+'</div>'+
+          '<div class="ft">'+(e.cost?'<span class="chip gold">¥'+e.cost+'</span>':'')+'</div>';
+        list.appendChild(div);
+      });
+      if(!(t.entries||[]).length) list.innerHTML='<div class="empty">还没有日记，写下第一篇 ↓</div>';
+      addB.onclick=function(){
+        var h=document.getElementById('je-h-'+ti).value.trim();
+        var tx=ta.value.trim();
+        if(!tx){toast('写点什么吧');return}
+        (t.entries=t.entries||[]).unshift({head:h||('D'+((t.entries||[]).length+1)),text:tx,cost:+document.getElementById('je-c-'+ti).value||0,date:today()});
+        save();renderAll();toast('已记下这一天 📖');
+      };
+      jw.appendChild(addRow);jw.appendChild(wrap2);jw.appendChild(addB);jw.appendChild(list);
+      box.appendChild(jw);
+    }
+  });
+}
+function openTrip(i){S.trips[i]._open=!S.trips[i]._open;renderTrips()}
+$('#tpAdd').onclick=function(){
+  var dest=$('#tpDest').value.trim();
+  if(!dest){toast('先写目的地');return}
+  S.trips.unshift({dest:dest,start:$('#tpStart').value,end:$('#tpEnd').value,with:$('#tpWith').value.trim(),emoji:$('#tpEmoji').value.trim()||'🧳',budget:+$('#tpBudget').value||0,entries:[],_open:true});
+  $('#tpDest').value='';$('#tpWith').value='';$('#tpBudget').value='';
+  save();renderAll();toast('旅程已创建，去记第一天 📖');
+};
+function renderWish(){
+  var box=$('#wishList');
+  if(!S.wish.length){box.innerHTML='<div class="empty"><span class="big">🌟</span>愿望清单是空的——想去哪里，写下来它就开始成立。</div>';return}
+  box.innerHTML='';
+  S.wish.forEach(function(w,wi){
+    var el=document.createElement('div');el.className='wish';
+    el.innerHTML='<span class="grow"><b>'+esc(w.t)+'</b>'+(w.why?'<small> · '+esc(w.why)+'</small>':'')+'</span>';
+    var go=document.createElement('button');go.className='btn sm';go.textContent='出发 →';
+    go.title='转成正式旅程';
+    go.onclick=function(){
+      S.trips.unshift({dest:w.t,start:'',end:'',with:'',emoji:'🧳',budget:0,entries:[],_open:true});
+      S.wish.splice(wi,1);save();renderAll();
+      document.querySelector('.tab[data-v="trips"]').click();
+      toast('已转为正式旅程，去补日期吧');
+    };
+    var del=document.createElement('button');del.className='btn del';del.textContent='删';
+    del.onclick=function(){S.wish.splice(wi,1);save();renderAll()};
+    el.appendChild(go);el.appendChild(del);
+    box.appendChild(el);
+  });
+}
+$('#wishAdd').onclick=function(){
+  var t=$('#wishIpt').value.trim();
+  if(!t){toast('写下想去的地方');return}
+  S.wish.unshift({t:t,why:$('#wishWhy').value.trim()});
+  $('#wishIpt').value='';$('#wishWhy').value='';
+  save();renderAll();renderStats();
+};
+
+function renderAll(){renderStats();renderTrips();renderWish()}
+if(!S.trips.length && !localStorage.getItem(KEY)){
+  S.trips=[{dest:'示例 · 苏州平江路',start:today(),end:today(),with:'自己',emoji:'🏮',budget:200,entries:[{head:'D1 · 平江路 · 晴',text:'评弹一声从河对岸飘过来，桂花糕还是热的时候就该吃。下次带相机来拍黄昏。',cost:126,date:today()}],_open:false}];
+  save();
+}
+renderAll();
+
+function reportH(){
+  var h=Math.max(document.documentElement.scrollHeight,document.body.scrollHeight);
+  try{parent.postMessage({__wbResize:true,id:'travelFrame',h:h},'*')}catch(e){}
+}
+if(window.ResizeObserver){new ResizeObserver(reportH).observe(document.body)}
+window.addEventListener('load',reportH);
+setTimeout(reportH,400);
+})();
+</script>
+</body>
+</html>

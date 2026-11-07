@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<!-- Vibe Coding 工作台 | 单文件 HTML 子应用（零外链）
+     用法：与 Claude Code / Cursor / 任意 AI 结对时的提示词模式库 + 工程纪律检查表。
+     开源最高标准 = 这个页面自身也按它自己列的清单来做：单文件零依赖、可 fork、README 级注释。 -->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" type="image/png" href="../../assets/pwa/icon-192.png"><!-- 2026-11-06 全站补 rel="icon"：本页此前未声明，浏览器回落请求站点根 /favicon.ico 报 404（控制台红色噪音、标签页无图标）；与 2026-10-03 对 index/zk-ky/share-hub 的处理同一策略 -->
+<title>Vibe Coding 工作台 · 提示词模式 × 工程纪律</title>
+
+<script>
+/* 主题跟随主站（同 anime.html 模式） */
+(function(){
+  function stored(){
+    try{
+      var raw=localStorage.getItem('wb_store');
+      if(raw){var o=JSON.parse(raw); if(o&&o.data&&o.data.theme) return o.data.theme;}
+    }catch(e){}
+    try{ var l=localStorage.getItem('wb_hub_theme'); if(l) return l; }catch(e){}
+    return 'auto';
+  }
+  function mq(){ return window.matchMedia('(prefers-color-scheme: dark)'); }
+  function apply(m){
+    var dark=mq().matches;
+    var act=(m==='dark'||m==='light')?m:(dark?'dark':'light');
+    document.documentElement.setAttribute('data-theme',act);
+  }
+  apply(stored());
+  window.addEventListener('storage',function(e){
+    if(e.key==='wb_store'||e.key==='wb_hub_theme') apply(stored());
+  });
+  try{ mq().addEventListener('change',function(){ if(stored()==='auto') apply('auto'); }); }catch(e){}
+})();
+</script>
+
+<link rel="canonical" href="https://epic-super.github.io/lab/products/vibe-coding.html">
+<meta name="description" content="Vibe Coding 工作台：AI 结对编程的提示词模式库（一键复制）、工具矩阵、开源工程纪律 12 检。">
+<style>
+:root{
+  --bg:#0b1016; --panel:#131a23; --panel2:#1a2330; --line:#243040; --line2:#33425a;
+  --txt:#e8eef6; --sub:#8b98ac; --cyan:#2dd4bf; --violet:#a78bfa; --gold:#f0b429; --green:#3ecf8e; --red:#f87171; --blue:#5b8cff;
+  --r:16px; --r-sm:11px; --r-f:999px;
+  --sh:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.22);
+  --ease:cubic-bezier(.32,.72,0,1); --tf:.16s var(--ease);
+  --mono:ui-monospace,Consolas,'Cascadia Code',Menlo,monospace;
+}
+html[data-theme="light"]{
+  --bg:#f5f8f9; --panel:#ffffff; --panel2:#ecf2f2; --line:#dbe5e5; --line2:#c2d1d1;
+  --txt:#17242a; --sub:#5a6b75; --cyan:#0d9488; --violet:#7c5ce0; --gold:#8a6608; --green:#12945f; --red:#d64545; --blue:#3b6ae0;
+  --sh:0 1px 3px rgba(16,24,40,.06),0 6px 16px rgba(16,24,40,.07);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","HarmonyOS Sans SC","Microsoft YaHei",sans-serif;
+  background:var(--bg);color:var(--txt);font-size:15px;line-height:1.65;
+  padding-bottom:calc(28px + env(safe-area-inset-bottom));-webkit-font-smoothing:antialiased}
+button,input{font-family:inherit;font-size:15px;color:inherit}
+button{cursor:pointer;border:none;background:none}
+button:focus-visible,input:focus-visible{outline:2px solid var(--cyan);outline-offset:2px;border-radius:6px}
+a{color:var(--cyan)}
+code{font-family:var(--mono);font-size:.92em;background:var(--panel2);padding:1px 6px;border-radius:6px}
+.wrap{max-width:1000px;margin:0 auto;padding:0 14px}
+
+.top{position:relative;color:#fff;padding:20px 0 16px;padding-top:calc(20px + env(safe-area-inset-top));
+  background:
+    radial-gradient(110% 150% at 8% -20%,rgba(167,139,250,.3),rgba(167,139,250,0) 50%),
+    radial-gradient(90% 130% at 94% 0%,rgba(45,212,191,.32),rgba(45,212,191,0) 58%),
+    linear-gradient(134deg,#141a2e 0%,#1e2a4a 52%,#123a3f 120%);
+  box-shadow:0 1px 0 rgba(255,255,255,.08) inset,0 6px 22px rgba(10,14,30,.3);overflow:hidden}
+.top::after{content:'';position:absolute;left:0;right:0;bottom:0;height:1px;background:linear-gradient(90deg,transparent,rgba(167,139,250,.55),transparent)}
+.brand h1{margin:0;font-size:21px;font-weight:800;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.brand p{margin:5px 0 0;font-size:12.5px;opacity:.88}
+
+.tabs{display:flex;gap:8px;margin:16px 0 0;flex-wrap:wrap}
+.tab{padding:9px 16px;border-radius:var(--r-f);border:1.5px solid var(--line2);background:var(--panel);color:var(--sub);font-weight:800;font-size:13.5px;transition:all var(--tf)}
+.tab.on{border-color:var(--violet);background:linear-gradient(135deg,rgba(167,139,250,.15),rgba(167,139,250,.04));color:var(--violet)}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px;box-shadow:var(--sh);margin:14px 0}
+.card h2{margin:0 0 4px;font-size:15.5px;font-weight:800;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.card .desc{color:var(--sub);font-size:12.5px;margin:0 0 12px}
+.viewpane{display:none}
+.viewpane.on{display:block;animation:fin .25s var(--ease)}
+@keyframes fin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+.premise{display:grid;grid-template-columns:repeat(2,1fr);gap:11px}
+@media (max-width:680px){.premise{grid-template-columns:1fr}}
+.pz{background:var(--panel2);border:1px solid var(--line);border-radius:var(--r);padding:13px 15px}
+.pz b{font-size:13.5px;display:flex;gap:7px;align-items:center}
+.pz p{margin:6px 0 0;font-size:12.5px;color:var(--sub)}
+.pz.good{border-left:3px solid var(--green)}
+.pz.warn{border-left:3px solid var(--red)}
+
+.modes{display:flex;flex-direction:column;gap:10px}
+.mode{background:var(--panel2);border:1px solid var(--line);border-radius:var(--r-sm);padding:12px 14px}
+.mode b{font-size:13.5px}
+.mode p{margin:4px 0 0;font-size:12.5px;color:var(--sub)}
+
+.pgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+@media (max-width:720px){.pgrid{grid-template-columns:1fr}}
+.pc{background:var(--panel2);border:1px solid var(--line);border-radius:var(--r);padding:13px 14px;display:flex;flex-direction:column;gap:8px}
+.pc b{font-size:13.5px;display:flex;align-items:center;gap:7px}
+.pc .why{font-size:12px;color:var(--sub)}
+.pc .tpl{font-family:var(--mono);font-size:11.5px;line-height:1.6;background:var(--panel);border:1px solid var(--line2);border-radius:var(--r-sm);padding:9px 11px;color:var(--txt);white-space:pre-wrap;word-break:break-word}
+.copybtn{align-self:flex-start;font-size:11.5px;font-weight:700;color:var(--violet);border:1px solid var(--violet);border-radius:var(--r-f);padding:4px 13px;background:rgba(167,139,250,.07);transition:all var(--tf)}
+.copybtn:hover{background:var(--violet);color:#fff}
+
+.tools{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media (max-width:720px){.tools{grid-template-columns:1fr}}
+.tool{background:var(--panel2);border:1px solid var(--line);border-radius:var(--r-sm);padding:12px 13px}
+.tool b{font-size:13px}
+.tool p{margin:4px 0 0;font-size:12px;color:var(--sub)}
+.tool .fit{display:inline-block;margin-top:6px;font-size:10.5px;font-weight:800;padding:2px 9px;border-radius:var(--r-f);border:1px solid var(--line2);color:var(--sub)}
+
+.checks{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media (max-width:680px){.checks{grid-template-columns:1fr}}
+.ck{display:flex;gap:9px;align-items:flex-start;background:var(--panel2);border:1px solid var(--line);border-radius:var(--r-sm);padding:10px 12px;cursor:pointer}
+.ck.done{border-color:var(--green);background:rgba(62,207,142,.07)}
+.ck input{width:16px;height:16px;accent-color:var(--green);margin-top:3px;flex:none;cursor:pointer}
+.ck span{font-size:12.5px;flex:1}
+.ck.done span{color:var(--green)}
+.ck span small{display:block;color:var(--sub);font-weight:400}
+.prog{height:8px;border-radius:var(--r-f);background:var(--panel2);border:1px solid var(--line);overflow:hidden;margin:9px 0 13px}
+.prog i{display:block;height:100%;background:linear-gradient(90deg,var(--violet),var(--cyan));transition:width .3s var(--ease)}
+
+.lnk{margin-top:12px;font-size:12.5px;color:var(--sub);background:var(--panel2);border:1px dashed var(--line2);border-radius:var(--r-sm);padding:10px 13px}
+footer.foot{color:var(--sub);font-size:11.5px;text-align:center;margin-top:18px}
+#toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(16px);background:var(--panel);color:var(--txt);border:1px solid var(--line2);border-radius:var(--r-f);padding:9px 18px;font-size:13px;font-weight:700;box-shadow:var(--sh);opacity:0;pointer-events:none;transition:all .25s var(--ease);z-index:99}
+#toast.show{opacity:1;transform:translateX(-50%)}
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <div class="brand">
+      <h1>🌊 Vibe Coding 工作台 <span style="font-size:12px;font-weight:600;opacity:.8">提示词模式 × 工程纪律</span></h1>
+      <p>让 AI 写代码不翻车的心法：氛围给它，验收给自己。原型可以 vibe，上线必须规矩。</p>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="tabs">
+    <button class="tab on" data-v="what">🌊 心法</button>
+    <button class="tab" data-v="prompts">🧭 提示词模式库</button>
+    <button class="tab" data-v="tools">🧰 工具矩阵</button>
+    <button class="tab" data-v="disc">🛡 开源纪律 12 检</button>
+  </div>
+
+  <!-- 心法 -->
+  <section class="card viewpane on" id="vp-what">
+    <h2>🌊 Vibe Coding 的边界</h2>
+    <p class="desc">Karpathy 2025 年提出的词：全情投入 AI 的输出、拥抱扩散式探索、几乎忘记代码本身的存在。它很强，但只在特定象限强。</p>
+    <div class="premise">
+      <div class="pz good"><b>✅ 放心 Vibe 的地方</b><p>原型与 demo / 一次性脚本 / 个人工具 / 探索陌生 API / UI 氛围调优 / 让 AI 写测试用例再人工过一遍。判断句：坏了的代价 &lt; 10 分钟重做。</p></div>
+      <div class="pz warn"><b>⛔ 别 Vibe 的地方</b><p>涉及钱与鉴权的代码 / 数据库迁移 / 并发与锁 / 密钥处理 / 你看不懂却要维护的核心逻辑。判断句：出事的代价是信誉或资金。</p></div>
+      <div class="pz good"><b>🧭 三种流派</b><p><b>氛围流</b>：一句话让 AI 自由发挥（原型最快）；<b>结对流</b>：AI 出方案你逐段审（默认推荐）；<b>规格流</b>：先写验收标准与接口契约再让 AI 实现（生产级）。</p></div>
+      <div class="pz warn"><b>⚖️ 唯一铁律</b><p>AI 生成的每一行，<b>你要能向另一个人解释它为什么对</b>。解释不了 = 技术债 +1。Vibe 加速的是打字，不是理解。</p></div>
+    </div>
+  </section>
+
+  <!-- 提示词模式库 -->
+  <section class="card viewpane" id="vp-prompts">
+    <h2>🧭 提示词模式库 · 八个可复用招式</h2>
+    <p class="desc">把大括号里的占位符换成你的内容，一键复制贴给任意 AI。模式之间可以叠加。</p>
+    <div class="pgrid" id="pgrid"></div>
+  </section>
+
+  <!-- 工具矩阵 -->
+  <section class="card viewpane" id="vp-tools">
+    <h2>🧰 工具矩阵 · 按场景选</h2>
+    <div class="tools">
+      <div class="tool"><b>终端 Agent（Claude Code / ZCode 类）</b><p>读写整个仓库、跑命令、自动提交。多文件重构与工程化首选。</p><span class="fit">适合：工程级改造</span></div>
+      <div class="tool"><b>IDE 结对（Cursor / Copilot）</b><p>行内补全 + 侧栏对话，反馈回路最短。</p><span class="fit">适合：日常开发</span></div>
+      <div class="tool"><b>Web 对话（DeepSeek / GPT 等）</b><p>无仓库上下文，适合方案讨论、概念解释、单文件生成。</p><span class="fit">适合：构思与学习</span></div>
+      <div class="tool"><b>开源 CLI（Aider / Cline）</b><p>git 原生工作流，自动小步提交，可自选模型。</p><span class="fit">适合：开源贡献</span></div>
+      <div class="tool"><b>审查助手（AI Code Review）</b><p>提交前让另一个 AI 以对手视角审 diff。</p><span class="fit">适合：发布前门禁</span></div>
+      <div class="tool"><b>塔台智能体</b><p>本站内置：BYOK 直连 LLM + 工具调用 + 长期记忆，与工作台数据互通。</p><span class="fit">适合：站内速查</span></div>
+    </div>
+  </section>
+
+  <!-- 开源纪律 -->
+  <section class="card viewpane" id="vp-disc">
+    <h2>🛡 开源纪律 12 检 · 发布前逐条打勾</h2>
+    <p class="desc">「按开源最高标准完善下去」的落地清单——本页面自身也按这 12 条执行（单文件零依赖 / 无密钥 / 自注释）。勾选进度存本机（wb_vibe_v1）。</p>
+    <div class="prog"><i id="discProg" style="width:0%"></i></div>
+    <div class="checks" id="discChecks"></div>
+    <div class="lnk">🔗 <b>塔台已内置的门禁</b>：tools/audit-xss.mjs（XSS 审计）· tools/audit-secrets.mjs（密钥审计）· tools/check-inline-syntax-all.mjs（内联语法 174 HTML/144 JS 块）——AI 改完代码先跑门禁再提交，就是 vibe coding 的安全带。</div>
+  </section>
+
+  <footer class="footer foot">Vibe Coding 工作台 ｜ 纪律勾选存本机（wb_vibe_v1）｜ 氛围给它，验收给自己</footer>
+</div>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+'use strict';
+var $=function(s){return document.querySelector(s)};
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function toast(m){var t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(toast._h);toast._h=setTimeout(function(){t.classList.remove('show')},2000)}
+
+document.querySelectorAll('.tab').forEach(function(t){
+  t.onclick=function(){
+    document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('on')});
+    t.classList.add('on');
+    document.querySelectorAll('.viewpane').forEach(function(x){x.classList.remove('on')});
+    var vp=$('#vp-'+t.getAttribute('data-v'));if(vp)vp.classList.add('on');
+    reportH();
+  };
+});
+
+/* ---------------- 提示词模式库 ---------------- */
+var PATTERNS=[
+  {n:'🎭 角色锚定',w:'给 AI 一个专家身份与团队语境，输出立刻从「百科腔」变成「老手腔」。',
+   t:'你是资深{领域}工程师，偏好简单直接的实现。现在帮我{任务}。约束：优先标准库，避免炫技。'},
+  {n:'📏 验收先行',w:'先给验收标准再让写代码——AI 会自己盯着标准查，返工率骤降。',
+   t:'实现{功能}。完成定义：①{可观察结果1} ②{边界条件2} ③{性能/安全要求3}。写完先自查这三条再交给我。'},
+  {n:'❓ 反向提问',w:'让 AI 先审题再动手，专治需求模糊导致的整段重写。',
+   t:'我要做{任务}。动代码之前，先问我 5 个最关键的澄清问题，我回答后再给方案。'},
+  {n:'🪜 小步提交',w:'禁止一次性大改。每步可验证，坏了只回退一小格。',
+   t:'把{任务}拆成 ≤5 个可独立验证的小步。每步：先说做什么→给最小代码→说明怎么验证。等我确认再继续下一步。'},
+  {n:'🔍 自我审查',w:'让 AI 扮演审稿人攻击自己的代码，比人类的 review 更快更狠。',
+   t:'审查你刚写的{模块}：列出 3 个最可能出 bug 的边界、2 个安全隐患、1 个最差命名，并给出修复。'},
+  {n:'📦 上下文投喂',w:'AI 不了解你的项目。把相关文件、约定、报错原文一起给它，质量立涨。',
+   t:'【背景】项目用{技术栈}，相关代码：```{粘贴}```\n【报错原文】```{粘贴}```\n【我要】定位根因并给最小修复，不要重构。'},
+  {n:'♻️ 失败回灌',w:'失败尝试不是垃圾，是上下文。把失败方案喂回去，AI 不再撞同一堵墙。',
+   t:'已试过{方案A}，失败原因{X}；也试过{方案B}，卡在{Y}。基于这两条失败，给一条不同的路线。'},
+  {n:'🧊 冻结约束',w:'防止 AI「顺手」改坏你不想动的部分。明确禁区比事后回滚便宜。',
+   t:'只允许修改{文件/函数}。禁止：改动公共 API、引入新依赖、动{禁区列表}。如果认为必须违反，先停下来问我。'}
+];
+$('#pgrid').innerHTML=PATTERNS.map(function(p,i){
+  return '<div class="pc"><b>'+(i+1)+'. '+esc(p.n)+'</b><div class="why">'+esc(p.w)+'</div>'+
+    '<div class="tpl">'+esc(p.t)+'</div>'+
+    '<button class="copybtn" data-i="'+i+'">📋 复制模板</button></div>';
+}).join('');
+function copyText(txt,btn,okLabel){
+  function ok(){ btn.textContent=okLabel; setTimeout(function(){ btn.textContent='📋 复制模板'; },1400); }
+  function fallback(){
+    var ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();
+    try{document.execCommand('copy');ok();}catch(e){btn.textContent='✗ 手动复制';}
+    ta.remove();
+  }
+  if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(ok,fallback);
+  else fallback();
+}
+$('#pgrid').addEventListener('click',function(e){
+  var b=e.target.closest('.copybtn');if(!b)return;
+  copyText(PATTERNS[+b.getAttribute('data-i')].t,b,'✓ 已复制');
+});
+
+/* ---------------- 开源纪律 12 检 ---------------- */
+var KEY='wb_vibe_v1';
+var DISC=[
+  ['版本控制','git 仓库初始化，改前先 commit —— AI 改崩可随时回退'],
+  ['小步提交','一次一个意图，commit message 说清「为什么」'],
+  ['分支隔离','AI 的实验性改动走分支，主干保持可用'],
+  ['测试门禁','关键路径至少有冒烟测试；改完先跑再交'],
+  ['静态检查','lint + tsc/py_compile 零错误（本站用 check-inline-syntax-all）'],
+  ['安全审计','扫密钥与 XSS（本站用 audit-secrets / audit-xss）'],
+  ['依赖最小化','新增依赖前先问：标准库真的不行吗'],
+  ['README 同步','安装/用法/边界三段随代码一起更新'],
+  ['注释讲为什么','代码讲 what，注释只留 why 与约束'],
+  ['密钥零入库','key 全走环境变量/本机配置并写进 .gitignore'],
+  ['回滚预案','发布前想清楚：坏了怎么一键回到上个好状态'],
+  ['人工复核','AI 写的每一行你都能解释；解释不了就重写或标 TODO']
+];
+var S={done:{}};
+try{var raw=localStorage.getItem(KEY);if(raw){var o=JSON.parse(raw);S.done=o.done||{}}}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function renderDisc(){
+  var box=$('#discChecks');box.innerHTML='';
+  DISC.forEach(function(d,i){
+    var el=document.createElement('div');el.className='ck'+(S.done[i]?' done':'');
+    el.innerHTML='<input type="checkbox" '+(S.done[i]?'checked':'')+'><span><b>'+esc(d[0])+'</b><small>'+esc(d[1])+'</small></span>';
+    el.onclick=function(){S.done[i]=!S.done[i];if(!S.done[i])delete S.done[i];save();renderDisc()};
+    box.appendChild(el);
+  });
+  var n=Object.keys(S.done).length;
+  $('#discProg').style.width=Math.round(n/DISC.length*100)+'%';
+}
+renderDisc();
+
+function reportH(){
+  var h=Math.max(document.documentElement.scrollHeight,document.body.scrollHeight);
+  try{parent.postMessage({__wbResize:true,id:'vibeFrame',h:h},'*')}catch(e){}
+}
+if(window.ResizeObserver){new ResizeObserver(reportH).observe(document.body)}
+window.addEventListener('load',reportH);
+setTimeout(reportH,400);
+})();
+</script>
+</body>
+</html>

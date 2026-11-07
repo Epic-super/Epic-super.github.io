@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<!-- 硬件工坊 · 打通电气 × 机械的壁垒 × AI 中台
+     单文件 HTML 子应用（零外链），数据走自身 localStorage（wb_hwlab_v1）。
+     定位：给兴趣广泛的人一张「硬件突触地图」——电气与机械各自成岛，中间这座桥就是你的独特生态位。 -->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" type="image/png" href="../../assets/pwa/icon-192.png"><!-- 2026-11-06 全站补 rel="icon"：本页此前未声明，浏览器回落请求站点根 /favicon.ico 报 404（控制台红色噪音、标签页无图标）；与 2026-10-03 对 index/zk-ky/share-hub 的处理同一策略 -->
+<title>硬件工坊 · 电气 × 机械 × AI 中台</title>
+
+<script>
+/* 主题跟随主站（同 anime.html 模式） */
+(function(){
+  function stored(){
+    try{
+      var raw=localStorage.getItem('wb_store');
+      if(raw){var o=JSON.parse(raw); if(o&&o.data&&o.data.theme) return o.data.theme;}
+    }catch(e){}
+    try{ var l=localStorage.getItem('wb_hub_theme'); if(l) return l; }catch(e){}
+    return 'auto';
+  }
+  function mq(){ return window.matchMedia('(prefers-color-scheme: dark)'); }
+  function apply(m){
+    var dark=mq().matches;
+    var act=(m==='dark'||m==='light')?m:(dark?'dark':'light');
+    document.documentElement.setAttribute('data-theme',act);
+  }
+  apply(stored());
+  window.addEventListener('storage',function(e){
+    if(e.key==='wb_store'||e.key==='wb_hub_theme') apply(stored());
+  });
+  try{ mq().addEventListener('change',function(){ if(stored()==='auto') apply('auto'); }); }catch(e){}
+})();
+</script>
+
+<link rel="canonical" href="https://epic-super.github.io/lab/products/hw-lab.html">
+<meta name="description" content="硬件工坊：电气与机械的知识双柱与交叉桥、L0-L5 项目阶梯、AI 中台在硬件里的三大作用、装备与项目看板。">
+<style>
+:root{
+  --bg:#0c0f14; --panel:#151a23; --panel2:#1c2230; --line:#28303f; --line2:#36405a;
+  --txt:#e9edf5; --sub:#8b94a8; --amber:#f0b429; --green:#3ecf8e; --blue:#5b8cff; --red:#f87171; --violet:#a78bfa; --cyan:#2dd4bf; --orange:#ff9f43;
+  --r:16px; --r-sm:11px; --r-f:999px;
+  --sh:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.22);
+  --ease:cubic-bezier(.32,.72,0,1); --tf:.16s var(--ease);
+}
+html[data-theme="light"]{
+  --bg:#f6f7fa; --panel:#ffffff; --panel2:#eef0f6; --line:#e0e4ee; --line2:#cbd2e2;
+  --txt:#1c2233; --sub:#5b6377; --amber:#8a6608; --green:#12945f; --blue:#3b6ae0; --red:#d64545; --violet:#7c5ce0; --cyan:#0d9488; --orange:#c96a0a;
+  --sh:0 1px 3px rgba(20,24,40,.06),0 6px 16px rgba(20,24,40,.07);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","HarmonyOS Sans SC","Microsoft YaHei",sans-serif;
+  background:var(--bg);color:var(--txt);font-size:15px;line-height:1.65;
+  padding-bottom:calc(28px + env(safe-area-inset-bottom));-webkit-font-smoothing:antialiased}
+button,input,select{font-family:inherit;font-size:15px;color:inherit}
+button{cursor:pointer;border:none;background:none}
+button:focus-visible,input:focus-visible{outline:2px solid var(--amber);outline-offset:2px;border-radius:6px}
+a{color:var(--cyan)}
+.wrap{max-width:1020px;margin:0 auto;padding:0 14px}
+
+.top{position:relative;color:#fff;padding:20px 0 16px;padding-top:calc(20px + env(safe-area-inset-top));
+  background:
+    radial-gradient(110% 150% at 8% -20%,rgba(240,180,41,.24),rgba(240,180,41,0) 48%),
+    radial-gradient(90% 130% at 94% 0%,rgba(45,212,191,.3),rgba(45,212,191,0) 58%),
+    linear-gradient(134deg,#1a1c28 0%,#233048 52%,#153436 120%);
+  box-shadow:0 1px 0 rgba(255,255,255,.08) inset,0 6px 22px rgba(8,12,24,.3);overflow:hidden}
+.top::after{content:'';position:absolute;left:0;right:0;bottom:0;height:1px;background:linear-gradient(90deg,transparent,rgba(240,180,41,.5),transparent)}
+.brand h1{margin:0;font-size:21px;font-weight:800;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.brand p{margin:5px 0 0;font-size:12.5px;opacity:.88}
+
+.tabs{display:flex;gap:8px;margin:16px 0 0;flex-wrap:wrap}
+.tab{padding:9px 16px;border-radius:var(--r-f);border:1.5px solid var(--line2);background:var(--panel);color:var(--sub);font-weight:800;font-size:13.5px;transition:all var(--tf)}
+.tab.on{border-color:var(--amber);background:linear-gradient(135deg,rgba(240,180,41,.15),rgba(240,180,41,.04));color:var(--amber)}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px;box-shadow:var(--sh);margin:14px 0}
+.card h2{margin:0 0 4px;font-size:15.5px;font-weight:800;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.card .desc{color:var(--sub);font-size:12.5px;margin:0 0 12px}
+.viewpane{display:none}
+.viewpane.on{display:block;animation:fin .25s var(--ease)}
+@keyframes fin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* 双域桥 */
+.bridge{display:grid;grid-template-columns:1fr 44px 1fr;gap:0;align-items:stretch}
+@media (max-width:720px){.bridge{grid-template-columns:1fr}.bridge-mid{transform:rotate(90deg);margin:4px auto}}
+.pillar{background:var(--panel2);border:1px solid var(--line);border-radius:var(--r);padding:13px 14px}
+.pillar h3{margin:0 0 8px;font-size:14px;display:flex;align-items:center;gap:7px}
+.pillar .kp{display:flex;flex-direction:column;gap:6px}
+.kchip{font-size:12.5px;background:var(--panel);border:1px solid var(--line2);border-radius:var(--r-sm);padding:7px 11px;line-height:1.5}
+.kchip b{color:var(--txt)}
+.kchip small{color:var(--sub);display:block}
+.bridge-mid{display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--amber);text-shadow:0 0 12px rgba(240,180,41,.5)}
+.cross{margin-top:12px;background:linear-gradient(135deg,rgba(240,180,41,.08),rgba(45,212,191,.07));border:1px solid rgba(240,180,41,.35);border-radius:var(--r);padding:13px 15px}
+.cross b.tt{font-size:14px;display:flex;gap:7px;align-items:center}
+.cross .cr{display:flex;gap:8px;flex-wrap:wrap;margin-top:9px}
+.crx{font-size:12px;font-weight:700;padding:6px 12px;border-radius:var(--r-f);background:var(--panel);border:1px solid var(--line2);color:var(--txt)}
+.crx small{color:var(--sub);display:block;font-weight:500}
+.mergenote{margin-top:11px;font-size:12.5px;color:var(--sub);background:var(--panel2);border-left:3px solid var(--violet);border-radius:var(--r-sm);padding:9px 12px}
+
+/* 项目阶梯 */
+.ladder{display:flex;flex-direction:column;gap:10px}
+.run{background:var(--panel2);border:1px solid var(--line);border-radius:var(--r);padding:13px 15px;position:relative;overflow:hidden}
+.run::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:linear-gradient(180deg,var(--amber),var(--cyan))}
+.run .tt{font-size:14px;font-weight:800;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.run .meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.mchip{font-size:11px;font-weight:700;padding:3px 9px;border-radius:var(--r-f);border:1px solid var(--line2);background:var(--panel);color:var(--sub)}
+.mchip.e{color:var(--amber);border-color:rgba(240,180,41,.4)}
+.mchip.m{color:var(--cyan);border-color:rgba(45,212,191,.4)}
+.mchip.ai{color:var(--violet);border-color:rgba(167,139,250,.4)}
+.run .goal{font-size:12.5px;color:var(--sub);margin-top:7px}
+.run .ok{font-size:12px;color:var(--green);margin-top:5px;font-weight:700}
+
+/* AI 中台 */
+.flow{display:flex;flex-direction:column;gap:0;align-items:stretch}
+.fstep{background:var(--panel2);border:1px solid var(--line);border-radius:var(--r-sm);padding:11px 14px;position:relative}
+.fstep b{font-size:13.5px;display:flex;align-items:center;gap:8px}
+.fstep p{margin:4px 0 0;font-size:12px;color:var(--sub)}
+.fstep.core{border:1.5px solid var(--violet);background:linear-gradient(135deg,rgba(167,139,250,.12),rgba(167,139,250,.03));text-align:center;padding:16px}
+.farrow{align-self:center;color:var(--sub);font-size:16px;padding:3px 0}
+.roles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
+@media (max-width:720px){.roles{grid-template-columns:1fr}}
+.role{background:var(--panel2);border:1px solid var(--line);border-radius:var(--r-sm);padding:12px 13px}
+.role b{font-size:13px;display:flex;gap:7px;align-items:center}
+.role p{margin:5px 0 0;font-size:12px;color:var(--sub)}
+
+/* 看板 */
+.kanban{display:grid;grid-template-columns:repeat(3,1fr);gap:11px}
+@media (max-width:720px){.kanban{grid-template-columns:1fr}}
+.kcol{background:var(--panel2);border:1px solid var(--line);border-radius:var(--r);padding:11px;min-height:120px}
+.kcol h4{margin:0 0 9px;font-size:12.5px;color:var(--sub);display:flex;justify-content:space-between;align-items:center}
+.kitem{background:var(--panel);border:1px solid var(--line2);border-radius:var(--r-sm);padding:8px 10px;margin-bottom:7px;font-size:12.5px;display:flex;align-items:center;gap:8px}
+.kitem .grow{flex:1;min-width:0;word-break:break-word}
+.kbtns{display:flex;gap:4px}
+.kmove{font-size:11px;color:var(--sub);border:1px solid var(--line2);border-radius:6px;padding:2px 7px;background:var(--panel2)}
+.kmove:hover{color:var(--amber);border-color:var(--amber)}
+.kdel{font-size:11px;color:var(--sub);border:1px solid var(--line2);border-radius:6px;padding:2px 7px;background:var(--panel2)}
+.kdel:hover{color:var(--red);border-color:var(--red)}
+.gearrow{display:flex;gap:8px;margin-bottom:12px}
+.gearrow .ipt{flex:1}
+.ipt,.sel{background:var(--panel2);border:1px solid var(--line2);border-radius:var(--r-sm);padding:9px 11px;color:var(--txt);width:100%}
+.ipt:focus,.sel:focus{border-color:var(--amber);outline:none}
+.btn{background:linear-gradient(135deg,#d99a1f,var(--amber));color:#171205;border-radius:var(--r-sm);padding:9px 16px;font-size:13.5px;font-weight:800;min-height:40px;display:inline-flex;align-items:center;gap:6px}
+html[data-theme="light"] .btn{color:#fff;background:linear-gradient(135deg,#a4740a,#c99410)}
+.btn:active{transform:scale(.97)}
+.btn.ghost{background:var(--panel2);color:var(--txt);border:1px solid var(--line2)}
+.lnk{margin-top:12px;font-size:12.5px;color:var(--sub);background:var(--panel2);border:1px dashed var(--line2);border-radius:var(--r-sm);padding:10px 13px}
+
+footer.foot{color:var(--sub);font-size:11.5px;text-align:center;margin-top:18px}
+#toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(16px);background:var(--panel);color:var(--txt);border:1px solid var(--line2);border-radius:var(--r-f);padding:9px 18px;font-size:13px;font-weight:700;box-shadow:var(--sh);opacity:0;pointer-events:none;transition:all .25s var(--ease);z-index:99}
+#toast.show{opacity:1;transform:translateX(-50%)}
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <div class="brand">
+      <h1>🔧 硬件工坊 <span style="font-size:12px;font-weight:600;opacity:.8">电气 × 机械 × AI 中台</span></h1>
+      <p>两座知识岛之间架一座桥——既懂电又懂结构、还能让 AI 当大脑的人，市面上非常缺。</p>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="tabs">
+    <button class="tab on" data-v="bridge">🌉 双域桥</button>
+    <button class="tab" data-v="ladder">🪜 项目阶梯</button>
+    <button class="tab" data-v="ai">🤖 AI 中台</button>
+    <button class="tab" data-v="kb">🧰 装备与项目</button>
+  </div>
+
+  <!-- 双域桥 -->
+  <section class="card viewpane on" id="vp-bridge">
+    <h2>🌉 双域知识桥 · 电气柱 ⇄ 机械柱</h2>
+    <p class="desc">先各自知道对方在说什么，交叉点自然会亮——这就是「寻找天赋」突触网络里的打通时刻。</p>
+    <div class="bridge">
+      <div class="pillar">
+        <h3>⚡ 电气柱</h3>
+        <div class="kp">
+          <div class="kchip"><b>电压 / 电流 / 电阻</b><small>欧姆定律 U=IR；先学会看万用表，再谈别的</small></div>
+          <div class="kchip"><b>GPIO 与电平</b><small>3.3V/5V 逻辑、上拉/下拉电阻——为什么悬空引脚会乱跳</small></div>
+          <div class="kchip"><b>PWM 调制</b><small>占空比控速控亮度；舵机角度就是 PWM 的脉宽语言</small></div>
+          <div class="kchip"><b>总线：UART / I2C / SPI</b><small>传感器怎么「说话」；接错 SDA/SCL 为什么会烧</small></div>
+          <div class="kchip"><b>电源与压降</b><small>电机一转电压就被拉垮——稳压与电容的去耦作用</small></div>
+        </div>
+      </div>
+      <div class="bridge-mid">⇄</div>
+      <div class="pillar">
+        <h3>⚙️ 机械柱</h3>
+        <div class="kp">
+          <div class="kchip"><b>自由度（DOF）</b><small>一个关节一个自由度；机械臂几轴就是几个 DOF</small></div>
+          <div class="kchip"><b>传动四件套</b><small>齿轮（变速变矩）/ 连杆（旋转↔往复）/ 皮带（远距缓冲）/ 丝杆（旋转→直线）</small></div>
+          <div class="kchip"><b>材料与工艺</b><small>PLA/PETG 3D 打印、亚克力切割、铝型材——强度与重量的取舍</small></div>
+          <div class="kchip"><b>紧固与装配</b><small>螺丝规格、防松垫片、轴孔配合公差——打出来装不上是最常见的坑</small></div>
+          <div class="kchip"><b>扭矩与惯量</b><small>电机「带得动」是电气问题，「带得稳」是机械问题</small></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cross">
+      <b class="tt">🔀 交叉点 · 打通任督二脉的地方（点开项目阶梯逐个打穿）</b>
+      <div class="cr">
+        <span class="crx">电机家族<small>有刷 / 步进 / 舵机 / 无刷+ESC</small></span>
+        <span class="crx">驱动电路<small>MOS 管 / H 桥 / TB6612 / A4988</small></span>
+        <span class="crx">传感×结构<small>编码器装哪、IMU 怎么固定才不抖</small></span>
+        <span class="crx">EMI 与走线<small>电机线为什么不能和信号线捆一起</small></span>
+        <span class="crx">热与散热<small>驱动板发烫 = 电流路径在叫救命</small></span>
+        <span class="crx">振动与噪声<small>共振点找出来，精度立刻上一个台阶</small></span>
+      </div>
+      <div class="mergenote">🧠 <b>给通才的话</b>：不要追求在某一柱上读到 90 分——你的护城河是「两边都能到 70 分，且知道桥在哪」。交叉点清单就是你的选修课表，按项目需要随用随学。</div>
+    </div>
+  </section>
+
+  <!-- 项目阶梯 -->
+  <section class="card viewpane" id="vp-ladder">
+    <h2>🪜 项目阶梯 L0 → L5 · 每级同时踩两块板</h2>
+    <p class="desc">每一级都同时包含电气 + 机械知识点；完成后打勾进「装备与项目」看板。器材总预算 L0-L3 约 ¥300 内。</p>
+    <div class="ladder">
+      <div class="run"><div class="tt">L0 · 点灯与呼吸 <span class="mchip e">GPIO·欧姆定律</span><span class="mchip m">面包板·插拔手感</span></div>
+        <div class="goal">Arduino/ESP32 + LED + 电阻：点亮 → 闪烁 → PWM 呼吸灯。理解「引脚是个可编程开关」。</div>
+        <div class="ok">✓ 验收：不看教程，自己接出三灯流水并解释每个电阻为什么是这个值</div></div>
+      <div class="run"><div class="tt">L1 · 传感器输入 <span class="mchip e">I2C·上拉</span><span class="mchip m">固定与走线</span></div>
+        <div class="goal">接 DHT11 温湿度 + 光敏 + 超声波；读数上 OLED 显示。第一次让「结构」服务「测量」：传感器装不稳，数据就抖。</div>
+        <div class="ok">✓ 验收：超声波测距稳定 ±1cm，能解释为什么手扶着和松手读数不同</div></div>
+      <div class="run"><div class="tt">L2 · 舵机与 PWM <span class="mchip e">PWM 脉宽</span><span class="mchip m">力臂·扭矩</span></div>
+        <div class="goal">SG90 舵机画角度：0/90/180 扫动 → 两舵云台。第一次体会「电压够但扭矩不够」的机械感受。</div>
+        <div class="ok">✓ 验收：云台带 50g 负载全程不抖，能算出力臂×重量对舵机扭矩的要求</div></div>
+      <div class="run"><div class="tt">L3 · 循迹避障小车 <span class="mchip e">H 桥·编码器</span><span class="mchip m">底盘·传动比</span></div>
+        <div class="goal">TT 电机 + TB6612 驱动 + 循迹传感器：组装底盘、调 PID 走直线。EMI 与走线第一次真正咬你。</div>
+        <div class="ok">✓ 验收：8 字循迹不断线；能说出电机线为什么必须远离信号线</div></div>
+      <div class="run"><div class="tt">L4 · 桌面机械臂 <span class="mchip e">多路 PWM·电源</span><span class="mchip m">3D 打印·逆运动学</span></div>
+        <div class="goal">4 自由度机械臂（3D 打印结构件 + 总线舵机）；写简单逆运动学让末端走直线。公差与装配的终极考验。</div>
+        <div class="ok">✓ 验收：末端重复定位 ±2mm；打印件装不上时能判断是公差还是设计问题</div></div>
+      <div class="run"><div class="tt">L5 · AI 视觉小车 <span class="mchip ai">AI 中台·视觉</span><span class="mchip e">摄像头接口</span><span class="mchip m">整车集成</span></div>
+        <div class="goal">树莓派/香橙派 + 摄像头 + 小车：接 AI 中台做目标识别跟随。这是「双柱 + AI 大脑」的合龙之战。</div>
+        <div class="ok">✓ 验收：识别并跟随指定颜色目标 10 米不断；LLM 副驾能解释每帧日志</div></div>
+    </div>
+  </section>
+
+  <!-- AI 中台 -->
+  <section class="card viewpane" id="vp-ai">
+    <h2>🤖 AI 中台 · 给硬件装一个统一的大脑</h2>
+    <p class="desc">不是「每个项目各接一个 AI」，而是让所有设备共用一个中台：统一接入、统一理解、统一调度。</p>
+    <div class="flow">
+      <div class="fstep"><b>👁 感知层</b><p>摄像头 / 麦克风 / IMU / 温湿度 / 编码器 —— 原始信号从这里进来</p></div>
+      <div class="farrow">↓</div>
+      <div class="fstep"><b>🔩 边缘层（MCU / SBC）</b><p>ESP32、树莓派：采集、滤波、实时控制环（<1ms 级），通过串口 / WiFi / MQTT 上报</p></div>
+      <div class="farrow">↓</div>
+      <div class="fstep core"><b>🤖 AI 中台（The Brain）</b><p>设备注册表 + 消息总线 + 意图理解（LLM）+ 视觉/语音模型 + 规则引擎 —— 所有设备只跟这里说话</p></div>
+      <div class="farrow">↓</div>
+      <div class="fstep"><b>⚙️ 执行层</b><p>电机 / 舵机 / 继电器 / 屏幕语音 —— 中台把「自然语言意图」翻译成「带参数的指令」</p></div>
+    </div>
+    <div class="roles">
+      <div class="role"><b>🧠 统一大脑</b><p>多设备一个脑：小车、机械臂、传感器全都注册进中台，彼此能协作（机械臂拿东西前先问小车「你到哪了」）。</p></div>
+      <div class="role"><b>🗣 自然语言 → 指令</b><p>对桌宠说「把云台转到左边 30 度」，LLM function calling 翻译成 <code>PWM=xx</code>——这就是塔台智能体已验证的链路。</p></div>
+      <div class="role"><b>🛠 调试副驾</b><p>把传感器日志/报错丢给 LLM：解释异常波形、生成驱动代码、审查接线图——硬件学习曲线的最大摩擦点被 AI 削平。</p></div>
+    </div>
+    <div class="lnk">🔗 <b>与塔台联动</b>：塔台智能体（<a href="agent.html">lab/products/agent.html</a>）就是 AI 中台的雏形——BYOK 直连 LLM + 工具调用 + 长期记忆。硬件工坊的中台 = 把它的「工具」从查版本/记事，扩展成「读串口/控 GPIO」。悬浮球对话里说「打开全屏智能体」即可体验。</div>
+    <div class="lnk" style="border-color:rgba(167,139,250,.4)">📚 <b>延伸</b>：个人成长工作站《硬件与电子入门》板块存着学习笔记（<a href="/个人成长工作站/硬件与电子入门/00-板块大纲.md">本地访问 ↗</a>，公开站不含私有内容）。</div>
+  </section>
+
+  <!-- 装备与项目 -->
+  <section class="card viewpane" id="vp-kb">
+    <h2>🧰 装备清单 & 项目看板</h2>
+    <div class="gearrow">
+      <input class="ipt" id="gearIpt" placeholder="加装备：如 SG90 舵机 ×4 / 万用表 / 3D 打印笔…" maxlength="30">
+      <button class="btn" id="gearAdd">＋ 入库</button>
+    </div>
+    <div class="gearrow">
+      <input class="ipt" id="projIpt" placeholder="加项目：如 L3 循迹小车 / 云台相框…" maxlength="30">
+      <button class="btn ghost" id="projAdd">＋ 立项</button>
+    </div>
+    <div class="kanban" id="kb"></div>
+    <div style="margin-top:12px;display:flex;gap:8px">
+      <button class="btn ghost" id="kbReset">♻️ 清空看板</button>
+    </div>
+  </section>
+
+  <footer class="foot">硬件工坊 ｜ 看板存本机（wb_hwlab_v1）｜ 记住：两边 70 分 + 一座桥 &gt; 单边 90 分</footer>
+</div>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+'use strict';
+var $=function(s){return document.querySelector(s)};
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function toast(m){var t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(toast._h);toast._h=setTimeout(function(){t.classList.remove('show')},2200)}
+
+document.querySelectorAll('.tab').forEach(function(t){
+  t.onclick=function(){
+    document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('on')});
+    t.classList.add('on');
+    document.querySelectorAll('.viewpane').forEach(function(x){x.classList.remove('on')});
+    var vp=$('#vp-'+t.getAttribute('data-v'));if(vp)vp.classList.add('on');
+    reportH();
+  };
+});
+
+/* ---------------- 看板 ---------------- */
+var KEY='wb_hwlab_v1';
+var S={gears:[],proj:[]}; /* gears: {n,done} proj: {n,st:0想法/1进行/2完成} */
+try{var raw=localStorage.getItem(KEY);if(raw){var o=JSON.parse(raw);S.gears=o.gears||[];S.proj=o.proj||[]}}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){toast('保存失败')}}
+
+var PST=['💡 想法','🔧 进行中','✅ 完成'];
+function renderKb(){
+  var kb=$('#kb');
+  /* 装备列 */
+  var gCol='<div class="kcol"><h4>🧰 装备清单 <span>'+S.gears.length+'</span></h4>'+
+    S.gears.map(function(g,i){
+      return '<div class="kitem"><input type="checkbox" class="chk gchk" data-i="'+i+'" '+(g.done?'checked':'')+
+        ' style="width:16px;height:16px;accent-color:var(--green)"><span class="grow" style="'+(g.done?'text-decoration:line-through;color:var(--sub)':'')+'">'+esc(g.n)+'</span>'+
+        '<span class="kbtns"><button class="kdel" data-g="'+i+'">删</button></span></div>';
+    }).join('')+(S.gears.length?'':'<div style="color:var(--sub);font-size:12px;text-align:center;padding:12px 0">从 L0 器材开始囤</div>')+'</div>';
+  /* 项目三列 */
+  var cols=[0,1,2].map(function(st){
+    return '<div class="kcol"><h4>'+PST[st]+' <span>'+S.proj.filter(function(p){return p.st===st}).length+'</span></h4>'+
+      S.proj.map(function(p,i){return {p:p,i:i}}).filter(function(x){return x.p.st===st}).map(function(x){
+        var moves=st<2?'<button class="kmove" data-p="'+x.i+'" data-m="1">→</button>':'';
+        var back=st>0?'<button class="kmove" data-p="'+x.i+'" data-m="-1">←</button>':'';
+        return '<div class="kitem"><span class="grow">'+esc(x.p.n)+'</span><span class="kbtns">'+back+moves+
+          '<button class="kdel" data-p="'+x.i+'">删</button></span></div>';
+      }).join('')+(S.proj.some(function(p){return p.st===st})?'':'<div style="color:var(--sub);font-size:12px;text-align:center;padding:10px 0">—</div>')+'</div>';
+  }).join('');
+  kb.innerHTML=gCol+cols;
+
+  kb.querySelectorAll('.gchk').forEach(function(c){
+    c.addEventListener('change',function(){S.gears[+c.getAttribute('data-i')].done=c.checked;save();renderKb()});
+  });
+  kb.querySelectorAll('.kdel').forEach(function(b){
+    b.addEventListener('click',function(){
+      var i=+b.getAttribute('data-g'),j=+b.getAttribute('data-p');
+      if(!isNaN(i)){S.gears.splice(i,1)} else {S.proj.splice(j,1)}
+      save();renderKb();
+    });
+  });
+  kb.querySelectorAll('.kmove').forEach(function(b){
+    b.addEventListener('click',function(){
+      var i=+b.getAttribute('data-p'),m=+b.getAttribute('data-m');
+      S.proj[i].st=Math.max(0,Math.min(2,S.proj[i].st+m));save();renderKb();
+    });
+  });
+}
+$('#gearAdd').onclick=function(){
+  var v=$('#gearIpt').value.trim();if(!v){toast('先写装备名');return}
+  S.gears.push({n:v,done:false});$('#gearIpt').value='';save();renderKb();
+};
+$('#projAdd').onclick=function(){
+  var v=$('#projIpt').value.trim();if(!v){toast('先写项目名');return}
+  S.proj.push({n:v,st:0});$('#projIpt').value='';save();renderKb();toast('已立项：推进到「进行中」才算开始');
+};
+$('#kbReset').onclick=function(){
+  if(!confirm('清空装备与项目看板？'))return;
+  S={gears:[],proj:[]};save();renderKb();
+};
+renderKb();
+
+function reportH(){
+  var h=Math.max(document.documentElement.scrollHeight,document.body.scrollHeight);
+  try{parent.postMessage({__wbResize:true,id:'hwFrame',h:h},'*')}catch(e){}
+}
+if(window.ResizeObserver){new ResizeObserver(reportH).observe(document.body)}
+window.addEventListener('load',reportH);
+setTimeout(reportH,400);
+})();
+</script>
+</body>
+</html>

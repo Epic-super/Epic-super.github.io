@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<!-- 自考章节追踪 · 每科章节清单 + 进度百分比 + 真题轮数 | 单文件 HTML 子应用（零外链），数据走自身 localStorage（wb_zkchapters_v1）
+     与 study-dashboard（周打卡·时间投入）互补：这里看内容覆盖——章节勾没勾完、真题刷了几轮。
+     科目/章节全部可编辑，预填自考公共课示例章节，专业课示例留空让用户自己搭。 -->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" type="image/png" href="../../assets/pwa/icon-192.png"><!-- 2026-11-06 全站补 rel="icon"：本页此前未声明，浏览器回落请求站点根 /favicon.ico 报 404（控制台红色噪音、标签页无图标）；与 2026-10-03 对 index/zk-ky/share-hub 的处理同一策略 -->
+<title>自考章节追踪 · 章节覆盖 × 真题轮数</title>
+
+<script>
+/* 主题跟随主站（同 anime.html 模式）：读 wb_store.data.theme（老版 wb_hub_theme），auto 跟随系统 */
+(function(){
+  function stored(){
+    try{
+      var raw=localStorage.getItem('wb_store');
+      if(raw){var o=JSON.parse(raw); if(o&&o.data&&o.data.theme) return o.data.theme;}
+    }catch(e){}
+    try{ var l=localStorage.getItem('wb_hub_theme'); if(l) return l; }catch(e){}
+    return 'auto';
+  }
+  function mq(){ return window.matchMedia('(prefers-color-scheme: dark)'); }
+  function apply(m){
+    var dark=mq().matches;
+    var act=(m==='dark'||m==='light')?m:(dark?'dark':'light');
+    document.documentElement.setAttribute('data-theme',act);
+  }
+  apply(stored());
+  window.addEventListener('storage',function(e){
+    if(e.key==='wb_store'||e.key==='wb_hub_theme') apply(stored());
+  });
+  try{ mq().addEventListener('change',function(){ if(stored()==='auto') apply('auto'); }); }catch(e){}
+})();
+</script>
+
+<link rel="canonical" href="https://epic-super.github.io/lab/products/zk-chapter-tracker.html">
+<meta name="description" content="自考章节追踪：每科章节清单勾选、进度百分比、真题轮数计数。看内容覆盖，不做时间打卡。">
+<style>
+:root{
+  --bg:#101019; --panel:#191a2b; --panel2:#20213a; --line:#2c2d4d; --line2:#3a3c63;
+  --txt:#edeef8; --sub:#8f93b4; --blue:#4a72d0; --orange:#ff9f43; --pink:#f472b6;
+  --green:#34d399; --red:#f87171; --purple:#a78bfa; --gold:#fbbf24;
+  --r:16px; --r-sm:11px; --r-f:999px;
+  --sh:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.22);
+  --ease:cubic-bezier(.32,.72,0,1); --tf:.16s var(--ease);
+}
+html[data-theme="light"]{
+  --bg:#f7f8fc; --panel:#ffffff; --panel2:#eef0f8; --line:#e2e5f0; --line2:#ccd2e6;
+  --txt:#20233a; --sub:#5d6280; --blue:#3b6ae0; --orange:#d97b1c; --pink:#db2777;
+  --green:#12945f; --red:#dc4b4b; --purple:#7c5cd6; --gold:#b45309;
+  --sh:0 1px 3px rgba(30,30,60,.06),0 6px 16px rgba(30,30,60,.07);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","HarmonyOS Sans SC","Microsoft YaHei",sans-serif;
+  background:var(--bg);color:var(--txt);font-size:15px;line-height:1.65;
+  padding-bottom:calc(28px + env(safe-area-inset-bottom));
+  -webkit-font-smoothing:antialiased;
+}
+button,input,select,textarea{font-family:inherit;font-size:15px;color:inherit}
+button{cursor:pointer;border:none;background:none}
+button:focus-visible,input:focus-visible{outline:2px solid var(--blue);outline-offset:2px;border-radius:6px}
+.wrap{max-width:880px;margin:0 auto;padding:0 14px}
+
+.top{position:relative;color:#fff;padding:22px 0 20px;padding-top:calc(22px + env(safe-area-inset-top));
+  background:
+    radial-gradient(110% 150% at 8% -20%,rgba(52,211,153,.30),rgba(52,211,153,0) 50%),
+    radial-gradient(90% 130% at 92% 0%,rgba(91,140,255,.32),rgba(91,140,255,0) 58%),
+    linear-gradient(134deg,#12321f 0%,#1d4a33 55%,#2b5c6b 120%);
+  box-shadow:0 1px 0 rgba(255,255,255,.08) inset,0 6px 22px rgba(6,22,14,.3);overflow:hidden}
+.top::after{content:'';position:absolute;left:0;right:0;bottom:0;height:1px;background:linear-gradient(90deg,transparent,rgba(52,211,153,.5),transparent)}
+.brand h1{margin:0;font-size:21px;font-weight:800;display:flex;align-items:center;gap:9px}
+.brand p{margin:5px 0 0;font-size:12.5px;opacity:.88}
+.stats{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}
+.stat{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:var(--r-sm);padding:6px 11px;font-size:12px;display:flex;align-items:baseline;gap:5px;color:#fff}
+.stat b{font-size:16px;font-weight:800;font-variant-numeric:tabular-nums}
+.stat.fire b{color:#b8ffd9}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:18px;box-shadow:var(--sh);margin:14px 0}
+.card h2{margin:0 0 4px;font-size:16px;font-weight:800;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.card .desc{color:var(--sub);font-size:13px;margin:0 0 12px}
+.small{font-size:12px;color:var(--sub)}
+
+/* 科目卡 */
+.subj{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px;box-shadow:var(--sh);margin:14px 0}
+.subj .head{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.subj .name{font-size:16px;font-weight:800;cursor:pointer}
+.subj .name:hover{color:var(--blue)}
+.statechip{font-size:10.5px;font-weight:700;border-radius:5px;padding:2px 8px;border:1px solid;letter-spacing:.5px}
+.s-none{color:var(--sub);border-color:var(--line2)}
+.s-going{color:var(--blue);border-color:var(--blue)}
+.s-cleared{color:var(--green);border-color:var(--green)}
+.s-paper{color:var(--gold);border-color:var(--gold)}
+.headbtns{margin-left:auto;display:flex;gap:6px}
+.mini{font-size:11.5px;border:1px solid var(--line2);border-radius:var(--r-f);padding:3px 10px;color:var(--sub);transition:var(--tf);background:none}
+.mini:hover{border-color:var(--red);color:var(--red)}
+.mini.blue:hover{border-color:var(--blue);color:var(--blue)}
+
+.prog{height:8px;background:var(--panel2);border-radius:var(--r-f);overflow:hidden;margin:11px 0 5px;border:1px solid var(--line)}
+.prog i{display:block;height:100%;background:linear-gradient(90deg,var(--blue),var(--green));border-radius:var(--r-f);transition:width .35s var(--ease)}
+.plabel{font-size:12px;color:var(--sub);display:flex;justify-content:space-between;font-variant-numeric:tabular-nums}
+
+.chs{margin-top:11px;display:grid;gap:5px}
+.ch{display:flex;align-items:center;gap:9px;background:var(--panel2);border:1px solid var(--line);border-radius:var(--r-sm);padding:8px 11px;transition:var(--tf)}
+.ch:hover{border-color:var(--line2)}
+.ch input[type=checkbox]{width:17px;height:17px;accent-color:var(--green);cursor:pointer;flex:none}
+.ch .cn{flex:1;font-size:13.5px;cursor:pointer}
+.ch.done .cn{color:var(--sub);text-decoration:line-through}
+.ch .del{font-size:11px;color:var(--sub);opacity:.6;transition:var(--tf)}
+.ch .del:hover{opacity:1;color:var(--red)}
+.addrow{display:flex;gap:8px;margin-top:10px}
+.addrow input{flex:1;background:var(--panel2);border:1px solid var(--line);border-radius:var(--r-sm);padding:8px 11px}
+.addrow input:focus{border-color:var(--blue)}
+.btn{border:1px solid var(--line2);background:var(--panel2);border-radius:var(--r-f);padding:8px 16px;font-size:13.5px;transition:var(--tf)}
+.btn:hover{border-color:var(--blue)}
+.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff;font-weight:700}
+.btn.primary:hover{filter:brightness(1.08)}
+
+/* 真题轮数 */
+.papers{display:flex;align-items:center;gap:10px;margin-top:12px;background:rgba(251,191,36,.06);border:1px dashed rgba(251,191,36,.35);border-radius:var(--r-sm);padding:9px 12px}
+.papers .pl{font-size:12.5px;color:var(--sub)}
+.papers .pv{font-size:18px;font-weight:800;color:var(--gold);font-variant-numeric:tabular-nums;min-width:34px;text-align:center}
+.pbtn{width:26px;height:26px;border-radius:50%;border:1px solid var(--line2);color:var(--txt);font-size:15px;line-height:1;transition:var(--tf);display:flex;align-items:center;justify-content:center}
+.pbtn:hover{border-color:var(--gold);color:var(--gold)}
+
+.totrow{margin-top:4px}
+@media (max-width:560px){
+  .optcell{font-size:14px}
+  .subj .head{align-items:flex-start}
+}
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+
+<header class="top">
+  <div class="wrap brand">
+    <h1>🗺️ 自考章节追踪</h1>
+    <p>每科一张章节地图：勾一章亮一章，真题轮数单独记。时间投入看驾驶舱的周打卡，内容覆盖看这里。</p>
+    <div class="stats">
+      <div class="stat"><span>科目</span><b id="stSubs">0</b></div>
+      <div class="stat fire"><span>总章节完成</span><b id="stPct">0</b><span>%</span></div>
+      <div class="stat"><span>章节已清科目</span><b id="stCleared">0</b></div>
+      <div class="stat"><span>真题总轮数</span><b id="stPapers">0</b></div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="card totrow">
+    <h2>📌 总览</h2>
+    <p class="desc">全书章节清完才算一轮复习的起点；真题轮数 ≥2 才有上考场的底气。科目名、章节名点一下就能改。</p>
+    <div class="prog"><i id="totBar" style="width:0%"></i></div>
+    <div class="plabel"><span id="totTxt">0 / 0 章</span><span>示例章节仅供起步，按你的专业和教材目录增删改</span></div>
+  </section>
+
+  <div id="subjBox"></div>
+
+  <div class="card" style="text-align:center">
+    <button class="btn primary" id="btnAddSub">＋ 新增科目</button>
+    <p class="small" style="margin-top:8px">科目名建议带课程代码（如 03709 马原），方便对照官方教材和真题。删除科目前会二次确认；数据全在本机 localStorage。</p>
+  </div>
+
+</main>
+
+<script>
+(function(){
+'use strict';
+var KEY='wb_zkchapters_v1';
+var $=function(s){return document.querySelector(s)};
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+
+/* ---------- 示例科目（自考公共课 + 专业课留空） ---------- */
+function sampleData(){
+  return {seq:1,subs:[
+    {id:'s1',name:'03709 马克思主义基本原理概论',papers:0,chs:[
+      {id:'c1',n:'绪论：马克思主义是关于无产阶级和人类解放的科学',done:false},
+      {id:'c2',n:'第1章 世界的物质性及发展规律',done:false},
+      {id:'c3',n:'第2章 实践与认识及其发展规律',done:false},
+      {id:'c4',n:'第3章 人类社会及其发展规律',done:false},
+      {id:'c5',n:'第4章 资本主义的本质及规律',done:false},
+      {id:'c6',n:'第5章 资本主义的发展及其趋势',done:false},
+      {id:'c7',n:'第6-7章 社会主义·共产主义',done:false}
+    ]},
+    {id:'s2',name:'03708 中国近现代史纲要',papers:0,chs:[
+      {id:'c8',n:'第1-2章 反侵略斗争·早期探索',done:false},
+      {id:'c9',n:'第3章 辛亥革命',done:false},
+      {id:'c10',n:'第4-5章 开天辟地·革命新道路',done:false},
+      {id:'c11',n:'第6章 抗日战争',done:false},
+      {id:'c12',n:'第7章 为创建新中国而奋斗',done:false},
+      {id:'c13',n:'第8-10章 新中国·探索·改革开放',done:false}
+    ]},
+    {id:'s3',name:'00015 英语(二)',papers:0,chs:[
+      {id:'c14',n:'词汇 4500 高频过一遍',done:false},
+      {id:'c15',n:'阅读理解 分题型练',done:false},
+      {id:'c16',n:'完形填空 + 语法',done:false},
+      {id:'c17',n:'翻译 + 写作模板',done:false},
+      {id:'c18',n:'真题卷 1 套计时模考',done:false}
+    ]},
+    {id:'s4',name:'专业课示例（点我改名）',papers:0,chs:[]}
+  ]};
+}
+function load(){
+  try{
+    var o=JSON.parse(localStorage.getItem(KEY));
+    if(o&&typeof o==='object'&&o.subs) return o;
+  }catch(e){}
+  return sampleData();
+}
+function save(){ try{ localStorage.setItem(KEY,JSON.stringify(S)); }catch(e){} }
+var S=load();
+
+/* ---------- 统计 ---------- */
+function pct(chs){
+  if(!chs.length) return -1;               // 无章节：不算进度
+  return Math.round(chs.filter(function(c){return c.done}).length/chs.length*100);
+}
+function renderStats(){
+  var tot=0,done=0,cleared=0,papers=0;
+  S.subs.forEach(function(s){
+    papers+=s.papers||0;
+    s.chs.forEach(function(c){ tot++; if(c.done) done++; });
+    var p=pct(s.chs);
+    if(p===100) cleared++;
+  });
+  $('#stSubs').textContent=S.subs.length;
+  $('#stPct').textContent=tot?Math.round(done/tot*100):0;
+  $('#stCleared').textContent=cleared;
+  $('#stPapers').textContent=papers;
+  $('#totBar').style.width=(tot?Math.round(done/tot*100):0)+'%';
+  $('#totTxt').textContent=done+' / '+tot+' 章';
+}
+
+/* ---------- 科目状态 ---------- */
+function stateOf(s){
+  var p=pct(s.chs);
+  if(p===100&&(s.papers||0)>=1) return {t:'真题 '+(s.papers||0)+' 轮',c:'s-paper'};
+  if(p===100) return {t:'章节已清',c:'s-cleared'};
+  if(p>0) return {t:'进行中 '+p+'%',c:'s-going'};
+  return {t:s.chs.length?'未开始':'待建章节',c:'s-none'};
+}
+
+/* ---------- 渲染 ---------- */
+function render(){
+  var box=$('#subjBox'); box.innerHTML='';
+  S.subs.forEach(function(s){
+    var idx=S.subs.indexOf(s);
+    var st=stateOf(s), p=pct(s.chs);
+    var el=document.createElement('section');
+    el.className='subj';
+    var h='<div class="head">'+
+      '<span class="name" title="点击改名" data-ren>'+esc(s.name)+'</span>'+
+      '<span class="statechip '+st.c+'">'+st.t+'</span>'+
+      '<span class="headbtns">'+
+      '<button class="mini blue" data-up>↑</button>'+
+      '<button class="mini blue" data-down>↓</button>'+
+      '<button class="mini" data-del>删除</button></span></div>';
+    if(p>=0){
+      h+='<div class="prog"><i style="width:'+p+'%"></i></div>'+
+         '<div class="plabel"><span>'+s.chs.filter(function(c){return c.done}).length+' / '+s.chs.length+' 章 · '+p+'%</span><span>勾完去刷真题</span></div>';
+    }else{
+      h+='<div class="small" style="margin-top:10px">还没有章节——按教材目录添加，一章一条（可写「第1章 …」）。</div>';
+    }
+    if(s.chs.length){
+      h+='<div class="chs">';
+      s.chs.forEach(function(c){
+        h+='<div class="ch'+(c.done?' done':'')+'" data-ch="'+c.id+'">'+
+          '<input type="checkbox"'+(c.done?' checked':'')+' data-ck>'+
+          '<span class="cn" data-cn>'+esc(c.n)+'</span>'+
+          '<span class="del" data-chdel>移除</span></div>';
+      });
+      h+='</div>';
+    }
+    h+='<div class="addrow">'+
+      '<input type="text" placeholder="添加章节，如：第1章 概率论的基本概念" data-addinput>'+
+      '<button class="btn primary" data-add>＋ 加章节</button></div>';
+    h+='<div class="papers">'+
+      '<span class="pl">真题轮数</span>'+
+      '<button class="pbtn" data-pm>−</button>'+
+      '<span class="pv">'+(s.papers||0)+'</span>'+
+      '<button class="pbtn" data-pp>＋</button>'+
+      '<span class="pl">整套真题计时刷完一遍 = +1 轮；刷完把错题回炉</span></div>';
+    el.innerHTML=h;
+
+    el.querySelector('[data-ren]').onclick=function(){
+      var v=prompt('科目名（建议带课程代码）：',s.name);
+      if(v!==null&&v.trim()){ s.name=v.trim(); save(); render(); }
+    };
+    el.querySelector('[data-up]').onclick=function(){
+      if(idx>0){ S.subs.splice(idx,1); S.subs.splice(idx-1,0,s); save(); render(); }
+    };
+    el.querySelector('[data-down]').onclick=function(){
+      if(idx<S.subs.length-1){ S.subs.splice(idx,1); S.subs.splice(idx+1,0,s); save(); render(); }
+    };
+    el.querySelector('[data-del]').onclick=function(){
+      if(confirm('删除科目「'+s.name+'」及其全部章节？')){ S.subs.splice(idx,1); save(); render(); }
+    };
+    var addBtn=el.querySelector('[data-add]'), addIn=el.querySelector('[data-addinput]');
+    function doAdd(){
+      var v=addIn.value.replace(/^\s+|\s+$/g,'');
+      if(!v){ addIn.focus(); return; }
+      s.chs.push({id:'c'+Date.now()+Math.floor(Math.random()*1e4),n:v,done:false});
+      save(); render();
+    }
+    addBtn.onclick=doAdd;
+    addIn.onkeydown=function(e){ if(e.key==='Enter'){ e.preventDefault(); doAdd(); } };
+    el.querySelectorAll('[data-ch]').forEach(function(row){
+      var cid=row.getAttribute('data-ch');
+      row.querySelector('[data-ck]').onchange=function(ev){
+        var ch=s.chs.filter(function(c){return c.id===cid})[0];
+        if(ch){ ch.done=ev.target.checked; save(); render(); }
+      };
+      row.querySelector('[data-cn]').onclick=function(){
+        var ch=s.chs.filter(function(c){return c.id===cid})[0];
+        if(!ch) return;
+        var v=prompt('章节名：',ch.n);
+        if(v!==null&&v.trim()){ ch.n=v.trim(); save(); render(); }
+      };
+      row.querySelector('[data-chdel]').onclick=function(){
+        s.chs=s.chs.filter(function(c){return c.id!==cid});
+        save(); render();
+      };
+    });
+    el.querySelector('[data-pm]').onclick=function(){ s.papers=Math.max(0,(s.papers||0)-1); save(); render(); };
+    el.querySelector('[data-pp]').onclick=function(){ s.papers=(s.papers||0)+1; save(); render(); };
+
+    box.appendChild(el);
+  });
+  renderStats();
+}
+
+$('#btnAddSub').onclick=function(){
+  var v=prompt('新科目名（建议带课程代码）：','');
+  if(v!==null&&v.trim()){
+    S.subs.push({id:'s'+Date.now(),name:v.trim(),papers:0,chs:[]});
+    save(); render();
+  }
+};
+
+/* ---------- 高度上报（主站 iframe 自适应） ---------- */
+function reportH(){
+  var h=Math.max(document.documentElement.scrollHeight,document.body.scrollHeight);
+  try{ parent.postMessage({__wbResize:true,id:'zkChapFrame',h:h},'*') }catch(e){}
+}
+if(window.ResizeObserver){ new ResizeObserver(reportH).observe(document.body); }
+window.addEventListener('load',reportH);
+setTimeout(reportH,400);
+
+render();
+})();
+</script>
+</body>
+</html>

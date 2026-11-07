@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<!-- 寻找天赋 · 突触地图 | 单文件 HTML 子应用（零外链），数据走自身 localStorage（wb_talent_finder_v1）
+     核心隐喻：天赋不是单项冠军，是一张会生长的突触网——
+     节点=领域（信号供能），连接=突触（关联），连通两座孤岛=打通时刻（任督二脉），
+     每个节点挂身体锚点（脑/眼/耳/口/心/肺/手/腿脚），身体热力图看训练的"地理"。 -->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" type="image/png" href="../../assets/pwa/icon-192.png"><!-- 2026-11-06 全站补 rel="icon"：本页此前未声明，浏览器回落请求站点根 /favicon.ico 报 404（控制台红色噪音、标签页无图标）；与 2026-10-03 对 index/zk-ky/share-hub 的处理同一策略 -->
+<title>寻找天赋 · 突触地图</title>
+
+<script>
+/* 主题跟随主站（同 anime.html 模式）：读 wb_store.data.theme（老版 wb_hub_theme），
+   auto 跟随系统；主站其它标签页切主题时经 storage 事件实时同步。 */
+(function(){
+  function stored(){
+    try{
+      var raw=localStorage.getItem('wb_store');
+      if(raw){var o=JSON.parse(raw); if(o&&o.data&&o.data.theme) return o.data.theme;}
+    }catch(e){}
+    try{ var l=localStorage.getItem('wb_hub_theme'); if(l) return l; }catch(e){}
+    return 'auto';
+  }
+  function mq(){ return window.matchMedia('(prefers-color-scheme: dark)'); }
+  function apply(m){
+    var dark=mq().matches;
+    var act=(m==='dark'||m==='light')?m:(dark?'dark':'light');
+    document.documentElement.setAttribute('data-theme',act);
+  }
+  apply(stored());
+  window.addEventListener('storage',function(e){
+    if(e.key==='wb_store'||e.key==='wb_hub_theme') apply(stored());
+  });
+  try{ mq().addEventListener('change',function(){ if(stored()==='auto') apply('auto'); }); }catch(e){}
+})();
+</script>
+
+<link rel="canonical" href="https://epic-super.github.io/lab/products/talent-finder.html">
+<meta name="description" content="寻找天赋 · 突触地图：领域节点 × 突触连接 × 身体锚点。采集天赋信号，连出你的神经网络，打通任督二脉。">
+<style>
+:root{
+  --bg:#0d0f1a; --panel:#151a2c; --panel2:#1c2238; --line:#2a3149; --line2:#363e5c;
+  --txt:#eceef8; --sub:#8f97b2; --gold:#f0b429; --gold-ink:#f0b429; --gold-dim:rgba(240,180,41,.14);
+  --teal:#2dd4bf; --violet:#a78bfa; --red:#f87171; --green:#34d399; --amber:#fbbf24;
+  --ring-track:#252c44; --r:16px; --r-sm:11px; --r-f:999px;
+  --sh:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.22);
+  --ease:cubic-bezier(.32,.72,0,1); --tf:.16s var(--ease);
+}
+html[data-theme="light"]{
+  --bg:#f7f6f1; --panel:#ffffff; --panel2:#f1efe7; --line:#e4e0d3; --line2:#d2cdbc;
+  --txt:#232433; --sub:#5d6377; --gold:#b8860b; --gold-ink:#8a6608; --gold-dim:rgba(184,134,11,.12);
+  --teal:#0d9488; --violet:#7c5ce0; --red:#dc4b4b; --green:#12945f; --amber:#b45309;
+  --ring-track:#e8e4d8; --sh:0 1px 3px rgba(30,26,10,.06),0 6px 16px rgba(30,26,10,.07);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","HarmonyOS Sans SC","Microsoft YaHei",sans-serif;
+  background:var(--bg);color:var(--txt);font-size:15px;line-height:1.65;
+  padding-bottom:calc(28px + env(safe-area-inset-bottom));
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+}
+button,input,select,textarea{font-family:inherit;font-size:15px;color:inherit}
+button{cursor:pointer;border:none;background:none}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,a:focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:6px}
+a{color:var(--teal)}
+.wrap{max-width:1080px;margin:0 auto;padding:0 14px}
+
+/* ---- 顶栏 hero ---- */
+.top{position:relative;color:#fff;padding:22px 0 20px;padding-top:calc(22px + env(safe-area-inset-top));
+  background:
+    radial-gradient(110% 150% at 8% -20%,rgba(240,180,41,.22),rgba(240,180,41,0) 48%),
+    radial-gradient(90% 130% at 95% 0%,rgba(167,139,250,.4),rgba(167,139,250,0) 58%),
+    linear-gradient(134deg,#191b3a 0%,#2a2350 48%,#153c46 120%);
+  box-shadow:0 1px 0 rgba(255,255,255,.08) inset,0 6px 22px rgba(10,12,30,.3);overflow:hidden}
+html[data-theme="light"] .top{color:#fff}
+.top::after{content:'';position:absolute;left:0;right:0;bottom:0;height:1px;background:linear-gradient(90deg,transparent,rgba(240,180,41,.55),transparent)}
+.top-row{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.brand{flex:1;min-width:230px}
+.brand h1{margin:0;font-size:21px;font-weight:800;letter-spacing:-.01em;display:flex;align-items:center;gap:9px;text-shadow:0 1px 2px rgba(0,0,0,.2)}
+.brand h1 .sp{font-size:24px;line-height:1;filter:drop-shadow(0 0 6px rgba(240,180,41,.7))}
+.brand p{margin:5px 0 0;font-size:12.5px;opacity:.88}
+.top-acts{display:flex;gap:7px;flex-wrap:wrap}
+.tbtn{background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.25);color:#fff;padding:8px 12px;border-radius:var(--r-sm);font-size:13px;font-weight:600;min-height:38px;display:inline-flex;align-items:center;gap:5px;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);transition:background var(--tf),transform var(--tf)}
+.tbtn:hover{background:rgba(255,255,255,.24)}
+.tbtn:active{transform:scale(.96)}
+.tbtn.danger{border-color:rgba(248,113,113,.5);background:rgba(248,113,113,.16)}
+/* 顶栏统计条 */
+.stats{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}
+.stat{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:var(--r-sm);padding:6px 11px;font-size:12px;display:flex;align-items:baseline;gap:5px}
+.stat b{font-size:16px;font-weight:800;font-variant-numeric:tabular-nums}
+.stat.gold b{color:var(--gold)}
+
+/* ---- 子导航 ---- */
+.subnav{position:sticky;top:0;z-index:20;display:flex;gap:6px;overflow-x:auto;padding:10px 0;border-bottom:1px solid var(--line);background:var(--bg);scrollbar-width:none}
+.subnav::-webkit-scrollbar{display:none}
+.subnav a{flex:none;padding:7px 13px;border-radius:var(--r-f);font-size:13px;color:var(--sub);text-decoration:none;font-weight:600;transition:background var(--tf),color var(--tf);white-space:nowrap}
+.subnav a:hover{background:var(--panel2);color:var(--txt)}
+
+/* ---- 卡片 ---- */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:18px;box-shadow:var(--sh);margin:14px 0}
+.card h2{margin:0 0 4px;font-size:16.5px;font-weight:800;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.card h2 .no{font-size:11px;background:var(--gold-dim);color:var(--gold-ink);padding:2px 9px;border-radius:var(--r-f);font-weight:800;letter-spacing:.06em}
+.card .desc{color:var(--sub);font-size:13px;margin:0 0 14px}
+.sect{scroll-margin-top:56px}
+
+/* ---- 表单元素 ---- */
+.ipt,.sel,.txa{background:var(--panel2);border:1px solid var(--line2);border-radius:var(--r-sm);padding:9px 11px;color:var(--txt);width:100%;transition:border-color var(--tf)}
+.ipt::placeholder,.txa::placeholder{color:var(--sub);opacity:.75}
+.ipt:focus,.sel:focus,.txa:focus{border-color:var(--gold);outline:none}
+.ipt:focus-visible,.sel:focus-visible,.txa:focus-visible{outline:none}
+.txa{resize:vertical;min-height:64px}
+.sel{appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--sub) 50%),linear-gradient(135deg,var(--sub) 50%,transparent 50%);background-position:calc(100% - 16px) 55%,calc(100% - 11px) 55%;background-size:5px 5px;background-repeat:no-repeat;padding-right:30px}
+.lbl{display:block;font-size:12px;font-weight:700;color:var(--sub);margin:10px 0 5px;letter-spacing:.02em}
+.btn{background:linear-gradient(135deg,#d99a1f,var(--gold));color:#171205;border-radius:var(--r-sm);padding:9px 16px;font-size:13.5px;font-weight:800;min-height:40px;display:inline-flex;align-items:center;gap:6px;transition:transform var(--tf),filter var(--tf);border:1px solid rgba(255,255,255,.14)}
+html[data-theme="light"] .btn{color:#fff;background:linear-gradient(135deg,#a4740a,#c99410);border-color:rgba(0,0,0,.08)}
+.btn:hover{filter:brightness(1.06)}
+.btn:active{transform:scale(.97)}
+.btn.ghost{background:var(--panel2);color:var(--txt);border:1px solid var(--line2)}
+.btn.sm{padding:6px 11px;min-height:32px;font-size:12.5px}
+.btn.del{background:transparent;border:1px solid var(--line2);color:var(--sub);min-height:32px;padding:6px 10px}
+.btn.del:hover{color:var(--red);border-color:var(--red)}
+
+/* ---- 信号 chips ---- */
+.sigs{display:flex;gap:8px;flex-wrap:wrap}
+.sig{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:var(--r-f);border:1.5px solid var(--line2);background:var(--panel2);font-size:13px;font-weight:700;color:var(--sub);min-height:38px;transition:all var(--tf);user-select:none}
+.sig:hover{border-color:var(--gold)}
+.sig.on{border-color:var(--gold);background:var(--gold-dim);color:var(--gold-ink)}
+.sig .ic{font-size:15px}
+.sig small{font-weight:500;opacity:.8}
+
+/* ---- 突触图 ---- */
+.syn-wrap{position:relative;border:1px solid var(--line);border-radius:var(--r);background:
+  radial-gradient(80% 90% at 20% 10%,rgba(167,139,250,.07),transparent 55%),
+  radial-gradient(70% 80% at 85% 85%,rgba(240,180,41,.06),transparent 55%),var(--panel2);overflow:hidden}
+.syn-svg{display:block;width:100%;height:auto;touch-action:none;cursor:grab}
+.syn-svg.dragging{cursor:grabbing}
+.syn-svg .edge{stroke:var(--line2);stroke-width:1.6;transition:stroke var(--tf)}
+.syn-svg .edge.far{stroke:var(--gold);stroke-dasharray:5 4;opacity:.85}
+.syn-svg .edge.sel{stroke:var(--teal);stroke-width:2.4}
+.syn-svg .edge:hover{stroke:var(--teal)}
+.syn-svg .nlabel{fill:var(--txt);font-size:11.5px;font-weight:700;text-anchor:middle;pointer-events:none;paint-order:stroke;stroke:var(--panel2);stroke-width:3px}
+.syn-svg .nsub{fill:var(--sub);font-size:9.5px;text-anchor:middle;pointer-events:none;paint-order:stroke;stroke:var(--panel2);stroke-width:2.5px}
+.syn-svg .node{cursor:pointer}
+.syn-svg .node circle.core{fill:var(--panel);stroke:var(--line2);stroke-width:2;transition:stroke var(--tf),filter var(--tf)}
+.syn-svg .node.warm circle.core{stroke:var(--violet)}
+.syn-svg .node.hot circle.core{stroke:var(--gold);filter:drop-shadow(0 0 5px rgba(240,180,41,.55))}
+.syn-svg .node.sel circle.core{stroke:var(--teal);stroke-width:3;filter:drop-shadow(0 0 7px rgba(45,212,191,.6))}
+.syn-svg .node.sel circle.ring{display:block}
+.syn-svg .node circle.ring{display:none;fill:none;stroke:var(--teal);stroke-width:1.4;stroke-dasharray:3 4;animation:rot 9s linear infinite}
+@keyframes rot{to{transform:rotate(360deg)}}
+.syn-svg .node circle.ring{transform-box:fill-box;transform-origin:center}
+.syn-svg .edgepulse{fill:var(--gold);filter:drop-shadow(0 0 5px rgba(240,180,41,.95));opacity:.95;pointer-events:none}
+.syn-svg .edgepulse.far{fill:var(--teal);filter:drop-shadow(0 0 6px rgba(45,212,191,.95))}
+.syn-svg .edgepulse.slow{opacity:.55}
+.syn-wrap{position:relative}
+.syn-wrap::before{content:'';position:absolute;inset:0;pointer-events:none;opacity:.5;
+  background:
+    radial-gradient(1.6px 1.6px at 12% 22%,rgba(167,139,250,.5),transparent 100%),
+    radial-gradient(1.4px 1.4px at 78% 14%,rgba(240,180,41,.42),transparent 100%),
+    radial-gradient(1.8px 1.8px at 34% 78%,rgba(45,212,191,.4),transparent 100%),
+    radial-gradient(1.3px 1.3px at 88% 62%,rgba(167,139,250,.44),transparent 100%),
+    radial-gradient(1.5px 1.5px at 58% 38%,rgba(240,180,41,.34),transparent 100%),
+    radial-gradient(1.4px 1.4px at 22% 56%,rgba(45,212,191,.36),transparent 100%);
+  animation:drift 26s linear infinite alternate}
+@keyframes drift{from{transform:translate3d(0,0,0)}to{transform:translate3d(-14px,10px,0)}}
+.syn-svg .node.hot circle.core{animation:breath 2.8s ease-in-out infinite}
+@keyframes breath{0%,100%{filter:drop-shadow(0 0 4px rgba(240,180,41,.45))}50%{filter:drop-shadow(0 0 11px rgba(240,180,41,.9))}}
+@media (prefers-reduced-motion:reduce){.syn-wrap::before{animation:none}.syn-svg .edgepulse{display:none}.syn-svg .node.hot circle.core{animation:none}}
+.syn-hint{padding:9px 13px;font-size:12.5px;color:var(--sub);border-top:1px solid var(--line);background:var(--panel)}
+.syn-hint b{color:var(--txt)}
+.syn-toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:11.5px;color:var(--sub);margin-left:auto}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:4px;vertical-align:-1px}
+/* 连线弹层 */
+.edge-pop{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);width:min(430px,92%);background:var(--panel);border:1px solid var(--line2);border-radius:var(--r);box-shadow:var(--sh);padding:13px 14px;display:none;z-index:5}
+.edge-pop.show{display:block;animation:pop .18s var(--ease)}
+@keyframes pop{from{opacity:0;transform:translate(-50%,8px)}to{opacity:1;transform:translate(-50%,0)}}
+.edge-pop .tt{font-size:13px;font-weight:800;margin-bottom:8px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.far-badge{font-size:10.5px;background:var(--gold-dim);color:var(--gold-ink);border:1px solid var(--gold);border-radius:var(--r-f);padding:1px 8px;font-weight:800}
+
+/* ---- 列表行 ---- */
+.row{display:flex;align-items:flex-start;gap:10px;padding:11px 2px;border-top:1px solid var(--line)}
+.row:first-child{border-top:none}
+.row .grow{flex:1;min-width:0}
+.row .tt{font-size:13.5px;font-weight:700;word-break:break-word}
+.row .meta{font-size:11.5px;color:var(--sub);margin-top:2px;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.chip{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:2px 9px;border-radius:var(--r-f);background:var(--panel2);border:1px solid var(--line2);color:var(--sub);white-space:nowrap}
+.chip.gold{background:var(--gold-dim);border-color:var(--gold);color:var(--gold-ink)}
+.chip.teal{background:rgba(45,212,191,.12);border-color:var(--teal);color:var(--teal)}
+.chip.violet{background:rgba(167,139,250,.13);border-color:var(--violet);color:var(--violet)}
+.chip.green{background:rgba(52,211,153,.12);border-color:var(--green);color:var(--green)}
+.chip.red{background:rgba(248,113,113,.12);border-color:var(--red);color:var(--red)}
+.empty{padding:22px 10px;text-align:center;color:var(--sub);font-size:13px}
+.empty .big{font-size:26px;display:block;margin-bottom:6px;opacity:.8}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:760px){.two{grid-template-columns:1fr}}
+
+/* ---- 打通横幅 ---- */
+.merge-banner{position:relative;overflow:hidden;border-radius:var(--r);padding:14px 18px;margin:14px 0;display:none;align-items:center;gap:12px;
+  background:linear-gradient(120deg,rgba(240,180,41,.18),rgba(167,139,250,.16) 55%,rgba(45,212,191,.14));
+  border:1px solid var(--gold);animation:bannerIn .4s var(--ease)}
+.merge-banner.show{display:flex}
+@keyframes bannerIn{from{opacity:0;transform:translateY(-6px) scale(.98)}to{opacity:1;transform:none}}
+.merge-banner .zap{font-size:26px;filter:drop-shadow(0 0 8px rgba(240,180,41,.8));animation:pulseZ 1.2s infinite}
+@keyframes pulseZ{0%,100%{transform:scale(1)}50%{transform:scale(1.18)}}
+.merge-banner b{font-size:14.5px}
+.merge-banner small{display:block;color:var(--sub);font-size:12px}
+
+/* ---- 身体地图 ---- */
+.body-grid{display:grid;grid-template-columns:250px 1fr;gap:16px;align-items:start}
+@media (max-width:700px){.body-grid{grid-template-columns:1fr}}
+.body-fig{background:var(--panel2);border:1px solid var(--line);border-radius:var(--r);padding:8px}
+.body-fig svg{display:block;width:100%;height:auto}
+.bp{transition:all var(--tf)}
+.bp[data-heat="0"]{fill:var(--panel);stroke:var(--line2)}
+.bp[data-heat="1"]{fill:rgba(45,212,191,.28);stroke:var(--teal)}
+.bp[data-heat="2"]{fill:rgba(240,180,41,.42);stroke:var(--gold)}
+.bp[data-heat="3"]{fill:rgba(240,180,41,.72);stroke:var(--gold);filter:drop-shadow(0 0 6px rgba(240,180,41,.55))}
+.bp:hover{stroke:var(--txt)}
+.bp-lbl{fill:var(--sub);font-size:10px;text-anchor:middle;pointer-events:none;font-weight:700}
+.part-row{padding:10px 2px;border-top:1px solid var(--line)}
+.part-row:first-child{border-top:none}
+.part-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.part-head b{font-size:13.5px}
+.part-head .meta-ico{font-size:12px;color:var(--sub)}
+.part-domains{margin-top:5px;display:flex;gap:5px;flex-wrap:wrap}
+.heat-pill{margin-left:auto;font-size:10.5px;font-weight:800;padding:2px 9px;border-radius:var(--r-f)}
+.heat-0{background:var(--panel2);color:var(--sub);border:1px solid var(--line2)}
+.heat-1{background:rgba(45,212,191,.14);color:var(--teal);border:1px solid var(--teal)}
+.heat-2{background:var(--gold-dim);color:var(--gold-ink);border:1px solid var(--gold)}
+.heat-3{background:rgba(240,180,41,.3);color:var(--gold-ink);border:1px solid var(--gold)}
+
+/* ---- 实验进度 ---- */
+.prog{height:7px;border-radius:var(--r-f);background:var(--panel2);border:1px solid var(--line);overflow:hidden;margin-top:7px}
+.prog i{display:block;height:100%;border-radius:var(--r-f);background:linear-gradient(90deg,var(--teal),var(--gold));transition:width .3s var(--ease)}
+
+/* ---- 方法论 ---- */
+.mth{display:grid;grid-template-columns:repeat(2,1fr);gap:11px;margin-top:4px}
+@media (max-width:700px){.mth{grid-template-columns:1fr}}
+.mth .it{background:var(--panel2);border:1px solid var(--line);border-radius:var(--r-sm);padding:12px 14px}
+.mth .it b{font-size:13.5px;display:flex;gap:7px;align-items:center}
+.mth .it p{margin:5px 0 0;font-size:12.5px;color:var(--sub)}
+.mth .it .ic{font-size:16px}
+
+/* ---- toast ---- */
+#toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(16px);background:var(--panel);color:var(--txt);border:1px solid var(--line2);border-radius:var(--r-f);padding:9px 18px;font-size:13px;font-weight:700;box-shadow:var(--sh);opacity:0;pointer-events:none;transition:all .25s var(--ease);z-index:99;max-width:88vw;text-align:center}
+#toast.show{opacity:1;transform:translateX(-50%)}
+footer.foot{color:var(--sub);font-size:11.5px;text-align:center;margin-top:18px}
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <div class="top-row">
+      <div class="brand">
+        <h1><span class="sp">✦</span>寻找天赋 · 突触地图</h1>
+        <p>天赋不是单项冠军，是一张会生长的神经网：信号给节点供能，连接让孤岛成陆，身体告诉你能力长在哪。</p>
+      </div>
+      <div class="top-acts">
+        <button class="tbtn" id="btnExport" title="导出 JSON 备份">⬇ 导出</button>
+        <button class="tbtn" id="btnImport" title="导入 JSON 恢复">⬆ 导入</button>
+        <button class="tbtn danger" id="btnWipe" title="清空全部数据">🗑 清空</button>
+        <input type="file" id="fileImp" accept="application/json,.json" hidden>
+      </div>
+    </div>
+    <div class="stats" id="statStrip"></div>
+  </div>
+</header>
+
+<nav class="subnav">
+  <div class="wrap" style="display:flex;gap:6px">
+    <a href="#t-syn">① 突触网络</a>
+    <a href="#t-sig">② 天赋信号</a>
+    <a href="#t-body">③ 身体地图</a>
+    <a href="#t-merge">④ 打通时刻</a>
+    <a href="#t-exp">⑤ 两周实验</a>
+    <a href="#t-mth">方法论</a>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <div class="merge-banner" id="mergeBanner" role="status">
+    <span class="zap">⚡</span>
+    <div class="grow">
+      <b id="mergeTxt">任督二脉打通！</b>
+      <small id="mergeSub"></small>
+    </div>
+    <button class="btn ghost sm" id="mergeClose">知道了</button>
+  </div>
+
+  <!-- ① 突触网络 -->
+  <section class="card sect" id="t-syn">
+    <h2><span class="no">①</span>突触网络 <span class="chip gold" id="synIslands">孤岛 —</span></h2>
+    <p class="desc">每个节点是一个领域（大小=信号强度，金色=热点，暗色=沉睡）。<b>点选两个节点</b>连一条突触；拖动整理布局。被金色虚线连起的，是<b>远域交叉</b>——最可能长出「只有你能做」的东西。</p>
+    <div class="syn-toolbar">
+      <button class="btn sm" id="btnAddNode">＋ 新节点</button>
+      <button class="btn ghost sm" id="btnDemo" title="载入一套可互动的专家示范网络（会覆盖当前数据）">✨ 专家示例</button>
+      <button class="btn ghost sm" id="btnRelayout">⟳ 重排布局</button>
+      <div class="legend">
+        <span><i style="background:var(--line2)"></i>沉睡</span>
+        <span><i style="background:var(--violet)"></i>温热</span>
+        <span><i style="background:var(--gold)"></i>热点</span>
+        <span><i style="background:var(--teal)"></i>选中</span>
+      </div>
+    </div>
+
+    <!-- 新建节点行内表单 -->
+    <div id="nodeForm" style="display:none;background:var(--panel2);border:1px solid var(--line2);border-radius:var(--r);padding:13px 14px;margin-bottom:12px">
+      <div class="two">
+        <div>
+          <label class="lbl" for="nfName">领域名称 *</label>
+          <input class="ipt" id="nfName" placeholder="例如：素描 / 递归算法 / 即兴喜剧" maxlength="20">
+        </div>
+        <div>
+          <label class="lbl">身体锚点（可多选，能力长在身体上）</label>
+          <div class="sigs" id="nfBody"></div>
+        </div>
+      </div>
+      <label class="lbl" for="nfNote">一句话备注（可选）</label>
+      <input class="ipt" id="nfNote" placeholder="例如：小学起就爱在课本边角画画">
+      <div style="display:flex;gap:8px;margin-top:11px">
+        <button class="btn sm" id="nfSave">创建节点</button>
+        <button class="btn ghost sm" id="nfCancel">取消</button>
+      </div>
+    </div>
+
+    <div class="syn-wrap">
+      <svg class="syn-svg" id="synSvg" viewBox="0 0 900 470" role="img" aria-label="天赋突触网络图，节点可拖动，点击两个节点建立连接"></svg>
+      <div class="syn-hint" id="synHint">💡 <b>点一个节点</b>开始连线，或拖动节点整理布局。</div>
+      <div class="edge-pop" id="edgePop">
+        <div class="tt" id="epTitle">连接突触</div>
+        <input class="ipt" id="epNote" placeholder="它们怎么相关？（如：都是模式识别 / 都靠画面感）" maxlength="60">
+        <div style="display:flex;gap:8px;margin-top:10px;align-items:center">
+          <button class="btn sm" id="epSave">建立连接</button>
+          <button class="btn ghost sm" id="epCancel">取消</button>
+          <span id="epFar" class="far-badge" style="display:none">✦ 远域交叉</span>
+        </div>
+      </div>
+    </div>
+
+    <h2 style="margin-top:16px;font-size:14.5px">节点清单</h2>
+    <p class="desc" style="margin-bottom:8px">改名、调身体锚点、删节点都在这里。信号越多节点越亮。</p>
+    <div id="nodeList"></div>
+  </section>
+
+  <!-- ② 天赋信号 -->
+  <section class="card sect" id="t-sig">
+    <h2><span class="no">②</span>天赋信号</h2>
+    <p class="desc">四种信号是天赋的铁证（缺一不算多，两条以上必留意）。每条信号给对应节点<strong>供能</strong>——这就是节点大小的来源。</p>
+    <div class="two">
+      <div>
+        <label class="lbl" for="sgNode">归属领域 *</label>
+        <select class="sel" id="sgNode"></select>
+        <label class="lbl" for="sgText">发生了什么？（尽量记具体事件）*</label>
+        <textarea class="txa" id="sgText" placeholder="例如：帮同学讲递归，讲了 10 分钟对方就懂了，我自己从没觉得它难"></textarea>
+        <label class="lbl" for="sgDate">日期</label>
+        <input class="ipt" id="sgDate" type="date">
+      </div>
+      <div>
+        <label class="lbl">信号类型 *（可多选）</label>
+        <div class="sigs" id="sgSigs"></div>
+        <button class="btn" id="sgSave" style="margin-top:14px">⚡ 记录信号</button>
+        <p class="desc" style="margin-top:12px;margin-bottom:0">⚡ 学得快 · 别人吃力你轻松<br>🌊 心流 · 做的时候时间消失<br>💬 被人夸 · 别人主动说「你这方面强」<br>🔥 自驱动 · 没人要求你也忍不住钻研</p>
+      </div>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin:14px 0 2px" id="sigFilters"></div>
+    <div id="sigList"></div>
+  </section>
+
+  <!-- ③ 身体地图 -->
+  <section class="card sect" id="t-body">
+    <h2><span class="no">③</span>身体地图</h2>
+    <p class="desc">能力长在身体上。给节点挂锚点后，这里显示你的训练「地理」：哪些部位已是<b>热点</b>，哪些还在<b>沉睡</b>——沉睡的部位常藏着没被命名的天赋。</p>
+    <div class="body-grid">
+      <div class="body-fig">
+        <svg viewBox="0 0 220 400" role="img" aria-label="身体热力图：按节点锚点聚合的天赋热度" id="bodySvg">
+          <!-- 头（脑） -->
+          <circle class="bp" data-part="脑" cx="110" cy="46" r="30" stroke-width="2"/>
+          <!-- 眼 ×2 -->
+          <circle class="bp" data-part="眼" cx="99"  cy="43" r="4.5" stroke-width="1.6"/>
+          <circle class="bp" data-part="眼" cx="121" cy="43" r="4.5" stroke-width="1.6"/>
+          <!-- 耳 ×2 -->
+          <ellipse class="bp" data-part="耳" cx="79"  cy="50" rx="5.5" ry="8" stroke-width="1.6"/>
+          <ellipse class="bp" data-part="耳" cx="141" cy="50" rx="5.5" ry="8" stroke-width="1.6"/>
+          <!-- 口 -->
+          <rect class="bp" data-part="口" x="102" y="60" width="16" height="6.5" rx="3.2" stroke-width="1.6"/>
+          <!-- 躯干 -->
+          <path class="bp" data-part="心" d="M80,86 L140,86 C149,118 149,156 141,196 L79,196 C71,156 71,118 80,86 Z" stroke-width="2"/>
+          <!-- 心（心脏） -->
+          <path class="bp" data-part="心" d="M110,120 c-3.5,-7 -13,-6.5 -14,1 c-1,6 6,10.5 14,16 c8,-5.5 15,-10 14,-16 c-1,-7.5 -10.5,-8 -14,-1 z" stroke-width="1.6"/>
+          <!-- 肺 ×2 -->
+          <ellipse class="bp" data-part="肺" cx="97"  cy="118" rx="8.5" ry="12" stroke-width="1.6"/>
+          <ellipse class="bp" data-part="肺" cx="123" cy="118" rx="8.5" ry="12" stroke-width="1.6"/>
+          <!-- 手（臂）×2 -->
+          <path class="bp" data-part="手" d="M80,92 C60,116 50,146 48,178" fill="none" stroke-linecap="round" stroke-width="15"/>
+          <path class="bp" data-part="手" d="M140,92 C160,116 170,146 172,178" fill="none" stroke-linecap="round" stroke-width="15"/>
+          <!-- 腿脚 ×2 -->
+          <path class="bp" data-part="腿脚" d="M96,200 C93,252 91,312 89,366" fill="none" stroke-linecap="round" stroke-width="19"/>
+          <path class="bp" data-part="腿脚" d="M124,200 C127,252 129,312 131,366" fill="none" stroke-linecap="round" stroke-width="19"/>
+          <!-- 标签 -->
+          <text class="bp-lbl" x="110" y="20">脑</text>
+          <text class="bp-lbl" x="110" y="218">心 · 肺</text>
+          <text class="bp-lbl" x="42" y="196">手</text>
+          <text class="bp-lbl" x="178" y="196">手</text>
+          <text class="bp-lbl" x="70" y="384">腿脚</text>
+          <text class="bp-lbl" x="150" y="384">腿脚</text>
+        </svg>
+      </div>
+      <div>
+        <div id="partList"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ④ 打通时刻 -->
+  <section class="card sect" id="t-merge">
+    <h2><span class="no">④</span>打通时刻 <span class="chip gold" id="mergeCnt">0 次</span></h2>
+    <p class="desc">每次把<b>两座原本不通的岛</b>连起来，就记一次「打通」。这些时刻是你认知地图扩张的里程碑——任督二脉是一寸一寸通的。</p>
+    <div id="mergeList"></div>
+    <h2 style="margin-top:16px;font-size:14.5px">✦ 远域交叉 · 交叉点洞察</h2>
+    <p class="desc" style="margin-bottom:8px">身体锚点几乎不重叠、邻居也少的连接，是「美第奇效应」高发区：两个领域交集处，往往站着只有一个你能站的位置。</p>
+    <div id="farList"></div>
+  </section>
+
+  <!-- ⑤ 两周实验 -->
+  <section class="card sect" id="t-exp">
+    <h2><span class="no">⑤</span>两周实验</h2>
+    <p class="desc">挑一条<b>远域交叉</b>（或任一突触），做一个 14 天就能看到证据的小实验——想而不做，图就只是图。开跑前先过一遍「三问快检」。</p>
+    <div class="two">
+      <div>
+        <label class="lbl" for="exEdge">在哪条突触上实验？*</label>
+        <select class="sel" id="exEdge"></select>
+        <label class="lbl" for="exName">实验名 *</label>
+        <input class="ipt" id="exName" placeholder="例如：用递归思想画分形树，日更 14 天" maxlength="40">
+        <label class="lbl" for="exHyp">假设（14 天后想看到什么证据）*</label>
+        <textarea class="txa" id="exHyp" placeholder="例如：如果「编程×绘画」真是我的交叉点，我应该越画越上瘾，且能画出别人复制不了的算法美感"></textarea>
+      </div>
+      <div>
+        <label class="lbl">三问快检（1-5 分）</label>
+        <div style="display:grid;gap:8px">
+          <label style="display:flex;align-items:center;gap:9px;font-size:13px">能做好 <input type="range" id="exQ1" min="1" max="5" value="3" style="flex:1;accent-color:var(--gold)"><b id="exQ1v" style="width:18px;text-align:center;color:var(--gold-ink)">3</b></label>
+          <label style="display:flex;align-items:center;gap:9px;font-size:13px">会上瘾 <input type="range" id="exQ2" min="1" max="5" value="3" style="flex:1;accent-color:var(--gold)"><b id="exQ2v" style="width:18px;text-align:center;color:var(--gold-ink)">3</b></label>
+          <label style="display:flex;align-items:center;gap:9px;font-size:13px">有空间 <input type="range" id="exQ3" min="1" max="5" value="3" style="flex:1;accent-color:var(--gold)"><b id="exQ3v" style="width:18px;text-align:center;color:var(--gold-ink)">3</b></label>
+        </div>
+        <p class="desc" style="margin-top:9px;margin-bottom:0">交集分看「能做好 × 会上瘾」的短板——真有前两者，「有空间」几乎不必担心。</p>
+        <label class="lbl" for="exStart">开始日期</label>
+        <input class="ipt" id="exStart" type="date">
+        <button class="btn" id="exSave" style="margin-top:13px">🚀 发起实验</button>
+      </div>
+    </div>
+    <div id="expList" style="margin-top:6px"></div>
+  </section>
+
+  <!-- 方法论 -->
+  <section class="card sect" id="t-mth">
+    <h2><span class="no">✦</span>方法论 · 为什么是突触</h2>
+    <div class="mth">
+      <div class="it"><b><span class="ic">⚡</span>四种信号</b><p>学得快 / 心流 / 被人夸 / 自驱动。单项证据是巧合，同一领域凑齐两条以上，就是值得下注的天赋候选。每条信号都挂在具体领域节点上，杜绝空想。</p></div>
+      <div class="it"><b><span class="ic">🕸</span>突触连接</b><p>单一领域是一枚点，连成网才有复利。主动问自己：这两个领域凭什么相关？说得出关系的连接才有价值——说不出，说明你还没想清楚。</p></div>
+      <div class="it"><b><span class="ic">🔀</span>远域交叉</b><p>美第奇效应：当两个离得足够远的领域在你身上交汇，交集处几乎无人竞争。「既会 A 又会 B」比「A 做到 99 分」更可能是你的独特生态位。</p></div>
+      <div class="it"><b><span class="ic">🧠</span>身体锚点</b><p>天赋有生理基础：眼（观察·审美）、耳（听觉·语感）、口（表达·歌唱）、心（共情·关系）、肺（气息·耐力）、手（动手·建造）、脑（逻辑·推演）、腿脚（行动·耐力）。热点部位是你已验证的金矿，沉睡部位是没拆的盲盒。</p></div>
+      <div class="it"><b><span class="ic">⚡️</span>打通任督二脉</b><p>孤岛领域之间原本不通；每打通一次，你的能力网就少一个死角、多一条高速公路。打通时刻值得庆祝并记录——它们是成长最真实的刻度。</p></div>
+      <div class="it"><b><span class="ic">🧭</span>通才罗盘</b><p>兴趣广、无法垂直在一个领域，不是缺陷，是另一种地形：单点深度拼不过专才，但「A×B×C」的交集处几乎没有对手。用法——把每个新兴趣都建成节点挂进突触图，任由它们连接；每月看一次远域交叉清单，挑最痒的一条做两周实验。广度负责产生候选，实验负责收敛，你只需要守好「不做第七件事」：同一时刻在跑的实验不超过两条。</p></div><div class="it"><b><span class="ic">🚀</span>两周实验</b><p>天赋最终要用证据确认：挑一个远域交叉点，三问快检（能做好 / 会上瘾 / 有空间），发起 14 天小实验。14 天后拿结果说话：验证就加码，证伪就换下一条突触。</p></div>
+    </div>
+  </section>
+
+  <footer class="foot">寻找天赋 · 突触地图 ｜ 数据仅存于本机浏览器（wb_talent_finder_v1）· 支持导出 / 导入 ｜ 天赋 = 证据 × 连接 × 时间</footer>
+</div>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+'use strict';
+var KEY='wb_talent_finder_v1';
+var PARTS=[
+  {k:'脑',  ico:'🧠', mean:'逻辑 · 推演 · 记忆 · 模式识别'},
+  {k:'眼',  ico:'👁', mean:'观察 · 审美 · 画面感 · 细节'},
+  {k:'耳',  ico:'👂', mean:'听觉 · 语感 · 节奏 · 辨音'},
+  {k:'口',  ico:'👄', mean:'表达 · 说服 · 歌唱 · 讲述'},
+  {k:'心',  ico:'❤️', mean:'共情 · 关系 · 意义感 · 审时度势'},
+  {k:'肺',  ico:'🫁', mean:'气息 · 耐力 · 长跑 · 歌唱底座'},
+  {k:'手',  ico:'✍️', mean:'动手 · 建造 · 书写 · 演奏 · 烹饪'},
+  {k:'腿脚',ico:'🦵', mean:'行动力 · 户外 · 耐力 · 舞蹈'}
+];
+var SIGS=[
+  {k:'fast', ic:'⚡', n:'学得快'},
+  {k:'flow', ic:'🌊', n:'心流'},
+  {k:'praise',ic:'💬', n:'被人夸'},
+  {k:'drive',ic:'🔥', n:'自驱动'}
+];
+var $=function(s){return document.querySelector(s)};
+var uid=function(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)};
+var today=function(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+var esc=function(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})};
+
+/* ---------- 数据 ---------- */
+var S={nodes:[],edges:[],signals:[],logs:[],exps:[],pos:{}};
+function load(){
+  try{var raw=localStorage.getItem(KEY); if(raw){var o=JSON.parse(raw);
+    S.nodes=o.nodes||[];S.edges=o.edges||[];S.signals=o.signals||[];S.logs=o.logs||[];S.exps=o.exps||[];S.pos=o.pos||{};
+  }}catch(e){console.warn('talent-finder load failed',e)}
+}
+function save(){ try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){toast('保存失败：'+e.message)} }
+
+/* ---------- 工具 ---------- */
+function nodeById(id){for(var i=0;i<S.nodes.length;i++) if(S.nodes[i].id===id) return S.nodes[i]; return null}
+function nodeStrength(n){ // 1 + 信号加权（每种信号 0.5）
+  var c=0; for(var i=0;i<S.signals.length;i++) if(S.signals[i].nodeId===n.id) c++;
+  return 1+c*0.5;
+}
+function nodeDeg(n){var c=0;for(var i=0;i<S.edges.length;i++) if(S.edges[i].a===n.id||S.edges[i].b===n.id)c++;return c}
+function toast(msg){var t=$('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(toast._h);toast._h=setTimeout(function(){t.classList.remove('show')},2400)}
+function components(){ // 连通分量：返回 {comp:Map(id->ci), count}
+  var comp={},ci=0,i,j;
+  for(i=0;i<S.nodes.length;i++) comp[S.nodes[i].id]=-1;
+  for(i=0;i<S.nodes.length;i++){
+    var id=S.nodes[i].id; if(comp[id]!==-1) continue;
+    var q=[id];comp[id]=ci;
+    while(q.length){var cur=q.shift();
+      for(j=0;j<S.edges.length;j++){var e=S.edges[j];var o=null;
+        if(e.a===cur)o=e.b; else if(e.b===cur)o=e.a;
+        if(o&&comp[o]===-1){comp[o]=ci;q.push(o);}
+      }}
+    ci++;
+  }
+  return {comp:comp,count:ci};
+}
+function isFarEdge(e){ // 远域交叉：两端身体锚点无交集 且 无公共邻居
+  var a=nodeById(e.a),b=nodeById(e.b); if(!a||!b) return false;
+  var ba=a.body||[],bb=b.body||[],i,j;
+  for(i=0;i<ba.length;i++) for(j=0;j<bb.length;j++) if(ba[i]===bb[j]) return false;
+  var na={},nb={},k;
+  for(i=0;i<S.edges.length;i++){var x=S.edges[i];
+    if(x.a===e.a)na[x.b]=1; if(x.b===e.a)na[x.a]=1;
+    if(x.a===e.b)nb[x.b]=1; if(x.b===e.b)nb[x.a]=1;}
+  for(k in na) if(nb[k]) return false;
+  return true;
+}
+
+/* ---------- 顶栏统计 ---------- */
+function renderStats(){
+  var c=components();
+  var mergeCnt=S.logs.length;
+  $('#statStrip').innerHTML=
+    '<span class="stat"><b>'+S.nodes.length+'</b>节点</span>'+
+    '<span class="stat"><b>'+S.edges.length+'</b>突触</span>'+
+    '<span class="stat"><b>'+c.count+'</b>孤岛</span>'+
+    '<span class="stat"><b>'+S.signals.length+'</b>信号</span>'+
+    '<span class="stat gold"><b>'+mergeCnt+'</b>次打通</span>';
+  $('#synIslands').textContent='孤岛 '+c.count;
+  $('#mergeCnt').textContent=mergeCnt+' 次';
+}
+
+/* ---------- 突触图 ---------- */
+var svg=$('#synSvg');
+var selA=null, drag=null, moved=false;
+var NS='http://www.w3.org/2000/svg';
+function el(tag,attrs){var e=document.createElementNS(NS,tag);for(var k in attrs)e.setAttribute(k,attrs[k]);return e}
+
+function layout(){
+  // 新节点螺旋找空位；「重排」按分量+索引圆环布局
+  var n=S.nodes.length,i;
+  var R=Math.min(190,60+n*14);
+  for(i=0;i<n;i++){
+    var id=S.nodes[i].id;
+    if(S.pos[id]==null){
+      var ang=-Math.PI/2+i*(Math.PI*2/Math.max(n,1));
+      S.pos[id]={x:450+R*Math.cos(ang),y:235+R*0.78*Math.sin(ang)};
+    }
+  }
+}
+/* ---------- 专家示例（2026-10-29）：一套可直接互动的示范突触网络 ----------
+   剧情：一位「前端工程师 × AI 应用 × 硬件入门 × 想做教育」的通才，
+   信号怎么挂、突触怎么连、远域交叉长什么样、实验怎么落——照着它玩。 */
+var DEMO = {
+  nodes: [
+    { id:'d1', name:'前端工程',   body:['脑','手'],  note:'十年老本行，最早的岛' },
+    { id:'d2', name:'算法与 408', body:['脑'],       note:'考研主线，越啃越有味' },
+    { id:'d3', name:'AI 应用开发', body:['脑','眼'],  note:'LLM 应用 + Agent，上瘾区' },
+    { id:'d4', name:'硬件工坊',   body:['手','眼'],  note:'电气×机械，从 L0 爬到 L3' },
+    { id:'d5', name:'教学表达',   body:['口','心'],  note:'讲题被人夸，越讲越上头' },
+    { id:'d6', name:'视觉审美',   body:['眼'],       note:'界面/海报的秩序感' },
+    { id:'d7', name:'写作沉淀',   body:['脑','口'],  note:'把复杂的讲简单' }
+  ],
+  edges: [
+    { a:'d1', b:'d3', note:'前端是 AI 应用的壳' },
+    { a:'d2', b:'d3', note:'算法功底撑起 Agent 调优' },
+    { a:'d1', b:'d6', note:'界面秩序感出自工程审美' },
+    { a:'d3', b:'d4', note:'AI 中台给硬件当大脑' },
+    { a:'d1', b:'d4', note:'前端工程法移植到硬件项目' },
+    { a:'d5', b:'d7', note:'讲清楚 = 写清楚' },
+    { a:'d5', b:'d2', note:'给同学讲题，408 反而更熟' }
+  ],
+  signals: [
+    { nodeId:'d3', sigs:['fast','flow','drive'], text:'给同学讲 Agent，凌晨两点还在调 prompt 不觉得累' },
+    { nodeId:'d4', sigs:['drive'],               text:'没人要求，自己把循迹小车 PID 调到半夜' },
+    { nodeId:'d5', sigs:['praise','fast'],       text:'帮三个人讲懂递归，都说「比老师讲得清楚」' },
+    { nodeId:'d1', sigs:['fast'],                text:'新框架上手一周就能出活' }
+  ],
+  logs: [ { a:'前端工程', b:'硬件工坊' }, { a:'算法与 408', b:'AI 应用开发' } ],
+  exps: [
+    { name:'AI 中台 × 教育机器人', a:'AI 应用开发', b:'硬件工坊',
+      hyp:'做一台能听懂人话的教学演示小车——验证「教育 × 硬件 × AI」三域交叉是否成立',
+      q1:4, q2:5, q3:4, status:'进行中' }
+  ]
+};
+function loadDemo(){
+  if(S.nodes.length && !confirm('载入专家示例会覆盖当前数据（建议先导出备份）。继续？')) return;
+  var nid = {};
+  S.nodes = DEMO.nodes.map(function(n){ nid[n.id] = uid(); return { id:nid[n.id], name:n.name, body:n.body.slice(), note:n.note, created:today() }; });
+  var eid = {};
+  S.edges = DEMO.edges.map(function(e, i){ eid[i] = uid(); return { id:eid[i], a:nid[e.a], b:nid[e.b], note:e.note, created:today() }; });
+  S.signals = DEMO.signals.map(function(g){ return { id:uid(), nodeId:nid[g.nodeId], text:g.text, sigs:g.sigs.slice(), date:today() }; });
+  S.logs = DEMO.logs.map(function(l){ return { id:uid(), date:today(), a:l.a, b:l.b, far:true }; });
+  S.exps = DEMO.exps.map(function(x){ return { id:uid(), eid:eid[0], name:x.name, hyp:x.hyp, a:x.a, b:x.b, q1:x.q1, q2:x.q2, q3:x.q3, start:today(), status:x.status, note:'' }; });
+  S.pos = {};
+  save(); renderAll(); relayout();
+  toast('专家示例已载入：试试拖动节点、连线、再看身体地图');
+}
+function relayout(){
+  S.pos={};
+  var c=components(),groups={},i;
+  for(i=0;i<S.nodes.length;i++){var ci=c.comp[S.nodes[i].id];(groups[ci]=groups[ci]||[]).push(S.nodes[i])}
+  var gk=Object.keys(groups);
+  for(var g=0;g<gk.length;g++){
+    var arr=groups[gk[g]];var cx=g%2===0?300:620,cy=170+(Math.floor(g/2)%2)*160;
+    for(i=0;i<arr.length;i++){
+      var ang=-Math.PI/2+i*(Math.PI*2/Math.max(arr.length,1));
+      var r=arr.length===1?0:46+arr.length*8;
+      S.pos[arr[i].id]={x:cx+r*Math.cos(ang),y:cy+r*0.8*Math.sin(ang)};
+    }
+  }
+  save();drawSyn();toast('已按孤岛重新排布');
+}
+function drawSyn(){
+  layout();
+  svg.innerHTML='';
+  var i;
+  // 边
+  for(i=0;i<S.edges.length;i++){
+    var e=S.edges[i],pa=S.pos[e.a],pb=S.pos[e.b];
+    if(!pa||!pb)continue;
+    var far = isFarEdge(e);
+    var ln=el('line',{x1:pa.x,y1:pa.y,x2:pb.x,y2:pb.y,class:'edge'+(far?' far':'')+(selEdge===e.id?' sel':'')});
+    ln.setAttribute('data-eid',e.id);
+    if(e.note){var t=el('title',{});t.textContent=e.note;ln.appendChild(t);}
+    svg.appendChild(ln);
+    // 突触信号脉冲：小光点沿轴突流动（边多时关闭，省性能）
+    if(S.edges.length<=40){
+      var len=Math.hypot(pb.x-pa.x,pb.y-pa.y);
+      var dur=Math.max(1.4,len/95).toFixed(2);
+      var pu=el('circle',{r:far?3:2.6,class:'edgepulse'+(far?' far':'')+(S.edges.length>18?' slow':'')});
+      var am=el('animateMotion',{dur:dur+'s',repeatCount:'indefinite',begin:(Math.random()*2).toFixed(2)+'s',path:'M'+pa.x+','+pa.y+' L'+pb.x+','+pb.y});
+      pu.appendChild(am);
+      svg.appendChild(pu);
+    }
+  }
+  // 节点
+  for(i=0;i<S.nodes.length;i++){
+    var n=S.nodes[i],p=S.pos[n.id];if(!p)continue;
+    var st=nodeStrength(n);
+    var r=Math.min(34,15+st*3.2);
+    var cls='node'+(st>=3?' hot':(st>1?' warm':''))+(selA===n.id?' sel':'');
+    var g=el('g',{class:cls,transform:'translate('+p.x+','+p.y+')','data-id':n.id});
+    g.appendChild(el('circle',{class:'ring',r:r+6}));
+    g.appendChild(el('circle',{class:'core',r:r}));
+    var bodyTxt=(n.body&&n.body.length)?n.body.slice(0,2).join('·'):'';
+    var label=n.name.length>7?n.name.slice(0,7)+'…':n.name;
+    g.appendChild(el('text',{class:'nlabel',y:5,'font-size':Math.max(10,13-st*0.4)})).textContent=label;
+    if(bodyTxt) g.appendChild(el('text',{class:'nsub',y:r+14})).textContent=bodyTxt;
+    var ti=el('title',{});ti.textContent=n.name+(bodyTxt?'（'+bodyTxt+'）':'')+' · 信号 '+Math.round((st-1)*2)+' 条'+(n.note?' · '+n.note:'');
+    g.appendChild(ti);
+    svg.appendChild(g);
+  }
+}
+function svgPoint(evt){
+  var pt=svg.createSVGPoint();pt.x=evt.clientX;pt.y=evt.clientY;
+  return pt.matrixTransform(svg.getScreenCTM().inverse());
+}
+var selEdge=null;
+svg.addEventListener('pointerdown',function(ev){
+  var g=ev.target.closest?ev.target.closest('.node'):null;
+  if(!g)return;
+  var id=g.getAttribute('data-id'),p=S.pos[id];
+  drag={id:id,dx:p.x-svgPoint(ev).x,dy:p.y-svgPoint(ev).y};moved=false;
+  svg.classList.add('dragging');
+  try{svg.setPointerCapture(ev.pointerId)}catch(e){}
+});
+svg.addEventListener('pointermove',function(ev){
+  if(!drag)return;
+  var pt=svgPoint(ev),p=S.pos[drag.id];
+  var nx=Math.max(30,Math.min(870,pt.x+drag.dx)),ny=Math.max(28,Math.min(440,pt.y+drag.dy));
+  if(Math.abs(nx-p.x)>2||Math.abs(ny-p.y)>2)moved=true;
+  p.x=nx;p.y=ny;
+  drawSyn();
+});
+svg.addEventListener('pointerup',function(ev){
+  if(!drag)return;
+  var id=drag.id;svg.classList.remove('dragging');
+  if(moved){S.pos[id]={x:S.pos[id].x,y:S.pos[id].y};save();drag=null;return}
+  drag=null;
+  // 点击（非拖动）：选中 / 连线
+  if(selA===id){selA=null;drawSyn();setHint('💡 已取消选择。');hideEdgePop();return}
+  if(!selA){
+    selA=id;var n=nodeById(id);
+    drawSyn();setHint('已选 <b>'+esc(n.name)+'</b> — 再点一个节点建立突触，点它自身或空白处取消。');
+    hideEdgePop();return;
+  }
+  // 第二个节点：若已有边则提示，否则弹连线层
+  var exist=null;
+  for(var i=0;i<S.edges.length;i++){var e=S.edges[i];
+    if((e.a===selA&&e.b===id)||(e.a===id&&e.b===selA)){exist=e;break}}
+  if(exist){toast('这两个节点已经连过了');selA=null;drawSyn();return}
+  openEdgePop(selA,id);
+});
+svg.addEventListener('pointerdown',function(ev){
+  if(ev.target.closest&&ev.target.closest('.node'))return;
+  if(ev.target===svg||ev.target.classList&&ev.target.classList.contains('edge')){
+    if(ev.target.classList&&ev.target.classList.contains('edge')){
+      selEdge=ev.target.getAttribute('data-eid');drawSyn();return;
+    }
+  }
+  if(ev.target===svg){selA=null;selEdge=null;drawSyn();setHint('💡 点一个节点开始连线，或拖动整理布局。');hideEdgePop();}
+},true);
+function setHint(html){$('#synHint').innerHTML=html}
+function hideEdgePop(){$('#edgePop').classList.remove('show')}
+
+/* 连线弹层 */
+var pending=null;
+function openEdgePop(aid,bid){
+  pending={a:aid,b:bid};
+  var a=nodeById(aid),b=nodeById(bid);
+  var far=isFarEdge({a:aid,b:bid});
+  $('#epTitle').innerHTML='连接突触：<b style="color:var(--gold-ink)">'+esc(a.name)+'</b> ⟷ <b style="color:var(--gold-ink)">'+esc(b.name)+'</b>';
+  $('#epFar').style.display=far?'':'none';
+  $('#epNote').value='';
+  $('#edgePop').classList.add('show');
+  $('#epNote').focus();
+}
+$('#epSave').onclick=function(){
+  if(!pending)return;
+  var note=$('#epNote').value.trim();
+  var before=components();
+  S.edges.push({id:uid(),a:pending.a,b:pending.b,note:note,created:today()});
+  var after=components();
+  if(after.count<before.count){
+    var a=nodeById(pending.a),b=nodeById(pending.b);
+    S.logs.unshift({id:uid(),date:today(),a:a.name,b:b.name,far:isFarEdge(S.edges[S.edges.length-1])});
+    showMerge(a.name,b.name);
+  } else {
+    toast('突触已连接');
+  }
+  pending=null;selA=null;hideEdgePop();save();renderAll();
+};
+$('#epCancel').onclick=function(){pending=null;selA=null;hideEdgePop();drawSyn()};
+
+/* 打通横幅 */
+function showMerge(an,bn){
+  $('#mergeTxt').textContent='⚡ 任督二脉打通！「'+an+'」×「'+bn+'」连成了';
+  $('#mergeSub').textContent='两座孤岛并成一陆——你的能力网刚刚完成一次扩张，去「打通时刻」看看里程碑。';
+  var bn2=$('#mergeBanner');bn2.classList.add('show');
+  clearTimeout(showMerge._h);showMerge._h=setTimeout(function(){bn2.classList.remove('show')},9000);
+}
+$('#mergeClose').onclick=function(){$('#mergeBanner').classList.remove('show')};
+
+/* ---------- 节点表单 / 清单 ---------- */
+var nfBody=new Set();
+function renderBodyChips(container,set){
+  container.innerHTML='';
+  PARTS.forEach(function(p){
+    var b=document.createElement('button');
+    b.type='button';b.className='sig'+(set.has(p.k)?' on':'');
+    b.innerHTML='<span class="ic">'+p.ico+'</span>'+p.k;
+    b.onclick=function(){ if(set.has(p.k)){set.delete(p.k)}else if(set.size<3){set.add(p.k)}else{toast('最多选 3 个锚点');return} renderBodyChips(container,set) };
+    container.appendChild(b);
+  });
+}
+$('#btnAddNode').onclick=function(){
+  var f=$('#nodeForm');f.style.display=f.style.display==='none'?'':'none';
+  if(f.style.display!=='none'){nfBody.clear();renderBodyChips($('#nfBody'),nfBody);$('#nfName').focus()}
+};
+$('#nfCancel').onclick=function(){$('#nodeForm').style.display='none'};
+$('#nfSave').onclick=function(){
+  var name=$('#nfName').value.trim();
+  if(!name){toast('先给领域起个名字');return}
+  var dup=S.nodes.some(function(n){return n.name===name});
+  if(dup){toast('已有同名节点');return}
+  S.nodes.push({id:uid(),name:name,note:$('#nfNote').value.trim(),body:Array.from(nfBody),created:today()});
+  $('#nfName').value='';$('#nfNote').value='';$('#nodeForm').style.display='none';
+  save();renderAll();toast('节点「'+name+'」已创建，快去记一条信号给它供能');
+};
+function renderNodeList(){
+  var box=$('#nodeList');
+  if(!S.nodes.length){box.innerHTML='<div class="empty"><span class="big">✦</span>还没有节点。点上方「＋ 新节点」，写下第一个让你上头的领域。</div>';return}
+  box.innerHTML='';
+  S.nodes.forEach(function(n){
+    var st=nodeStrength(n);
+    var row=document.createElement('div');row.className='row';
+    var set=new Set(n.body||[]);
+    row.innerHTML='<div class="grow"><div class="tt" style="display:flex;align-items:center;gap:7px;flex-wrap:wrap">'+esc(n.name)+
+      (st>=3?'<span class="chip gold">热点</span>':(st>1?'<span class="chip violet">温热</span>':'<span class="chip">沉睡</span>'))+
+      '<span class="chip">'+nodeDeg(n)+' 连接</span><span class="chip teal">⚡ '+Math.round((st-1)*2)+' 信号</span></div>'+
+      '<div class="meta">'+esc(n.note||'')+'</div>'+
+      '<div class="part-domains" data-roles></div></div>';
+    var roles=row.querySelector('[data-roles]');
+    PARTS.forEach(function(p){
+      var b=document.createElement('button');b.type='button';
+      b.className='chip'+(set.has(p.k)?' gold':'');b.textContent=p.ico+p.k;
+      b.style.cursor='pointer';
+      b.onclick=function(){
+        var i=(n.body||[]).indexOf(p.k);
+        if(i>=0){n.body.splice(i,1)}else{ if((n.body||[]).length>=3){toast('最多 3 个锚点');return} (n.body=n.body||[]).push(p.k) }
+        save();renderAll();
+      };
+      roles.appendChild(b);
+    });
+    var del=document.createElement('button');del.className='btn del';del.textContent='删';
+    del.onclick=function(){
+      if(!confirm('删除节点「'+n.name+'」？其信号与连接一并删除。'))return;
+      S.nodes=S.nodes.filter(function(x){return x.id!==n.id});
+      S.edges=S.edges.filter(function(e){return e.a!==n.id&&e.b!==n.id});
+      S.signals=S.signals.filter(function(s){return s.nodeId!==n.id});
+      delete S.pos[n.id];
+      save();renderAll();toast('已删除');
+    };
+    row.appendChild(del);
+    box.appendChild(row);
+  });
+}
+$('#btnRelayout').onclick=relayout;
+$('#btnDemo').onclick=loadDemo;
+
+/* ---------- 信号 ---------- */
+var sgSel=new Set();
+function renderSigChips(container,set){
+  container.innerHTML='';
+  SIGS.forEach(function(s){
+    var b=document.createElement('button');
+    b.type='button';b.className='sig'+(set.has(s.k)?' on':'');
+    b.innerHTML='<span class="ic">'+s.ic+'</span>'+s.n;
+    b.onclick=function(){ if(set.has(s.k)){set.delete(s.k)}else{set.add(s.k)} renderSigChips(container,set) };
+    container.appendChild(b);
+  });
+}
+function renderSigForm(){
+  var sel=$('#sgNode');
+  var cur=sel.value;
+  sel.innerHTML='<option value="">— 选择领域 —</option>'+S.nodes.map(function(n){return '<option value="'+n.id+'">'+esc(n.name)+'</option>'}).join('');
+  if(cur&&S.nodes.some(function(n){return n.id===cur}))sel.value=cur;
+  renderSigChips($('#sgSigs'),sgSel);
+  if(!$('#sgDate').value)$('#sgDate').value=today();
+}
+$('#sgSave').onclick=function(){
+  var nid=$('#sgNode').value;
+  if(!nid){toast('选一个领域节点');return}
+  var text=$('#sgText').value.trim();
+  if(!text){toast('写一句具体发生的事');return}
+  if(!sgSel.size){toast('至少勾一种信号');return}
+  S.signals.unshift({id:uid(),nodeId:nid,text:text,sigs:Array.from(sgSel),date:$('#sgDate').value||today()});
+  var n=nodeById(nid);
+  $('#sgText').value='';sgSel.clear();renderSigForm();
+  save();renderAll();
+  toast('信号已入账，「'+(n?n.name:'')+'」供能 +'+sgSel2str(0.5));
+};
+function sgSel2str(){return '⚡'}
+var sigFilter='';
+function renderSigFilters(){
+  var box=$('#sigFilters');box.innerHTML='';
+  var mk=function(k,label){
+    var b=document.createElement('button');b.type='button';
+    b.className='sig'+(sigFilter===k?' on':'');b.style.minHeight='32px';b.style.padding='5px 11px';
+    b.textContent=label;b.onclick=function(){sigFilter=sigFilter===k?'':k;renderSigFilters();renderSigList()};
+    box.appendChild(b);
+  };
+  mk('','全部');
+  SIGS.forEach(function(s){mk(s.k,s.ic+' '+s.n)});
+}
+function renderSigList(){
+  var box=$('#sigList');
+  var list=S.signals.filter(function(s){return !sigFilter||s.sigs.indexOf(sigFilter)>=0});
+  if(!list.length){box.innerHTML='<div class="empty"><span class="big">🫥</span>'+(S.signals.length?'该筛选下暂无信号。':'还没有信号记录。回想最近一次「这也太容易了吧」的时刻，记下来。')+'</div>';return}
+  box.innerHTML='';
+  list.slice(0,60).forEach(function(s){
+    var n=nodeById(s.nodeId);
+    var chips=s.sigs.map(function(k){var f=SIGS.filter(function(x){return x.k===k})[0];return '<span class="chip gold">'+(f?f.ic+' '+f.n:k)+'</span>'}).join(' ');
+    var row=document.createElement('div');row.className='row';
+    row.innerHTML='<div class="grow"><div class="tt">'+esc(s.text)+'</div>'+
+      '<div class="meta"><span class="chip teal">'+esc(n?n.name:'?')+'</span>'+chips+'<span>'+esc(s.date)+'</span></div></div>';
+    var del=document.createElement('button');del.className='btn del';del.textContent='删';
+    del.onclick=function(){S.signals=S.signals.filter(function(x){return x.id!==s.id});save();renderAll()};
+    row.appendChild(del);
+    box.appendChild(row);
+  });
+  if(S.signals.length>60){var p=document.createElement('p');p.className='desc';p.style.textAlign='center';p.textContent='仅显示最近 60 条，全量请导出查看';box.appendChild(p)}
+}
+
+/* ---------- 身体地图 ---------- */
+function partHeat(){
+  var h={},i;PARTS.forEach(function(p){h[p.k]=0});
+  for(i=0;i<S.nodes.length;i++){
+    var n=S.nodes[i];if(!n.body)continue;
+    var w=1+(nodeStrength(n)-1)*0.6;
+    n.body.forEach(function(b){if(h[b]!=null)h[b]+=w});
+  }
+  return h;
+}
+function heatTier(v){return v<=0?0:(v<2.5?1:(v<5?2:3))}
+function renderBody(){
+  var h=partHeat();
+  var svgB=$('#bodySvg');
+  svgB.querySelectorAll('.bp').forEach(function(el){
+    el.setAttribute('data-heat',heatTier(h[el.getAttribute('data-part')]));
+    var n=partDomains(el.getAttribute('data-part'));
+    var ti=el.querySelector('title')||document.createElementNS(NS,'title');
+    ti.textContent=el.getAttribute('data-part')+' · '+(n.length?n.map(function(x){return x.name}).join('、'):'未唤醒');
+    if(!ti.parentNode)el.appendChild(ti);
+  });
+  var box=$('#partList');box.innerHTML='';
+  PARTS.forEach(function(p){
+    var v=h[p.k],tier=heatTier(v);
+    var doms=partDomains(p.k);
+    var row=document.createElement('div');row.className='part-row';
+    row.innerHTML='<div class="part-head"><b>'+p.ico+' '+p.k+'</b><span class="meta-ico">'+p.mean+'</span>'+
+      '<span class="heat-pill heat-'+tier+'">'+(tier===0?'未唤醒':(tier===1?'温热':(tier===2?'活跃':'🔥 热点')))+'</span></div>'+
+      '<div class="part-domains">'+(doms.length?doms.map(function(n){return '<span class="chip gold">'+esc(n.name)+'</span>'}).join(''):'<span class="chip">暂无节点挂此锚点</span>')+'</div>';
+    box.appendChild(row);
+  });
+}
+function partDomains(part){
+  return S.nodes.filter(function(n){return n.body&&n.body.indexOf(part)>=0});
+}
+
+/* ---------- 打通时刻 / 交叉点 ---------- */
+function renderMerge(){
+  var box=$('#mergeList');
+  if(!S.logs.length){box.innerHTML='<div class="empty"><span class="big">🗺</span>还没有打通记录。找到两个看似无关的领域，说出它们的关系——那一刻就通了。</div>'}
+  else{
+    box.innerHTML='';
+    S.logs.forEach(function(l){
+      var row=document.createElement('div');row.className='row';
+      row.innerHTML='<div class="grow"><div class="tt">⚡ <b style="color:var(--gold-ink)">'+esc(l.a)+'</b> ⟷ <b style="color:var(--gold-ink)">'+esc(l.b)+'</b>'+(l.far?' <span class="far-badge">远域交叉</span>':'')+'</div><div class="meta">'+esc(l.date)+'</div></div>';
+      var del=document.createElement('button');del.className='btn del';del.textContent='删';
+      del.onclick=function(){S.logs=S.logs.filter(function(x){return x.id!==l.id});save();renderAll()};
+      row.appendChild(del);box.appendChild(row);
+    });
+  }
+  var fb=$('#farList');
+  var far=S.edges.filter(isFarEdge);
+  if(!far.length){fb.innerHTML='<div class="empty"><span class="big">✦</span>还没有远域交叉连接。试着把「最不像一家人」的两个节点连起来。</div>'}
+  else{
+    fb.innerHTML='';
+    far.forEach(function(e){
+      var a=nodeById(e.a),b=nodeById(e.b);
+      var hint=farHint(a,b);
+      var row=document.createElement('div');row.className='row';
+      row.innerHTML='<div class="grow"><div class="tt"><b style="color:var(--gold-ink)">'+esc(a?a.name:'?')+'</b> × <b style="color:var(--gold-ink)">'+esc(b?b.name:'?')+'</b></div>'+
+        '<div class="meta">'+(e.note?'<span>'+esc(e.note)+'</span>':'')+'</div>'+
+        '<div class="meta" style="margin-top:4px;color:var(--txt)">💡 '+esc(hint)+'</div></div>';
+      var btn=document.createElement('button');btn.className='btn sm';btn.textContent='做实验 →';
+      btn.onclick=function(){$('#exEdge').value=e.id;location.hash='#t-exp';$('#exName').focus()};
+      row.appendChild(btn);fb.appendChild(row);
+    });
+  }
+}
+function farHint(a,b){
+  if(!a||!b)return '';
+  var ba=(a.body||[]).map(function(x){var f=PARTS.filter(function(p){return p.k===x})[0];return f?x+'('+f.mean.split(' · ')[0]+')':x});
+  var bb=(b.body||[]).map(function(x){var f=PARTS.filter(function(p){return p.k===x})[0];return f?x+'('+f.mean.split(' · ')[0]+')':x});
+  return '谁同时会「'+ba.join('/')+'」和「'+bb.join('/')+'」？也许只有你。这个交集处，值得摆一个 14 天的探针。';
+}
+
+/* ---------- 实验 ---------- */
+function renderExpForm(){
+  var sel=$('#exEdge');var cur=sel.value;
+  sel.innerHTML='<option value="">— 选择一条突触 —</option>'+S.edges.map(function(e){
+    var a=nodeById(e.a),b=nodeById(e.b);
+    return '<option value="'+e.id+'">'+esc((a?a.name:'?')+' × '+(b?b.name:'?'))+(isFarEdge(e)?'（远域交叉）':'')+'</option>';
+  }).join('');
+  if(cur&&S.edges.some(function(e){return e.id===cur}))sel.value=cur;
+  if(!$('#exStart').value)$('#exStart').value=today();
+}
+[['exQ1'],['exQ2'],['exQ3']].forEach(function(q){
+  var el=document.getElementById(q[0]);
+  if(!el) return;
+  el.addEventListener('input',function(){
+    var v=document.getElementById(q[0]+'v');
+    if(v) v.textContent=el.value;
+  });
+});
+$('#exSave').onclick=function(){
+  var eid=$('#exEdge').value;
+  if(!eid){toast('选一条突触（先去图上连线）');return}
+  var name=$('#exName').value.trim();
+  if(!name){toast('给实验起个名');return}
+  var hyp=$('#exHyp').value.trim();
+  if(!hyp){toast('写下 14 天后想看到的证据');return}
+  var e=S.edges.filter(function(x){return x.id===eid})[0];
+  var a=nodeById(e.a),b=nodeById(e.b);
+  S.exps.unshift({id:uid(),eid:eid,name:name,hyp:hyp,a:a?a.name:'?',b:b?b.name:'?',
+    q1:+$('#exQ1').value,q2:+$('#exQ2').value,q3:+$('#exQ3').value,
+    start:$('#exStart').value||today(),status:'进行中',note:''});
+  $('#exName').value='';$('#exHyp').value='';
+  save();renderAll();toast('实验已发起，14 天后回来交证据');
+};
+var EXS=['进行中','已验证','已证伪','继续加码'];
+function renderExpList(){
+  var box=$('#expList');
+  if(!S.exps.length){box.innerHTML='<div class="empty"><span class="big">🧪</span>还没有实验。图上的远域交叉就是候选清单，挑一条最痒的动手。</div>';return}
+  box.innerHTML='';
+  S.exps.forEach(function(x){
+    var days=Math.max(0,Math.round((new Date(today())-new Date(x.start))/86400000));
+    var pct=Math.min(100,Math.round(days/14*100));
+    var gate=Math.min(x.q1,x.q2);
+    var gateCls=gate>=4?'green':(gate>=3?'gold':'red');
+    var row=document.createElement('div');row.className='row';
+    row.innerHTML='<div class="grow"><div class="tt">🧪 '+esc(x.name)+' <span class="chip '+gateCls+'">三问交集 '+gate+'/5</span></div>'+
+      '<div class="meta"><span class="chip gold">'+esc(x.a)+' × '+esc(x.b)+'</span><span>'+esc(x.start)+' 起 · 第 '+Math.min(days,14)+' 天</span></div>'+
+      '<div class="meta" style="margin-top:3px">'+esc(x.hyp)+'</div>'+
+      '<div class="prog"><i style="width:'+pct+'%"></i></div>'+
+      '<div class="meta" style="margin-top:7px;gap:8px;align-items:center">状态 '+
+      '<select class="sel" data-exp-st="'+x.id+'" style="width:auto;padding:5px 28px 5px 9px;font-size:12.5px">'+
+      EXS.map(function(s){return '<option'+(s===x.status?' selected':'')+'>'+s+'</option>'}).join('')+'</select>'+
+      '<input class="ipt" data-exp-note="'+x.id+'" placeholder="14 天后的结论…" value="'+esc(x.note)+'" style="flex:1;min-width:140px;padding:5px 9px;font-size:12.5px"></div></div>';
+    var del=document.createElement('button');del.className='btn del';del.textContent='删';
+    del.onclick=function(){if(!confirm('删除实验「'+x.name+'」？'))return;S.exps=S.exps.filter(function(y){return y.id!==x.id});save();renderAll()};
+    row.appendChild(del);box.appendChild(row);
+  });
+  box.querySelectorAll('[data-exp-st]').forEach(function(s){
+    s.addEventListener('change',function(){
+      var x=S.exps.filter(function(y){return y.id===s.getAttribute('data-exp-st')})[0];
+      if(x){x.status=s.value;save();toast('状态已更新：'+s.value)}
+    });
+  });
+  box.querySelectorAll('[data-exp-note]').forEach(function(i){
+    i.addEventListener('change',function(){
+      var x=S.exps.filter(function(y){return y.id===i.getAttribute('data-exp-note')})[0];
+      if(x){x.note=i.value.trim();save()}
+    });
+  });
+}
+
+/* ---------- 导出 / 导入 / 清空 ---------- */
+$('#btnExport').onclick=function(){
+  var blob=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='talent-finder-'+today()+'.json';a.click();
+  setTimeout(function(){URL.revokeObjectURL(a.href)},2000);
+  toast('已导出备份');
+};
+$('#btnImport').onclick=function(){$('#fileImp').click()};
+$('#fileImp').addEventListener('change',function(ev){
+  var f=ev.target.files[0];if(!f)return;
+  var r=new FileReader();
+  r.onload=function(){
+    try{
+      var o=JSON.parse(r.result);
+      if(!o||!Array.isArray(o.nodes))throw new Error('格式不对');
+      if(!confirm('导入将覆盖当前数据（节点 '+o.nodes.length+' / 连接 '+(o.edges||[]).length+'），确定？'))return;
+      S.nodes=o.nodes||[];S.edges=o.edges||[];S.signals=o.signals||[];S.logs=o.logs||[];S.exps=o.exps||[];S.pos=o.pos||{};
+      save();renderAll();toast('导入成功');
+    }catch(e){toast('导入失败：'+e.message)}
+    ev.target.value='';
+  };
+  r.readAsText(f);
+});
+$('#btnWipe').onclick=function(){
+  if(!confirm('清空全部天赋数据？此操作不可恢复（建议先导出备份）。'))return;
+  if(!confirm('再次确认：真的清空？'))return;
+  S={nodes:[],edges:[],signals:[],logs:[],exps:[],pos:{}};
+  save();renderAll();toast('已清空，重新开始画你的网');
+};
+
+/* ---------- 渲染总入口 & 高度上报 ---------- */
+function renderAll(){
+  renderStats();drawSyn();renderNodeList();renderSigForm();renderSigFilters();renderSigList();renderBody();renderMerge();renderExpForm();renderExpList();
+}
+load();renderAll();
+
+function reportH(){
+  var h=Math.max(document.documentElement.scrollHeight,document.body.scrollHeight);
+  try{parent.postMessage({__wbResize:true,id:'talentFrame',h:h},'*')}catch(e){}
+}
+if(window.ResizeObserver){new ResizeObserver(reportH).observe(document.body)}
+window.addEventListener('load',reportH);
+setTimeout(reportH,400);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<!-- 复试口语抽卡 · 考研复试英语问答 30 题 | 单文件 HTML 子应用（零外链），数据走自身 localStorage（wb_itvdraw_v1）
+     玩法：按分类随机抽卡（低自评优先）→ 先自己开口答 → 看参考要点对照 → 星级自评 → 低星卡更常被抽到。
+     录音用 MediaRecorder，仅本轮回放不落盘；环境不支持时优雅降级为纯口头练习。 -->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" type="image/png" href="../../assets/pwa/icon-192.png"><!-- 2026-11-06 全站补 rel="icon"：本页此前未声明，浏览器回落请求站点根 /favicon.ico 报 404（控制台红色噪音、标签页无图标）；与 2026-10-03 对 index/zk-ky/share-hub 的处理同一策略 -->
+<title>复试口语抽卡 · 考研英语问答 30 题</title>
+
+<script>
+/* 主题跟随主站（同 anime.html 模式）：读 wb_store.data.theme（老版 wb_hub_theme），auto 跟随系统 */
+(function(){
+  function stored(){
+    try{
+      var raw=localStorage.getItem('wb_store');
+      if(raw){var o=JSON.parse(raw); if(o&&o.data&&o.data.theme) return o.data.theme;}
+    }catch(e){}
+    try{ var l=localStorage.getItem('wb_hub_theme'); if(l) return l; }catch(e){}
+    return 'auto';
+  }
+  function mq(){ return window.matchMedia('(prefers-color-scheme: dark)'); }
+  function apply(m){
+    var dark=mq().matches;
+    var act=(m==='dark'||m==='light')?m:(dark?'dark':'light');
+    document.documentElement.setAttribute('data-theme',act);
+  }
+  apply(stored());
+  window.addEventListener('storage',function(e){
+    if(e.key==='wb_store'||e.key==='wb_hub_theme') apply(stored());
+  });
+  try{ mq().addEventListener('change',function(){ if(stored()==='auto') apply('auto'); }); }catch(e){}
+})();
+</script>
+
+<link rel="canonical" href="https://epic-super.github.io/lab/products/interview-draw.html">
+<meta name="description" content="考研复试口语抽卡：英语问答 30 题随机抽练，参考要点对照，星级自评低星优先复抽，可录音回放。题目与要点均为原创语料。">
+<style>
+:root{
+  --bg:#101019; --panel:#191a2b; --panel2:#20213a; --line:#2c2d4d; --line2:#86889f;
+  --txt:#edeef8; --sub:#8f93b4; --blue:#4a72d0;--blue-ink:#7489bc; --orange:#ff9f43; --pink:#f472b6;
+  --green:#34d399; --red:#f87171; --purple:#a78bfa; --yellow:#fbbf24;
+  --r:16px; --r-sm:11px; --r-f:999px;
+  --sh:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.22);
+  --ease:cubic-bezier(.32,.72,0,1); --tf:.16s var(--ease);
+}
+html[data-theme="light"]{--blue-ink:#3966d8;
+  --bg:#f7f8fc; --panel:#ffffff; --panel2:#eef0f8; --line:#e2e5f0; --line2:#6a6d77;
+  --txt:#20233a; --sub:#5d6280; --blue:#3966d8; --orange:#a25c15; --pink:#cd256f;
+  --green:#0f7d50; --red:#c04141; --purple:#7758cd; --yellow:#b45309;
+  --sh:0 1px 3px rgba(30,30,60,.06),0 6px 16px rgba(30,30,60,.07);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","HarmonyOS Sans SC","Microsoft YaHei",sans-serif;
+  background:var(--bg);color:var(--txt);font-size:15px;line-height:1.65;
+  padding-bottom:calc(28px + env(safe-area-inset-bottom));
+  -webkit-font-smoothing:antialiased;
+}
+button,input,select,textarea{font-family:inherit;font-size:15px;color:inherit}
+button{cursor:pointer;border:none;background:none}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--blue);outline-offset:2px;border-radius:6px}
+.wrap{max-width:880px;margin:0 auto;padding:0 14px}
+
+.top{position:relative;color:#fff;padding:22px 0 20px;padding-top:calc(22px + env(safe-area-inset-top));
+  background:
+    radial-gradient(110% 150% at 8% -20%,rgba(91,140,255,.35),rgba(91,140,255,0) 50%),
+    radial-gradient(90% 130% at 92% 0%,rgba(167,139,250,.32),rgba(167,139,250,0) 58%),
+    linear-gradient(134deg,#1b2450 0%,#2b2f6e 55%,#45308a 120%);
+  box-shadow:0 1px 0 rgba(255,255,255,.08) inset,0 6px 22px rgba(12,14,40,.35);overflow:hidden}
+.top::after{content:'';position:absolute;left:0;right:0;bottom:0;height:1px;background:linear-gradient(90deg,transparent,rgba(167,139,250,.5),transparent)}
+.brand h1{margin:0;font-size:21px;font-weight:800;display:flex;align-items:center;gap:9px}
+.brand p{margin:5px 0 0;font-size:12.5px;opacity:.88}
+.stats{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}
+.stat{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:var(--r-sm);padding:6px 11px;font-size:12px;display:flex;align-items:baseline;gap:5px;color:#fff}
+.stat b{font-size:16px;font-weight:800;font-variant-numeric:tabular-nums}
+.stat.fire b{color:#a5f3c9}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:18px;box-shadow:var(--sh);margin:14px 0}
+.card h2{margin:0 0 4px;font-size:16px;font-weight:800;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.card .desc{color:var(--sub);font-size:13px;margin:0 0 12px}
+.small{font-size:12px;color:var(--sub)}
+
+/* 抽卡主区 */
+.filters{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:6px}
+.fchip{border:1px solid var(--line2);border-radius:var(--r-f);padding:4px 12px;font-size:12px;color:var(--sub);transition:var(--tf)}
+.fchip.on{border-color:var(--blue);color:var(--blue-ink);background:rgba(91,140,255,.1);font-weight:700}
+.fchip.warn.on{border-color:var(--yellow);color:var(--yellow);background:rgba(251,191,36,.1)}
+.decktop{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:12px;color:var(--sub);margin:12px 0 6px}
+.deckcard{background:var(--panel2);border:1px solid var(--line);border-radius:var(--r);padding:20px 18px;margin-top:10px}
+.qbig{font-size:19px;font-weight:700;line-height:1.45;margin:6px 0 4px}
+.zh{font-size:13px;color:var(--sub);margin-bottom:4px}
+.pts{margin-top:14px;background:rgba(91,140,255,.07);border:1px solid rgba(91,140,255,.25);border-radius:var(--r-sm);padding:12px 14px;font-size:13.5px}
+.pts b{color:var(--blue-ink)}
+.pts ul{margin:8px 0 4px;padding-left:18px}
+.pts li{margin:5px 0}
+.tag{display:inline-block;font-size:10.5px;font-weight:700;border-radius:5px;padding:1px 7px;letter-spacing:.5px;border:1px solid}
+.t-my{color:var(--blue-ink);border-color:var(--blue)} .t-mz{color:var(--red);border-color:var(--red)}
+.t-sg{color:var(--orange);border-color:var(--orange)} .t-sx{color:var(--green);border-color:var(--green)}
+.t-sz{color:var(--purple);border-color:var(--purple)} .t-pk{color:var(--pink);border-color:var(--pink)}
+
+.btn{border:1px solid var(--line2);background:var(--panel);border-radius:var(--r-f);padding:8px 16px;font-size:13.5px;transition:var(--tf)}
+.btn:hover{border-color:var(--blue)}
+.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff;font-weight:700}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.rec{border-color:var(--red);color:var(--red)}
+.btn.rec:hover{background:rgba(248,113,113,.1)}
+.btn.rec.live{background:var(--red);color:#fff;animation:pulse 1.1s infinite}
+@keyframes pulse{50%{filter:brightness(1.25)}}
+.hint{font-size:12px;color:var(--sub);min-height:18px}
+.hint.err{color:var(--red)}
+
+.stars{display:flex;gap:2px;align-items:center;margin-top:14px;flex-wrap:wrap}
+.star{font-size:26px;line-height:1;color:var(--line2);transition:var(--tf);padding:2px 3px}
+.star:hover{transform:scale(1.12)}
+.star.on{color:var(--yellow)}
+.starlab{font-size:12px;color:var(--sub);margin-right:8px;font-weight:700}
+
+.recrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:14px;padding-top:12px;border-top:1px dashed var(--line)}
+audio{width:100%;max-width:340px;height:36px;margin-top:8px}
+.frow{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:12px}
+
+/* 题库列表 */
+.qitem{background:var(--panel2);border:1px solid var(--line);border-radius:var(--r-sm);padding:11px 13px;margin:8px 0;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.qitem .qq{font-size:13.5px;font-weight:600;flex:1;min-width:200px}
+.qitem .starsTxt{font-size:13px;letter-spacing:1px;color:var(--yellow)}
+.qitem .starsTxt.off{color:var(--line2)}
+.mini{font-size:11.5px;border:1px solid var(--line2);border-radius:var(--r-f);padding:3px 11px;color:var(--sub);transition:var(--tf);flex:none}
+.mini:hover{border-color:var(--blue);color:var(--blue-ink)}
+.empty{text-align:center;color:var(--sub);padding:14px 0;font-size:13px}
+
+/* 急救包 */
+.tips{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.tip{background:var(--panel2);border:1px solid var(--line);border-radius:var(--r-sm);padding:11px 13px;font-size:12.5px}
+.tip b{display:block;font-size:13px;margin-bottom:4px}
+.tip .en{color:var(--blue-ink);line-height:1.55}
+@media (max-width:560px){.tips{grid-template-columns:1fr}.qbig{font-size:17px}}
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body>
+
+<header class="top">
+  <div class="wrap brand">
+    <h1>🎤 复试口语抽卡</h1>
+    <p>考研复试英语问答 30 题（题目与参考要点均为自撰语料）。先自己开口答，再看要点对照，星级自评——低星卡更常被抽到。可录音回放找语感。</p>
+    <div class="stats">
+      <div class="stat"><span>题库</span><b id="stBank">30</b></div>
+      <div class="stat"><span>已覆盖</span><b id="stCover">0</b></div>
+      <div class="stat fire"><span>已掌握（≥4★）</span><b id="stMaster">0</b></div>
+      <div class="stat"><span>平均自评</span><b id="stAvg">–</b></div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="card">
+    <h2>🃏 抽卡练习</h2>
+    <p class="desc">抽到卡先别看要点——开口说满 30 秒再看对照。自评越低的卡，被抽中的权重越高。</p>
+    <div class="filters" id="catFilters"></div>
+    <div class="filters" style="margin-top:6px">
+      <button class="fchip warn" id="fNew" type="button">🎯 只抽未掌握</button>
+    </div>
+    <div class="deckcard" id="deckBox"></div>
+  </section>
+
+  <section class="card">
+    <h2>📇 题库浏览 <span class="small" id="bankCount"></span></h2>
+    <p class="desc">点「抽它」直接练这一张。★ 为你的历史最高自评。</p>
+    <div id="bankBox"></div>
+  </section>
+
+  <section class="card">
+    <h2>🩹 口语急救包</h2>
+    <p class="desc">卡壳时救命的固定句式，考前把这几句练到脱口而出。</p>
+    <div class="tips">
+      <div class="tip"><b>⏳ 争取思考时间</b><div class="en">That's a good question. Let me think about it for a second.</div></div>
+      <div class="tip"><b>👂 没听清/确认</b><div class="en">Sorry, could you say that again? / Do you mean…?</div></div>
+      <div class="tip"><b>🔁 换个说法续命</b><div class="en">Let me put it another way. / In other words, …</div></div>
+      <div class="tip"><b>🧱 万能四步结构</b><div class="en">In my opinion… → The main reason is… → For instance… → That's why I believe…</div></div>
+      <div class="tip"><b>🎓 自考背景怎么说</b><div class="en">I earned my bachelor's degree through the Higher Education Self-study Examination program. It taught me self-discipline.</div></div>
+      <div class="tip"><b>🙏 得体收尾</b><div class="en">Thanks for your question. … That's all. Thank you.</div></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>ℹ️ 说明</h2>
+    <p class="desc">抽卡规则：未抽过的卡权重最高（5），自评 ≤3★ 权重 3，≥4★ 权重不足 1；「只抽未掌握」会把 ≥4★ 的卡移出候选，候选空了自动回退全部。星级与覆盖进度存本机 localStorage（wb_itvdraw_v1），不上传。录音仅当轮回放，刷新即失；需浏览器麦克风权限，被拦时直接新标签打开本页即可。</p>
+  </section>
+
+</main>
+
+<script>
+(function(){
+'use strict';
+var KEY='wb_itvdraw_v1';
+var $=function(s){return document.querySelector(s)};
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+
+var CATS={
+  intro:{n:'自我介绍',c:'t-my'},
+  motive:{n:'报考动机',c:'t-sg'},
+  academic:{n:'学术研究',c:'t-sx'},
+  future:{n:'规划未来',c:'t-sz'},
+  stress:{n:'应变压力',c:'t-mz'},
+  daily:{n:'日常交流',c:'t-pk'}
+};
+
+/* ---------- 题库（自撰语料，30 题） ---------- */
+var CARDS=[
+{id:'c01',cat:'intro',q:"Please introduce yourself briefly.",zh:'请做一个简短的自我介绍（1 分钟左右）。',pts:["Open with your name and current status in one sentence.","One or two lines on your study path — as a self-study candidate, mention your self-discipline.","Two qualities that fit postgraduate study, each with a tiny example.","End with why you are here: 'That's why I'm applying for this program.'"],key:"self-taught examination / self-discipline / I'm applying for…"},
+{id:'c02',cat:'intro',q:"What are your strengths and weaknesses?",zh:'你的优点和缺点是什么？',pts:["Pick ONE strength and prove it with a real fact, not adjectives.","For the weakness, choose something real but not fatal to research work.","Always add what you are doing about it: 'I'm improving it by…'","Avoid clichés like 'I'm a perfectionist'."],key:"persistence / I tend to… / I'm working on it"},
+{id:'c03',cat:'intro',q:"As a self-taught candidate, tell us about your learning path.",zh:'作为自考考生，讲讲你的学习之路。',pts:["Why you chose self-study exams: a clear goal plus a flexible schedule.","How you kept going year after year: plans, routines, mock exams.","What it proves about you: independent learning and persistence — exactly what a postgraduate needs.","Be proud, not apologetic, about this path."],key:"self-taught / self-discipline / independent learner"},
+{id:'c04',cat:'intro',q:"Could you introduce your hometown?",zh:'介绍你的家乡。',pts:["Geography in one sentence: where it is and what it is known for.","One specific detail: food, scenery, or a local custom.","Connect it to you: how the place shaped your character."],key:"is located in / is famous for / it taught me…"},
+{id:'c05',cat:'intro',q:"What are your hobbies?",zh:'你有什么兴趣爱好？',pts:["One or two real hobbies — be specific, not a long list.","A small story or detail makes it believable.","Tie it to study or character: running keeps me self-disciplined; reading keeps me curious."],key:"in my spare time / it helps me…"},
+{id:'c06',cat:'motive',q:"Why do you choose our university and this program?",zh:'为什么选择我校与本项目？',pts:["Show homework: mention a direction, a course, or a resource you looked up.","Match it to your own goal in one sentence.","End with willingness: 'I believe I can grow a lot here.'"],key:"research direction / curriculum / a good match for…"},
+{id:'c07',cat:'motive',q:"Why do you want to pursue a master's degree instead of working first?",zh:'为什么读研而不是先工作？',pts:["Real motivation: academic interest, or the depth your career requires.","What the degree gives you: systematic training and research methods.","Show a clear short-term plan so it doesn't sound like escaping the job market."],key:"systematic training / research methods / in the long run"},
+{id:'c08',cat:'motive',q:"Why did you choose this major?",zh:'为什么选择这个专业？',pts:["The starting point: one book, one course, or one event.","How your interest deepened over time.","What you want to do with it in the future."],key:"sparked my interest / the more I learned, the more…"},
+{id:'c09',cat:'motive',q:"How do you balance work and study?",zh:'如何平衡工作／生活与学习？',pts:["Fixed study blocks: early mornings, weekends, holidays.","Use fragments: review cards while commuting.","Your self-study exam record is the best proof — say it out loud."],key:"make full use of / stick to a schedule"},
+{id:'c10',cat:'academic',q:"What is your plan for the postgraduate stage?",zh:'研究生阶段有什么计划？',pts:["Year one: courses plus wide reading to locate a topic.","Year two: proposal, data or experiments, a first paper attempt.","Year three: thesis and career preparation.","A phrase like 'read widely first, then go deep' works well."],key:"literature review / research proposal / thesis"},
+{id:'c11',cat:'academic',q:"Which research topic interests you? Why?",zh:'你感兴趣的课题方向是什么？为什么？',pts:["Name ONE concrete direction, not a whole field.","Why it matters: a real problem or a gap you noticed.","Connect it to your experience or strength.","Stay open: 'I would also love to hear my supervisor's advice.'"],key:"research gap / I'm curious about / under the guidance of…"},
+{id:'c12',cat:'academic',q:"What books or papers have you read recently?",zh:'最近读过什么专业书或论文？',pts:["One or two titles you truly read — never fake it.","One sentence on the core idea.","Your own comment or question shows real reading."],key:"The book argues that… / What impressed me is…"},
+{id:'c13',cat:'academic',q:"Describe a project or thesis you have completed.",zh:'介绍你完成过的一个项目或毕业论文。',pts:["Background and goal in one sentence.","Your concrete work: methods, difficulties, how you solved them.","Result — numbers help — and one lesson learned."],key:"I was responsible for / the challenge was… / it turned out…"},
+{id:'c14',cat:'academic',q:"How do you see the development of your field?",zh:'你怎么看本领域的发展趋势？',pts:["One or two trends: technology, policy, or cross-disciplinary work.","Support with a concrete example.","Stay humble and curious at the end."],key:"trend / breakthrough / I'd love to explore…"},
+{id:'c15',cat:'academic',q:"What quality matters most for a researcher?",zh:'你认为研究者最重要的素质是什么？',pts:["Choose one quality only: curiosity, honesty, or persistence.","Prove you have it with a short story of your own.","Link it to the training a master's program offers."],key:"curiosity / academic integrity / keep questioning"},
+{id:'c16',cat:'future',q:"What is your career plan after graduation?",zh:'毕业后有什么职业规划？',pts:["A realistic three-to-five-year path: role, industry, or further study.","Connect it with what you will learn in the program.","Concrete beats grandiose — no 'change the world'."],key:"in the short term / build on / step by step"},
+{id:'c17',cat:'future',q:"Do you prefer theoretical research or practical application?",zh:'你偏好理论研究还是实践应用？',pts:["Pick a side, but respect the other.","Give your reason with one example.","Say which type this program mostly is, if you know."],key:"on the one hand… on the other hand / in practice"},
+{id:'c18',cat:'future',q:"Where do you see yourself in five years?",zh:'五年后你希望自己是什么状态？',pts:["A role plus an ability state, matching this program.","Show stability and ambition at once."],key:"I see myself as… / by then I will have…"},
+{id:'c19',cat:'future',q:"What will you do before enrollment if admitted?",zh:'如果被录取，入学前这段时间你打算做什么？',pts:["Language and tools: keep sharpening English and software skills.","Read your supervisor's recent papers to warm up.","Wrap up current work cleanly — it shows responsibility."],key:"get a head start / familiarize myself with…"},
+{id:'c20',cat:'stress',q:"What will you do if you fail this interview?",zh:'如果这次复试失败了，你会怎么办？',pts:["Stay calm: review the feedback and find the real gap.","Plan B: adjustment (tiaoji), another attempt, or a job while preparing.","End with: my passion for this field will not change."],key:"adjustment / learn from it / my passion remains"},
+{id:'c21',cat:'stress',q:"Why should we admit you?",zh:'为什么应该录取你？',pts:["Three points, three facts: foundation, self-discipline, match.","Your self-taught path is strong evidence of self-discipline.","Confident closing: 'I will not let this chance down.'"],key:"as shown by / prove myself / make the most of"},
+{id:'c22',cat:'stress',q:"Your background differs from this field. How will you catch up?",zh:'你的背景与本专业不同，打算如何补齐？',pts:["Admit the gap honestly — no dodging.","List what you have already done: courses, books, problems solved.","Your method from self-study transfers to any new field.","Use school resources: courses, labs, and your supervisor."],key:"bridge the gap / catch up with / make up for"},
+{id:'c23',cat:'stress',q:"Tell us about a failure and what you learned from it.",zh:'讲一次失败经历和你的收获。',pts:["A real, small failure is fine — an exam or a project.","How you reacted at the time: emotions first, then analysis.","The behavior that changed afterwards — show, don't claim."],key:"fell short / looking back / since then I have…"},
+{id:'c24',cat:'stress',q:"If you disagree with your supervisor, what will you do?",zh:'与导师意见不合时你会怎么做？',pts:["First understand the reasoning behind the advice.","Express your view with data and literature, not feelings.","Respect the final decision, then review and learn.","Avoid both extremes: blind obedience and stubbornness."],key:"on second thought / evidence-based / in the end I respect…"},
+{id:'c25',cat:'daily',q:"Describe your daily study routine.",zh:'描述你一天的学习安排。',pts:["Specific time blocks beat vague words: 6:30 review, morning reading…","One habit you keep: error notebooks, daily cards, weekly review.","Weekend rhythm and how you avoid burnout."],key:"stick to / review what I learned / stay focused"},
+{id:'c26',cat:'daily',q:"How do you improve your English besides exams?",zh:'考试之外你如何提升英语？',pts:["Listening: podcasts or shows — second pass with subtitles off.","Speaking: talk to yourself, record and replay — practice beats shyness.","Reading: journals in your field kill two birds with one stone."],key:"get exposed to / out of habit / kill two birds with one stone"},
+{id:'c27',cat:'daily',q:"Who has influenced you the most?",zh:'对你影响最大的人是谁？',pts:["Who, in one sentence.","One concrete thing they did, not a list of virtues.","The change in you: a habit or a value you keep today."],key:"what shaped me most / I learned from… / ever since then"},
+{id:'c28',cat:'daily',q:"What do you do to relax under pressure?",zh:'压力大的时候你怎么放松？',pts:["One or two healthy ways — exercise works well.","Why it works for you, briefly.","A touch of humor is welcome; tension is not."],key:"clear my head / recharge / work out"},
+{id:'c29',cat:'daily',q:"Do you have any questions for us?",zh:'你有什么想问我们的吗？（反问环节）',pts:["Prepare one or two real questions: research opportunities, training style, reading list.","Never ask about scores, admission odds, or salary.","Thank the panel and say you look forward to joining."],key:"I was wondering… / could you share… / thank you for your time"},
+{id:'c30',cat:'future',q:"Anything else you would like to add?",zh:'还有什么想补充的吗？（收尾）',pts:["One sentence to restate your match with the program.","Add one highlight not covered before.","Close briefly: 'That's all. Thank you.'"],key:"to sum up / I hope I have shown… / that's all, thank you"}
+];
+
+/* ---------- 存储 ---------- */
+function load(){
+  try{ var o=JSON.parse(localStorage.getItem(KEY)); if(o&&typeof o==='object'&&o.ratings) return o; }catch(e){}
+  return {ratings:{}};
+}
+function save(){ try{ localStorage.setItem(KEY,JSON.stringify(S)); }catch(e){} }
+var S=load();
+var catOn='all', onlyNew=false, curIdx=0, revealed=false;
+
+/* ---------- 统计 ---------- */
+function ratedCount(){ return Object.keys(S.ratings).length; }
+function masterCount(){ var n=0; Object.keys(S.ratings).forEach(function(k){ if(S.ratings[k].best>=4) n++; }); return n; }
+function avgRating(){
+  var ks=Object.keys(S.ratings); if(!ks.length) return null;
+  var s=0; ks.forEach(function(k){ s+=S.ratings[k].last; });
+  return (s/ks.length);
+}
+function renderStats(){
+  $('#stCover').textContent=ratedCount()+'/'+CARDS.length;
+  $('#stMaster').textContent=masterCount();
+  var a=avgRating();
+  $('#stAvg').textContent=a==null?'–':a.toFixed(1)+'★';
+}
+
+/* ---------- 抽卡 ---------- */
+function pick(){
+  var pool=[];
+  CARDS.forEach(function(c,i){
+    if(catOn!=='all'&&c.cat!==catOn) return;
+    if(onlyNew){ var r=S.ratings[c.id]; if(r&&r.best>=4) return; }
+    pool.push(i);
+  });
+  if(!pool.length){ onlyNew=false; CARDS.forEach(function(c,i){ if(catOn==='all'||c.cat===catOn) pool.push(i); }); }
+  if(pool.length>1) pool=pool.filter(function(i){ return i!==curIdx; });
+  var ws=pool.map(function(i){
+    var r=S.ratings[CARDS[i].id];
+    if(!r) return 5;
+    if(r.best>=5) return 0.4;
+    if(r.best>=4) return 0.8;
+    return 3;
+  });
+  var tot=0; ws.forEach(function(w){tot+=w});
+  var x=Math.random()*tot;
+  for(var j=0;j<pool.length;j++){ x-=ws[j]; if(x<=0) return pool[j]; }
+  return pool[pool.length-1];
+}
+function stopRec(){
+  try{ if(rec&&rec.state==='recording'){ rec.onstop=null; rec.stop(); } }catch(e){}
+  rec=null; recUrl=null; recLive=false;
+  try{ if(streamRef){ streamRef.getTracks().forEach(function(t){t.stop()}); streamRef=null; } }catch(e){}
+}
+function goto(i){ stopRec(); curIdx=i; revealed=false; renderDeck(); }
+
+function renderDeck(){
+  var c=CARDS[curIdx], r=S.ratings[c.id];
+  var h='<div class="decktop"><span class="tag '+CATS[c.cat].c+'">'+CATS[c.cat].n+'</span>'+
+    '<span>第 '+(curIdx+1)+' / '+CARDS.length+' 张'+(r?' · 上次 '+r.last+'★ · 最高 '+r.best+'★ · 练过 '+r.times+' 次':' · 未练过')+'</span></div>';
+  h+='<div class="qbig">'+esc(c.q)+'</div>';
+  h+='<div class="zh">'+esc(c.zh)+'</div>';
+  if(revealed){
+    h+='<div class="pts"><b>💡 参考要点</b><ul>'+
+      c.pts.map(function(p){return '<li>'+esc(p)+'</li>'}).join('')+'</ul>'+
+      '<div class="small">常用表达：'+esc(c.key)+'</div></div>';
+    h+='<div class="stars"><span class="starlab">开口自评：</span>';
+    for(var s=1;s<=5;s++) h+='<button type="button" class="star'+(r&&r.last>=s?' on':'')+'" data-v="'+s+'">★</button>';
+    h+='<span class="small" style="margin-left:8px" id="starHint">'+(r?'已评，可改':'点星评分并保存')+'</span></div>';
+  }
+  h+='<div class="frow">';
+  if(!revealed) h+='<button class="btn primary" id="btnReveal" type="button">💡 看参考要点</button>';
+  h+='<button class="btn" id="btnNext" type="button">下一张 →</button>';
+  h+='<button class="btn'+(recLive?' rec live':' rec')+'" id="btnRec" type="button">'+(recLive?'⏹ 停止录音':'🎤 开始录音')+'</button>';
+  h+='<span class="hint'+(recErr?' err':'')+'" id="recHint">'+esc(recMsg)+'</span>';
+  h+='</div>';
+  if(recUrl) h+='<audio id="playback" controls></audio><div class="small">录音仅供本轮回放，刷新即失。</div>';
+  $('#deckBox').innerHTML=h;
+  var audio=$('#playback'); if(audio&&recUrl) audio.src=recUrl;
+  if(!revealed) $('#btnReveal').onclick=function(){ revealed=true; renderDeck(); };
+  $('#btnNext').onclick=function(){ goto(pick()); };
+  $('#btnRec').onclick=toggleRec;
+  var stars=$('#deckBox').querySelectorAll('.star');
+  stars.forEach(function(b){
+    b.onclick=function(){
+      var v=+b.getAttribute('data-v');
+      var old=S.ratings[c.id];
+      S.ratings[c.id]={best:Math.max(old?old.best:0,v),last:v,times:(old?old.times:0)+1};
+      save(); renderStats(); renderBank(); renderDeck();
+    };
+  });
+  renderStats();
+}
+
+/* ---------- 录音（优雅降级） ---------- */
+var rec=null,recUrl=null,recLive=false,recMsg='',recErr=false,streamRef=null;
+function setMsg(m,err){ recMsg=m; recErr=!!err; }
+function toggleRec(){
+  if(rec&&rec.state==='recording'){
+    rec.stop(); return;   // onstop 里收尾并重绘
+  }
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia||typeof MediaRecorder==='undefined'){
+    setMsg('此环境不支持录音（需麦克风权限）——不影响抽卡练习',true); renderDeck(); return;
+  }
+  navigator.mediaDevices.getUserMedia({audio:true}).then(function(stream){
+    streamRef=stream;
+    try{ rec=new MediaRecorder(stream); }catch(e){ setMsg('录音初始化失败：'+(e&&e.message||e),true); renderDeck(); return; }
+    var chunks=[];
+    rec.ondataavailable=function(ev){ if(ev.data&&ev.data.size) chunks.push(ev.data); };
+    rec.onstop=function(){
+      recLive=false;
+      try{ streamRef.getTracks().forEach(function(t){t.stop()}); }catch(e){}
+      streamRef=null;
+      if(recUrl){ try{URL.revokeObjectURL(recUrl)}catch(e){} recUrl=null; }
+      try{
+        var blob=new Blob(chunks,{type:rec.mimeType||'audio/webm'});
+        recUrl=URL.createObjectURL(blob);
+        setMsg('✔ 已录 '+Math.round(blob.size/1024)+' KB，点下方播放回听');
+      }catch(e){ setMsg('录音数据整理失败',true); }
+      renderDeck();
+    };
+    rec.start(); recLive=true; setMsg('● 录音中——开口回答，说满 30 秒');
+    renderDeck();
+  }).catch(function(err){
+    setMsg('无法访问麦克风（'+(err&&err.name||'未知原因')+'）：iframe 里可能被拦，新标签直接打开本页即可',true);
+    renderDeck();
+  });
+}
+window.addEventListener('beforeunload',stopRec);
+
+/* ---------- 过滤 chips ---------- */
+function renderFilters(){
+  var box=$('#catFilters'); box.innerHTML='';
+  var list=[{k:'all',n:'全部'}];
+  Object.keys(CATS).forEach(function(k){ list.push({k:k,n:CATS[k].n}); });
+  list.forEach(function(f){
+    var b=document.createElement('button');
+    b.type='button'; b.className='fchip'+(catOn===f.k?' on':''); b.textContent=f.n;
+    b.onclick=function(){ catOn=f.k; goto(pick()); renderFilters(); };
+    box.appendChild(b);
+  });
+  var fn=$('#fNew');
+  fn.className='fchip warn'+(onlyNew?' on':'');
+  fn.onclick=function(){ onlyNew=!onlyNew; goto(pick()); renderFilters(); };
+}
+
+/* ---------- 题库浏览 ---------- */
+function renderBank(){
+  $('#bankCount').textContent='（'+CARDS.length+' 题）';
+  var box=$('#bankBox');
+  var arr=CARDS.map(function(c,i){return {c:c,i:i}})
+    .filter(function(x){ return catOn==='all'||x.c.cat===catOn; });
+  if(!arr.length){ box.innerHTML='<div class="empty">该分类下没有卡片。</div>'; return; }
+  box.innerHTML='';
+  arr.forEach(function(x){
+    var d=document.createElement('div'); d.className='qitem';
+    var r=S.ratings[x.c.id];
+    var st='';
+    for(var s=1;s<=5;s++) st+=(r&&r.best>=s?'★':'☆');
+    d.innerHTML='<span class="tag '+CATS[x.c.cat].c+'">'+CATS[x.c.cat].n+'</span>'+
+      '<span class="qq">'+esc(x.c.q)+'</span>'+
+      '<span class="starsTxt'+(r?'':' off')+'">'+st+'</span>'+
+      '<button class="mini draw1" type="button">抽它</button>';
+    d.querySelector('.draw1').onclick=function(){ goto(x.i); document.querySelector('.deckcard').scrollIntoView({behavior:'smooth'}); };
+    box.appendChild(d);
+  });
+}
+
+/* ---------- 高度上报（主站 iframe 自适应） ---------- */
+function reportH(){
+  var h=Math.max(document.documentElement.scrollHeight,document.body.scrollHeight);
+  try{ parent.postMessage({__wbResize:true,id:'itvDrawFrame',h:h},'*') }catch(e){}
+}
+if(window.ResizeObserver){ new ResizeObserver(reportH).observe(document.body); }
+window.addEventListener('load',reportH);
+setTimeout(reportH,400);
+
+renderFilters();
+curIdx=pick();
+renderDeck();
+renderBank();
+})();
+</script>
+</body>
+</html>

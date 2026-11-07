@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<!-- 打气站 · 为学习打气 / 为生活打气 | 单文件 HTML 子应用（零外链），数据走自身 localStorage（wb_cheer_v1）
+     三件套：打气按钮（每日打卡连击）、我的为什么、情绪急救包。 -->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" type="image/png" href="../../assets/pwa/icon-192.png"><!-- 2026-11-06 全站补 rel="icon"：本页此前未声明，浏览器回落请求站点根 /favicon.ico 报 404（控制台红色噪音、标签页无图标）；与 2026-10-03 对 index/zk-ky/share-hub 的处理同一策略 -->
+<title>打气站 · 为学习打气 · 为生活打气</title>
+
+<script>
+/* 主题跟随主站（同 anime.html 模式）：读 wb_store.data.theme（老版 wb_hub_theme），auto 跟随系统 */
+(function(){
+  function stored(){
+    try{
+      var raw=localStorage.getItem('wb_store');
+      if(raw){var o=JSON.parse(raw); if(o&&o.data&&o.data.theme) return o.data.theme;}
+    }catch(e){}
+    try{ var l=localStorage.getItem('wb_hub_theme'); if(l) return l; }catch(e){}
+    return 'auto';
+  }
+  function mq(){ return window.matchMedia('(prefers-color-scheme: dark)'); }
+  function apply(m){
+    var dark=mq().matches;
+    var act=(m==='dark'||m==='light')?m:(dark?'dark':'light');
+    document.documentElement.setAttribute('data-theme',act);
+  }
+  apply(stored());
+  window.addEventListener('storage',function(e){
+    if(e.key==='wb_store'||e.key==='wb_hub_theme') apply(stored());
+  });
+  try{ mq().addEventListener('change',function(){ if(stored()==='auto') apply('auto'); }); }catch(e){}
+})();
+</script>
+
+<link rel="canonical" href="https://epic-super.github.io/lab/products/cheer-station.html">
+<meta name="description" content="打气站：为学习打气、为生活打气。每日打气打卡、我的为什么、情绪急救包。">
+<style>
+:root{
+  --bg:#101019; --panel:#191a2b; --panel2:#20213a; --line:#2c2d4d; --line2:#3a3c63;
+  --txt:#edeef8; --sub:#8f93b4; --blue:#5b8cff; --orange:#ff9f43; --pink:#f472b6; --green:#34d399; --red:#f87171;
+  --r:16px; --r-sm:11px; --r-f:999px;
+  --sh:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.22);
+  --ease:cubic-bezier(.32,.72,0,1); --tf:.16s var(--ease);
+}
+html[data-theme="light"]{
+  --bg:#f7f8fc; --panel:#ffffff; --panel2:#eef0f8; --line:#e2e5f0; --line2:#ccd2e6;
+  --txt:#20233a; --sub:#5d6280; --blue:#3966d8; --orange:#d97b1c; --pink:#db2777; --green:#12945f; --red:#dc4b4b;
+  --sh:0 1px 3px rgba(30,30,60,.06),0 6px 16px rgba(30,30,60,.07);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","HarmonyOS Sans SC","Microsoft YaHei",sans-serif;
+  background:var(--bg);color:var(--txt);font-size:15px;line-height:1.65;
+  padding-bottom:calc(28px + env(safe-area-inset-bottom));
+  -webkit-font-smoothing:antialiased;
+}
+button,input,select,textarea{font-family:inherit;font-size:15px;color:inherit}
+button{cursor:pointer;border:none;background:none}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--blue);outline-offset:2px;border-radius:6px}
+.wrap{max-width:880px;margin:0 auto;padding:0 14px}
+
+.top{position:relative;color:#fff;padding:22px 0 20px;padding-top:calc(22px + env(safe-area-inset-top));
+  background:
+    radial-gradient(110% 150% at 10% -20%,rgba(91,140,255,.35),rgba(91,140,255,0) 50%),
+    radial-gradient(90% 130% at 92% 0%,rgba(255,159,67,.38),rgba(255,159,67,0) 58%),
+    linear-gradient(134deg,#1c2140 0%,#31346b 52%,#7a4b2c 120%);
+  box-shadow:0 1px 0 rgba(255,255,255,.08) inset,0 6px 22px rgba(10,12,30,.3);overflow:hidden}
+.top::after{content:'';position:absolute;left:0;right:0;bottom:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,159,67,.55),transparent)}
+.brand h1{margin:0;font-size:21px;font-weight:800;display:flex;align-items:center;gap:9px}
+.brand p{margin:5px 0 0;font-size:12.5px;opacity:.88}
+.stats{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}
+.stat{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:var(--r-sm);padding:6px 11px;font-size:12px;display:flex;align-items:baseline;gap:5px;color:#fff}
+.stat b{font-size:16px;font-weight:800;font-variant-numeric:tabular-nums}
+.stat.fire b{color:#ffd58a}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:18px;box-shadow:var(--sh);margin:14px 0}
+.card h2{margin:0 0 4px;font-size:16px;font-weight:800;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.card .desc{color:var(--sub);font-size:13px;margin:0 0 12px}
+.ipt{background:var(--panel2);border:1px solid var(--line2);border-radius:var(--r-sm);padding:9px 11px;color:var(--txt);width:100%}
+.ipt:focus{border-color:var(--blue);outline:none}
+.lbl{display:block;font-size:12px;font-weight:700;color:var(--sub);margin:10px 0 5px}
+.btn{background:linear-gradient(135deg,#4a76e8,#5b8cff);color:#fff;border-radius:var(--r-sm);padding:9px 16px;font-size:13.5px;font-weight:800;min-height:40px;display:inline-flex;align-items:center;gap:6px;transition:transform var(--tf),filter var(--tf)}
+.btn:hover{filter:brightness(1.07)}
+.btn:active{transform:scale(.97)}
+.btn.ghost{background:var(--panel2);color:var(--txt);border:1px solid var(--line2)}
+.btn.sm{padding:6px 11px;min-height:32px;font-size:12.5px}
+.btn.del{background:transparent;border:1px solid var(--line2);color:var(--sub);min-height:32px;padding:6px 10px}
+.btn.del:hover{color:var(--red);border-color:var(--red)}
+
+/* 模式切换 */
+.modes{display:flex;gap:8px;margin:16px 0 0}
+.mode{flex:1;padding:11px 0;border-radius:var(--r-sm);border:1.5px solid var(--line2);background:var(--panel);color:var(--sub);font-weight:800;font-size:14px;transition:all var(--tf)}
+.mode.on-study{border-color:var(--blue);background:linear-gradient(135deg,rgba(91,140,255,.18),rgba(91,140,255,.06));color:var(--blue)}
+.mode.on-life{border-color:var(--orange);background:linear-gradient(135deg,rgba(255,159,67,.2),rgba(255,159,67,.06));color:var(--orange)}
+body[data-mode="study"] .card h2 .no{color:var(--blue)}
+body[data-mode="life"] .card h2 .no{color:var(--orange)}
+
+/* 打气主按钮 */
+.pump{position:relative;text-align:center;padding:8px 0 4px}
+.pump-btn{width:168px;height:168px;border-radius:50%;border:none;position:relative;color:#fff;font-size:17px;font-weight:800;letter-spacing:.04em;
+  display:grid;place-items:center;gap:2px;transition:transform .14s var(--ease),box-shadow .2s;user-select:none;-webkit-user-select:none}
+.pump-btn .ic{font-size:40px;line-height:1}
+body[data-mode="study"] .pump-btn{background:radial-gradient(120% 120% at 30% 20%,#7aa2ff,#3966d8 60%,#2c4fb8);box-shadow:0 14px 34px -10px rgba(91,140,255,.65),0 0 0 8px rgba(91,140,255,.12)}
+body[data-mode="life"] .pump-btn{background:radial-gradient(120% 120% at 30% 20%,#ffb763,#f08c1f 60%,#d9731a);box-shadow:0 14px 34px -10px rgba(255,159,67,.65),0 0 0 8px rgba(255,159,67,.12)}
+.pump-btn:active{transform:scale(.93)}
+.pump-btn::after{content:'';position:absolute;inset:-8px;border-radius:50%;border:2px solid currentColor;opacity:.3;animation:pulse 2.2s ease-out infinite;color:var(--blue)}
+body[data-mode="life"] .pump-btn::after{color:var(--orange)}
+@keyframes pulse{0%{transform:scale(.92);opacity:.4}70%{transform:scale(1.28);opacity:0}100%{opacity:0}}
+.pump-hint{color:var(--sub);font-size:12px;margin-top:10px}
+/* 打气气泡 */
+.bubble{margin:14px auto 0;max-width:560px;background:var(--panel2);border:1px solid var(--line2);border-radius:var(--r);padding:16px 18px;text-align:center;display:none;position:relative;overflow:hidden}
+.bubble.show{display:block;animation:bin .35s var(--ease)}
+@keyframes bin{from{opacity:0;transform:translateY(8px) scale(.97)}to{opacity:1;transform:none}}
+.bubble .bq{font-size:16.5px;font-weight:800;line-height:1.7}
+.bubble .bic{font-size:26px;display:block;margin-bottom:6px}
+.bubble .bmeta{font-size:11px;color:var(--sub);margin-top:8px}
+/* 彩带 */
+.confetti{position:absolute;width:8px;height:14px;top:-16px;border-radius:2px;animation:cf 1.5s linear forwards;pointer-events:none}
+@keyframes cf{to{transform:translateY(240px) rotate(720deg);opacity:0}}
+
+/* 我的为什么 */
+.row{display:flex;align-items:flex-start;gap:10px;padding:10px 2px;border-top:1px solid var(--line)}
+.row:first-child{border-top:none}
+.row .grow{flex:1;min-width:0;font-size:13.5px;word-break:break-word}
+.why-hero{background:var(--panel2);border:1px dashed var(--line2);border-radius:var(--r);padding:14px 16px;font-size:14.5px;font-weight:700;line-height:1.7}
+body[data-mode="study"] .why-hero{color:var(--blue)}
+body[data-mode="life"] .why-hero{color:var(--orange)}
+
+/* 标语墙 */
+.wall{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+@media (max-width:640px){.wall{grid-template-columns:1fr}}
+.wq{background:var(--panel2);border:1px solid var(--line);border-radius:var(--r-sm);padding:12px 14px;font-size:13px;line-height:1.7;color:var(--txt);position:relative}
+.wq::before{content:'"';position:absolute;top:2px;left:10px;font-size:26px;opacity:.12;font-family:Georgia,serif}
+
+/* 急救包 */
+.kit{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media (max-width:640px){.kit{grid-template-columns:1fr}}
+.kbtn{background:var(--panel2);border:1px solid var(--line2);border-radius:var(--r-sm);padding:13px 10px;font-weight:800;font-size:13.5px;color:var(--txt);transition:all var(--tf)}
+.kbtn:hover{border-color:var(--pink);color:var(--pink);transform:translateY(-2px)}
+.kout{margin-top:12px;background:linear-gradient(135deg,rgba(244,114,182,.1),rgba(91,140,255,.08));border:1px solid var(--line2);border-radius:var(--r);padding:14px 16px;display:none}
+.kout.show{display:block;animation:bin .3s var(--ease)}
+.kout b{display:flex;gap:7px;align-items:center;margin-bottom:6px}
+.kout p{margin:0 0 8px;font-size:13.5px;color:var(--txt)}
+.kout .act{font-size:12.5px;color:var(--sub)}
+.kout .act b2{color:var(--green);font-weight:800}
+
+footer.foot{color:var(--sub);font-size:11.5px;text-align:center;margin-top:18px}
+#toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(16px);background:var(--panel);color:var(--txt);border:1px solid var(--line2);border-radius:var(--r-f);padding:9px 18px;font-size:13px;font-weight:700;box-shadow:var(--sh);opacity:0;pointer-events:none;transition:all .25s var(--ease);z-index:99}
+#toast.show{opacity:1;transform:translateX(-50%)}
+</style>
+<script>window.__WB_PUBLIC__=true;</script><style>[data-private]{display:none !important}</style></head>
+<body data-mode="study">
+
+<header class="top">
+  <div class="wrap">
+    <div class="brand">
+      <h1>⛽ 打气站</h1>
+      <p>为学习打气，也为生活打气——每天进来喊一嗓子，把电量打满再出发。</p>
+    </div>
+    <div class="stats" id="statStrip"></div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="modes">
+    <button class="mode on-study" id="mStudy">📚 为学习打气</button>
+    <button class="mode" id="mLife">🌤 为生活打气</button>
+  </div>
+
+  <!-- 打气机 -->
+  <section class="card">
+    <h2><span class="no">⚙️</span>打气机</h2>
+    <p class="desc">每天一次打气算打卡，连续天数就是你的「电量连击」。想多打几次也行——电永远不嫌多。</p>
+    <div class="pump">
+      <button class="pump-btn" id="pumpBtn"><span class="ic">⚡</span><span id="pumpLabel">给我打气</span></button>
+      <div class="pump-hint" id="pumpHint"></div>
+    </div>
+    <div class="bubble" id="bubble" role="status">
+      <div id="bubbleBody"></div>
+      <div class="bmeta" id="bubbleMeta"></div>
+    </div>
+  </section>
+
+  <!-- 我的为什么 -->
+  <section class="card">
+    <h2><span class="no">🎯</span>我的为什么</h2>
+    <p class="desc">写下来你为什么出发。每次打开打气站，随机抽一条亮在上面——比任何鸡汤都管用，因为那是你自己的话。</p>
+    <div class="why-hero" id="whyHero"></div>
+    <label class="lbl" for="whyIpt">加一条「为什么」</label>
+    <div style="display:flex;gap:8px">
+      <input class="ipt" id="whyIpt" placeholder="例如：让当年说我不行的人闭嘴 / 给爸妈过个好年" maxlength="80">
+      <button class="btn" id="whyAdd">＋ 记下</button>
+    </div>
+    <div id="whyList" style="margin-top:6px"></div>
+  </section>
+
+  <!-- 情绪急救包 -->
+  <section class="card">
+    <h2><span class="no">🚑</span>情绪急救包</h2>
+    <p class="desc">情绪上头的时候，不讲大道理，只给当下能做的一小步。</p>
+    <div class="kit">
+      <button class="kbtn" data-kit="quit">😭 想放弃</button>
+      <button class="kbtn" data-kit="anxious">😰 焦虑炸了</button>
+      <button class="kbtn" data-kit="tired">🥱 好累啊</button>
+    </div>
+    <div class="kout" id="kout"></div>
+  </section>
+
+  <!-- 标语墙 -->
+  <section class="card">
+    <h2><span class="no">🧱</span>标语墙</h2>
+    <p class="desc">哪句戳到你就把哪句记在心里，别的当背景音。</p>
+    <div class="wall" id="wall"></div>
+  </section>
+
+  <footer class="foot">打气站 ｜ 数据仅存于本机浏览器（wb_cheer_v1）· 打气免费，不限量 ｜ 今天也要加油鸭 🦆</footer>
+</div>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+'use strict';
+var KEY='wb_cheer_v1';
+var today=function(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+var $=function(s){return document.querySelector(s)};
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function toast(m){var t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(toast._h);toast._h=setTimeout(function(){t.classList.remove('show')},2200)}
+
+var STUDY_Q=[
+  {i:'🔥',q:'再坚持一天，未来的你会回来感谢现在没有放弃的你。'},
+  {i:'📝',q:'题不会做是常态，把会做的那部分稳稳拿住，就已经赢过大多数人。'},
+  {i:'💡',q:'你不是学不会，只是还没到开窍那天。开窍之前，只管堆量。'},
+  {i:'⚔️',q:'今天刷的每一道题，都是初试考场上的底气。'},
+  {i:'🌙',q:'别人在玩的时候你在自习——差距就是这件事本身。'},
+  {i:'🧱',q:'知识是一块一块垒的，今天垒的这一块，塌不了。'},
+  {i:'⏳',q:'倒计时不是催命符，是提醒：该加速了，来得及。'},
+  {i:'🧠',q:'408 不过是四只纸老虎，一门一门拆，拆完你就毕业了。'},
+  {i:'📈',q:'每天进步 1%，一百天后你就是另一个人。'},
+  {i:'🏔',q:'现在觉得难，是因为在爬坡。爬坡的人才会累，平路上只会越走越懒。'},
+  {i:'🎒',q:'自考拼的不是聪明，是「不中断」三个字。'},
+  {i:'🚩',q:'记住你为什么开始——把当初立誓的样子钉在墙上。'}
+];
+var LIFE_Q=[
+  {i:'🍚',q:'饭要好好吃，觉要好好睡，剩下的交给时间。'},
+  {i:'🫶',q:'你已经做得很好了，真的，比你自己以为的好得多。'},
+  {i:'🛋',q:'允许自己休息，是长期主义的一部分，不是偷懒。'},
+  {i:'🎈',q:'今天的目标只有一个：取悦自己。'},
+  {i:'🍜',q:'天塌下来先吃饭，吃饱了再想别的。'},
+  {i:'🌊',q:'情绪没有对错，来了就接住它，走了就送送它。'},
+  {i:'🛤',q:'世界上没有白走的路，也没有白吃的饭。'},
+  {i:'🏡',q:'把今天过成样板间：干净、明亮、有盼头。'},
+  {i:'🔋',q:'不必时时刻刻有用，发呆也是充电。'},
+  {i:'🌟',q:'你值得一切好的东西，从今晚早点睡开始。'},
+  {i:'🚶',q:'走慢一点没关系，方向对就好。'},
+  {i:'☕',q:'生活不是考卷，没有标准答案，舒服就是满分。'}
+];
+var KITS={
+  quit:{i:'😭',t:'想放弃的时候',p:'想放弃是正常的，几乎每个走到终点的人都想过无数次。这不是你不行，这是爬坡期的标配风景。',
+    a:'✅ 现在只做一件事：把「我想放弃，因为……」写在纸上，合上，明天同一时间再看一眼。大多数理由，第二天就消失了大半。'},
+  anxious:{i:'😰',t:'焦虑炸了的时候',p:'焦虑是大脑在「假想危险」，它要的不是解决方案，是确认你安全。先让身体停下来，脑子才会跟上来。',
+    a:'✅ 4-7-8 呼吸三轮：吸气 4 秒 → 屏住 7 秒 → 呼气 8 秒。然后把担心的事逐条写下，只写事实不写灾难片，写完给每条标一个「我能做什么」。'},
+  tired:{i:'🥱',t:'好累的时候',p:'累不是意志力不足，是电量真的低了。硬撑只会让明天更糟，休息是战略动作。',
+    a:'✅ 定一个 20 分钟的闹钟：设了闹钟的休息不算偷懒。躺平、喝水、看窗外，什么都别想；闹钟响起来，从最简单的那件小事重启。'}
+};
+var S={days:[],whys:[],count:0};
+try{var raw=localStorage.getItem(KEY);if(raw){var o=JSON.parse(raw);S.days=o.days||[];S.whys=o.whys||[];S.count=o.count||0;}}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){toast('保存失败：'+e.message)}}
+
+function mode(){return document.body.getAttribute('data-mode')}
+function pool(){return mode()==='study'?STUDY_Q:LIFE_Q}
+
+function streak(){
+  if(!S.days.length)return 0;
+  var set={};S.days.forEach(function(d){set[d]=1});
+  function fmt(dt){return dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0')}
+  var n=0,cur=new Date();
+  /* 今天打了先 +1，然后从昨天起向回走（原实现把今天在 while 里又数了一遍） */
+  if(set[fmt(cur)])n++;
+  cur.setDate(cur.getDate()-1);
+  while(set[fmt(cur)]){n++;cur.setDate(cur.getDate()-1)}
+  return n;
+}
+function renderStats(){
+  $('#statStrip').innerHTML=
+    '<span class="stat fire"><b>'+streak()+'</b>连续打气 · 天</span>'+
+    '<span class="stat"><b>'+S.count+'</b>累计打气 · 次</span>'+
+    '<span class="stat"><b>'+S.whys.length+'</b>为什么 · 条</span>';
+}
+function confetti(el){
+  var colors=['#5b8cff','#ff9f43','#f472b6','#34d399','#fbd38d'];
+  for(var i=0;i<14;i++){
+    var c=document.createElement('i');c.className='confetti';
+    c.style.left=(6+Math.random()*88)+'%';
+    c.style.background=colors[i%colors.length];
+    c.style.animationDelay=(Math.random()*.25)+'s';
+    el.appendChild(c);
+    (function(node){setTimeout(function(){node.remove()},1800)})(c);
+  }
+}
+$('#pumpBtn').addEventListener('click',function(){
+  var p=pool(),pick=p[Math.floor(Math.random()*p.length)];
+  var b=$('#bubble');
+  $('#bubbleBody').innerHTML='<span class="bic">'+pick.i+'</span><div class="bq">'+esc(pick.q)+'</div>';
+  $('#bubbleMeta').textContent='—— 打气站'+(mode()==='study'?'学习频道':'生活频道');
+  b.classList.remove('show');void b.offsetWidth;b.classList.add('show');
+  confetti(b);
+  var t=today();
+  if(S.days.indexOf(t)<0){S.days.push(t)}
+  S.count++;save();renderStats();
+  renderPumpHint();
+});
+function renderPumpHint(){
+  var t=today(),hit=S.days.indexOf(t)>=0;
+  $('#pumpHint').textContent=hit?'✅ 今天已打气，电量满格（想再充也随时欢迎）':'今天还没打气，点上面那颗 ⚡';
+}
+/* 我的为什么 */
+function renderWhys(){
+  var hero=$('#whyHero');
+  if(!S.whys.length){hero.textContent='还没有写下「为什么」。第一次来，先写一条吧——它会陪你走过最想放弃的那天。'}
+  else{hero.textContent='「 '+S.whys[Math.floor(Math.random()*S.whys.length)]+' 」'}
+  var box=$('#whyList');box.innerHTML='';
+  S.whys.forEach(function(w,i){
+    var row=document.createElement('div');row.className='row';
+    row.innerHTML='<div class="grow">'+esc(w)+'</div>';
+    var del=document.createElement('button');del.className='btn del';del.textContent='删';
+    del.onclick=function(){S.whys.splice(i,1);save();renderWhys();renderStats()};
+    row.appendChild(del);box.appendChild(row);
+  });
+}
+$('#whyAdd').onclick=function(){
+  var v=$('#whyIpt').value.trim();
+  if(!v){toast('先写下你的理由');return}
+  if(S.whys.length>=20){toast('最多 20 条，删掉再写新的');return}
+  S.whys.push(v);$('#whyIpt').value='';save();renderWhys();renderStats();toast('已记下，它会随机出现在最上面');
+};
+/* 急救包 */
+initKit();
+function initKit(){
+  var kitBtns=document.querySelectorAll('.kbtn');
+  Array.prototype.forEach.call(kitBtns,function(b){
+    b.onclick=function(){
+      var k=KITS[b.getAttribute('data-kit')];
+      var out=$('#kout');
+      out.innerHTML='<b><span>'+k.i+'</span>'+esc(k.t)+'</b><p>'+esc(k.p)+'</p><div class="act">'+k.a+'</div>';
+      out.classList.remove('show');void out.offsetWidth;out.classList.add('show');
+    };
+  });
+}
+/* 标语墙 */
+function renderWall(){
+  var box=$('#wall');box.innerHTML='';
+  pool().forEach(function(x){var d=document.createElement('div');d.className='wq';d.textContent=x.q;box.appendChild(d)});
+}
+/* 模式切换 */
+$('#mStudy').onclick=function(){setMode('study')};
+$('#mLife').onclick=function(){setMode('life')};
+function setMode(m){
+  document.body.setAttribute('data-mode',m);
+  $('#mStudy').className='mode'+(m==='study'?' on-study':'');
+  $('#mLife').className='mode'+(m==='life'?' on-life':'');
+  $('#pumpLabel').textContent=m==='study'?'给我打气':'抱抱我';
+  renderWall();
+  try{localStorage.setItem(KEY+'_mode',m)}catch(e){}
+}
+try{var m0=localStorage.getItem(KEY+'_mode');if(m0==='life')setMode('life')}catch(e){}
+
+renderStats();renderWhys();renderPumpHint();renderWall();
+
+function reportH(){
+  var h=Math.max(document.documentElement.scrollHeight,document.body.scrollHeight);
+  try{parent.postMessage({__wbResize:true,id:'cheerFrame',h:h},'*')}catch(e){}
+}
+if(window.ResizeObserver){new ResizeObserver(reportH).observe(document.body)}
+window.addEventListener('load',reportH);
+setTimeout(reportH,400);
+})();
+</script>
+</body>
+</html>
